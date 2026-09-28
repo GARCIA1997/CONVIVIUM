@@ -52,17 +52,17 @@ apps/*  ──►  app-shell ──► api-client ──► contracts ──► 
 | Módulo | Implementados | Definidos (501, pendientes) |
 |---|---|---|
 | `auth` | vincular dispositivo, usuarios del dispositivo, login PIN, login correo, `me` | — |
-| `catalog` | menú, alta/edición de producto, agotado (tiempo real), motivos, estaciones | — |
+| `catalog` | menú, alta/edición de producto, agotado (tiempo real), motivos, estaciones (alta/edición con impresora y respaldo) | — |
 | `floor` | plano con estado calculado | editor de plano |
 | `orders` | abrir cuenta (mesa/barra), agregar productos con ruteo por estación, marchar tiempo, transiciones (listo/deshacer/entregado), cancelar por estado, devolver (rehacer/retirar), pedir cuenta, mover productos | — |
 | `stations` | cola KDS (rehacer primero), historial del turno, consolidado | — |
 | `approvals` | crear, listar, resolver (remoto o PIN de gerente) con aplicación del efecto | — |
-| `cash` | abrir caja, caja actual, retiros/entradas, cobro mixto + propina | dividir cuenta, corte X/Z, reabrir |
+| `cash` | abrir caja, caja actual, retiros/entradas, cobro mixto + propina (cambio descontado del efectivo), dividir (iguales / por comensal / por producto), corte X/Z con conteo ciego, reabrir | — |
 | `inventory` | insumos, almacenes | alta de insumo, existencias, movimientos, recetas, costo, producción, conteos, aprobación de ajustes, sugerencia de compra |
 | `purchasing` | proveedores | alta proveedor, OC, aprobación, PDF, recepción, lectura XML CFDI, CxP, pagos |
 | `reports` | dashboard en vivo | ventas, excepciones, tiempos, ingeniería de menú, propinas |
 | `audit` | bitácora paginada con filtros | — |
-| `sync` (solo nube) | — | ingesta de eventos, configuración versionada |
+| `sync` (solo nube) | ingesta idempotente de eventos del nodo | configuración versionada nube → nodo |
 
 ## 3. Fronts
 
@@ -70,7 +70,7 @@ apps/*  ──►  app-shell ──► api-client ──► contracts ──► 
 |---|---|---|---|---|
 | `mesero` | 5101 | Celular del restaurante | Dispositivo + PIN | Plano, abrir mesa/barra, comanda con modificadores, envío, avisos "listo", entregado, pedir cuenta |
 | `estacion` | 5102 | TV / táctil | Dispositivo + PIN | Tarjetas por cuenta, semáforo, REHACER, cancelado, tocar = listo, "toda lista", deshacer 10 s, consolidado |
-| `caja` | 5103 | PC / tablet | Dispositivo + PIN | Apertura, cuentas abiertas, detalle con IVA, propina, pagos mixtos, cambio |
+| `caja` | 5103 | PC / tablet | Dispositivo + PIN | Apertura, cuentas abiertas, detalle con IVA, propina, pagos mixtos, cambio, dividir, corte X/Z |
 | `admin` | 5104 | Web / PWA | Correo + contraseña | Menú lateral según permisos, dashboard en vivo, aprobaciones, menú con agotado; resto de secciones como marcadores |
 
 ## 4. Cómo correrlo en local
@@ -85,10 +85,18 @@ pnpm --filter @convivium/mesero dev
 
 Usuarios de prueba, PINs y código de vinculación: ver comentario al inicio de `packages/db/src/seed.ts`.
 
-## 5. Siguientes incrementos sugeridos
+## 5. Incremento 3 (hecho)
 
-1. Servir las PWA desde la API en modo edge + worker de sincronización nodo → nube.
-2. Impresión ESC/POS por estación con respaldo automático (E4-09).
-3. Caja: dividir cuenta, corte X/Z con conteo ciego.
-4. Inventario: recetas y descuento automático por venta.
-5. Pruebas de integración de la API contra PostgreSQL en CI.
+- **Nodo sirve las PWA**: `/mesero/`, `/estacion/`, `/caja/`, `/admin/` con fallback SPA (en la nube solo `/admin/`).
+- **Sync nodo → nube**: worker cada 10 s sube eventos no sincronizados en lotes de 500; la nube los ingiere sin duplicar. Requiere `CLOUD_URL`, `NODE_TOKEN` (vincular el nodo como dispositivo `nodo`) y `BRANCH_ID`.
+- **Impresión ESC/POS** (E4-09): por estación, salida `pantalla | impresora | ambos`; si es `pantalla` con respaldo y no hay pantalla conectada, imprime con leyenda "RESPALDO". Reintentos con espera creciente.
+- **Caja**: dividir, corte X/Z con conteo ciego (Z solo gerente), reabrir con permiso.
+- **Seguridad**: los tokens se redactan en los logs.
+
+## 6. Siguientes incrementos sugeridos
+
+1. Configuración versionada nube → nodo y proyección de eventos para reportes consolidados.
+2. Inventario: recetas, descuento automático por venta, conteos.
+3. Compras y cuentas por pagar.
+4. Corte Z autorizado por PIN de gerente sobre la caja del cajero; zona horaria de la sucursal en tickets.
+5. Pruebas de integración de la API en CI.

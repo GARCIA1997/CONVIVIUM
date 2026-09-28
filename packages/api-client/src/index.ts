@@ -102,6 +102,10 @@ export function createClient(baseUrl = "/v1") {
     cash: {
       current: () => request<{ id: string; openingFloat: number } | null>("GET", "/cash/sessions/current"),
       open: (registerId: string, openingFloat: number) => request("POST", "/cash/sessions", { registerId, openingFloat }),
+      split: (checkId: string, body: { mode: "iguales"; parts: number } | { mode: "por_comensal" } | { mode: "por_producto"; groups: string[][] }) =>
+        request<{ mode: string; parts: { checkId: string; amount: number }[] }>("POST", `/cash/checks/${checkId}/split`, body),
+      count: (kind: "X" | "Z", counted: Record<string, number>) =>
+        request<{ kind: string; expected: Record<string, number>; counted: Record<string, number>; differences: Record<string, number>; sales: number; tips: number; closed: boolean }>("POST", "/cash/sessions/current/counts", { kind, counted }),
       pay: (checkId: string, body: unknown) => request<{ paid: number; change: number; checkStatus: string }>("POST", `/cash/checks/${checkId}/pay`, body),
     },
     reports: {

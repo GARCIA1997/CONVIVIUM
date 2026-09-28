@@ -4,6 +4,7 @@ import { cancelRequirement, canTransition, type ItemState } from "@convivium/dom
 import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
+import { PrintQueue } from "../../lib/printer.js";
 import type { Principal } from "../../plugins/auth.js";
 import { AppError, conflict, notFound } from "../../plugins/errors.js";
 import { lineTotal, toItemDto } from "./mapper.js";
@@ -11,7 +12,10 @@ import { lineTotal, toItemDto } from "./mapper.js";
 type ItemRow = typeof schema.orderItems.$inferSelect;
 
 export class OrdersService {
-  constructor(private app: FastifyInstance, private db: Db = app.db) {}
+  private printer: PrintQueue;
+  constructor(private app: FastifyInstance, private db: Db = app.db) {
+    this.printer = new PrintQueue(app);
+  }
 
   async getCheck(who: Principal, checkId: string) {
     const [check] = await this.db.select().from(schema.checks).where(and(eq(schema.checks.id, checkId), eq(schema.checks.branchId, who.branchId)));
@@ -184,7 +188,7 @@ export class OrdersService {
 
   private broadcastSent(items: ItemRow[]) {
     for (const i of items) this.app.hub.publish([`station:${i.stationId}`], { type: "item.sent", item: toItemDto(i) });
-    // TODO(printing): si la estación está en modo impresora o su pantalla está desconectada, encolar ticket ESC/POS (E4-09).
+    void this.printer.onItemsSent(items).catch((err) => this.app.log.error(err));
   }
 
   private async notifyItem(item: ItemRow) {

@@ -80,6 +80,27 @@ const plugin: ApiModule["plugin"] = async (app) => {
     db.select().from(schema.stations).where(eq(schema.stations.branchId, req.user.branchId)),
   );
 
+  /** E2-03 · Alta y configuración de estaciones (salida, impresora, respaldo, tiempo objetivo). */
+  const StationBody = z.object({
+    name: z.string().min(1),
+    kind: z.enum(["cocina", "barra"]),
+    output: z.enum(["pantalla", "impresora", "ambos"]).default("pantalla"),
+    printerFallback: z.boolean().default(true),
+    printerAddress: z.string().regex(/^[\w.-]+(:\d+)?$/).nullable().default(null),
+    defaultTargetSec: z.number().int().positive().default(900),
+  });
+  app.post("/stations", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["catálogo"], body: StationBody } }, async (req, reply) => {
+    const [st] = await db.insert(schema.stations).values({ ...req.body, tenantId: req.user.tenantId, branchId: req.user.branchId }).returning();
+    await recordEvent(db, req.user, { type: "station.created", entity: "station", entityId: st!.id, data: req.body });
+    return reply.status(201).send(st);
+  });
+  app.put("/stations/:id", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["catálogo"], params: z.object({ id: z.string().uuid() }), body: StationBody } }, async (req) => {
+    const [st] = await db.update(schema.stations).set(req.body).where(and(eq(schema.stations.id, req.params.id), eq(schema.stations.branchId, req.user.branchId))).returning();
+    if (!st) throw notFound("Estación");
+    await recordEvent(db, req.user, { type: "station.updated", entity: "station", entityId: st.id, data: req.body });
+    return st;
+  });
+
   void inArray;
 };
 

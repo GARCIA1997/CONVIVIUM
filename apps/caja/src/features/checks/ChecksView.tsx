@@ -68,7 +68,17 @@ export function ChecksView() {
             {check.discounts > 0 && <Row label="Descuentos" cents={-check.discounts} />}
             {taxes && <Row label="IVA incluido" cents={taxes.iva} muted />}
             <Row label="Total" cents={check.total} bold />
-            <Button variant="ghost" style={{ marginTop: 12 }} onClick={() => window.print()}>Imprimir pre-cuenta</Button>
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+              <Button variant="ghost" onClick={() => window.print()}>Imprimir pre-cuenta</Button>
+              <Button variant="ghost" onClick={async () => {
+                const r = await client.cash.split(check.id, { mode: "por_comensal" }).catch((e) => { setResult(e.message); return null; });
+                if (r) { setResult(`Dividida en ${r.parts.length} cuentas`); load(); select(check.id); }
+              }}>Dividir por comensal</Button>
+              <Button variant="ghost" onClick={async () => {
+                const r = await client.cash.split(check.id, { mode: "iguales", parts: 2 });
+                setResult(`Partes iguales: ${r.parts.map((p) => `$${(p.amount / 100).toFixed(2)}`).join(" / ")}`);
+              }}>Entre 2</Button>
+            </div>
           </Card>
         ) : <p style={{ color: "var(--text-muted)" }}>Selecciona una cuenta.</p>}
       </section>
