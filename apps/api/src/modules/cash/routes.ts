@@ -3,7 +3,8 @@ import { and, eq, isNull, schema } from "@convivium/db";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
 import type { ApiModule } from "../../lib/module.js";
-import { can } from "@convivium/domain";
+import { can, type Role } from "@convivium/domain";
+import bcrypt from "bcryptjs";
 import { AppError, conflict, forbidden } from "../../plugins/errors.js";
 import { CashService } from "./service.js";
 import { OrdersService } from "../orders/service.js";
@@ -74,11 +75,32 @@ const plugin: ApiModule["plugin"] = async (app) => {
     svc.split(req.user, req.params.id, req.body),
   );
 
-  /** E6-07 · Corte X / Z. El Z exige permiso de gerente. */
+  app.get("/sessions/current/summary", { onRequest: [app.guard("caja.corte_x")], schema: { tags } }, async (req) => svc.summary(req.user));
+
+  /** E6-07 · Corte X / Z. El Z exige permiso de gerente: propio o autorizado en sitio con su PIN. */
   app.post("/sessions/current/counts", { onRequest: [app.guard("caja.corte_x")], schema: { tags, body: cash.CashCountBody } }, async (req) => {
-    if (req.body.kind === "Z" && !can(req.user.roles, "caja.corte_z")) throw forbidden("El corte Z requiere autorización de gerente");
+    if (req.body.kind === "Z" && !can(req.user.roles, "caja.corte_z")) {
+      if (!req.body.approverPin) throw forbidden("El corte Z requiere autorización de gerente");
+      const approver = await findApproverByPin(req.user.branchId, req.body.approverPin);
+      if (!approver) throw new AppError(401, "bad_pin", "PIN de gerente incorrecto");
+      return svc.count(req.user, req.body, approver);
+    }
     return svc.count(req.user, req.body);
   });
+
+  /** Busca en la sucursal un usuario con permiso de corte Z cuyo PIN coincida. */
+  async function findApproverByPin(branchId: string, pin: string) {
+    const rows = await db
+      .select({ id: schema.users.id, pinHash: schema.users.pinHash, role: schema.userRoles.role })
+      .from(schema.users)
+      .innerJoin(schema.userRoles, eq(schema.userRoles.userId, schema.users.id))
+      .where(and(eq(schema.userRoles.branchId, branchId), eq(schema.users.active, true)));
+    for (const r of rows) {
+      if (!can([r.role as Role], "caja.corte_z") || !r.pinHash) continue;
+      if (await bcrypt.compare(pin, r.pinHash)) return r.id;
+    }
+    return null;
+  }
 
   /** E6-08 · Reabrir cuenta cobrada. */
   app.post("/checks/:id/reopen", { onRequest: [app.guard("cuenta.reabrir")], schema: { tags, params: IdParam, body: z.object({ reason: z.string().min(3) }) } }, async (req) =>

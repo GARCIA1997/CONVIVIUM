@@ -24,14 +24,51 @@ export class OrdersService {
     const discountRows = await this.db.select().from(schema.discounts).where(eq(schema.discounts.checkId, checkId));
     const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
     const discounts = discountRows.reduce((s, d) => s + d.amount, 0);
+    const [table] = check.tableId ? await this.db.select().from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
+    const [waiter] = await this.db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, check.waiterId));
     return {
       ...check,
+      tableLabel: table?.label ?? null,
+      waiterName: waiter?.name ?? null,
       openedAt: check.openedAt.toISOString(),
       items: items.map(toItemDto),
       subtotal,
       discounts,
       total: Math.max(0, subtotal - discounts),
     };
+  }
+
+  /** Cuentas abiertas con mesa, mesero, total y artículos (lista de caja, E6-02). */
+  async listOpen(who: Principal, statuses: ("abierta" | "pidio_cuenta" | "cobrada" | "cancelada")[]) {
+    const checks = await this.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, who.branchId), inArray(schema.checks.status, statuses)));
+    if (!checks.length) return [];
+    const ids = checks.map((c) => c.id);
+    const tableIds = checks.map((c) => c.tableId).filter((x): x is string => !!x);
+    const [items, discounts, tables, waiters] = await Promise.all([
+      this.db.select().from(schema.orderItems).where(inArray(schema.orderItems.checkId, ids)),
+      this.db.select().from(schema.discounts).where(inArray(schema.discounts.checkId, ids)),
+      tableIds.length ? this.db.select().from(schema.tables).where(inArray(schema.tables.id, tableIds)) : [],
+      this.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, checks.map((c) => c.waiterId))),
+    ]);
+    return checks
+      .map((c) => {
+        const mine = items.filter((i) => i.checkId === c.id);
+        const sub = mine.reduce((s, i) => s + lineTotal(i), 0);
+        const disc = discounts.filter((d) => d.checkId === c.id).reduce((s, d) => s + d.amount, 0);
+        return {
+          id: c.id,
+          kind: c.kind,
+          status: c.status,
+          tableLabel: tables.find((t) => t.id === c.tableId)?.label ?? null,
+          name: c.name,
+          guests: c.guests,
+          waiterName: waiters.find((w) => w.id === c.waiterId)?.name ?? null,
+          total: Math.max(0, sub - disc),
+          itemCount: mine.filter((i) => i.unitPrice > 0 && i.state !== "cancelado" && i.state !== "devuelto").reduce((s, i) => s + i.quantity, 0),
+          openedAt: c.openedAt.toISOString(),
+        };
+      })
+      .sort((a, b) => Number(b.status === "pidio_cuenta") - Number(a.status === "pidio_cuenta") || a.openedAt.localeCompare(b.openedAt));
   }
 
   async openCheck(who: Principal, body: z.infer<typeof orders.OpenCheckBody>) {
@@ -158,7 +195,8 @@ export class OrdersService {
       const { id: _id, createdAt: _c, readyAt: _r, deliveredAt: _d, readyBy: _rb, ...rest } = item;
       const [redo] = await this.db
         .insert(schema.orderItems)
-        .values({ ...rest, unitPrice: 0, modifiers: item.modifiers.map((m) => ({ ...m, priceDelta: 0 })), state: "enviado", priority: "rehacer", sentAt: new Date(), createdBy: who.userId })
+        // "Rehacer" conserva el cobro: el precio pasa al platillo rehecho y el original queda en cero (devuelto).
+        .values({ ...rest, state: "enviado", priority: "rehacer", sentAt: new Date(), createdBy: who.userId })
         .returning();
       this.broadcastSent([redo!]);
       return { status: "remade" as const, item: toItemDto(redo!) };

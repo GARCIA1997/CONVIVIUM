@@ -96,16 +96,50 @@ export class CashService {
     return { expected: exp, sales: payments.reduce((s, p) => s + (p.method === "efectivo_usd" ? Math.round((p.amount * (p.exchangeRate ?? 0)) / 100) : p.amount), 0), tips: tips.reduce((s, t) => s + t.amount, 0) };
   }
 
+  /** Resumen de la sesión para la pantalla de corte: apertura, movimientos, propinas por mesero y descuentos. */
+  async summary(who: Principal) {
+    const session = await this.requireSession(who);
+    const [movements, payments, supplier, cashier] = await Promise.all([
+      this.db.select().from(schema.cashMovements).where(eq(schema.cashMovements.cashSessionId, session.id)),
+      this.db.select().from(schema.payments).where(eq(schema.payments.cashSessionId, session.id)),
+      this.db.select().from(schema.supplierPayments).where(eq(schema.supplierPayments.cashSessionId, session.id)),
+      this.db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, session.cashierId)),
+    ]);
+    const checkIds = [...new Set(payments.map((p) => p.checkId))];
+    const [tips, discounts] = await Promise.all([
+      checkIds.length ? this.db.select().from(schema.tips).where(inArray(schema.tips.checkId, checkIds)) : [],
+      checkIds.length ? this.db.select().from(schema.discounts).where(inArray(schema.discounts.checkId, checkIds)) : [],
+    ]);
+    const waiterIds = [...new Set(tips.map((t) => t.waiterId))];
+    const waiters = waiterIds.length ? await this.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, waiterIds)) : [];
+    const tipsByWaiter = waiterIds.map((id) => ({ name: waiters.find((w) => w.id === id)?.name ?? "", amount: tips.filter((t) => t.waiterId === id).reduce((s, t) => s + t.amount, 0) }));
+    const { sales } = await this.expected(session.id);
+    return {
+      sessionId: session.id,
+      cashierName: cashier[0]?.name ?? "",
+      openedAt: session.openedAt.toISOString(),
+      openingFloat: session.openingFloat,
+      movements: [
+        ...movements.map((m) => ({ at: m.createdAt.toISOString(), type: m.type as "entrada" | "retiro", amount: m.amount, reason: m.reason })),
+        ...supplier.map((p) => ({ at: p.createdAt.toISOString(), type: "proveedor" as const, amount: p.amount, reason: p.reference ?? "Pago a proveedor" })),
+      ].sort((a, b) => a.at.localeCompare(b.at)),
+      sales,
+      discounts: discounts.filter((d) => d.type !== "cortesia").reduce((s, d) => s + d.amount, 0),
+      courtesies: discounts.filter((d) => d.type === "cortesia").reduce((s, d) => s + d.amount, 0),
+      tipsByWaiter,
+    };
+  }
+
   /** E6-07 · Corte X (parcial) o Z (cierre). Conteo ciego: el esperado se revela al registrar lo contado. */
-  async count(who: Principal, body: z.infer<typeof cash.CashCountBody>) {
+  async count(who: Principal, body: z.infer<typeof cash.CashCountBody>, authorizedBy?: string) {
     const session = await this.requireSession(who);
     const { expected, sales, tips } = await this.expected(session.id);
     const differences = Object.fromEntries(METHODS.map((m) => [m, (body.counted[m] ?? 0) - expected[m]]));
     await this.db.insert(schema.cashCounts).values({ tenantId: who.tenantId, cashSessionId: session.id, kind: body.kind, expected, counted: body.counted, createdBy: who.userId });
     if (body.kind === "Z") {
-      await this.db.update(schema.cashSessions).set({ closedAt: new Date(), closedBy: who.userId }).where(eq(schema.cashSessions.id, session.id));
+      await this.db.update(schema.cashSessions).set({ closedAt: new Date(), closedBy: authorizedBy ?? who.userId }).where(eq(schema.cashSessions.id, session.id));
     }
-    await recordEvent(this.db, who, { type: `cash.corte_${body.kind}`, entity: "cash_session", entityId: session.id, data: { counted: body.counted, expected, differences } });
+    await recordEvent(this.db, who, { type: `cash.corte_${body.kind}`, entity: "cash_session", entityId: session.id, data: { counted: body.counted, expected, differences }, authorizedBy });
     return { kind: body.kind, expected, counted: body.counted, differences, sales, tips, closed: body.kind === "Z" };
   }
 

@@ -27,4 +27,6 @@ export const PayResponse = z.object({ paid: Cents, change: Cents, checkStatus: z
 export const CashCountBody = z.object({
   kind: z.enum(["X", "Z"]),
   counted: z.record(PaymentMethod, Cents),
+  /** Corte Z autorizado en sitio por un gerente con su PIN (el cajero no tiene el permiso). */
+  approverPin: z.string().regex(/^\d{4,6}$/).optional(),
 });

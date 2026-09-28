@@ -8,8 +8,21 @@ export type Product = Infer<typeof catalog.Product>;
 export type FloorPlan = Infer<typeof floor.FloorPlan>;
 export type Check = Infer<typeof orders.Check>;
 export type OrderItem = Infer<typeof orders.OrderItem>;
+export type CheckSummary = Infer<typeof orders.CheckSummary>;
 export type Approval = Infer<typeof approvals.Approval>;
 export type { RealtimeEvent };
+
+export interface CashSummary {
+  sessionId: string;
+  cashierName: string;
+  openedAt: string;
+  openingFloat: number;
+  movements: { at: string; type: "entrada" | "retiro" | "proveedor"; amount: number; reason: string }[];
+  sales: number;
+  discounts: number;
+  courtesies: number;
+  tipsByWaiter: { name: string; amount: number }[];
+}
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -78,7 +91,7 @@ export function createClient(baseUrl = "/v1") {
     },
     floor: { get: () => request<FloorPlan>("GET", "/floor") },
     orders: {
-      openChecks: () => request<{ id: string; kind: string; tableId: string | null; name: string | null; status: string }[]>("GET", "/orders/checks"),
+      openChecks: () => request<CheckSummary[]>("GET", "/orders/checks"),
       open: (body: Infer<typeof orders.OpenCheckBody>) => request<{ id: string }>("POST", "/orders/checks", body),
       get: (checkId: string) => request<Check>("GET", `/orders/checks/${checkId}`),
       addItems: (checkId: string, items: Infer<typeof orders.AddItemsBody>["items"]) => request<OrderItem[]>("POST", `/orders/checks/${checkId}/items`, { items }),
@@ -104,8 +117,9 @@ export function createClient(baseUrl = "/v1") {
       open: (registerId: string, openingFloat: number) => request("POST", "/cash/sessions", { registerId, openingFloat }),
       split: (checkId: string, body: { mode: "iguales"; parts: number } | { mode: "por_comensal" } | { mode: "por_producto"; groups: string[][] }) =>
         request<{ mode: string; parts: { checkId: string; amount: number }[] }>("POST", `/cash/checks/${checkId}/split`, body),
-      count: (kind: "X" | "Z", counted: Record<string, number>) =>
-        request<{ kind: string; expected: Record<string, number>; counted: Record<string, number>; differences: Record<string, number>; sales: number; tips: number; closed: boolean }>("POST", "/cash/sessions/current/counts", { kind, counted }),
+      summary: () => request<CashSummary>("GET", "/cash/sessions/current/summary"),
+      count: (kind: "X" | "Z", counted: Record<string, number>, approverPin?: string) =>
+        request<{ kind: string; expected: Record<string, number>; counted: Record<string, number>; differences: Record<string, number>; sales: number; tips: number; closed: boolean }>("POST", "/cash/sessions/current/counts", { kind, counted, approverPin }),
       pay: (checkId: string, body: unknown) => request<{ paid: number; change: number; checkStatus: string }>("POST", `/cash/checks/${checkId}/pay`, body),
     },
     reports: {

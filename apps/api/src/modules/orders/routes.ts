@@ -1,5 +1,4 @@
 import { orders } from "@convivium/contracts";
-import { and, eq, inArray, schema } from "@convivium/db";
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
 import { forbidden } from "../../plugins/errors.js";
@@ -14,10 +13,10 @@ const plugin: ApiModule["plugin"] = async (app) => {
 
   app.get("/checks", {
     onRequest: [app.guard()],
-    schema: { tags, querystring: z.object({ status: z.enum(["abierta", "pidio_cuenta", "cobrada", "cancelada"]).optional() }) },
+    schema: { tags, querystring: z.object({ status: z.enum(["abierta", "pidio_cuenta", "cobrada", "cancelada"]).optional() }), response: { 200: z.array(orders.CheckSummary) } },
   }, async (req) => {
     const statuses = req.query.status ? [req.query.status] : (["abierta", "pidio_cuenta"] as const);
-    return app.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, req.user.branchId), inArray(schema.checks.status, [...statuses])));
+    return svc.listOpen(req.user, [...statuses]);
   });
 
   app.post("/checks", { onRequest: [app.guard("mesa.abrir")], schema: { tags, body: orders.OpenCheckBody } }, async (req, reply) =>
