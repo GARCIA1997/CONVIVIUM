@@ -43,7 +43,8 @@
                       "kds_tv",
                       "estacion_tactil",
                       "caja",
-                      "admin"
+                      "admin",
+                      "nodo"
                     ]
                   }
                 },
@@ -782,6 +783,145 @@
       "get": {
         "tags": [
           "catálogo"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "catálogo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "cocina",
+                      "barra"
+                    ]
+                  },
+                  "output": {
+                    "type": "string",
+                    "enum": [
+                      "pantalla",
+                      "impresora",
+                      "ambos"
+                    ],
+                    "default": "pantalla"
+                  },
+                  "printerFallback": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "printerAddress": {
+                    "type": "string",
+                    "pattern": "^[\\w.-]+(:\\d+)?$",
+                    "nullable": true,
+                    "default": null
+                  },
+                  "defaultTargetSec": {
+                    "type": "integer",
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "default": 900
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/catalog/stations/{id}": {
+      "put": {
+        "tags": [
+          "catálogo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "cocina",
+                      "barra"
+                    ]
+                  },
+                  "output": {
+                    "type": "string",
+                    "enum": [
+                      "pantalla",
+                      "impresora",
+                      "ambos"
+                    ],
+                    "default": "pantalla"
+                  },
+                  "printerFallback": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "printerAddress": {
+                    "type": "string",
+                    "pattern": "^[\\w.-]+(:\\d+)?$",
+                    "nullable": true,
+                    "default": null
+                  },
+                  "defaultTargetSec": {
+                    "type": "integer",
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "default": 900
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
         ],
         "responses": {
           "200": {
@@ -2170,6 +2310,26 @@
         "tags": [
           "caja"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {
