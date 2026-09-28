@@ -5,7 +5,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 
-document.documentElement.dataset.theme = "dark";
 
 // La TV del KDS es de solo lectura (?modo=tv); la táctil despacha.
 const mode = new URLSearchParams(location.search).get("modo") === "tv" ? "tv" : "tactil";

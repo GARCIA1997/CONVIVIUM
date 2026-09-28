@@ -89,7 +89,7 @@ export function createClient(baseUrl = "/v1") {
       returnItem: (itemId: string, body: Infer<typeof orders.ReturnItemBody>) => request<{ status: string }>("POST", `/orders/items/${itemId}/return`, body),
     },
     stations: {
-      queue: (stationId: string) => request<(OrderItem & { targetPrepSec: number })[]>("GET", `/stations/${stationId}/queue`),
+      queue: (stationId: string) => request<(OrderItem & { targetPrepSec: number; tableLabel: string | null; waiterName: string | null; folio: string })[]>("GET", `/stations/${stationId}/queue`),
       history: (stationId: string) => request<OrderItem[]>("GET", `/stations/${stationId}/history`),
       consolidated: (stationId: string) => request<{ product: string; quantity: number }[]>("GET", `/stations/${stationId}/consolidated`),
     },
