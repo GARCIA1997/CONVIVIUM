@@ -1,0 +1,11 @@
+# Sustituir por el dominio real. Caddy obtiene el certificado TLS automáticamente.
+api.convivium.mx {
+  reverse_proxy /v1/* api:4000
+  reverse_proxy /docs* api:4000
+}
+app.convivium.mx {
+  # Dashboard del dueño y administración remota (PWA)
+  handle_path /admin/* { root * /srv/web/admin; try_files {path} /index.html; file_server }
+  redir / /admin/
+  reverse_proxy /v1/* api:4000
+}

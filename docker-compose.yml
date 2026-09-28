@@ -1,0 +1,12 @@
+# Desarrollo local: Postgres
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: convivium
+      POSTGRES_PASSWORD: convivium
+      POSTGRES_DB: convivium
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+volumes:
+  pgdata:

@@ -1,0 +1,32 @@
+# Nube CONVIVIUM en Hostinger VPS: API (modo cloud) + Postgres + Caddy (TLS automático).
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: convivium
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: convivium
+    volumes: [pgdata:/var/lib/postgresql/data]
+  api:
+    build: { context: ../.., dockerfile: apps/api/Dockerfile }
+    restart: unless-stopped
+    environment:
+      CONVIVIUM_MODE: cloud
+      PORT: 4000
+      DATABASE_URL: postgres://convivium:${POSTGRES_PASSWORD}@postgres:5432/convivium
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on: [postgres]
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - web:/srv/web:ro
+      - caddy_data:/data
+    depends_on: [api]
+volumes:
+  pgdata:
+  caddy_data:
+  web:

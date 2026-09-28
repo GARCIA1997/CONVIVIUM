@@ -1,0 +1,8 @@
+# Red local de la sucursal. Certificado de la CA interna del nodo (se instala al vincular dispositivos).
+convivium.local {
+  tls internal
+  reverse_proxy /v1/* localhost:4000
+  @apps path /mesero/* /estacion/* /caja/* /admin/*
+  handle @apps { reverse_proxy localhost:4000 }
+  redir / /mesero/
+}

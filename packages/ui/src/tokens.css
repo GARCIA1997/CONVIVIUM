@@ -1,0 +1,55 @@
+/* CONVIVIUM · design tokens (docs/04-diseno-ui-stitch.md) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
+:root {
+  --c-olivo: #1e2f28;
+  --c-marfil: #eae6dd;
+  --c-arena: #c9b89f;
+  --c-terracota: #b45a3c;
+  --c-carbon: #1a1a1a;
+  --c-dorado: #d4af7c;
+  --c-verde-ok: #4f7a5a;
+  --c-ambar: #d19a3a;
+
+  --bg: var(--c-marfil);
+  --surface: #f5f2ec;
+  --text: var(--c-carbon);
+  --text-muted: #5c5a55;
+  --border: var(--c-arena);
+  --primary: var(--c-olivo);
+  --on-primary: var(--c-marfil);
+  --accent: var(--c-dorado);
+  --danger: var(--c-terracota);
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --radius: 8px;
+  --space: 8px;
+  --touch: 48px;
+}
+
+/* Vistas de estación (KDS/táctil) usan tema oscuro carbón. */
+[data-theme="dark"] {
+  --bg: var(--c-carbon);
+  --surface: var(--c-olivo);
+  --text: var(--c-marfil);
+  --text-muted: #b9b4a8;
+  --border: #33443c;
+  --primary: var(--c-dorado);
+  --on-primary: var(--c-carbon);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-ui); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; }
+button { font: inherit; }
+
+.cv-btn { min-height: var(--touch); padding: 0 calc(var(--space) * 2.5); border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; font-weight: 600; }
+.cv-btn--primary { background: var(--primary); color: var(--on-primary); }
+.cv-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+.cv-btn--danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.cv-btn:disabled { opacity: .5; cursor: default; }
+.cv-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: calc(var(--space) * 2); }
+.cv-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.cv-label { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--text-muted); }

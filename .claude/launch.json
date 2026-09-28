@@ -1,0 +1,9 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "mesero", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@convivium/mesero", "dev"], "port": 5101 },
+    { "name": "estacion", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@convivium/estacion", "dev"], "port": 5102 },
+    { "name": "caja", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@convivium/caja", "dev"], "port": 5103 },
+    { "name": "admin", "runtimeExecutable": "pnpm", "runtimeArgs": ["--filter", "@convivium/admin", "dev"], "port": 5104 }
+  ]
+}

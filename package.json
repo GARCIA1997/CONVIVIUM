@@ -1,0 +1,23 @@
+{
+  "name": "convivium",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @convivium/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:up": "docker compose up -d postgres",
+    "db:generate": "pnpm --filter @convivium/db generate",
+    "db:migrate": "pnpm --filter @convivium/db migrate",
+    "db:seed": "pnpm --filter @convivium/db seed"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8",
+    "@types/node": "^22.10.0"
+  }
+}

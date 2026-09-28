@@ -1,0 +1,3241 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CONVIVIUM API",
+    "version": "0.1.0",
+    "description": "Modo edge"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/v1/auth/devices/pair": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "mesero",
+                      "kds_tv",
+                      "estacion_tactil",
+                      "caja",
+                      "admin"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "name",
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deviceId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "deviceToken": {
+                      "type": "string"
+                    },
+                    "branchId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "deviceId",
+                    "deviceToken",
+                    "branchId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/devices/users": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/pin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "pin": {
+                    "type": "string",
+                    "pattern": "^\\d{4,6}$"
+                  }
+                },
+                "required": [
+                  "userId",
+                  "pin"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "dueno",
+                              "gerente",
+                              "capitan",
+                              "mesero",
+                              "cajero",
+                              "cocina",
+                              "barra",
+                              "almacenista"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "roles"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "permissions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "branchId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "user",
+                    "permissions",
+                    "branchId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "dueno",
+                              "gerente",
+                              "capitan",
+                              "mesero",
+                              "cajero",
+                              "cocina",
+                              "barra",
+                              "almacenista"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "roles"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "permissions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "branchId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "user",
+                    "permissions",
+                    "branchId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/catalog/menu": {
+      "get": {
+        "tags": [
+          "catálogo"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "integer"
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "sortOrder",
+                          "active"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "categoryId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "integer",
+                            "description": "Precio con impuestos incluidos"
+                          },
+                          "iepsPct": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 200,
+                            "default": 0
+                          },
+                          "targetPrepSec": {
+                            "type": "integer",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "stationIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "minItems": 1
+                          },
+                          "modifierGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "minSelect": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                "maxSelect": {
+                                  "type": "integer",
+                                  "minimum": 1
+                                },
+                                "modifiers": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "priceDelta": {
+                                        "type": "integer",
+                                        "description": "Monto en centavos MXN"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name",
+                                      "priceDelta"
+                                    ],
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "name",
+                                "minSelect",
+                                "maxSelect",
+                                "modifiers"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "photoUrl": {
+                            "type": "string",
+                            "format": "uri",
+                            "nullable": true
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "soldOut": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "categoryId",
+                          "name",
+                          "price",
+                          "targetPrepSec",
+                          "stationIds",
+                          "modifierGroups",
+                          "photoUrl",
+                          "active",
+                          "soldOut"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "categories",
+                    "products"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/catalog/products": {
+      "post": {
+        "tags": [
+          "catálogo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categoryId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "description": "Precio con impuestos incluidos"
+                  },
+                  "iepsPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "default": 0
+                  },
+                  "targetPrepSec": {
+                    "type": "integer",
+                    "exclusiveMinimum": true,
+                    "minimum": 0
+                  },
+                  "stationIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1
+                  },
+                  "photoUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "nullable": true
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "soldOut": {
+                    "type": "boolean"
+                  },
+                  "modifierGroupIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "default": []
+                  }
+                },
+                "required": [
+                  "categoryId",
+                  "name",
+                  "price",
+                  "targetPrepSec",
+                  "stationIds",
+                  "photoUrl",
+                  "active",
+                  "soldOut"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/catalog/products/{id}": {
+      "put": {
+        "tags": [
+          "catálogo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categoryId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "description": "Precio con impuestos incluidos"
+                  },
+                  "iepsPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "default": 0
+                  },
+                  "targetPrepSec": {
+                    "type": "integer",
+                    "exclusiveMinimum": true,
+                    "minimum": 0
+                  },
+                  "stationIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1
+                  },
+                  "photoUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "nullable": true
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "soldOut": {
+                    "type": "boolean"
+                  },
+                  "modifierGroupIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "default": []
+                  }
+                },
+                "required": [
+                  "categoryId",
+                  "name",
+                  "price",
+                  "targetPrepSec",
+                  "stationIds",
+                  "photoUrl",
+                  "active",
+                  "soldOut"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/catalog/products/{id}/sold-out": {
+      "put": {
+        "tags": [
+          "catálogo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "soldOut": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "soldOut"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/catalog/reasons": {
+      "get": {
+        "tags": [
+          "catálogo"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "kind",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/catalog/stations": {
+      "get": {
+        "tags": [
+          "catálogo"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/floor/": {
+      "get": {
+        "tags": [
+          "piso"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "areas": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "sortOrder"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "tables": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "areaId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "capacity": {
+                            "type": "integer",
+                            "exclusiveMinimum": true,
+                            "minimum": 0
+                          },
+                          "shape": {
+                            "type": "string",
+                            "enum": [
+                              "redonda",
+                              "cuadrada",
+                              "rectangular",
+                              "periquera"
+                            ]
+                          },
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "libre",
+                              "ocupada",
+                              "listo_por_entregar",
+                              "pidio_cuenta"
+                            ]
+                          },
+                          "openCheckId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "areaId",
+                          "label",
+                          "capacity",
+                          "shape",
+                          "x",
+                          "y",
+                          "status",
+                          "openCheckId"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "areas",
+                    "tables"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/checks": {
+      "get": {
+        "tags": [
+          "comandas"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "abierta",
+                "pidio_cuenta",
+                "cobrada",
+                "cancelada"
+              ]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "mesa"
+                        ]
+                      },
+                      "tableId": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "guests": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "tableId",
+                      "guests"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "barra"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/checks/{id}": {
+      "get": {
+        "tags": [
+          "comandas"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "mesa",
+                        "barra"
+                      ]
+                    },
+                    "tableId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "nullable": true
+                    },
+                    "name": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "guests": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "waiterId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "abierta",
+                        "pidio_cuenta",
+                        "cobrada",
+                        "cancelada"
+                      ]
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "checkId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "productId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "stationId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "quantity": {
+                            "type": "integer"
+                          },
+                          "modifiers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "note": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "guest": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "course": {
+                            "type": "string",
+                            "enum": [
+                              "entrada",
+                              "fuerte",
+                              "postre",
+                              "bebida",
+                              "sin_tiempo"
+                            ]
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "pendiente",
+                              "enviado",
+                              "en_preparacion",
+                              "listo",
+                              "entregado",
+                              "cancelado",
+                              "devuelto"
+                            ]
+                          },
+                          "unitPrice": {
+                            "type": "integer",
+                            "description": "Monto en centavos MXN"
+                          },
+                          "priority": {
+                            "type": "string",
+                            "enum": [
+                              "normal",
+                              "rehacer"
+                            ]
+                          },
+                          "createdBy": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "sentAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "readyAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "deliveredAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "checkId",
+                          "productId",
+                          "productName",
+                          "stationId",
+                          "quantity",
+                          "modifiers",
+                          "note",
+                          "guest",
+                          "course",
+                          "state",
+                          "unitPrice",
+                          "priority",
+                          "createdBy",
+                          "sentAt",
+                          "readyAt",
+                          "deliveredAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "subtotal": {
+                      "type": "integer",
+                      "description": "Monto en centavos MXN"
+                    },
+                    "discounts": {
+                      "type": "integer",
+                      "description": "Monto en centavos MXN"
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "Monto en centavos MXN"
+                    },
+                    "openedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "tableId",
+                    "name",
+                    "guests",
+                    "waiterId",
+                    "status",
+                    "items",
+                    "subtotal",
+                    "discounts",
+                    "total",
+                    "openedAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/checks/{id}/items": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "modifierIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "default": []
+                        },
+                        "note": {
+                          "type": "string",
+                          "maxLength": 140
+                        },
+                        "guest": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "course": {
+                          "type": "string",
+                          "enum": [
+                            "entrada",
+                            "fuerte",
+                            "postre",
+                            "bebida",
+                            "sin_tiempo"
+                          ],
+                          "default": "sin_tiempo"
+                        },
+                        "fireNow": {
+                          "type": "boolean",
+                          "default": true
+                        }
+                      },
+                      "required": [
+                        "productId",
+                        "quantity"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "items"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/checks/{id}/fire": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "course": {
+                    "type": "string",
+                    "enum": [
+                      "entrada",
+                      "fuerte",
+                      "postre",
+                      "bebida",
+                      "sin_tiempo"
+                    ]
+                  }
+                },
+                "required": [
+                  "course"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/checks/{id}/request-bill": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/items/move": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "minItems": 1
+                  },
+                  "toCheckId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "itemIds",
+                  "toCheckId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/items/{id}/transition": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "pendiente",
+                      "enviado",
+                      "en_preparacion",
+                      "listo",
+                      "entregado",
+                      "cancelado",
+                      "devuelto"
+                    ]
+                  }
+                },
+                "required": [
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/items/{id}/cancel": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reasonId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orders/items/{id}/return": {
+      "post": {
+        "tags": [
+          "comandas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "resolution": {
+                    "type": "string",
+                    "enum": [
+                      "rehacer",
+                      "retirar_de_cuenta"
+                    ]
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reasonId",
+                  "resolution"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/stations/{id}/queue": {
+      "get": {
+        "tags": [
+          "estaciones (KDS)"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/stations/{id}/history": {
+      "get": {
+        "tags": [
+          "estaciones (KDS)"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/stations/{id}/consolidated": {
+      "get": {
+        "tags": [
+          "estaciones (KDS)"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/approvals/": {
+      "post": {
+        "tags": [
+          "aprobaciones"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "cancelacion",
+                      "devolucion_retiro",
+                      "cortesia",
+                      "descuento",
+                      "reapertura"
+                    ]
+                  },
+                  "checkId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "itemId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "default": 0
+                  },
+                  "pct": {
+                    "type": "number"
+                  },
+                  "reasonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "payload": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "kind",
+                  "checkId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "aprobaciones"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pendiente",
+                "aprobada",
+                "rechazada"
+              ],
+              "default": "pendiente"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/approvals/{id}/resolve": {
+      "post": {
+        "tags": [
+          "aprobaciones"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "aprobar",
+                      "rechazar"
+                    ]
+                  },
+                  "approverPin": {
+                    "type": "string"
+                  },
+                  "approverId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "decision"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/sessions": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "registerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "openingFloat": {
+                    "type": "integer",
+                    "description": "Monto en centavos MXN"
+                  }
+                },
+                "required": [
+                  "registerId",
+                  "openingFloat"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/sessions/current": {
+      "get": {
+        "tags": [
+          "caja"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/sessions/current/movements": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "retiro",
+                      "entrada"
+                    ]
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "description": "Monto en centavos MXN"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "amount",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/checks/{id}/pay": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "efectivo_mxn",
+                            "efectivo_usd",
+                            "tarjeta",
+                            "transferencia",
+                            "vales"
+                          ]
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "description": "Monto en centavos MXN"
+                        },
+                        "exchangeRate": {
+                          "type": "integer"
+                        },
+                        "reference": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "method",
+                        "amount"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  },
+                  "tip": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      },
+                      "method": {
+                        "type": "string",
+                        "enum": [
+                          "efectivo_mxn",
+                          "efectivo_usd",
+                          "tarjeta",
+                          "transferencia",
+                          "vales"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "amount",
+                      "method"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "payments"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paid": {
+                      "type": "integer",
+                      "description": "Monto en centavos MXN"
+                    },
+                    "change": {
+                      "type": "integer",
+                      "description": "Monto en centavos MXN"
+                    },
+                    "checkStatus": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "paid",
+                    "change",
+                    "checkStatus"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/cash/checks/{id}/split": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "iguales"
+                        ]
+                      },
+                      "parts": {
+                        "type": "integer",
+                        "minimum": 2
+                      }
+                    },
+                    "required": [
+                      "mode",
+                      "parts"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "por_comensal"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "mode"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "por_producto"
+                        ]
+                      },
+                      "groups": {
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        }
+                      }
+                    },
+                    "required": [
+                      "mode",
+                      "groups"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/sessions/current/counts": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "X",
+                      "Z"
+                    ]
+                  },
+                  "counted": {
+                    "type": "object",
+                    "required": [
+                      "efectivo_mxn",
+                      "efectivo_usd",
+                      "tarjeta",
+                      "transferencia",
+                      "vales"
+                    ],
+                    "properties": {
+                      "efectivo_mxn": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      },
+                      "efectivo_usd": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      },
+                      "tarjeta": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      },
+                      "transferencia": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      },
+                      "vales": {
+                        "type": "integer",
+                        "description": "Monto en centavos MXN"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "counted"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/cash/checks/{id}/reopen": {
+      "post": {
+        "tags": [
+          "caja"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/ingredients": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventario"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "purchaseUnit": {
+                    "type": "string"
+                  },
+                  "useUnit": {
+                    "type": "string",
+                    "enum": [
+                      "g",
+                      "ml",
+                      "pz"
+                    ]
+                  },
+                  "conversion": {
+                    "type": "number",
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "description": "Unidades de uso por unidad de compra"
+                  },
+                  "minStock": {
+                    "type": "number"
+                  },
+                  "maxStock": {
+                    "type": "number"
+                  },
+                  "critical": {
+                    "type": "boolean"
+                  },
+                  "lotTracking": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "purchaseUnit",
+                  "useUnit",
+                  "conversion",
+                  "minStock",
+                  "maxStock",
+                  "critical",
+                  "lotTracking"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/warehouses": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/stock": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "warehouseId",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/movements": {
+      "post": {
+        "tags": [
+          "inventario"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "merma",
+                      "traspaso",
+                      "ajuste",
+                      "produccion"
+                    ]
+                  },
+                  "ingredientId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "quantity": {
+                    "type": "number"
+                  },
+                  "fromWarehouseId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "toWarehouseId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reasonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "type",
+                  "ingredientId",
+                  "quantity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/recipes/{id}": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "inventario"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "productId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "modifierId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true
+                  },
+                  "isSubRecipe": {
+                    "type": "boolean"
+                  },
+                  "yieldQty": {
+                    "type": "number",
+                    "exclusiveMinimum": true,
+                    "minimum": 0,
+                    "nullable": true
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "subRecipeId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "type": "number",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        "wastePct": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100,
+                          "default": 0
+                        }
+                      },
+                      "required": [
+                        "quantity"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "productId",
+                  "modifierId",
+                  "isSubRecipe",
+                  "yieldQty",
+                  "lines",
+                  "steps"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/recipes/{id}/cost": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/production": {
+      "post": {
+        "tags": [
+          "inventario"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "recipeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "exclusiveMinimum": true,
+                    "minimum": 0
+                  },
+                  "warehouseId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "recipeId",
+                  "quantity",
+                  "warehouseId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/counts": {
+      "post": {
+        "tags": [
+          "inventario"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "warehouseId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "counted": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "ingredientId",
+                        "counted"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "warehouseId",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/counts/{id}/approve": {
+      "post": {
+        "tags": [
+          "inventario"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/inventory/purchase-suggestions": {
+      "get": {
+        "tags": [
+          "inventario"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/suppliers": {
+      "get": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "rfc": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "phone": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "nullable": true
+                  },
+                  "creditDays": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "name",
+                  "rfc",
+                  "phone",
+                  "email",
+                  "creditDays"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/purchase-orders": {
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "supplierId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "expectedAt": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "type": "number",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        "unitPrice": {
+                          "type": "integer",
+                          "description": "Monto en centavos MXN"
+                        }
+                      },
+                      "required": [
+                        "ingredientId",
+                        "quantity",
+                        "unitPrice"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "supplierId",
+                  "expectedAt",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/purchase-orders/{id}/approve": {
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/purchase-orders/{id}/pdf": {
+      "get": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/receipts": {
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purchaseOrderId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "supplierId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "warehouseId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "invoiceFolio": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ingredientId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "quantity": {
+                          "type": "number",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        "unitPrice": {
+                          "type": "integer",
+                          "description": "Monto en centavos MXN"
+                        },
+                        "lot": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date"
+                        }
+                      },
+                      "required": [
+                        "ingredientId",
+                        "quantity",
+                        "unitPrice"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "supplierId",
+                  "warehouseId",
+                  "lines"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/receipts/parse-cfdi": {
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "xml": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "xml"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/payables": {
+      "get": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/purchasing/payables/payments": {
+      "post": {
+        "tags": [
+          "compras y CxP"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payableId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "description": "Monto en centavos MXN"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "transferencia",
+                      "efectivo_caja",
+                      "cheque"
+                    ]
+                  },
+                  "reference": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "payableId",
+                  "amount",
+                  "method"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/live": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/sales": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "producto",
+                "categoria",
+                "mesero",
+                "estacion",
+                "forma_pago",
+                "hora"
+              ]
+            },
+            "in": "query",
+            "name": "groupBy",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/exceptions": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/prep-times": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/menu-engineering": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/reports/tips": {
+      "get": {
+        "tags": [
+          "reportes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "from",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in": "query",
+            "name": "to",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/audit/": {
+      "get": {
+        "tags": [
+          "auditoría"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "actorId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "type",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "before",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "maximum": 200,
+              "default": 50
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ]
+}
