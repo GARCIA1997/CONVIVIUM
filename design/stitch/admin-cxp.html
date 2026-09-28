@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM | Cuentas por Pagar a Proveedores</title>
+<!-- Google Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: '#1E2F28',
+              marfil: '#EAE6DD',
+              marfilLight: '#FBF9F5',
+              arena: '#C9B89F',
+              arenaLight: '#E8E2D5',
+              terracota: '#B45A3C',
+              carbon: '#1A1A1A',
+              dorado: '#D4AF7C',
+              doradoDark: '#B8860B',
+              pizarra: '#3B5360',
+              esmeralda: '#2A5D45',
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "Georgia", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(201, 184, 159, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #B8A589;
+    }
+    .serif-nums {
+      font-feature-settings: "tnum";
+    }
+  </style>
+</head>
+<body class="h-full font-body text-[#1A1A1A] bg-[#F6F3EC] antialiased selection:bg-[#D4AF7C]/30 selection:text-[#1E2F28]">
+<!-- SIDEBAR IZQUIERDA (Shared Component: SideNavBar) -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col z-30 bg-[#1E2F28] border-r border-[#C9B89F]/30 shadow-none">
+<div class="w-64 h-full flex flex-col justify-between p-4">
+<!-- Top Branding -->
+<div>
+<div class="flex items-center gap-3 px-3 py-3 border-b border-[#C9B89F]/20 mb-6">
+<div class="w-10 h-10 rounded-lg bg-[#D4AF7C]/15 border border-[#D4AF7C]/40 flex items-center justify-center text-[#D4AF7C] shadow-inner">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 22px;">restaurant</span>
+</div>
+<div>
+<span class="block font-headline text-lg font-semibold tracking-widest text-[#EAE6DD]">CONVIVIUM</span>
+<span class="block font-label text-xs tracking-wider text-[#C9B89F]">Administración Central</span>
+</div>
+</div>
+<!-- Botón Rápido de Acción -->
+<button class="w-full mb-6 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-[#D4AF7C] hover:bg-[#D4AF7C]/90 text-[#1E2F28] font-medium text-sm transition-all duration-150 active:scale-[0.99] shadow-sm">
+<span class="material-symbols-outlined font-semibold" style="font-size: 18px;">add_circle</span>
+<span>Nuevo Gasto</span>
+</button>
+<!-- Navegación Principal (5 pestañas del JSON) -->
+<nav class="space-y-1">
+<!-- 1. Almacén -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">warehouse</span>
+<span class="font-label text-sm">Almacén</span>
+</a>
+<!-- 2. Órdenes de Compra -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label text-sm">Órdenes de Compra</span>
+</a>
+<!-- 3. Proveedores -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label text-sm">Proveedores</span>
+</a>
+<!-- 4. Inventario Físico -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label text-sm">Inventario Físico</span>
+</a>
+<!-- 5. Cuentas por Pagar (ACTIVA SEGÚN INTENCIÓN DEL SCREEN) -->
+<a class="flex items-center gap-3 px-4 py-3 bg-[#EAE6DD]/10 text-[#D4AF7C] rounded-lg font-medium border-l-2 border-[#D4AF7C] transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label text-sm tracking-wide">Cuentas por Pagar</span>
+</a>
+</nav>
+</div>
+<!-- Footer SideBar -->
+<div class="pt-4 border-t border-[#C9B89F]/20 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label text-sm">Configuración</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label text-sm">Soporte</span>
+</a>
+<!-- Badge Sucursal y Perfil Rápido -->
+<div class="mt-3 p-3 bg-black/20 rounded-lg flex items-center justify-between border border-[#C9B89F]/10">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+<span class="text-xs text-[#EAE6DD]/80 font-mono">CFDI 4.0 Conectado</span>
+</div>
+<span class="text-[10px] text-[#D4AF7C] bg-[#D4AF7C]/10 px-1.5 py-0.5 rounded border border-[#D4AF7C]/30">v2.4</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- TOPBAR FIJA (Shared Component: TopNavBar) -->
+<header class="fixed top-0 right-0 left-64 h-16 z-20 bg-[#EAE6DD] border-b border-[#C9B89F] shadow-none flex items-center">
+<div class="flex justify-between items-center h-full px-6 w-full">
+<!-- Izquierda: Título de sucursal & Buscador rápido -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1E2F28]">storefront</span>
+<span class="font-headline font-bold text-base text-[#1E2F28] tracking-wide">Sucursal Polanco CDMX</span>
+</div>
+<div class="h-5 w-px bg-[#C9B89F]/60"></div>
+<!-- Indicadores de Balance del JSON -->
+<div class="hidden xl:flex items-center gap-5 text-xs font-body">
+<div class="flex items-center gap-1.5 text-[#1E2F28] font-semibold bg-[#FBF9F5] px-3 py-1.5 rounded border border-[#C9B89F]/60">
+<span class="text-[#1E2F28]/60 font-normal">Balance General:</span>
+<span class="font-mono text-[#1E2F28]">$428,950.00 MXN</span>
+</div>
+<div class="flex items-center gap-1.5 text-[#B45A3C] font-semibold bg-[#B45A3C]/10 px-3 py-1.5 rounded border border-[#B45A3C]/30">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">warning</span>
+<span>Vencidos: $34,200.00 MXN</span>
+</div>
+</div>
+</div>
+<!-- Derecha: Acciones principales de tesorería y usuario -->
+<div class="flex items-center gap-3">
+<!-- Acciones Trailing del JSON -->
+<button class="hidden md:inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-[#1E2F28] bg-transparent hover:bg-[#C9B89F]/20 rounded border border-[#1E2F28]/30 transition-all duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-size: 17px;">file_download</span>
+<span>Exportar Conciliación</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-white bg-[#1E2F28] hover:bg-[#1E2F28]/90 rounded transition-all duration-150 shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined text-[#D4AF7C]" style="font-size: 17px;">send</span>
+<span>Programar Lote SPEI</span>
+</button>
+<div class="h-5 w-px bg-[#C9B89F]/60 mx-1"></div>
+<!-- Iconos de Acción del JSON -->
+<button class="p-2 text-[#1A1A1A]/70 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#B45A3C] rounded-full"></span>
+</button>
+<button class="p-2 text-[#1A1A1A]/70 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded-full transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+<!-- Perfil Usuario -->
+<div class="flex items-center gap-2.5 pl-2 border-l border-[#C9B89F]/60">
+<div class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center font-display font-medium text-xs border border-[#C9B89F]">
+            DF
+          </div>
+<div class="hidden 2xl:block text-left">
+<span class="block text-xs font-semibold text-[#1E2F28] leading-tight">Rodrigo Salinas</span>
+<span class="block text-[10px] text-[#1A1A1A]/60">Director Finanzas</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- CONTENEDOR PRINCIPAL (Scrollable con panel lateral derecho) -->
+<div class="pt-16 pl-64 flex min-h-screen">
+<!-- ÁREA DE CONTENIDO CENTRAL (Izquierda / Principal) -->
+<main class="flex-1 p-6 lg:p-8 xl:pr-[420px] transition-all duration-200">
+<!-- SUB-HEADER DE PANTALLA: Título & Tabs Secundarias -->
+<div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#C9B89F]/40 pb-4">
+<div>
+<div class="flex items-center gap-2 text-xs uppercase tracking-widest text-[#B8860B] font-semibold mb-1">
+<span>Tesorería &amp; Proveeduría</span>
+<span>•</span>
+<span>HU E8-05 / E8-06 / E8-07</span>
+</div>
+<h1 class="text-2xl lg:text-3xl font-display font-semibold text-[#1E2F28] tracking-tight">
+            Cuentas por Pagar &amp; Tesorería
+          </h1>
+<p class="text-xs text-[#1A1A1A]/70 mt-1">
+            Programación de dispersiones, control de flujo y liquidación de facturas comerciales con validación fiscal SAT.
+          </p>
+</div>
+<!-- Filtros rápidos / Tabs de vista -->
+<div class="flex items-center gap-1.5 p-1 bg-[#E8E2D5]/70 rounded-lg border border-[#C9B89F]/50">
+<button class="px-3 py-1.5 text-xs font-medium bg-white text-[#1E2F28] rounded shadow-xs">
+            Todas las facturas
+          </button>
+<button class="px-3 py-1.5 text-xs font-medium text-[#B45A3C] hover:bg-white/60 rounded flex items-center gap-1.5 transition-colors">
+<span>Vencidas</span>
+<span class="w-4 h-4 rounded-full bg-[#B45A3C] text-white text-[10px] flex items-center justify-center font-mono">2</span>
+</button>
+<button class="px-3 py-1.5 text-xs font-medium text-[#1A1A1A]/80 hover:bg-white/60 rounded transition-colors">
+            Por vencer en 7 días
+          </button>
+<button class="px-3 py-1.5 text-xs font-medium text-[#1A1A1A]/80 hover:bg-white/60 rounded transition-colors hidden sm:inline-block">
+            Historial de dispersiones
+          </button>
+</div>
+</div>
+<!-- SECCIÓN SUPERIOR DE RESUMEN (Bento Grid: KPIs & Antigüedad de Saldos) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<!-- KPI 1: Total por Pagar -->
+<div class="bg-[#FBF9F5] p-5 rounded-lg border border-[#C9B89F] shadow-xs relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="text-xs font-medium uppercase tracking-wider text-[#1A1A1A]/70">Total por Pagar</span>
+<span class="p-1.5 bg-[#1E2F28]/5 rounded text-[#1E2F28]">
+<span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span>
+</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-display font-semibold text-[#1E2F28]">$48,320.00 <span class="text-xs font-sans text-[#1A1A1A]/60">MXN</span></div>
+<div class="text-xs text-[#1A1A1A]/70 mt-1 flex items-center gap-1">
+<span class="font-medium text-[#1E2F28]">18</span> facturas comerciales activas
+            </div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-[#1E2F28]"></div>
+</div>
+<!-- KPI 2: Vencido (Terracota de Advertencia) -->
+<div class="bg-[#FBF9F5] p-5 rounded-lg border border-[#B45A3C]/40 shadow-xs relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#FBF9F5] to-[#B45A3C]/5">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#B45A3C] animate-pulse"></span>
+<span class="text-xs font-medium uppercase tracking-wider text-[#B45A3C]">Vencido (Urgente)</span>
+</div>
+<span class="p-1.5 bg-[#B45A3C]/10 rounded text-[#B45A3C]">
+<span class="material-symbols-outlined" style="font-size: 18px;">priority_high</span>
+</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-display font-semibold text-[#B45A3C]">$6,150.00 <span class="text-xs font-sans text-[#B45A3C]/70">MXN</span></div>
+<div class="text-xs text-[#B45A3C] mt-1 font-medium">
+              2 facturas en estatus crítico
+            </div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-[#B45A3C]"></div>
+</div>
+<!-- KPI 3: Vence esta semana (Dorado Cálido) -->
+<div class="bg-[#FBF9F5] p-5 rounded-lg border border-[#D4AF7C] shadow-xs relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="text-xs font-medium uppercase tracking-wider text-[#B8860B]">Vence esta semana</span>
+<span class="p-1.5 bg-[#D4AF7C]/15 rounded text-[#B8860B]">
+<span class="material-symbols-outlined" style="font-size: 18px;">event_upcoming</span>
+</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-display font-semibold text-[#1E2F28]">$12,400.00 <span class="text-xs font-sans text-[#1A1A1A]/60">MXN</span></div>
+<div class="text-xs text-[#B8860B] mt-1 font-medium">
+              3 facturas prioritarias
+            </div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-[#D4AF7C]"></div>
+</div>
+<!-- KPI 4: Fondo Disponible en Bancos / Caja -->
+<div class="bg-[#FBF9F5] p-5 rounded-lg border border-[#C9B89F] shadow-xs relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="text-xs font-medium uppercase tracking-wider text-[#1A1A1A]/70">Fondo Disponible Bancos</span>
+<span class="p-1.5 bg-emerald-100 rounded text-emerald-800">
+<span class="material-symbols-outlined" style="font-size: 18px;">domain</span>
+</span>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-display font-semibold text-[#1E2F28]">$115,800.00 <span class="text-xs font-sans text-[#1A1A1A]/60">MXN</span></div>
+<div class="text-xs text-emerald-700 mt-1 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+<span>Cobertura de pasivos al 239%</span>
+</div>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-[#2A5D45]"></div>
+</div>
+</section>
+<!-- SECCIÓN DE ANTIGÜEDAD DE SALDOS (Aging Analysis) -->
+<section class="bg-[#FBF9F5] rounded-lg border border-[#C9B89F] p-5 mb-6">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-[#C9B89F]/30 gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1E2F28]">bar_chart</span>
+<h3 class="font-headline font-semibold text-sm text-[#1E2F28] tracking-wide uppercase">
+              Antigüedad de Saldos Proveedores (Aging Analysis)
+            </h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60">Corte al 24 de Octubre de 2026</span>
+</div>
+<!-- Barra segmentada visual compuesta -->
+<div class="mt-4">
+<div class="h-3 w-full rounded-full bg-[#E8E2D5] overflow-hidden flex shadow-inner">
+<div class="h-full bg-[#2A5D45]" style="width: 61.6%" title="Al corriente: 61.6%"></div>
+<div class="h-full bg-[#D4AF7C]" style="width: 14.9%" title="1 a 15 días: 14.9%"></div>
+<div class="h-full bg-[#B8860B]" style="width: 10.8%" title="16 a 30 días: 10.8%"></div>
+<div class="h-full bg-[#B45A3C]" style="width: 12.7%" title="+30 días vencido: 12.7%"></div>
+</div>
+<!-- Cuadrícula descriptiva de rangos -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-2">
+<!-- 0-30 días -->
+<div class="p-2.5 rounded bg-white/70 border border-[#C9B89F]/30">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-[#2A5D45]"></span>
+<span class="text-xs font-medium text-[#1A1A1A]/80">Al corriente (0-30 días)</span>
+</div>
+<div class="text-base font-semibold font-display text-[#1E2F28]">$29,770.00</div>
+<div class="text-[11px] text-[#1A1A1A]/60">61.6% del pasivo total</div>
+</div>
+<!-- 1 a 15 días -->
+<div class="p-2.5 rounded bg-white/70 border border-[#C9B89F]/30">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-[#D4AF7C]"></span>
+<span class="text-xs font-medium text-[#1A1A1A]/80">1 a 15 días de vencimiento</span>
+</div>
+<div class="text-base font-semibold font-display text-[#1E2F28]">$7,200.00</div>
+<div class="text-[11px] text-[#1A1A1A]/60">14.9% del pasivo total</div>
+</div>
+<!-- 16 a 30 días -->
+<div class="p-2.5 rounded bg-white/70 border border-[#C9B89F]/30">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-[#B8860B]"></span>
+<span class="text-xs font-medium text-[#1A1A1A]/80">16 a 30 días de vencimiento</span>
+</div>
+<div class="text-base font-semibold font-display text-[#1E2F28]">$5,200.00</div>
+<div class="text-[11px] text-[#1A1A1A]/60">10.8% del pasivo total</div>
+</div>
+<!-- +30 días Crítico -->
+<div class="p-2.5 rounded bg-[#B45A3C]/5 border border-[#B45A3C]/20">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2.5 h-2.5 rounded-full bg-[#B45A3C]"></span>
+<span class="text-xs font-semibold text-[#B45A3C]">+30 días vencido (Crítico)</span>
+</div>
+<div class="text-base font-semibold font-display text-[#B45A3C]">$6,150.00</div>
+<div class="text-[11px] text-[#B45A3C]/80">12.7% • Bloqueo de suministro</div>
+</div>
+</div>
+</div>
+</section>
+<!-- TABLA PRINCIPAL DE FACTURAS Y DOCUMENTOS -->
+<section class="bg-[#FBF9F5] rounded-lg border border-[#C9B89F] shadow-sm overflow-hidden">
+<!-- Toolbar con búsqueda y filtros -->
+<div class="p-4 border-b border-[#C9B89F] bg-[#F6F3EC]/70 flex flex-wrap items-center justify-between gap-3">
+<!-- Búsqueda -->
+<div class="relative flex-1 min-w-[240px] max-w-md">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#1A1A1A]/50">
+<span class="material-symbols-outlined" style="font-size: 18px;">search</span>
+</span>
+<input class="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded border border-[#C9B89F] focus:outline-none focus:border-[#1E2F28] focus:ring-1 focus:ring-[#1E2F28] placeholder-[#1A1A1A]/40 text-[#1A1A1A]" placeholder="Buscar por proveedor, folio o RFC..." type="text"/>
+</div>
+<!-- Filtros de estatus y fechas -->
+<div class="flex items-center gap-2">
+<select class="text-xs bg-white border border-[#C9B89F] rounded px-3 py-1.5 text-[#1A1A1A] focus:outline-none focus:border-[#1E2F28]">
+<option>Todos los estatus</option>
+<option>Vencidas</option>
+<option>Por vencer</option>
+<option>Pagado parcial</option>
+<option>Al corriente</option>
+</select>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-white border border-[#C9B89F] rounded hover:bg-[#EAE6DD]/40 text-[#1A1A1A] transition-colors">
+<span class="material-symbols-outlined" style="font-size: 16px;">date_range</span>
+<span>Octubre 2026</span>
+<span class="material-symbols-outlined" style="font-size: 14px;">arrow_drop_down</span>
+</button>
+<button class="p-1.5 text-[#1A1A1A]/70 hover:text-[#1E2F28] bg-white border border-[#C9B89F] rounded transition-colors" title="Limpiar filtros">
+<span class="material-symbols-outlined" style="font-size: 16px;">filter_alt_off</span>
+</button>
+</div>
+</div>
+<!-- Tabla Responsive -->
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse text-xs">
+<thead>
+<tr class="border-b border-[#C9B89F] bg-[#EAE6DD]/60 font-medium text-[#1E2F28] uppercase tracking-wider text-[11px]">
+<th class="py-3.5 px-4 w-10 text-center">
+<input class="rounded border-[#C9B89F] text-[#1E2F28] focus:ring-[#1E2F28] h-3.5 w-3.5" type="checkbox"/>
+</th>
+<th class="py-3.5 px-4">Proveedor</th>
+<th class="py-3.5 px-4">Folio Fiscal CFDI</th>
+<th class="py-3.5 px-4">Recepción Ligada</th>
+<th class="py-3.5 px-4">Emisión / Vencimiento</th>
+<th class="py-3.5 px-4 text-right">Monto Factura</th>
+<th class="py-3.5 px-4 text-right">Saldo Pendiente</th>
+<th class="py-3.5 px-4 text-center">Estado</th>
+<th class="py-3.5 px-4 text-center">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#C9B89F]/40 font-body">
+<!-- FILA 1: Verduras del Bajío (SELECCIONADA / ACTIVA PARA PAGO CON HALO DORADO) -->
+<tr class="bg-[#FFFDF9] border-l-4 border-l-[#D4AF7C] ring-1 ring-[#D4AF7C]/60 hover:bg-[#FDFBF7] transition-colors">
+<td class="py-4 px-4 text-center">
+<input checked="" class="rounded border-[#D4AF7C] text-[#1E2F28] focus:ring-[#1E2F28] h-3.5 w-3.5" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-[#1E2F28]/10 text-[#1E2F28] font-bold flex items-center justify-center font-display border border-[#1E2F28]/20">
+                      VB
+                    </div>
+<div>
+<div class="font-semibold text-sm text-[#1E2F28]">Verduras del Bajío S.A. de C.V.</div>
+<div class="text-[11px] text-[#1A1A1A]/60 font-mono">VBA-190412-KM8</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-medium text-[#1E2F28]">Factura F-4860</div>
+<div class="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded w-max mt-0.5 font-mono">
+<span class="material-symbols-outlined" style="font-size: 12px; font-variation-settings: 'FILL' 1;">verified</span>
+<span>SAT CFDI 4.0</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="text-[#1A1A1A]/80 font-mono text-[11px] bg-[#EAE6DD]/50 px-2 py-1 rounded border border-[#C9B89F]/40">
+                    REC-2026-0894
+                  </span>
+<div class="text-[10px] text-[#1A1A1A]/50 mt-0.5">Ligada a OC-0142</div>
+</td>
+<td class="py-4 px-4">
+<div class="text-[#1A1A1A]/70">05 Oct 2026</div>
+<div class="font-semibold text-[#B45A3C]">20 Oct 2026</div>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-xs text-[#1A1A1A]/70">$8,150.00</span>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-sm font-bold text-[#B45A3C]">$6,150.00</span>
+<div class="text-[10px] text-[#1A1A1A]/50">Abono previo $2,000</div>
+</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#B45A3C]/15 text-[#B45A3C] border border-[#B45A3C]/30">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45A3C]"></span>
+<span>Vencido hace 4 días</span>
+</span>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="flex items-center justify-center gap-1.5">
+<button class="p-1 text-[#1A1A1A]/60 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded" title="Ver XML/PDF">
+<span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+</button>
+<button class="px-2.5 py-1 text-xs font-semibold bg-[#1E2F28] text-[#D4AF7C] rounded hover:bg-[#1E2F28]/90 transition-colors">
+                      Pagar
+                    </button>
+</div>
+</td>
+</tr>
+<!-- FILA 2: Cervecería Modelo distribuidor -->
+<tr class="hover:bg-[#F6F3EC]/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-[#C9B89F] text-[#1E2F28] focus:ring-[#1E2F28] h-3.5 w-3.5" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-[#D4AF7C]/15 text-[#B8860B] font-bold flex items-center justify-center font-display border border-[#D4AF7C]/30">
+                      CM
+                    </div>
+<div>
+<div class="font-semibold text-sm text-[#1E2F28]">Cervecería Modelo distribuidor</div>
+<div class="text-[11px] text-[#1A1A1A]/60 font-mono">DMO-840915-P82</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-medium text-[#1E2F28]">Factura MOD-88219</div>
+<div class="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded w-max mt-0.5 font-mono">
+<span class="material-symbols-outlined" style="font-size: 12px; font-variation-settings: 'FILL' 1;">verified</span>
+<span>SAT CFDI 4.0</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="text-[#1A1A1A]/80 font-mono text-[11px] bg-[#EAE6DD]/50 px-2 py-1 rounded border border-[#C9B89F]/40">
+                    REC-2026-0881
+                  </span>
+<div class="text-[10px] text-[#1A1A1A]/50 mt-0.5">Ligada a OC-0139</div>
+</td>
+<td class="py-4 px-4">
+<div class="text-[#1A1A1A]/70">12 Oct 2026</div>
+<div class="font-semibold text-[#B8860B]">27 Oct 2026</div>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-xs text-[#1A1A1A]/70">$12,400.00</span>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-sm font-semibold text-[#1E2F28]">$12,400.00</span>
+<div class="text-[10px] text-[#1A1A1A]/50">Total pendiente</div>
+</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#D4AF7C]/20 text-[#966810] border border-[#D4AF7C]/40">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B8860B]"></span>
+<span>Por vencer en 3 días</span>
+</span>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="flex items-center justify-center gap-1.5">
+<button class="p-1 text-[#1A1A1A]/60 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded" title="Ver XML/PDF">
+<span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+</button>
+<button class="px-2.5 py-1 text-xs font-medium border border-[#1E2F28] text-[#1E2F28] hover:bg-[#1E2F28] hover:text-[#D4AF7C] rounded transition-colors">
+                      Pagar
+                    </button>
+</div>
+</td>
+</tr>
+<!-- FILA 3: Carnes Selectas del Norte -->
+<tr class="hover:bg-[#F6F3EC]/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-[#C9B89F] text-[#1E2F28] focus:ring-[#1E2F28] h-3.5 w-3.5" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-slate-200 text-slate-800 font-bold flex items-center justify-center font-display border border-slate-300">
+                      CS
+                    </div>
+<div>
+<div class="font-semibold text-sm text-[#1E2F28]">Carnes Selectas del Norte</div>
+<div class="text-[11px] text-[#1A1A1A]/60 font-mono">CSN-020811-3H1</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-medium text-[#1E2F28]">Factura CS-9041</div>
+<div class="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded w-max mt-0.5 font-mono">
+<span class="material-symbols-outlined" style="font-size: 12px; font-variation-settings: 'FILL' 1;">verified</span>
+<span>SAT CFDI 4.0</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="text-[#1A1A1A]/80 font-mono text-[11px] bg-[#EAE6DD]/50 px-2 py-1 rounded border border-[#C9B89F]/40">
+                    REC-2026-0899
+                  </span>
+<div class="text-[10px] text-[#1A1A1A]/50 mt-0.5">Ligada a OC-0145</div>
+</td>
+<td class="py-4 px-4">
+<div class="text-[#1A1A1A]/70">18 Oct 2026</div>
+<div class="font-medium text-[#1A1A1A]/80">02 Nov 2026</div>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-xs text-[#1A1A1A]/70">$18,900.00</span>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-sm font-semibold text-slate-800">$9,450.00</span>
+<div class="text-[10px] text-slate-600 font-medium">50% restante</div>
+</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+<span>Pagado parcial (50%)</span>
+</span>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="flex items-center justify-center gap-1.5">
+<button class="p-1 text-[#1A1A1A]/60 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded" title="Ver XML/PDF">
+<span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+</button>
+<button class="px-2.5 py-1 text-xs font-medium border border-[#1E2F28] text-[#1E2F28] hover:bg-[#1E2F28] hover:text-[#D4AF7C] rounded transition-colors">
+                      Pagar
+                    </button>
+</div>
+</td>
+</tr>
+<!-- FILA 4: Vinos y Licores La Cava -->
+<tr class="hover:bg-[#F6F3EC]/50 transition-colors">
+<td class="py-4 px-4 text-center">
+<input class="rounded border-[#C9B89F] text-[#1E2F28] focus:ring-[#1E2F28] h-3.5 w-3.5" type="checkbox"/>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-[#1E2F28]/10 text-[#1E2F28] font-bold flex items-center justify-center font-display border border-[#1E2F28]/20">
+                      LC
+                    </div>
+<div>
+<div class="font-semibold text-sm text-[#1E2F28]">Vinos y Licores La Cava</div>
+<div class="text-[11px] text-[#1A1A1A]/60 font-mono">VLC-981120-TA4</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="font-medium text-[#1E2F28]">Factura CAV-1024</div>
+<div class="flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded w-max mt-0.5 font-mono">
+<span class="material-symbols-outlined" style="font-size: 12px; font-variation-settings: 'FILL' 1;">verified</span>
+<span>SAT CFDI 4.0</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="text-[#1A1A1A]/80 font-mono text-[11px] bg-[#EAE6DD]/50 px-2 py-1 rounded border border-[#C9B89F]/40">
+                    REC-2026-0904
+                  </span>
+<div class="text-[10px] text-[#1A1A1A]/50 mt-0.5">Ligada a OC-0148</div>
+</td>
+<td class="py-4 px-4">
+<div class="text-[#1A1A1A]/70">21 Oct 2026</div>
+<div class="font-medium text-[#1A1A1A]/80">15 Nov 2026</div>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-xs text-[#1A1A1A]/70">$20,320.00</span>
+</td>
+<td class="py-4 px-4 text-right">
+<span class="font-mono text-sm font-semibold text-[#1E2F28]">$20,320.00</span>
+<div class="text-[10px] text-[#1A1A1A]/50">Crédito 25 días</div>
+</td>
+<td class="py-4 px-4 text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100/80 text-emerald-900 border border-emerald-300">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+<span>Al corriente</span>
+</span>
+</td>
+<td class="py-4 px-4 text-center">
+<div class="flex items-center justify-center gap-1.5">
+<button class="p-1 text-[#1A1A1A]/60 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded" title="Ver XML/PDF">
+<span class="material-symbols-outlined" style="font-size: 18px;">description</span>
+</button>
+<button class="px-2.5 py-1 text-xs font-medium border border-[#1E2F28] text-[#1E2F28] hover:bg-[#1E2F28] hover:text-[#D4AF7C] rounded transition-colors">
+                      Pagar
+                    </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Paginación y Resumen Inferior -->
+<div class="p-4 bg-[#F6F3EC]/70 border-t border-[#C9B89F] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#1A1A1A]/70">
+<div class="flex items-center gap-2">
+<span>Mostrando <span class="font-semibold text-[#1E2F28]">1 a 4</span> de 18 facturas</span>
+<span>•</span>
+<span class="bg-[#1E2F28]/10 text-[#1E2F28] px-2 py-0.5 rounded font-mono font-medium">1 seleccionada ($6,150.00 MXN)</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 border border-[#C9B89F] rounded bg-white text-[#1A1A1A]/50 cursor-not-allowed">Anterior</button>
+<button class="px-3 py-1 border border-[#1E2F28] rounded bg-[#1E2F28] text-[#D4AF7C] font-semibold">1</button>
+<button class="px-3 py-1 border border-[#C9B89F] rounded bg-white hover:bg-[#EAE6DD]">2</button>
+<button class="px-3 py-1 border border-[#C9B89F] rounded bg-white hover:bg-[#EAE6DD]">3</button>
+<button class="px-2.5 py-1 border border-[#C9B89F] rounded bg-white hover:bg-[#EAE6DD] text-[#1E2F28]">Siguiente</button>
+</div>
+</div>
+</section>
+</main>
+<!-- PANEL LATERAL DERECHO FIJO: 'Registrar Pago a Factura F-4860' -->
+<aside class="fixed top-16 right-0 w-[420px] h-[calc(100vh-4rem)] bg-[#FBF9F5] border-l border-[#C9B89F] z-20 flex flex-col justify-between shadow-lg overflow-y-auto custom-scrollbar">
+<div>
+<!-- Encabezado del Drawer -->
+<div class="p-5 border-b border-[#C9B89F] bg-[#EAE6DD]/50">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] font-bold tracking-widest text-[#B8860B] uppercase font-headline">Tesorería Operativa</span>
+<button class="text-[#1A1A1A]/50 hover:text-[#1E2F28] p-1 rounded-md hover:bg-[#C9B89F]/30 transition-colors" title="Cerrar panel">
+<span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-display font-semibold text-[#1E2F28]">Registrar Pago</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#B45A3C]/10 text-[#B45A3C] text-[11px] font-semibold border border-[#B45A3C]/30">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45A3C]"></span>
+<span>Vencida</span>
+</span>
+</div>
+<!-- Documento Activo Sub-badge -->
+<div class="mt-3 p-3 bg-white rounded border border-[#C9B89F] flex items-center justify-between shadow-xs">
+<div>
+<div class="font-semibold text-xs text-[#1E2F28]">Verduras del Bajío S.A. de C.V.</div>
+<div class="text-[11px] text-[#1A1A1A]/60">Folio: <span class="font-mono text-[#1E2F28] font-medium">F-4860</span> • Rec: REC-2026-0894</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] text-[#1A1A1A]/60">Venció el</div>
+<div class="text-xs font-semibold text-[#B45A3C]">20 Oct 2026</div>
+</div>
+</div>
+</div>
+<!-- FORMULARIO DE REGISTRO DE PAGO -->
+<form class="p-5 space-y-5" onsubmit="event.preventDefault();">
+<!-- Resumen de Montos -->
+<div class="grid grid-cols-2 gap-3 p-3 bg-[#E8E2D5]/40 rounded border border-[#C9B89F]/60">
+<div>
+<span class="block text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider">Monto Total Factura</span>
+<span class="text-xs font-mono font-medium text-[#1A1A1A]/80">$8,150.00 MXN</span>
+</div>
+<div class="text-right">
+<span class="block text-[10px] text-[#B45A3C] font-semibold uppercase tracking-wider">Saldo Pendiente</span>
+<span class="text-sm font-mono font-bold text-[#B45A3C]">$6,150.00 MXN</span>
+</div>
+</div>
+<!-- Selector de Modo de Liquidación -->
+<div>
+<label class="block text-xs font-semibold text-[#1E2F28] mb-2 uppercase tracking-wider">
+              Monto a Abonar / Dispersar
+            </label>
+<div class="grid grid-cols-2 gap-2 mb-2.5">
+<button class="py-1.5 px-3 text-xs font-medium rounded border border-[#1E2F28] bg-[#1E2F28] text-[#D4AF7C] shadow-xs text-center" type="button">
+                Liquidar Total ($6,150)
+              </button>
+<button class="py-1.5 px-3 text-xs font-medium rounded border border-[#C9B89F] bg-white text-[#1A1A1A] hover:bg-[#EAE6DD]/50 text-center transition-colors" type="button">
+                Abono Parcial
+              </button>
+</div>
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sm font-semibold text-[#1E2F28]">
+                $
+              </span>
+<input class="w-full pl-8 pr-12 py-2 text-base font-semibold font-mono text-[#1E2F28] bg-white border border-[#C9B89F] rounded focus:ring-1 focus:ring-[#1E2F28] focus:border-[#1E2F28]" type="text" value="6,150.00"/>
+<span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-xs text-[#1A1A1A]/50 font-mono">
+                MXN
+              </span>
+</div>
+</div>
+<!-- FORMA DE PAGO (Radio Enriquecido) -->
+<div>
+<label class="block text-xs font-semibold text-[#1E2F28] mb-2 uppercase tracking-wider">
+              Método de Pago
+            </label>
+<div class="space-y-2">
+<!-- Opción 1: SPEI (Seleccionada) -->
+<label class="flex items-start gap-3 p-3 bg-white rounded border-2 border-[#1E2F28] cursor-pointer shadow-xs">
+<input checked="" class="mt-0.5 text-[#1E2F28] focus:ring-[#1E2F28] h-4 w-4" name="forma_pago" type="radio"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-[#1E2F28]">Transferencia SPEI / Banco</span>
+<span class="material-symbols-outlined text-[#1E2F28]" style="font-size: 16px;">account_balance</span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/70 mt-0.5">BBVA Operativa Convivium •••• 4910</p>
+</div>
+</label>
+<!-- Opción 2: Efectivo Caja TPV (Con Warning) -->
+<label class="flex items-start gap-3 p-3 bg-[#FFFDF7] rounded border border-[#C9B89F] hover:border-[#1E2F28]/50 cursor-pointer transition-colors">
+<input class="mt-0.5 text-[#1E2F28] focus:ring-[#1E2F28] h-4 w-4" name="forma_pago" type="radio"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-[#1E2F28]">Efectivo desde Caja TPV</span>
+<span class="material-symbols-outlined text-amber-700" style="font-size: 16px;">point_of_sale</span>
+</div>
+<div class="mt-1.5 p-2 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-900 leading-tight">
+<strong class="font-semibold">⚠️ Advertencia:</strong> Afecta el corte de turno activo de Salón Principal (Corte X/Z). Requiere firma de cajero.
+                  </div>
+</div>
+</label>
+<!-- Opción 3: Cheque Nominativo -->
+<label class="flex items-start gap-3 p-3 bg-white rounded border border-[#C9B89F] hover:border-[#1E2F28]/50 cursor-pointer transition-colors">
+<input class="mt-0.5 text-[#1E2F28] focus:ring-[#1E2F28] h-4 w-4" name="forma_pago" type="radio"/>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-semibold text-[#1E2F28]">Cheque nominativo</span>
+<span class="material-symbols-outlined text-[#1A1A1A]/60" style="font-size: 16px;">edit_document</span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/70 mt-0.5">Sujeto a confirmación de cobro bancario</p>
+</div>
+</label>
+</div>
+</div>
+<!-- Fecha de Pago y Referencia Bancaria -->
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block text-[11px] font-semibold text-[#1E2F28] mb-1 uppercase tracking-wider">
+                Fecha de Emisión
+              </label>
+<input class="w-full text-xs bg-white border border-[#C9B89F] rounded px-2.5 py-1.5 text-[#1A1A1A] focus:ring-[#1E2F28] focus:border-[#1E2F28]" type="date" value="2026-10-24"/>
+</div>
+<div>
+<label class="block text-[11px] font-semibold text-[#1E2F28] mb-1 uppercase tracking-wider">
+                Clave de Rastreo / Folio
+              </label>
+<input class="w-full text-xs font-mono bg-white border border-[#C9B89F] rounded px-2.5 py-1.5 text-[#1A1A1A] focus:ring-[#1E2F28] focus:border-[#1E2F28]" placeholder="SPEI-8921094" type="text" value="SPEI-8839120"/>
+</div>
+</div>
+<!-- Centro de Costo / Cuenta Contable -->
+<div>
+<label class="block text-[11px] font-semibold text-[#1E2F28] mb-1 uppercase tracking-wider">
+              Centro de Costo / Cuenta Contable
+            </label>
+<select class="w-full text-xs bg-white border border-[#C9B89F] rounded px-3 py-2 text-[#1E2F28] font-medium focus:ring-[#1E2F28] focus:border-[#1E2F28]">
+<option selected="">Cocina Caliente • Insumos Perecederos (CTA-5102)</option>
+<option>Barra y Coctelería • Licores (CTA-5104)</option>
+<option>Salón • Insumos de Servicio (CTA-5201)</option>
+<option>Mantenimiento General • Operaciones (CTA-6101)</option>
+</select>
+</div>
+<!-- Subir Comprobante (Drag and drop) -->
+<div>
+<label class="block text-[11px] font-semibold text-[#1E2F28] mb-1 uppercase tracking-wider">
+              Comprobante de Dispersión
+            </label>
+<div class="border-2 border-dashed border-[#C9B89F] hover:border-[#1E2F28] rounded-lg p-3 text-center bg-white/50 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[#B8860B] mb-1" style="font-size: 24px;">cloud_upload</span>
+<p class="text-xs text-[#1E2F28] font-medium">Arrastra el comprobante o <span class="text-[#B8860B] underline">explorar</span></p>
+<p class="text-[10px] text-[#1A1A1A]/50 mt-0.5">PDF, XML del banco, JPG o PNG (máx. 10MB)</p>
+</div>
+</div>
+</form>
+</div>
+<!-- FOOTER DEL DRAWER CON ACCIÓN PRINCIPAL -->
+<div class="p-5 border-t border-[#C9B89F] bg-[#EAE6DD]/70">
+<button class="w-full py-3 px-4 rounded-lg bg-[#1E2F28] hover:bg-[#1E2F28]/95 text-[#D4AF7C] font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-all duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 18px;">task_alt</span>
+<span>Registrar pago de $6,150.00 MXN</span>
+</button>
+<p class="text-[10px] text-[#1A1A1A]/60 text-center mt-2.5 leading-tight">
+          Se emitirá complemento de pago y se actualizará el saldo en Kardex y flujo de caja de forma automática.
+        </p>
+</div>
+</aside>
+</div>
+</body></html>

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Editor de Plano de Mesas</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              surface: '#263B33',
+              hover: '#2D453C',
+              dark: '#14201B'
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              light: '#FAF7F2',
+              cream: '#F4EFE6',
+              warm: '#FBF9F5'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#E5DCce',
+              muted: '#D8CCA8',
+              border: '#DDD2C1'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#E5C99E',
+              dark: '#B88F5B',
+              soft: '#F4E8D3'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#934329',
+              light: '#EAD1C8'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              soft: '#2D2D2D',
+              muted: '#5A5856'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            "headline": ["Playfair Display", "serif"],
+            "display": ["Playfair Display", "serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400;
+    }
+    
+    /* Subtle grid dots for the architectural floorplan canvas */
+    .bg-grid-dots {
+      background-image: radial-gradient(#C9B89F 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+    }
+    
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4EFE6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B88F5B;
+    }
+  </style>
+</head>
+<body class="bg-marfil-warm text-carbon font-body h-full overflow-hidden select-none antialiased flex">
+<!-- ========================================================================= -->
+<!-- 1. SIDENAVBAR (VERDE OLIVO #1E2F28 - AS CONFIGURED IN SHARED COMPONENTS)  -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between p-4 bg-olivo border-r border-stone-700/40 h-screen w-64 shrink-0 shadow-2xl">
+<div>
+<!-- Brand Header -->
+<div class="px-2 pt-2 pb-5 border-b border-white/10 mb-4">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-dorado/20 border border-dorado/40 flex items-center justify-center text-dorado font-headline text-lg font-bold">
+            C
+          </div>
+<div>
+<h1 class="font-headline text-lg tracking-wider text-amber-100 font-bold uppercase">CONVIVIUM</h1>
+<p class="font-headline uppercase tracking-widest text-[9px] text-dorado/80 -mt-0.5">Donde todo sucede en la mesa</p>
+</div>
+</div>
+<!-- Mode pill -->
+<div class="mt-4 px-2.5 py-1.5 rounded-lg bg-emerald-950/60 border border-dorado/30 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-dorado animate-pulse"></span>
+<span class="text-[11px] font-medium text-amber-100 uppercase tracking-wider">Modo Edición Plano</span>
+</div>
+<span class="text-[10px] bg-olivo-hover text-dorado px-1.5 py-0.5 rounded border border-dorado/20 font-mono">v2.4</span>
+</div>
+</div>
+<!-- Navigation Links from Shared Components JSON + Design Spec -->
+<nav aria-label="Navegación principal" class="space-y-1.5">
+<!-- 1. Salón y Mesas (ACTIVE STRICT MATCH) -->
+<a class="flex items-center gap-3 px-4 py-2.5 bg-stone-800/60 text-amber-200 rounded-lg font-medium transition-all border-l-2 border-dorado shadow-inner" href="#">
+<span class="material-symbols-outlined text-dorado text-[20px]" data-icon="table_restaurant">table_restaurant</span>
+<span class="text-sm font-medium tracking-wide">Salón y Mesas</span>
+</a>
+<!-- 2. Reservaciones -->
+<a class="flex items-center gap-3 px-4 py-2.5 text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 rounded-lg font-normal transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="book_online">book_online</span>
+<span class="text-sm tracking-wide">Reservaciones</span>
+</a>
+<!-- 3. Comandero / Cocina -->
+<a class="flex items-center gap-3 px-4 py-2.5 text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 rounded-lg font-normal transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-sm tracking-wide">Comandero</span>
+</a>
+<!-- 4. KDS Cocina -->
+<a class="flex items-center gap-3 px-4 py-2.5 text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 rounded-lg font-normal transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="soup_kitchen">soup_kitchen</span>
+<span class="text-sm tracking-wide">KDS Cocina</span>
+</a>
+<!-- 5. Caja y Cortes -->
+<a class="flex items-center gap-3 px-4 py-2.5 text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 rounded-lg font-normal transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="point_of_sale">point_of_sale</span>
+<span class="text-sm tracking-wide">Caja y Cortes</span>
+</a>
+<!-- 6. Configuración -->
+<a class="flex items-center gap-3 px-4 py-2.5 text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 rounded-lg font-normal transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="text-sm tracking-wide">Configuración</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls & CTA -->
+<div class="pt-4 border-t border-white/10 space-y-3">
+<button class="w-full py-2.5 px-4 bg-dorado hover:bg-dorado-dark text-olivo font-semibold rounded-lg text-xs uppercase tracking-wider transition-colors shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="publish">publish</span>
+        Publicar Plano
+      </button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-stone-400 hover:text-stone-200 text-xs rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+<span>Ayuda y Soporte</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-stone-400 hover:text-terracota-light hover:bg-terracota/10 text-xs rounded transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CONTAINER (Calculated with Left Margin for fixed Nav)      -->
+<!-- ========================================================================= -->
+<div class="ml-64 flex-1 flex flex-col h-screen overflow-hidden bg-marfil-warm">
+<!-- ========================================================================= -->
+<!-- 2. TOPBAR / BARRA SUPERIOR DE CONTROL                                     -->
+<!-- ========================================================================= -->
+<header class="h-16 bg-white/80 backdrop-blur border-b border-arena/30 px-6 flex items-center justify-between shrink-0 z-30">
+<!-- Left: Breadcrumbs & Area Tabs -->
+<div class="flex items-center gap-6">
+<div>
+<nav class="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-carbon-muted">
+<span>Administración</span>
+<span class="text-arena-DEFAULT">/</span>
+<span>Distribución de Espacios</span>
+<span class="text-arena-DEFAULT">/</span>
+<span class="text-olivo font-semibold">Editor de Plano</span>
+</nav>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="font-headline font-semibold text-base text-carbon tracking-tight">Distribución de Sala</span>
+<span class="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 rounded-full ml-2">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              Cambios sin publicar (2 modificaciones)
+            </span>
+</div>
+</div>
+<!-- Area tabs selector -->
+<div class="flex items-center bg-marfil-cream p-1 rounded-lg border border-arena/40 ml-4">
+<button class="px-3.5 py-1 text-xs font-semibold rounded-md bg-white text-olivo shadow-xs border border-arena/30 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-dorado-dark" data-icon="deck">deck</span>
+            Salón Principal
+          </button>
+<button class="px-3.5 py-1 text-xs font-medium text-carbon-muted hover:text-carbon rounded-md hover:bg-white/60 transition-colors">
+            Terraza Jardín
+          </button>
+<button class="px-3.5 py-1 text-xs font-medium text-carbon-muted hover:text-carbon rounded-md hover:bg-white/60 transition-colors">
+            Barra y Cava
+          </button>
+<button class="px-2.5 py-1 text-xs font-medium text-carbon-muted hover:text-olivo rounded-md hover:bg-white/60 transition-colors flex items-center gap-1 border-l border-arena/30 ml-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="add">add</span>
+            Nueva Área
+          </button>
+</div>
+</div>
+<!-- Center & Right: Canvas controls and primary actions -->
+<div class="flex items-center gap-3">
+<!-- History actions -->
+<div class="flex items-center bg-marfil-cream border border-arena/40 rounded-lg p-0.5">
+<button class="p-1.5 text-carbon-soft hover:text-olivo hover:bg-white rounded transition-colors" title="Deshacer (Cmd+Z)">
+<span class="material-symbols-outlined text-base" data-icon="undo">undo</span>
+</button>
+<button class="p-1.5 text-carbon-muted hover:text-olivo hover:bg-white rounded transition-colors opacity-50 cursor-not-allowed" title="Rehacer (Cmd+Y)">
+<span class="material-symbols-outlined text-base" data-icon="redo">redo</span>
+</button>
+</div>
+<!-- Zoom & View controls -->
+<div class="flex items-center bg-marfil-cream border border-arena/40 rounded-lg p-0.5 text-xs text-carbon">
+<button class="p-1.5 text-carbon-soft hover:text-olivo hover:bg-white rounded transition-colors" title="Alejar">
+<span class="material-symbols-outlined text-base" data-icon="zoom_out">zoom_out</span>
+</button>
+<span class="px-2 font-mono font-medium text-[11px]">100%</span>
+<button class="p-1.5 text-carbon-soft hover:text-olivo hover:bg-white rounded transition-colors" title="Acercar">
+<span class="material-symbols-outlined text-base" data-icon="zoom_in">zoom_in</span>
+</button>
+<div class="w-px h-4 bg-arena/50 mx-0.5"></div>
+<button class="p-1.5 text-carbon-soft hover:text-olivo hover:bg-white rounded transition-colors" title="Centrar vista">
+<span class="material-symbols-outlined text-base" data-icon="filter_center_focus">filter_center_focus</span>
+</button>
+</div>
+<!-- Magnet/Snap toggle -->
+<button class="px-2.5 py-1.5 bg-olivo/5 text-olivo border border-olivo/20 rounded-lg text-xs font-medium flex items-center gap-1.5 hover:bg-olivo/10 transition-colors">
+<span class="material-symbols-outlined text-sm text-dorado-dark" data-icon="grid_on">grid_on</span>
+<span>Snap to Grid</span>
+</button>
+<div class="w-px h-6 bg-arena/40 mx-1"></div>
+<!-- Comandero preview -->
+<button class="px-3 py-1.5 bg-white text-carbon border border-arena hover:bg-marfil-cream text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors shadow-2xs">
+<span class="material-symbols-outlined text-sm text-carbon-muted" data-icon="visibility">visibility</span>
+<span>Vista Previa Comandero</span>
+</button>
+<!-- Guardar Plano (High impact button) -->
+<button class="px-4 py-1.5 bg-olivo hover:bg-olivo-hover text-white rounded-lg text-xs font-semibold flex items-center gap-2 transition-all shadow hover:shadow-md border border-dorado/30">
+<span class="material-symbols-outlined text-sm text-dorado" data-icon="check_circle">check_circle</span>
+<span>Guardar Plano</span>
+</button>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- WORKSPACE CANVAS BODY (Left Toolset + Central Canvas + Right Inspector)    -->
+<!-- ========================================================================= -->
+<div class="flex-1 flex overflow-hidden relative">
+<!-- ========================================================================= -->
+<!-- 3. PALETA IZQUIERDA DE ELEMENTOS ARRASTRABLES (~220px)                   -->
+<!-- ========================================================================= -->
+<aside class="w-56 bg-marfil-light border-r border-arena/30 flex flex-col shrink-0 z-20 overflow-y-auto">
+<div class="p-3.5 border-b border-arena/20 bg-white/40">
+<h2 class="font-headline font-semibold text-xs tracking-wider uppercase text-olivo">Mobiliario &amp; Estructura</h2>
+<p class="text-[10px] text-carbon-muted mt-0.5">Arrastrar elementos al plano</p>
+</div>
+<div class="p-3 space-y-4">
+<!-- Categoría 1: Mesas -->
+<div>
+<span class="text-[10px] font-semibold uppercase tracking-wider text-carbon-muted px-1 block mb-2">Mesas de Comensales</span>
+<div class="grid grid-cols-2 gap-2">
+<!-- Mesa Redonda 2p -->
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2.5 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all shadow-2xs hover:shadow-xs" draggable="true">
+<div class="w-9 h-9 rounded-full border-2 border-olivo/70 group-hover:border-olivo group-hover:bg-dorado/10 flex items-center justify-center relative mb-1.5 transition-colors">
+<div class="w-2.5 h-2.5 rounded-full bg-olivo/30"></div>
+<!-- Sillas miniatura -->
+<div class="absolute -top-1 w-3 h-1 bg-arena/80 rounded-full"></div>
+<div class="absolute -bottom-1 w-3 h-1 bg-arena/80 rounded-full"></div>
+</div>
+<span class="text-[11px] font-medium text-carbon">Redonda 2p</span>
+<span class="text-[9px] text-carbon-muted font-mono">Ø 70cm</span>
+</div>
+<!-- Mesa Redonda 4p -->
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2.5 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all shadow-2xs hover:shadow-xs" draggable="true">
+<div class="w-10 h-10 rounded-full border-2 border-olivo/70 group-hover:border-olivo group-hover:bg-dorado/10 flex items-center justify-center relative mb-1.5 transition-colors">
+<span class="text-[10px] font-semibold text-olivo font-mono">4</span>
+<!-- 4 sillas -->
+<div class="absolute -top-1 w-3.5 h-1 bg-arena rounded-full"></div>
+<div class="absolute -bottom-1 w-3.5 h-1 bg-arena rounded-full"></div>
+<div class="absolute -left-1 h-3.5 w-1 bg-arena rounded-full"></div>
+<div class="absolute -right-1 h-3.5 w-1 bg-arena rounded-full"></div>
+</div>
+<span class="text-[11px] font-medium text-carbon">Redonda 4p</span>
+<span class="text-[9px] text-carbon-muted font-mono">Ø 100cm</span>
+</div>
+<!-- Mesa Cuadrada 4p -->
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2.5 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all shadow-2xs hover:shadow-xs" draggable="true">
+<div class="w-9 h-9 border-2 border-olivo/70 group-hover:border-olivo group-hover:bg-dorado/10 rounded flex items-center justify-center relative mb-1.5 transition-colors">
+<span class="text-[10px] font-semibold text-olivo font-mono">4</span>
+<!-- Sillas -->
+<div class="absolute -top-1 w-4 h-1 bg-arena rounded-full"></div>
+<div class="absolute -bottom-1 w-4 h-1 bg-arena rounded-full"></div>
+<div class="absolute -left-1 h-4 w-1 bg-arena rounded-full"></div>
+<div class="absolute -right-1 h-4 w-1 bg-arena rounded-full"></div>
+</div>
+<span class="text-[11px] font-medium text-carbon">Cuadrada 4p</span>
+<span class="text-[9px] text-carbon-muted font-mono">80x80cm</span>
+</div>
+<!-- Mesa Rectangular 6/8p -->
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2.5 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing transition-all shadow-2xs hover:shadow-xs" draggable="true">
+<div class="w-11 h-7 border-2 border-olivo/70 group-hover:border-olivo group-hover:bg-dorado/10 rounded flex items-center justify-center relative mb-1.5 transition-colors">
+<span class="text-[10px] font-semibold text-olivo font-mono">6/8</span>
+<!-- Sillas arriba/abajo -->
+<div class="absolute -top-1 w-7 h-1 flex justify-between">
+<span class="w-2 h-1 bg-arena rounded-full"></span>
+<span class="w-2 h-1 bg-arena rounded-full"></span>
+</div>
+<div class="absolute -bottom-1 w-7 h-1 flex justify-between">
+<span class="w-2 h-1 bg-arena rounded-full"></span>
+<span class="w-2 h-1 bg-arena rounded-full"></span>
+</div>
+</div>
+<span class="text-[11px] font-medium text-carbon">Rectangular</span>
+<span class="text-[9px] text-carbon-muted font-mono">160x90cm</span>
+</div>
+<!-- Periquera de barra -->
+<div class="col-span-2 group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2 flex items-center gap-3 cursor-grab active:cursor-grabbing transition-all shadow-2xs" draggable="true">
+<div class="w-7 h-7 rounded-full border-2 border-dashed border-olivo/60 flex items-center justify-center">
+<span class="w-2 h-2 rounded-full bg-dorado"></span>
+</div>
+<div class="text-left">
+<span class="text-[11px] font-medium text-carbon block">Periquera Alta (2p)</span>
+<span class="text-[9px] text-carbon-muted font-mono">Coctelería · Ø 60cm</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Categoría 2: Estructura & Separadores -->
+<div>
+<span class="text-[10px] font-semibold uppercase tracking-wider text-carbon-muted px-1 block mb-2">Estructura &amp; Flujo</span>
+<div class="space-y-1.5">
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2 flex items-center gap-3 cursor-grab transition-all" draggable="true">
+<div class="w-8 h-4 bg-carbon-soft rounded-xs flex items-center justify-center">
+<div class="w-6 h-0.5 bg-white/40"></div>
+</div>
+<div>
+<span class="text-[11px] font-medium text-carbon block">Muro o División</span>
+<span class="text-[9px] text-carbon-muted">Tabique arquitectónico</span>
+</div>
+</div>
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2 flex items-center gap-3 cursor-grab transition-all" draggable="true">
+<div class="w-8 h-5 bg-dorado/30 border border-dorado-dark rounded-sm flex items-center justify-center text-[9px] font-mono text-carbon font-bold">
+                  BAR
+                </div>
+<div>
+<span class="text-[11px] font-medium text-carbon block">Barra / Contrabarra</span>
+<span class="text-[9px] text-carbon-muted">Módulo de coctelería</span>
+</div>
+</div>
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2 flex items-center gap-3 cursor-grab transition-all" draggable="true">
+<span class="material-symbols-outlined text-lg text-carbon-soft" data-icon="meeting_room">meeting_room</span>
+<div>
+<span class="text-[11px] font-medium text-carbon block">Puerta de Acceso</span>
+<span class="text-[9px] text-carbon-muted">Radio de giro y entrada</span>
+</div>
+</div>
+<div class="group bg-white hover:bg-marfil-cream border border-arena/40 hover:border-dorado rounded-lg p-2 flex items-center gap-3 cursor-grab transition-all" draggable="true">
+<span class="material-symbols-outlined text-lg text-terracota" data-icon="soup_kitchen">soup_kitchen</span>
+<div>
+<span class="text-[11px] font-medium text-carbon block">Estación de Servicio</span>
+<span class="text-[9px] text-carbon-muted">Pase meseros y loza</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Guide / Hint -->
+<div class="p-2.5 rounded-lg border border-dashed border-arena/60 bg-marfil-cream/50 text-center">
+<span class="material-symbols-outlined text-arena-muted text-base block mb-0.5" data-icon="drag_pan">drag_pan</span>
+<p class="text-[10px] text-carbon-muted">Arrastra elementos directamente al plano central.</p>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- 4. LIENZO CENTRAL (CANVAS DE DISEÑO DEL PLANO ARQUITECTÓNICO)            -->
+<!-- ========================================================================= -->
+<main class="flex-1 bg-marfil-light bg-grid-dots relative overflow-auto p-8 flex items-center justify-center">
+<!-- Architectural Blueprint Surface -->
+<div class="relative w-[1140px] h-[680px] bg-white/95 rounded-xl border border-arena/60 shadow-xl overflow-hidden">
+<!-- Subtle metric rulers on outer boundaries -->
+<div class="absolute top-0 left-0 right-0 h-4 bg-marfil-cream/80 border-b border-arena/40 flex items-center justify-between px-6 text-[8px] font-mono text-carbon-muted select-none">
+<span>0.00m</span>
+<span>2.50m</span>
+<span>5.00m</span>
+<span>7.50m</span>
+<span>10.00m</span>
+<span>12.50m</span>
+<span>15.00m</span>
+</div>
+<div class="absolute top-4 left-0 bottom-0 w-4 bg-marfil-cream/80 border-r border-arena/40 flex flex-col justify-between py-6 text-[8px] font-mono text-carbon-muted select-none text-center">
+<span>0m</span>
+<span>2m</span>
+<span>4m</span>
+<span>6m</span>
+<span>8m</span>
+</div>
+<!-- Architectural Boundary Walls -->
+<div class="absolute inset-4 top-6 border-2 border-carbon-soft/30 rounded pointer-events-none"></div>
+<!-- ========================================================= -->
+<!-- ELEMENTOS ARQUITECTÓNICOS FIJOS                          -->
+<!-- ========================================================= -->
+<!-- 1. Acceso Principal (Puerta con arco batiente) -->
+<div class="absolute left-8 bottom-6 flex items-center gap-2">
+<div class="relative w-20 h-16 border-l-2 border-b-2 border-dashed border-dorado-dark/80 rounded-bl-full flex items-end justify-start pl-1 pb-1">
+<span class="text-[9px] uppercase tracking-widest text-carbon-muted font-headline font-bold">Puerta</span>
+</div>
+<div class="bg-carbon-soft text-white text-[9px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded shadow-xs">
+              Acceso Principal
+            </div>
+</div>
+<!-- 2. Barra de Coctelería con 4 Periqueras (P1..P4) -->
+<div class="absolute top-8 left-12 bg-marfil-cream border-2 border-arena/80 rounded-lg p-2.5 shadow-sm">
+<div class="flex items-center justify-between pb-1 mb-2 border-b border-arena/40">
+<span class="text-[10px] font-headline font-bold tracking-wider text-olivo uppercase">Barra Central &amp; Coctelería</span>
+<span class="text-[9px] font-mono text-dorado-dark bg-white px-1.5 rounded border border-arena/30">Mixología</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- La barra física -->
+<div class="w-48 h-9 bg-olivo/90 rounded border border-dorado/40 flex items-center justify-center text-dorado text-[10px] font-headline tracking-widest uppercase">
+                Estación de Bebidas
+              </div>
+<!-- Periqueras de barra -->
+<div class="flex gap-2">
+<div class="w-7 h-7 rounded-full bg-white border border-olivo/60 flex items-center justify-center text-[9px] font-bold text-olivo shadow-2xs hover:border-dorado cursor-pointer" title="Periquera 1">P1</div>
+<div class="w-7 h-7 rounded-full bg-white border border-olivo/60 flex items-center justify-center text-[9px] font-bold text-olivo shadow-2xs hover:border-dorado cursor-pointer" title="Periquera 2">P2</div>
+<div class="w-7 h-7 rounded-full bg-white border border-olivo/60 flex items-center justify-center text-[9px] font-bold text-olivo shadow-2xs hover:border-dorado cursor-pointer" title="Periquera 3">P3</div>
+<div class="w-7 h-7 rounded-full bg-white border border-olivo/60 flex items-center justify-center text-[9px] font-bold text-olivo shadow-2xs hover:border-dorado cursor-pointer" title="Periquera 4">P4</div>
+</div>
+</div>
+</div>
+<!-- 3. Muro divisor y Pase de Cocina (KDS Station) -->
+<div class="absolute top-8 right-12 w-64 bg-marfil-cream border-2 border-arena/60 rounded-lg p-2 shadow-sm">
+<div class="flex items-center gap-2 mb-1.5">
+<span class="w-2 h-2 rounded-full bg-terracota animate-pulse"></span>
+<span class="text-[10px] font-headline font-bold tracking-wider uppercase text-carbon">Pase de Cocina Caliente</span>
+</div>
+<div class="h-3 w-full bg-carbon-soft/80 rounded-xs flex items-center justify-center text-[8px] text-white tracking-widest font-mono">
+              VENTANILLA DE SERVICIO · 3.20m
+            </div>
+</div>
+<!-- 4. Estación de Meseros (Cristalería / Insumos) -->
+<div class="absolute bottom-8 right-12 bg-white border border-arena rounded-lg p-2 shadow-xs flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-marfil-cream border border-arena/50 flex items-center justify-center text-olivo">
+<span class="material-symbols-outlined text-base" data-icon="coffee_maker">coffee_maker</span>
+</div>
+<div>
+<span class="text-[10px] font-semibold text-carbon block">Estación de Servicio 01</span>
+<span class="text-[8px] text-carbon-muted">Cafetería &amp; Cubertería</span>
+</div>
+</div>
+<!-- ========================================================= -->
+<!-- MESAS COLOCADAS (M1 A M14)                                -->
+<!-- ========================================================= -->
+<!-- M1 (Cuadrada 4p) -->
+<div class="absolute top-28 left-16 group cursor-pointer">
+<div class="relative w-14 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M1</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<!-- 4 sillas sutiles -->
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M2 (Redonda 4p) -->
+<div class="absolute top-28 left-44 group cursor-pointer">
+<div class="relative w-15 h-15 rounded-full bg-white border-2 border-olivo/80 flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M2</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M3 (Redonda 2p) -->
+<div class="absolute top-28 left-72 group cursor-pointer">
+<div class="relative w-11 h-11 rounded-full bg-white border-2 border-olivo/80 flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-[11px] font-bold font-mono text-carbon">M3</span>
+<span class="text-[8px] font-mono text-carbon-muted">2p</span>
+<span class="absolute -top-1.5 w-4 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-4 h-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M4 (Cuadrada 4p) -->
+<div class="absolute top-28 right-80 group cursor-pointer">
+<div class="relative w-14 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M4</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M5 (Rectangular 6p) -->
+<div class="absolute top-48 left-16 group cursor-pointer">
+<div class="relative w-24 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M5</span>
+<span class="text-[9px] font-mono text-carbon-muted">6 personas</span>
+<!-- 6 sillas -->
+<span class="absolute -top-1.5 left-3 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -top-1.5 right-3 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 left-3 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 right-3 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M6 (Redonda 2p) -->
+<div class="absolute top-52 left-52 group cursor-pointer">
+<div class="relative w-11 h-11 rounded-full bg-white border-2 border-olivo/80 flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-[11px] font-bold font-mono text-carbon">M6</span>
+<span class="text-[8px] font-mono text-carbon-muted">2p</span>
+<span class="absolute -left-1.5 h-4 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-4 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- M7 & M8 (M7 SELECCIONADA CON MANIJAS DE TRANSFORMACIÓN + AFINIDAD CON M8) -->
+<!-- ========================================================================= -->
+<!-- Affinity Link between M7 and M8 (Línea discontinua con badge de unión) -->
+<div class="absolute top-[284px] left-[490px] w-24 h-0.5 border-t-2 border-dashed border-dorado-dark flex items-center justify-center pointer-events-none z-10">
+<span class="bg-dorado-soft text-olivo border border-dorado text-[8px] font-mono font-bold px-1.5 py-0.2 rounded-full shadow-2xs whitespace-nowrap">
+              Fusión 8p
+            </span>
+</div>
+<!-- M7 (SELECCIONADA: Bounding box dorado, handles, rotation pin, info pill) -->
+<div class="absolute top-[260px] left-[420px] z-20">
+<!-- Etiqueta Flotante de Selección -->
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-olivo text-amber-100 text-[10px] font-medium px-2.5 py-1 rounded-full shadow-lg border border-dorado flex items-center gap-1.5 whitespace-nowrap">
+<span class="w-1.5 h-1.5 rounded-full bg-dorado"></span>
+<span>Mesa 7 · 4 personas · 120x80cm</span>
+</div>
+<!-- Manija superior de Rotación -->
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-white border-2 border-dorado shadow flex items-center justify-center text-dorado cursor-grab hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[10px]" data-icon="rotate_right">rotate_right</span>
+</div>
+<div class="w-0.5 h-2 bg-dorado"></div>
+</div>
+<!-- Contenedor con Bounding Box Dorado -->
+<div class="relative p-1 border-2 border-dorado rounded-lg bg-dorado/5 shadow-md">
+<!-- 4 Puntos de esquina (Handles) -->
+<span class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-dorado rounded-full shadow cursor-nwse-resize"></span>
+<span class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-dorado rounded-full shadow cursor-nesw-resize"></span>
+<span class="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-dorado rounded-full shadow cursor-nesw-resize"></span>
+<span class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-dorado rounded-full shadow cursor-nwse-resize"></span>
+<!-- Mesa propiamente dicha -->
+<div class="w-20 h-16 bg-white border-2 border-olivo rounded flex flex-col items-center justify-center shadow-inner">
+<div class="flex items-center gap-1">
+<span class="text-sm font-bold font-mono text-olivo">M7</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600" title="Estado: Disponible"></span>
+</div>
+<span class="text-[9px] font-mono text-carbon-muted">4 comensales</span>
+<!-- Sillas alrededor de M7 -->
+<span class="absolute -top-1.5 w-8 h-1 bg-dorado rounded-full"></span>
+<span class="absolute -bottom-1.5 w-8 h-1 bg-dorado rounded-full"></span>
+<span class="absolute -left-1.5 h-8 w-1 bg-dorado rounded-full"></span>
+<span class="absolute -right-1.5 h-8 w-1 bg-dorado rounded-full"></span>
+</div>
+</div>
+</div>
+<!-- M8 (Cuadrada contigua) -->
+<div class="absolute top-[264px] left-[580px] group cursor-pointer">
+<div class="relative w-18 h-16 bg-white border-2 border-olivo/80 border-dashed rounded flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M8</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p · Unible</span>
+<span class="absolute -top-1.5 w-7 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-7 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-7 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-7 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M9, M10, M11 (Mesas intermedias) -->
+<div class="absolute top-[260px] right-28 group cursor-pointer">
+<div class="relative w-28 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M9</span>
+<span class="text-[9px] font-mono text-carbon-muted">6p Familiar</span>
+<span class="absolute -top-1.5 left-4 w-7 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -top-1.5 right-4 w-7 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 left-4 w-7 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 right-4 w-7 h-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<div class="absolute bottom-28 left-36 group cursor-pointer">
+<div class="relative w-14 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M10</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<div class="absolute bottom-28 left-64 group cursor-pointer">
+<div class="relative w-15 h-15 rounded-full bg-white border-2 border-olivo/80 flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M11</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-5 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-5 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-5 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-5 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- M12, M13, M14 (Zona Ventanal / Terraza vista) -->
+<div class="absolute bottom-24 right-96 group cursor-pointer">
+<div class="relative w-14 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M12</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<div class="absolute bottom-24 right-64 group cursor-pointer">
+<div class="relative w-14 h-14 bg-white border-2 border-olivo/80 rounded-md flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M13</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-6 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-6 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<div class="absolute bottom-24 right-32 group cursor-pointer">
+<div class="relative w-15 h-15 rounded-full bg-white border-2 border-olivo/80 flex flex-col items-center justify-center shadow-xs group-hover:border-dorado transition-colors">
+<span class="text-xs font-bold font-mono text-carbon">M14</span>
+<span class="text-[9px] font-mono text-carbon-muted">4p</span>
+<span class="absolute -top-1.5 w-5 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -bottom-1.5 w-5 h-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -left-1.5 h-5 w-1 bg-arena/80 rounded-full"></span>
+<span class="absolute -right-1.5 h-5 w-1 bg-arena/80 rounded-full"></span>
+</div>
+</div>
+<!-- Window label bottom right -->
+<div class="absolute bottom-2 right-44 text-[9px] font-headline tracking-widest text-carbon-muted uppercase flex items-center gap-2">
+<span class="w-12 h-px bg-arena"></span>
+<span>Ventanal Panorámico Jardín</span>
+<span class="w-12 h-px bg-arena"></span>
+</div>
+</div>
+</main>
+<!-- ========================================================================= -->
+<!-- 5. PANEL DERECHO DE PROPIEDADES (INSPECTOR DE MESA M7 ~320px)            -->
+<!-- ========================================================================= -->
+<aside class="w-80 bg-white border-l border-arena/40 flex flex-col shrink-0 z-20 shadow-lg overflow-y-auto">
+<!-- Inspector Header -->
+<div class="p-4 border-b border-arena/30 flex items-center justify-between bg-marfil-cream/50">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+<h3 class="font-headline font-semibold text-sm tracking-wide text-carbon">Propiedades de Mesa</h3>
+</div>
+<span class="inline-block text-[11px] font-mono text-dorado-dark font-medium mt-0.5">
+              M7 Seleccionada · Salón Principal
+            </span>
+</div>
+<button class="p-1.5 text-carbon-muted hover:text-terracota hover:bg-terracota/10 rounded transition-colors" title="Eliminar mesa del plano">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- Form fields and properties -->
+<div class="p-4 space-y-4 text-xs">
+<!-- Campo 1: Identificador / Número de Mesa -->
+<div>
+<label class="block text-[11px] font-medium text-carbon-muted uppercase tracking-wider mb-1.5">
+              Identificador / Clave
+            </label>
+<div class="relative flex rounded-md shadow-2xs">
+<span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-arena bg-marfil-cream text-carbon-muted text-xs font-mono font-bold">
+                M-
+              </span>
+<input class="flex-1 min-w-0 block w-full px-3 py-1.5 rounded-none rounded-r-md border border-arena text-xs font-mono font-semibold focus:ring-1 focus:ring-olivo focus:border-olivo bg-white" type="text" value="7"/>
+</div>
+</div>
+<!-- Campo 2: Capacidad (Stepper) -->
+<div>
+<label class="block text-[11px] font-medium text-carbon-muted uppercase tracking-wider mb-1.5">
+              Capacidad de Comensales
+            </label>
+<div class="flex items-center justify-between border border-arena rounded-md p-1 bg-white">
+<button class="w-8 h-8 rounded bg-marfil-cream text-carbon hover:bg-arena/30 flex items-center justify-center font-bold text-sm transition-colors">-</button>
+<div class="text-center">
+<span class="text-sm font-bold text-olivo font-mono">4</span>
+<span class="text-[10px] text-carbon-muted block -mt-0.5">personas</span>
+</div>
+<button class="w-8 h-8 rounded bg-marfil-cream text-carbon hover:bg-arena/30 flex items-center justify-center font-bold text-sm transition-colors">+</button>
+</div>
+<div class="flex justify-between text-[10px] text-carbon-muted mt-1 px-1">
+<span>Mínimo: 2p</span>
+<span>Máximo recomendado: 6p</span>
+</div>
+</div>
+<!-- Campo 3: Forma geométrica -->
+<div>
+<label class="block text-[11px] font-medium text-carbon-muted uppercase tracking-wider mb-1.5">
+              Forma Geométrica
+            </label>
+<div class="grid grid-cols-3 gap-1.5">
+<button class="py-2 px-1 text-center rounded border-2 border-olivo bg-olivo/5 text-olivo font-medium flex flex-col items-center gap-1 shadow-2xs">
+<span class="w-4 h-4 border border-olivo rounded-xs"></span>
+<span class="text-[10px]">Cuadrada</span>
+</button>
+<button class="py-2 px-1 text-center rounded border border-arena hover:border-dorado bg-white text-carbon-muted hover:text-carbon flex flex-col items-center gap-1 transition-colors">
+<span class="w-4 h-4 rounded-full border border-carbon-muted"></span>
+<span class="text-[10px]">Redonda</span>
+</button>
+<button class="py-2 px-1 text-center rounded border border-arena hover:border-dorado bg-white text-carbon-muted hover:text-carbon flex flex-col items-center gap-1 transition-colors">
+<span class="w-6 h-3 border border-carbon-muted rounded-xs"></span>
+<span class="text-[10px]">Rectangular</span>
+</button>
+</div>
+</div>
+<!-- Campo 4: Área Asignada -->
+<div>
+<label class="block text-[11px] font-medium text-carbon-muted uppercase tracking-wider mb-1.5">
+              Área Asignada
+            </label>
+<select class="w-full border border-arena rounded-md py-1.5 px-3 text-xs bg-white focus:ring-1 focus:ring-olivo focus:border-olivo">
+<option selected="">Salón Principal (Interior)</option>
+<option>Terraza Jardín</option>
+<option>Barra y Cava Privada</option>
+<option>Mezzanine VIP</option>
+</select>
+</div>
+<!-- Campo 5: Mesero Asignado por Defecto -->
+<div>
+<label class="block text-[11px] font-medium text-carbon-muted uppercase tracking-wider mb-1.5">
+              Mesero Asignado por Turno
+            </label>
+<div class="border border-arena rounded-md p-2 bg-marfil-light/40 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<img class="w-7 h-7 rounded-full object-cover border border-dorado" data-alt="Fotografía de retrato editorial cálido de una mesera profesional mexicana sonriente con filipina oscura en un restaurante de alta gama con luz natural tenue." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-C34i5sfNkfljCOIF-lRUUs3xg55yNLtLCzqRq1-OPUhnQHXR7BWQoNCpf05STchFuvj0wBZmR5JQu6IzAY_dX08bG3gNTYTtxN9HqirUBzPWo03vCrVDRzDMkQsc1Sknbr9jC6EHYvI309G7CzmLFtOOIjkv80ogRhMBBRe516yUhYlASN7_ru-nFDvSivdMo4zG1dnnTD402JxqwuNuTYiB1df8nmRjvf5Nj28hJK4gNETLWiNppVemKRVDl0laIn7EtoGLPwvg"/>
+<div>
+<span class="text-xs font-semibold text-carbon block">Ana Morales</span>
+<span class="text-[10px] text-carbon-muted">Turno Vespertino · Rango 2</span>
+</div>
+</div>
+<button class="text-dorado-dark hover:text-olivo text-[11px] font-medium underline">
+                Cambiar
+              </button>
+</div>
+</div>
+<!-- Campo 6: Configuración de Grupos (Fusión de Mesas) -->
+<div class="p-3 rounded-lg border border-dorado/50 bg-dorado-soft/20">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-carbon">Permitir Fusión con M8</span>
+<!-- Toggle switch activo -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-arena rounded-full peer peer-checked:bg-olivo peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+</div>
+<p class="text-[10px] text-carbon-muted leading-relaxed">
+              Habilita la unión rápida en comandero para grupos y banquetes compartiendo comanda y cuenta única.
+            </p>
+</div>
+<!-- Campo 7: Posición y Coordenadas Técnicas -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="text-[11px] font-medium text-carbon-muted uppercase tracking-wider">
+                Geometría &amp; Orientación
+              </label>
+<div class="flex items-center gap-1 text-[10px] text-carbon-muted">
+<span class="material-symbols-outlined text-xs" data-icon="lock_open">lock_open</span>
+<span>Desbloqueado</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 font-mono text-[11px]">
+<div class="bg-marfil-cream border border-arena/60 rounded px-2 py-1">
+<span class="text-[9px] text-carbon-muted block">POS X</span>
+<span class="font-semibold text-carbon">420 px</span>
+</div>
+<div class="bg-marfil-cream border border-arena/60 rounded px-2 py-1">
+<span class="text-[9px] text-carbon-muted block">POS Y</span>
+<span class="font-semibold text-carbon">260 px</span>
+</div>
+<div class="bg-marfil-cream border border-arena/60 rounded px-2 py-1">
+<span class="text-[9px] text-carbon-muted block">ROTACIÓN</span>
+<span class="font-semibold text-carbon">0°</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions in Inspector -->
+<div class="mt-auto p-4 border-t border-arena/30 bg-marfil-cream/30 space-y-2">
+<button class="w-full py-2 bg-white hover:bg-marfil-cream border border-arena rounded-md text-xs font-semibold text-carbon flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+<span class="material-symbols-outlined text-sm text-carbon-muted" data-icon="content_copy">content_copy</span>
+            Duplicar Mesa (M15)
+          </button>
+<button class="w-full py-2 bg-olivo hover:bg-olivo-hover text-white rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow">
+<span class="material-symbols-outlined text-sm text-dorado" data-icon="done_all">done_all</span>
+            Aplicar Cambios a M7
+          </button>
+</div>
+</aside>
+</div>
+</div>
+</body></html>

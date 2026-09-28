@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM | Promociones por Horario (Happy Hour &amp; Combos)</title>
+<!-- Google Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: '#1E2F28',
+              'olivo-dark': '#15221D',
+              marfil: '#EAE6DD',
+              marfilLight: '#F7F5F0',
+              arena: '#C9B89F',
+              'arena-soft': '#DFD7C9',
+              terracota: '#B45A3C',
+              carbon: '#1A1A1A',
+              dorado: '#D4AF7C',
+              'dorado-dark': '#B8935F',
+              'dorado-light': '#F3E8D7'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["'Playfair Display'", "serif"],
+            display: ["'Playfair Display'", "serif"],
+            body: ["'Inter'", "sans-serif"],
+            label: ["'Inter'", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400;
+    }
+    /* Custom Scrollbar for inner panes */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(201, 184, 159, 0.15);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B8935F;
+    }
+  </style>
+</head>
+<body class="h-full antialiased font-body text-[#1A1A1A] bg-[#F7F5F0] overflow-hidden flex">
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT 1: SideNavBar                                            -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 bottom-0 h-screen w-64 p-4 z-40 bg-[#1E2F28] flex flex-col justify-between shrink-0 border-r border-[#C9B89F]/30 select-none">
+<!-- Header Brand Monogram & Title -->
+<div>
+<div class="flex items-center gap-3 px-3 py-2 mb-6">
+<div class="w-10 h-10 rounded-lg bg-[#D4AF7C]/15 border border-[#D4AF7C]/40 flex items-center justify-center text-[#D4AF7C] shadow-inner">
+<span class="font-headline font-bold text-xl tracking-tighter" title="Monograma Convivium en Dorado">C</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline tracking-widest text-lg font-bold text-[#D4AF7C] leading-tight">CONVIVIUM</span>
+<span class="font-headline tracking-widest uppercase text-[10px] font-semibold text-[#C9B89F]/80">Hospitalidad Mexicana</span>
+</div>
+</div>
+<!-- Quick Action / CTA -->
+<button class="w-full mb-6 bg-[#D4AF7C] hover:bg-[#B8935F] text-[#1E2F28] font-body text-xs font-semibold uppercase tracking-wider py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Nueva Promoción</span>
+</button>
+<!-- Navigation Tabs (from JSON) -->
+<nav class="space-y-1">
+<!-- 1. Mesas y Salón -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">table_restaurant</span>
+<span class="font-normal">Mesas y Salón</span>
+</a>
+<!-- 2. Comandas y KDS -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">soup_kitchen</span>
+<span class="font-normal">Comandas y KDS</span>
+</a>
+<!-- 3. Menú y Recetas -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">menu_book</span>
+<span class="font-normal">Menú y Recetas</span>
+</a>
+<!-- 4. Promociones (ACTIVE TAB PER CONTEXT) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#2A3E35] text-[#D4AF7C] font-body text-sm font-medium transition-colors cursor-pointer shadow-sm border-l-2 border-[#D4AF7C]" href="#">
+<span class="material-symbols-outlined text-[#D4AF7C] fill-icon">loyalty</span>
+<span class="font-medium tracking-wide">Promociones</span>
+<span class="ml-auto w-1.5 h-1.5 rounded-full bg-[#D4AF7C]"></span>
+</a>
+<!-- 5. Caja y Facturación -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">point_of_sale</span>
+<span class="font-normal">Caja y Facturación</span>
+</a>
+<!-- 6. Reportes -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">analytics</span>
+<span class="font-normal">Reportes</span>
+</a>
+</nav>
+</div>
+<!-- Footer Tabs (from JSON) -->
+<div class="pt-4 border-t border-[#C9B89F]/20 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">settings</span>
+<span>Configuración</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#253931] font-body text-sm transition-colors cursor-pointer" href="#">
+<span class="material-symbols-outlined text-[#C9B89F]">contact_support</span>
+<span>Soporte</span>
+</a>
+<!-- Operational Status Pill -->
+<div class="mt-3 px-3 py-2 rounded-md bg-[#15221D] flex items-center justify-between border border-[#C9B89F]/10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[11px] text-[#EAE6DD]/80 font-medium">TPV Server Online</span>
+</div>
+<span class="text-[10px] text-[#D4AF7C] font-mono">v3.4.2</span>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN APPLICATION WRAPPER (Offset ml-64 for fixed sidebar)               -->
+<!-- ========================================================================= -->
+<div class="ml-64 flex-1 flex flex-col h-screen overflow-hidden">
+<!-- ========================================================================= -->
+<!-- SHARED COMPONENT 2: TopNavBar                                             -->
+<!-- ========================================================================= -->
+<header class="h-16 px-6 bg-[#EAE6DD] border-b border-[#C9B89F] flex justify-between items-center w-full sticky top-0 z-30 shrink-0">
+<!-- Left: Breadcrumb & Branch Anchor -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-xs text-[#1A1A1A]/70 font-body">
+<span>Administración</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span>Reglas Comerciales</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="font-medium text-[#1E2F28]">Promociones por Horario</span>
+</div>
+<div class="h-4 w-px bg-[#C9B89F]/60 mx-1"></div>
+<div class="flex items-center gap-2 px-2.5 py-1 rounded bg-[#F7F5F0] border border-[#C9B89F]/50">
+<span class="material-symbols-outlined text-[#1E2F28] text-sm">store</span>
+<span class="font-headline font-semibold text-xs tracking-wide text-[#1E2F28]">Sucursal Roma Norte</span>
+</div>
+<!-- Sync Pill from JSON navigation_links -->
+<div class="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-medium">
+<span class="material-symbols-outlined text-emerald-600 text-sm animate-spin" style="animation-duration: 6s;">sync</span>
+<span>Reglas TPV/KDS: Sincronizado en tiempo real</span>
+</div>
+</div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-3">
+<!-- Secondary Action: Ver Calendario -->
+<button class="px-3.5 py-1.5 rounded-lg border border-[#C9B89F] text-[#1E2F28] hover:bg-[#C9B89F]/20 text-xs font-semibold tracking-wide flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+<span>Ver Calendario</span>
+</button>
+<!-- Primary Action: Guardar Cambios -->
+<button class="px-4 py-1.5 rounded-lg bg-[#1E2F28] hover:bg-[#2A3E35] text-[#D4AF7C] text-xs font-semibold tracking-wide flex items-center gap-2 shadow-sm transition-all border border-[#D4AF7C]/30">
+<span class="material-symbols-outlined text-sm">save</span>
+<span>Guardar Cambios</span>
+</button>
+<div class="h-5 w-px bg-[#C9B89F]/60 mx-1"></div>
+<!-- Trailing Icon Actions -->
+<div class="flex items-center gap-1 text-[#1E2F28]">
+<button class="p-2 rounded-lg hover:bg-[#C9B89F]/20 transition-colors" title="Sincronizar ahora">
+<span class="material-symbols-outlined">sync</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-[#C9B89F]/20 transition-colors relative" title="Notificaciones">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#B45A3C]"></span>
+</button>
+<button class="p-1 rounded-lg hover:bg-[#C9B89F]/20 transition-colors flex items-center gap-2" title="Foto de perfil del Administrador General">
+<span class="material-symbols-outlined text-2xl text-[#1E2F28]">account_circle</span>
+<div class="text-left hidden lg:block pr-1">
+<span class="block text-xs font-medium text-[#1A1A1A] leading-tight">Admin General</span>
+<span class="block text-[10px] text-[#1A1A1A]/60">Capitán Roma Norte</span>
+</div>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================================================= -->
+<!-- MAIN CONTENT CANVAS: 3-COLUMN EXECUTIVE BENTO LAYOUT                     -->
+<!-- ========================================================================= -->
+<main class="flex-1 grid grid-cols-12 overflow-hidden bg-[#F7F5F0]">
+<!-- ===================================================================== -->
+<!-- COLUMN 1: PROMOTION RULES LIST (Cols 3/12)                             -->
+<!-- ===================================================================== -->
+<section class="col-span-3 border-r border-[#C9B89F]/40 flex flex-col h-full bg-[#F7F5F0]/70 overflow-hidden">
+<!-- Header & Fast Filter -->
+<div class="p-4 border-b border-[#C9B89F]/40 bg-[#F7F5F0]">
+<div class="flex items-center justify-between mb-3">
+<div>
+<h2 class="font-headline font-semibold text-base text-[#1E2F28] tracking-tight">Reglas de Promoción</h2>
+<p class="text-xs text-[#1A1A1A]/60 font-body">4 campañas configuradas</p>
+</div>
+<button class="p-1.5 rounded-md bg-[#1E2F28] text-[#D4AF7C] hover:bg-[#2A3E35] transition-colors" title="Crear nueva regla">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<!-- Quick Filter Tabs -->
+<div class="flex items-center gap-1.5 p-1 bg-[#EAE6DD] rounded-lg border border-[#C9B89F]/40 text-xs">
+<button class="flex-1 py-1 px-2 rounded-md bg-white text-[#1E2F28] font-medium shadow-xs text-center transition-all">Todas (4)</button>
+<button class="flex-1 py-1 px-2 rounded-md text-[#1A1A1A]/70 hover:text-[#1E2F28] text-center transition-all">Activas hoy (2)</button>
+<button class="flex-1 py-1 px-2 rounded-md text-[#1A1A1A]/70 hover:text-[#1E2F28] text-center transition-all">Borradores</button>
+</div>
+</div>
+<!-- Scrollable Promotions List -->
+<div class="flex-1 overflow-y-auto p-3 space-y-2.5">
+<!-- Card 1: Happy Hour Cervezas 2x1 (SELECTED / ACTIVE NOW) -->
+<div class="relative bg-white rounded-lg p-3.5 border-2 border-[#D4AF7C] shadow-sm cursor-pointer transition-all hover:shadow-md">
+<div class="flex items-start justify-between gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide bg-[#D4AF7C]/20 text-[#1E2F28] border border-[#D4AF7C]/50">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+<span class="w-1.5 h-1.5 -ml-2.5 rounded-full bg-emerald-600"></span>
+                ACTIVA AHORA
+              </span>
+<span class="text-[11px] font-mono text-[#1E2F28]/60">17:00 - 20:00</span>
+</div>
+<h3 class="font-headline font-semibold text-sm text-[#1E2F28] leading-tight mb-1">Happy hour cervezas 2x1</h3>
+<p class="text-[11px] text-[#1A1A1A]/70 leading-relaxed mb-2.5">Lunes a Viernes · Barra y Salón · Auto-comanda en TPV</p>
+<div class="flex items-center justify-between pt-2 border-t border-[#C9B89F]/20 text-[11px]">
+<span class="inline-flex items-center gap-1 text-[#1E2F28] font-medium">
+<span class="material-symbols-outlined text-xs text-[#D4AF7C]">sports_bar</span>
+                2x1 Artesanales e Ind.
+              </span>
+<span class="text-[#D4AF7C] font-semibold font-mono text-xs">#PRM-08</span>
+</div>
+</div>
+<!-- Card 2: Martes de Margaritas 30% -->
+<div class="bg-white/80 hover:bg-white rounded-lg p-3.5 border border-[#C9B89F]/50 shadow-xs cursor-pointer transition-all hover:border-[#C9B89F]">
+<div class="flex items-start justify-between gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide bg-[#EAE6DD] text-[#1E2F28] border border-[#C9B89F]/60">
+<span class="material-symbols-outlined text-[11px] text-[#1E2F28]/70">schedule</span>
+                Programada (Próx. Martes)
+              </span>
+<span class="text-[11px] font-mono text-[#1A1A1A]/50">18:00 - 23:00</span>
+</div>
+<h3 class="font-headline font-semibold text-sm text-[#1E2F28] leading-tight mb-1">Martes de margaritas 30%</h3>
+<p class="text-[11px] text-[#1A1A1A]/70 leading-relaxed mb-2">Martes · Coctelería de autor · Salón &amp; Terraza</p>
+<div class="flex items-center justify-between pt-2 border-t border-[#C9B89F]/20 text-[11px]">
+<span class="inline-flex items-center gap-1 text-[#1A1A1A]/80">
+<span class="material-symbols-outlined text-xs text-[#B45A3C]">local_bar</span>
+                30% Descuento directo
+              </span>
+<span class="text-[#1A1A1A]/40 font-mono text-xs">#PRM-05</span>
+</div>
+</div>
+<!-- Card 3: Cubeta + Botana -->
+<div class="bg-white/70 hover:bg-white rounded-lg p-3.5 border border-[#C9B89F]/40 shadow-xs cursor-pointer transition-all hover:border-[#C9B89F]">
+<div class="flex items-start justify-between gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide bg-amber-50 text-amber-800 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                Inactiva / Turno Nocturno
+              </span>
+<span class="text-[11px] font-mono text-[#1A1A1A]/50">20:00 - 02:00</span>
+</div>
+<h3 class="font-headline font-semibold text-sm text-[#1E2F28] leading-tight mb-1">Cubeta + botana</h3>
+<p class="text-[11px] text-[#1A1A1A]/70 leading-relaxed mb-2">Jueves a Sábado · Combo automático (6 Charro + Guacamole)</p>
+<div class="flex items-center justify-between pt-2 border-t border-[#C9B89F]/20 text-[11px]">
+<span class="inline-flex items-center gap-1 text-[#1A1A1A]/80">
+<span class="material-symbols-outlined text-xs text-[#1E2F28]">inventory_2</span>
+                Paquete fijo: $495 MXN
+              </span>
+<span class="text-[#1A1A1A]/40 font-mono text-xs">#PRM-03</span>
+</div>
+</div>
+<!-- Card 4: Copeo Nacional 2x1 Descorche -->
+<div class="bg-white/60 hover:bg-white rounded-lg p-3.5 border border-[#C9B89F]/30 shadow-xs cursor-pointer transition-all hover:border-[#C9B89F]">
+<div class="flex items-start justify-between gap-2 mb-1.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide bg-[#EAE6DD] text-[#1A1A1A]/70">
+                Programada Fines de Semana
+              </span>
+<span class="text-[11px] font-mono text-[#1A1A1A]/50">14:00 - 18:00</span>
+</div>
+<h3 class="font-headline font-medium text-sm text-[#1E2F28] leading-tight mb-1">Copeo Nacional 2x1 Descorche</h3>
+<p class="text-[11px] text-[#1A1A1A]/60 leading-relaxed">Sábado y Domingo · Mezcales &amp; Tequilas de la casa</p>
+</div>
+<!-- Atmospheric Mini Context Card -->
+<div class="mt-4 p-3 rounded-lg bg-[#EAE6DD]/60 border border-[#C9B89F]/30 text-xs text-[#1E2F28]">
+<div class="flex items-center gap-2 mb-1 font-headline font-semibold">
+<span class="material-symbols-outlined text-xs text-[#B45A3C]">info</span>
+<span>Prioridad de Motor Comercial</span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/70 leading-normal">
+              Si dos reglas se cruzan en un mismo ítem, CONVIVIUM aplica la de mayor beneficio al comensal para evitar fricciones.
+            </p>
+</div>
+</div>
+<!-- Bottom Col Status -->
+<div class="p-3 border-t border-[#C9B89F]/40 bg-[#EAE6DD]/50 text-xs flex justify-between items-center text-[#1A1A1A]/70">
+<span>KDS v4.2 Enlazado</span>
+<span class="font-mono text-[11px]">TPV Principal: #01</span>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- COLUMN 2: SELECTED PROMOTION EDITOR (Cols 6/12)                       -->
+<!-- ===================================================================== -->
+<section class="col-span-6 flex flex-col h-full bg-[#F7F5F0] overflow-hidden border-r border-[#C9B89F]/40">
+<!-- Editor Header -->
+<div class="p-4 bg-white border-b border-[#C9B89F]/40 flex items-center justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<input class="font-headline font-bold text-lg text-[#1E2F28] border-0 border-b border-transparent hover:border-[#C9B89F] focus:border-[#D4AF7C] focus:ring-0 p-0 bg-transparent w-72 transition-colors" type="text" value="Happy hour cervezas 2x1"/>
+<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                Activa ahora en TPV #01 y Comanderos móviles
+              </span>
+</div>
+<div class="flex items-center gap-3 text-xs text-[#1A1A1A]/60">
+<span>Folio: <strong class="text-[#1E2F28] font-mono">#PRM-2026-08</strong></span>
+<span>•</span>
+<span>Última modificación: Hoy 15:30 por Gerencia</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg border border-[#C9B89F] hover:bg-[#EAE6DD] text-[#1E2F28] transition-colors" title="Duplicar Promoción">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+</button>
+<button class="p-2 rounded-lg border border-[#C9B89F] hover:bg-red-50 hover:text-red-700 text-[#1E2F28] transition-colors" title="Archivar">
+<span class="material-symbols-outlined text-sm">archive</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Form Body -->
+<div class="flex-1 overflow-y-auto p-5 space-y-6">
+<!-- 1. SELECTOR DE TIPO DE PROMOCIÓN (4 Bento Tabs) -->
+<div>
+<label class="block text-xs font-semibold text-[#1E2F28] uppercase tracking-wider mb-2 font-headline">
+              1. Tipo de Regla Promocional
+            </label>
+<div class="grid grid-cols-4 gap-2.5">
+<!-- Option A: 2x1 (Selected) -->
+<div class="p-3 rounded-lg border-2 border-[#D4AF7C] bg-[#F7F5F0] shadow-xs cursor-pointer relative">
+<div class="flex items-center justify-between mb-1.5">
+<span class="material-symbols-outlined text-[#1E2F28] font-medium">counter_2</span>
+<span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+</div>
+<div class="font-headline font-semibold text-xs text-[#1E2F28]">2x1 (Dos por Uno)</div>
+<div class="text-[10px] text-[#1A1A1A]/70 mt-0.5">La segunda unidad de menor precio sin costo</div>
+</div>
+<!-- Option B: % Descuento -->
+<div class="p-3 rounded-lg border border-[#C9B89F]/50 bg-white hover:border-[#C9B89F] cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[#1A1A1A]/70 mb-1.5">percent</span>
+<div class="font-headline font-semibold text-xs text-[#1E2F28]">% Descuento</div>
+<div class="text-[10px] text-[#1A1A1A]/60 mt-0.5">Porcentaje fijo sobre el precio de carta</div>
+</div>
+<!-- Option C: Precio Especial -->
+<div class="p-3 rounded-lg border border-[#C9B89F]/50 bg-white hover:border-[#C9B89F] cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[#1A1A1A]/70 mb-1.5">sell</span>
+<div class="font-headline font-semibold text-xs text-[#1E2F28]">Precio Especial</div>
+<div class="text-[10px] text-[#1A1A1A]/60 mt-0.5">Tarifa fija por horario convenido</div>
+</div>
+<!-- Option D: Combo / Paquete -->
+<div class="p-3 rounded-lg border border-[#C9B89F]/50 bg-white hover:border-[#C9B89F] cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-[#1A1A1A]/70 mb-1.5">fastfood</span>
+<div class="font-headline font-semibold text-xs text-[#1E2F28]">Combo / Paquete</div>
+<div class="text-[10px] text-[#1A1A1A]/60 mt-0.5">Maridaje bebida + alimento predefinido</div>
+</div>
+</div>
+</div>
+<!-- 2. PRODUCTOS Y CATEGORÍAS APLICABLES -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs space-y-3">
+<div class="flex items-center justify-between">
+<label class="text-xs font-semibold text-[#1E2F28] uppercase tracking-wider font-headline">
+                2. Productos y Categorías Aplicables
+              </label>
+<button class="text-xs text-[#1E2F28] font-medium hover:text-[#B8935F] flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">add</span>
+                Agregar Ítem o Tag
+              </button>
+</div>
+<!-- Category Inclusion Pills -->
+<div class="flex flex-wrap gap-2 pt-1">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2F28] text-[#D4AF7C] text-xs font-medium">
+<span class="material-symbols-outlined text-xs">category</span>
+                Cat: Cervezas Artesanales (12)
+                <button class="hover:text-white"><span class="material-symbols-outlined text-[13px]">close</span></button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E2F28] text-[#D4AF7C] text-xs font-medium">
+<span class="material-symbols-outlined text-xs">category</span>
+                Cat: Cervezas Nacionales (8)
+                <button class="hover:text-white"><span class="material-symbols-outlined text-[13px]">close</span></button>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAE6DD] text-[#1E2F28] border border-[#C9B89F] text-xs font-medium">
+<span class="material-symbols-outlined text-xs">liquor</span>
+                Mezcales de Casa (4 variedades)
+                <button class="hover:text-[#B45A3C]"><span class="material-symbols-outlined text-[13px]">close</span></button>
+</span>
+</div>
+<!-- List of Featured Selected SKUs -->
+<div class="bg-[#F7F5F0] rounded-md p-2.5 border border-[#C9B89F]/30 divide-y divide-[#C9B89F]/20 text-xs">
+<div class="py-1.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C] text-sm">check_circle</span>
+<span class="font-medium text-[#1E2F28]">Cerveza Charro 355ml (Pilsner de autor)</span>
+</div>
+<span class="text-xs font-mono text-[#1A1A1A]/70">$85 MXN (Normal) → <span class="font-semibold text-emerald-800">2x1 ($42.50 c/u)</span></span>
+</div>
+<div class="py-1.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C] text-sm">check_circle</span>
+<span class="font-medium text-[#1E2F28]">Colimita Lager 355ml</span>
+</div>
+<span class="text-xs font-mono text-[#1A1A1A]/70">$90 MXN (Normal) → <span class="font-semibold text-emerald-800">2x1 ($45.00 c/u)</span></span>
+</div>
+<div class="py-1.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C] text-sm">check_circle</span>
+<span class="font-medium text-[#1E2F28]">Minerva Stout Imperial</span>
+</div>
+<span class="text-xs font-mono text-[#1A1A1A]/70">$95 MXN (Normal) → <span class="font-semibold text-emerald-800">2x1 ($47.50 c/u)</span></span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-[11px] text-[#B45A3C] bg-amber-50/70 p-2 rounded border border-amber-200/80">
+<span class="material-symbols-outlined text-xs">warning</span>
+<span>Regla de exclusión activa: Aplica exclusivamente para consumo en mesa y barra. No aplica en botellas cerradas para llevar.</span>
+</div>
+</div>
+<!-- 3. DIAS Y HORARIO DE ACTIVACIÓN -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Días de la semana -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs">
+<label class="block text-xs font-semibold text-[#1E2F28] uppercase tracking-wider mb-2 font-headline">
+                3. Días de la Semana
+              </label>
+<div class="flex items-center justify-between gap-1 mb-2">
+<!-- L (Active) -->
+<button class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] font-semibold text-xs border border-[#1E2F28] shadow-xs hover:scale-105 transition-transform">L</button>
+<!-- M (Active) -->
+<button class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] font-semibold text-xs border border-[#1E2F28] shadow-xs hover:scale-105 transition-transform">M</button>
+<!-- M (Active) -->
+<button class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] font-semibold text-xs border border-[#1E2F28] shadow-xs hover:scale-105 transition-transform">M</button>
+<!-- J (Active) -->
+<button class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] font-semibold text-xs border border-[#1E2F28] shadow-xs hover:scale-105 transition-transform">J</button>
+<!-- V (Active) -->
+<button class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] font-semibold text-xs border border-[#1E2F28] shadow-xs hover:scale-105 transition-transform">V</button>
+<!-- S (Inactive) -->
+<button class="w-8 h-8 rounded-full bg-[#EAE6DD]/50 text-[#1A1A1A]/40 font-medium text-xs border border-[#C9B89F]/40 hover:bg-[#EAE6DD]">S</button>
+<!-- D (Inactive) -->
+<button class="w-8 h-8 rounded-full bg-[#EAE6DD]/50 text-[#1A1A1A]/40 font-medium text-xs border border-[#C9B89F]/40 hover:bg-[#EAE6DD]">D</button>
+</div>
+<div class="text-[11px] text-[#1E2F28]/80 flex items-center justify-between">
+<span>Vigencia: <strong>Lunes a Viernes</strong></span>
+<span class="text-[#D4AF7C] font-medium">5 días/sem</span>
+</div>
+</div>
+<!-- Horario de Activación -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs">
+<label class="block text-xs font-semibold text-[#1E2F28] uppercase tracking-wider mb-2 font-headline">
+                4. Franja Horaria
+              </label>
+<div class="flex items-center gap-2 mb-2">
+<div class="flex-1">
+<span class="text-[10px] text-[#1A1A1A]/60 block mb-0.5 font-medium">Inicio</span>
+<input class="w-full text-xs font-mono font-bold bg-[#F7F5F0] border border-[#C9B89F] rounded-md px-2.5 py-1.5 text-center text-[#1E2F28] focus:border-[#D4AF7C] focus:ring-0" type="text" value="17:00"/>
+</div>
+<span class="text-xs text-[#1A1A1A]/40 pt-4">a</span>
+<div class="flex-1">
+<span class="text-[10px] text-[#1A1A1A]/60 block mb-0.5 font-medium">Cierre</span>
+<input class="w-full text-xs font-mono font-bold bg-[#F7F5F0] border border-[#C9B89F] rounded-md px-2.5 py-1.5 text-center text-[#1E2F28] focus:border-[#D4AF7C] focus:ring-0" type="text" value="20:00"/>
+</div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-[#1A1A1A]/70">
+<span>Duración: <strong>3 horas activas</strong></span>
+<span class="text-emerald-700 font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> En curso
+                </span>
+</div>
+</div>
+</div>
+<!-- 4. ALCANCE Y OPERACIÓN TPV EN TIEMPO REAL -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs space-y-3.5">
+<label class="block text-xs font-semibold text-[#1E2F28] uppercase tracking-wider font-headline">
+              5. Alcance de Sucursales y Espacios
+            </label>
+<div class="grid grid-cols-2 gap-3 text-xs">
+<label class="flex items-center gap-2 p-2 rounded bg-[#F7F5F0] border border-[#C9B89F]/40 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-[#D4AF7C] border-[#C9B89F]" type="checkbox"/>
+<div>
+<span class="font-medium text-[#1E2F28] block">Roma Norte (Principal)</span>
+<span class="text-[10px] text-[#1A1A1A]/60">TPV #01, #02 y 4 Comanderos</span>
+</div>
+</label>
+<label class="flex items-center gap-2 p-2 rounded bg-[#F7F5F0] border border-[#C9B89F]/40 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-[#D4AF7C] border-[#C9B89F]" type="checkbox"/>
+<div>
+<span class="font-medium text-[#1E2F28] block">Polanco CDMX</span>
+<span class="text-[10px] text-[#1A1A1A]/60">TPV Central Salón</span>
+</div>
+</label>
+</div>
+<!-- Areas within restaurant -->
+<div class="pt-2 border-t border-[#C9B89F]/20 flex items-center gap-4 text-xs">
+<span class="text-[11px] text-[#1A1A1A]/70 font-medium">Zonas del local:</span>
+<label class="flex items-center gap-1.5 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-[#D4AF7C] border-[#C9B89F] text-xs" type="checkbox"/>
+<span>Barra Directa</span>
+</label>
+<label class="flex items-center gap-1.5 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-[#D4AF7C] border-[#C9B89F] text-xs" type="checkbox"/>
+<span>Salón Principal</span>
+</label>
+<label class="flex items-center gap-1.5 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-[#D4AF7C] border-[#C9B89F] text-xs" type="checkbox"/>
+<span>Terraza Jardín</span>
+</label>
+</div>
+</div>
+<!-- 5. REGLAS INTELIGENTES DE SERVICIO (Tolerancia & Auto-comanda) -->
+<div class="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-4 shadow-sm space-y-3 border border-[#D4AF7C]/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C]">auto_fix_high</span>
+<div>
+<h4 class="font-headline font-semibold text-sm text-[#D4AF7C]">Aplicar automáticamente en comanda</h4>
+<p class="text-[11px] text-[#EAE6DD]/70">El TPV y comanderos aplican el beneficio en automático sin requerir PIN ni autorización del capitán al cobrar.</p>
+</div>
+</div>
+<!-- Toggle Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-[#2A3E35] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#D4AF7C] after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#D4AF7C]/30 border border-[#D4AF7C]/50"></div>
+</label>
+</div>
+<div class="pt-3 border-t border-[#C9B89F]/20 flex items-center justify-between text-xs">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#C9B89F] text-sm">hourglass_top</span>
+<span>Tolerancia de salida para mesas abiertas:</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="px-2 py-0.5 rounded bg-[#2A3E35] text-[#D4AF7C] font-mono font-bold">+15 min</span>
+<span class="text-[10px] text-[#EAE6DD]/60">(hasta las 20:15 hrs)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Form Footer Actions -->
+<div class="p-4 bg-white border-t border-[#C9B89F]/40 flex items-center justify-between">
+<button class="px-3.5 py-2 rounded-lg text-xs font-medium text-[#1A1A1A]/70 hover:text-[#B45A3C] transition-colors">
+            Descartar cambios
+          </button>
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-2 rounded-lg border border-[#C9B89F] text-[#1E2F28] hover:bg-[#EAE6DD] text-xs font-medium transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">pause_circle</span>
+<span>Pausar Regla</span>
+</button>
+<button class="px-5 py-2 rounded-lg bg-[#1E2F28] hover:bg-[#2A3E35] text-[#D4AF7C] text-xs font-semibold tracking-wide flex items-center gap-2 shadow-sm transition-all border border-[#D4AF7C]/40">
+<span class="material-symbols-outlined text-sm">cloud_done</span>
+<span>Guardar y Publicar en TPV</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- COLUMN 3: WEEKLY MATRIX & LIVE PERFORMANCE WIDGETS (Cols 3/12)       -->
+<!-- ===================================================================== -->
+<section class="col-span-3 flex flex-col h-full bg-[#F7F5F0] overflow-y-auto p-4 space-y-4">
+<!-- Widget 1: Vista Previa Semanal de Franjas Horarias -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-headline font-semibold text-xs uppercase tracking-wider text-[#1E2F28]">
+              Matriz Semanal de Turnos
+            </h3>
+<span class="inline-flex items-center gap-1 text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+<span class="material-symbols-outlined text-[10px]">verified</span>
+              Sin conflictos
+            </span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/60 mb-3">Distribución horaria activa para Sucursal Roma Norte (14:00 - 24:00 hrs).</p>
+<!-- Heatmap / Schedule Timeline Grid -->
+<div class="space-y-1.5 text-[11px]">
+<!-- Headers: Lun to Dom -->
+<div class="grid grid-cols-7 text-center font-mono text-[10px] text-[#1A1A1A]/60 pb-1 border-b border-[#C9B89F]/30">
+<span>L</span>
+<span>M</span>
+<span>M</span>
+<span>J</span>
+<span>V</span>
+<span>S</span>
+<span>D</span>
+</div>
+<!-- Block 1: 17:00 a 20:00 (Happy Hour 2x1) -->
+<div class="p-2 rounded bg-[#D4AF7C]/15 border border-[#D4AF7C] relative">
+<div class="flex items-center justify-between font-semibold text-[#1E2F28] text-[10px]">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                  Happy Hour 2x1
+                </span>
+<span class="font-mono text-[9px]">17:00 - 20:00</span>
+</div>
+<div class="grid grid-cols-7 gap-1 mt-1.5">
+<span class="h-2 rounded bg-[#D4AF7C]" title="Lunes activo"></span>
+<span class="h-2 rounded bg-[#D4AF7C]" title="Martes activo"></span>
+<span class="h-2 rounded bg-[#D4AF7C]" title="Miércoles activo"></span>
+<span class="h-2 rounded bg-[#D4AF7C]" title="Jueves activo"></span>
+<span class="h-2 rounded bg-[#D4AF7C]" title="Viernes activo"></span>
+<span class="h-2 rounded bg-[#EAE6DD]" title="Sábado inactivo"></span>
+<span class="h-2 rounded bg-[#EAE6DD]" title="Domingo inactivo"></span>
+</div>
+<div class="mt-1 text-[9px] text-[#1E2F28]/70 flex justify-between">
+<span>En curso ahora (18:42 hrs)</span>
+<span class="font-mono font-medium">1h 18m restantes</span>
+</div>
+</div>
+<!-- Block 2: 18:00 a 23:00 (Martes de Margaritas) -->
+<div class="p-2 rounded bg-[#EAE6DD]/70 border border-[#C9B89F]/60">
+<div class="flex items-center justify-between text-[#1E2F28] text-[10px]">
+<span class="font-medium">Margaritas 30%</span>
+<span class="font-mono text-[9px] text-[#1A1A1A]/60">18:00 - 23:00</span>
+</div>
+<div class="grid grid-cols-7 gap-1 mt-1">
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#B45A3C]" title="Martes solo"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+</div>
+</div>
+<!-- Block 3: 20:00 a 02:00 (Cubeta + Botana Nocturna) -->
+<div class="p-2 rounded bg-[#EAE6DD]/70 border border-[#C9B89F]/60">
+<div class="flex items-center justify-between text-[#1E2F28] text-[10px]">
+<span class="font-medium">Cubeta + Botana</span>
+<span class="font-mono text-[9px] text-[#1A1A1A]/60">20:00 - 02:00</span>
+</div>
+<div class="grid grid-cols-7 gap-1 mt-1">
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+<span class="h-1.5 rounded bg-amber-600" title="Jueves"></span>
+<span class="h-1.5 rounded bg-amber-600" title="Viernes"></span>
+<span class="h-1.5 rounded bg-amber-600" title="Sábado"></span>
+<span class="h-1.5 rounded bg-[#EAE6DD]"></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Widget 2: Impacto en Turno Actual (Live Analytics) -->
+<div class="bg-white rounded-lg p-4 border border-[#C9B89F]/50 shadow-xs space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="font-headline font-semibold text-xs uppercase tracking-wider text-[#1E2F28]">
+              Impacto en Turno Actual
+            </h3>
+<span class="text-[10px] font-mono text-[#D4AF7C] bg-[#1E2F28] px-1.5 py-0.5 rounded">En vivo</span>
+</div>
+<!-- KPI 1 -->
+<div class="p-2.5 rounded bg-[#F7F5F0] border border-[#C9B89F]/30 flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#1A1A1A]/60 block">Bonificado hoy en mesas</span>
+<span class="font-headline font-bold text-base text-[#1E2F28]">$3,420 MXN</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">18 órdenes</span>
+<span class="block text-[9px] text-[#1A1A1A]/50 mt-0.5">8 comensales recurrentes</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="p-2.5 rounded bg-[#F7F5F0] border border-[#C9B89F]/30 flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#1A1A1A]/60 block">Ticket promedio en promo</span>
+<span class="font-headline font-bold text-base text-[#1E2F28]">$480 MXN</span>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-semibold text-emerald-800">+18%</span>
+<span class="block text-[9px] text-[#1A1A1A]/50 mt-0.5">vs. días sin promo</span>
+</div>
+</div>
+<!-- Top Item Dispensed -->
+<div class="text-xs pt-1">
+<span class="text-[10px] text-[#1A1A1A]/60 uppercase tracking-wider font-semibold block mb-1">Ítem más ordenado:</span>
+<div class="flex items-center gap-2 p-2 rounded bg-[#EAE6DD]/40 border border-[#C9B89F]/30">
+<span class="material-symbols-outlined text-[#D4AF7C] text-lg">sports_bar</span>
+<div class="flex-1 min-w-0">
+<span class="font-medium text-[#1E2F28] text-xs truncate block">Cerveza Charro 355ml</span>
+<span class="text-[10px] text-[#1A1A1A]/60">42 unidades servidas en barra y salón</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Widget 3: Cumplimiento Fiscal SAT & CFDI 4.0 -->
+<div class="rounded-lg p-3.5 bg-[#EAE6DD] border border-[#C9B89F] text-[#1E2F28] shadow-xs">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-sm text-[#1E2F28] mt-0.5">receipt_long</span>
+<div>
+<h4 class="font-headline font-bold text-xs uppercase tracking-wider text-[#1E2F28]">Regla Fiscal SAT CFDI 4.0</h4>
+<p class="text-[10px] text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Descuentos y 2x1 se desglosan en CFDI 4.0 conforme a la regla 2.7.1.39 de la RMF, aplicando clave de descuento en el nodo concepto sin alterar el precio de lista.
+              </p>
+</div>
+</div>
+</div>
+<!-- System Audit Log Quick Note -->
+<div class="text-[10px] text-[#1A1A1A]/50 text-center font-mono py-1">
+          CONVIVIUM Smart POS Engine • Terminal Roma 01
+        </div>
+</section>
+</main>
+</div>
+</body></html>

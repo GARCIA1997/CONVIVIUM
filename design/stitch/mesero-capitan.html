@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>CONVIVIUM · Supervisión de Piso (Capitán)</title>
+<!-- Material Symbols Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Editorial Google Fonts (Playfair Display + Inter) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              surface: '#293D35',
+              dark: '#16221D',
+              light: '#354E43'
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              canvas: '#F5F2EB',
+              card: '#FFFFFF'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              subtle: '#E2D9CC',
+              dark: '#8C7B65'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              hover: '#C29C66',
+              soft: '#F4ECE0'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              soft: '#F7EDE9',
+              vibrant: '#C85A32',
+              dark: '#8E3F27'
+            },
+            carbon: '#1A1A1A'
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Estilo de micro-pulso para alertas críticas de comida */
+    @keyframes pulse-subtle {
+      0%, 100% { border-color: #B45A3C; box-shadow: 0 0 0 0 rgba(180, 90, 60, 0.2); }
+      50% { border-color: #C85A32; box-shadow: 0 0 0 4px rgba(200, 90, 50, 0.15); }
+    }
+    .alert-pulse {
+      animation: pulse-subtle 2.6s infinite ease-in-out;
+    }
+    /* Suavizado en scroll móvil */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full bg-[#EAE6DD] text-carbon font-body antialiased flex justify-center selection:bg-[#D4AF7C] selection:text-[#1E2F28]">
+<!-- Mobile Frame Container (Strict 390px emulation feel) -->
+<div class="w-full max-w-[420px] min-h-screen bg-[#F5F2EB] flex flex-col relative shadow-2xl border-x border-arena/30">
+<!-- 1. TopAppBar (From Shared Component JSON) -->
+<header class="bg-[#1E2F28] dark:bg-[#1A1A1A] text-[#EAE6DD] shadow-sm sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-4 py-3 max-w-md mx-auto">
+<!-- Leading Icon -->
+<button aria-label="Menú general" class="p-1 text-[#D4AF7C] hover:bg-[#1E2F28]/80 hover:text-[#D4AF7C] active:scale-95 transition-transform duration-150 rounded" title="Menú general">
+<span class="material-symbols-outlined text-[24px]">restaurant_menu</span>
+</button>
+<!-- Brand Center Headline -->
+<div class="flex flex-col items-center text-center">
+<span class="font-headline font-semibold text-sm tracking-wide text-[#EAE6DD]">Capitán · Luis · Salón</span>
+<span class="font-label text-[10px] tracking-wider text-[#C9B89F] uppercase font-medium flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-ping"></span>
+            Salón Principal · Servicio Comida
+          </span>
+</div>
+<!-- Trailing Icon Action with indicator -->
+<div class="relative">
+<button aria-label="Notificaciones" class="p-1 text-[#D4AF7C] hover:bg-[#1E2F28]/80 hover:text-[#D4AF7C] active:scale-95 transition-transform duration-150 rounded" title="Notificaciones">
+<span class="material-symbols-outlined text-[24px]">notifications_active</span>
+</button>
+<span class="absolute top-1 right-1 w-2 h-2 bg-terracota-vibrant rounded-full ring-2 ring-[#1E2F28]"></span>
+</div>
+</div>
+<!-- Quick Operational Metrics Strip (HUD) -->
+<div class="px-4 py-2.5 bg-[#16221D] border-t border-[#C9B89F]/15 flex items-center justify-between text-xs">
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="text-[#C9B89F]/80 text-[10px] uppercase tracking-wider font-medium">Mesas Activas</span>
+<span class="font-semibold text-white flex items-center gap-1 font-body text-xs">
+<span class="text-[#D4AF7C] font-bold">12</span> / 15
+            </span>
+</div>
+<div class="w-px h-6 bg-[#C9B89F]/20"></div>
+<div class="flex flex-col">
+<span class="text-[#C9B89F]/80 text-[10px] uppercase tracking-wider font-medium">Por Cobrar</span>
+<span class="font-semibold text-terracota-vibrant flex items-center gap-1 font-body text-xs">
+<span class="material-symbols-outlined text-xs">receipt_long</span> 4 mesas
+            </span>
+</div>
+<div class="w-px h-6 bg-[#C9B89F]/20"></div>
+<div class="flex flex-col">
+<span class="text-[#C9B89F]/80 text-[10px] uppercase tracking-wider font-medium">Ocupación</span>
+<span class="font-semibold text-[#D4AF7C] font-body text-xs">82%</span>
+</div>
+</div>
+<!-- Walkie / Broadcast Button -->
+<button class="flex items-center gap-1 bg-[#1E2F28] hover:bg-[#293D35] text-[#D4AF7C] border border-[#D4AF7C]/30 px-2.5 py-1.5 rounded-lg active:scale-95 transition-all text-[11px] font-medium" title="Llamada a capitanes y cocina">
+<span class="material-symbols-outlined text-[15px]">record_voice_over</span>
+<span>Walkie</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas (Scrollable area) -->
+<main class="flex-1 px-4 pt-3.5 pb-28 space-y-4 overflow-y-auto no-scrollbar">
+<!-- 2. Alerta Superior Crítica Terracota (HU E3-10 / Charola caliente demorada) -->
+<section class="bg-white border-2 border-terracota/80 rounded-xl p-3.5 shadow-sm alert-pulse relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-20 h-20 bg-terracota/5 rounded-full pointer-events-none"></div>
+<div class="flex items-start gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-terracota/10 flex items-center justify-center text-terracota shrink-0 mt-0.5">
+<span class="material-symbols-outlined fill-icon text-[20px]">warning</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold tracking-wider text-terracota uppercase bg-terracota-soft px-2 py-0.5 rounded-full">
+                Demora en Pase · 6 min
+              </span>
+<span class="text-[11px] text-terracota-dark font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px]">timer</span> 14:26 hrs
+              </span>
+</div>
+<h3 class="font-display font-bold text-carbon text-sm mt-1 leading-snug">
+              Mesa 4 · Tacos al pastor listos sin entregar
+            </h3>
+<p class="text-[11.5px] text-stone-600 mt-0.5 leading-normal">
+              Mesera asignada: <strong class="text-carbon font-semibold">Ana M.</strong> — Salieron de cocina caliente hace 6m y están en riesgo de enfriarse.
+            </p>
+<!-- Touch Actions Grid -->
+<div class="grid grid-cols-2 gap-2 mt-3">
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 border border-arena rounded-lg text-xs font-medium text-carbon bg-[#FBF9F5] active:scale-95 transition-transform hover:bg-[#F5F2EB]" onclick="handleNotify('Ana M.')">
+<span class="material-symbols-outlined text-[16px] text-stone-600">vibration</span>
+<span>Avisar a Ana</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 bg-terracota hover:bg-terracota-dark text-white rounded-lg text-xs font-semibold shadow-sm active:scale-95 transition-transform" onclick="handleTakeOver('Mesa 4')">
+<span class="material-symbols-outlined text-[16px]">room_service</span>
+<span>Lo llevo yo</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Sección "Resumen del piso · Meseros activos y carga" (HU E4-10) -->
+<section class="space-y-2.5">
+<div class="flex items-center justify-between pt-1">
+<div>
+<h2 class="font-display font-bold text-carbon text-base tracking-tight">Resumen del piso</h2>
+<p class="text-[11px] text-stone-500 font-label">3 meseros en turno · 12 mesas ocupadas</p>
+</div>
+<button class="text-xs text-[#1E2F28] font-semibold flex items-center gap-0.5 hover:underline py-1">
+<span>Ver mapa de salón</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-2">
+<!-- Tarjeta Ana M. -->
+<div class="bg-white border border-arena/40 rounded-xl p-3 shadow-xs hover:border-arena transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center font-bold text-xs">
+                  AM
+                </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-xs text-carbon">Ana Morales</span>
+<span class="px-1.5 py-0.2 bg-stone-100 border border-stone-200 text-stone-600 text-[10px] rounded font-medium">4 Mesas</span>
+</div>
+<p class="text-[11px] text-stone-500">M1, M4, M5, M9 · Carga media</p>
+</div>
+</div>
+<button class="text-[11px] text-[#1E2F28] border border-arena/60 px-2 py-1 rounded bg-[#FBF9F5] active:scale-95 hover:bg-stone-100 font-medium">
+                Reasignar
+              </button>
+</div>
+<!-- Mini Progress Bar de carga -->
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px]">
+<div class="flex items-center gap-1.5 text-terracota font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-terracota"></span>
+<span>1 plato pendiente (M4)</span>
+</div>
+<div class="flex items-center gap-1 text-stone-600">
+<span class="material-symbols-outlined text-[14px]">point_of_sale</span>
+<span>1 cuenta solicitada</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Marco R. -->
+<div class="bg-white border border-arena/40 rounded-xl p-3 shadow-xs hover:border-arena transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-stone-700 text-white flex items-center justify-center font-bold text-xs">
+                  MR
+                </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-xs text-carbon">Marco Reyes</span>
+<span class="px-1.5 py-0.2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] rounded font-medium">3 Mesas</span>
+</div>
+<p class="text-[11px] text-stone-500">M2, M7, M12 · Carga balanceada</p>
+</div>
+</div>
+<button class="text-[11px] text-[#1E2F28] border border-arena/60 px-2 py-1 rounded bg-[#FBF9F5] active:scale-95 hover:bg-stone-100 font-medium">
+                Reasignar
+              </button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px]">
+<div class="flex items-center gap-1.5 text-emerald-700 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>Al día (0 pendientes)</span>
+</div>
+<div class="flex items-center gap-1 text-stone-600">
+<span class="material-symbols-outlined text-[14px]">skillet</span>
+<span>1 comanda en cocina</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Sofía M. -->
+<div class="bg-white border border-amber-300/80 rounded-xl p-3 shadow-xs hover:border-amber-400 transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-amber-700 text-white flex items-center justify-center font-bold text-xs">
+                  SM
+                </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-xs text-carbon">Sofía Méndez</span>
+<span class="px-1.5 py-0.2 bg-amber-100 text-amber-900 border border-amber-200 text-[10px] rounded font-bold">Carga Alta (85%)</span>
+</div>
+<p class="text-[11px] text-stone-500">M3, M6, M8, M10, M11 · 5 Mesas</p>
+</div>
+</div>
+<button class="text-[11px] text-terracota font-semibold border border-terracota/30 px-2 py-1 rounded bg-terracota-soft active:scale-95 hover:bg-terracota/10">
+                Apoyar mesa
+              </button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px]">
+<div class="flex items-center gap-1.5 text-amber-800 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+<span>2 platillos en fuego</span>
+</div>
+<div class="flex items-center gap-1 text-stone-600">
+<span class="material-symbols-outlined text-[14px]">credit_card</span>
+<span>1 cobro TPV activo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Sección "Cuentas de barra abiertas" (HU E4-10) -->
+<section class="bg-white border border-arena/50 rounded-xl p-3.5 space-y-3 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded bg-[#1E2F28]/10 text-[#1E2F28] flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">local_bar</span>
+</span>
+<h3 class="font-display font-bold text-sm text-carbon">Cuentas de barra abiertas</h3>
+</div>
+<span class="text-xs font-bold text-[#1E2F28] bg-[#D4AF7C]/20 border border-[#D4AF7C]/40 px-2 py-0.5 rounded-full font-label">
+            $800 MXN activo
+          </span>
+</div>
+<div class="divide-y divide-stone-100 text-xs">
+<!-- Item Barra 1 -->
+<div class="py-2.5 space-y-1.5">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-semibold text-carbon text-xs">Roberto · Mostrador directo #14</span>
+<p class="text-[11px] text-stone-500">2x Cerveza Charro, 1x Mezcal Tobalá</p>
+</div>
+<div class="text-right">
+<span class="font-bold text-carbon text-xs">$480 MXN</span>
+<span class="block text-[10px] text-stone-400">Hace 25 min</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 px-2 border border-arena/60 rounded bg-[#FBF9F5] text-[11px] text-stone-700 hover:bg-stone-100 active:scale-95 transition-transform flex items-center justify-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[13px]">receipt</span> Ver comanda
+              </button>
+<button class="flex-1 py-1 px-2 border border-[#1E2F28]/40 rounded bg-white text-[11px] text-[#1E2F28] font-semibold hover:bg-stone-50 active:scale-95 transition-transform flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[13px]">move_up</span> Pasar a mesa
+              </button>
+</div>
+</div>
+<!-- Item Barra 2 -->
+<div class="py-2.5 space-y-1.5">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-semibold text-carbon text-xs">Paola · Barra baja #08</span>
+<p class="text-[11px] text-stone-500">1x Carajillo, 1x Margarita Tradicional</p>
+</div>
+<div class="text-right">
+<span class="font-bold text-carbon text-xs">$320 MXN</span>
+<span class="block text-[10px] text-stone-400">Hace 15 min</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1 px-2 border border-arena/60 rounded bg-[#FBF9F5] text-[11px] text-stone-700 hover:bg-stone-100 active:scale-95 transition-transform flex items-center justify-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[13px]">receipt</span> Ver comanda
+              </button>
+<button class="flex-1 py-1 px-2 border border-[#1E2F28]/40 rounded bg-white text-[11px] text-[#1E2F28] font-semibold hover:bg-stone-50 active:scale-95 transition-transform flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[13px]">move_up</span> Pasar a mesa
+              </button>
+</div>
+</div>
+</div>
+<button class="w-full py-2 border border-dashed border-[#1E2F28]/40 text-[#1E2F28] rounded-lg text-xs font-semibold hover:bg-[#1E2F28]/5 flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+<span>+ Nueva cuenta de barra</span>
+</button>
+</section>
+<!-- 5. Sección "Autorizaciones que puedo dar (tope 10%)" (HU E1-05 / E4-10) -->
+<section class="bg-white border border-arena/60 rounded-xl p-3.5 space-y-3 shadow-xs">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#D4AF7C] text-[18px]">verified_user</span>
+<h3 class="font-display font-bold text-sm text-carbon">Autorizaciones autónomas</h3>
+</div>
+<span class="text-[10px] text-stone-500 font-label">Facultad de Capitán (Tope 10% · Máx $300)</span>
+</div>
+<span class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold rounded-full">
+            Sin PIN Gerente
+          </span>
+</div>
+<!-- Solicitud de Marco R. para Mesa 7 -->
+<div class="bg-[#F5F2EB]/70 border border-arena/40 rounded-lg p-3 space-y-2">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-bold text-xs text-carbon">Mesa 7 · Solicitud de cortesía</span>
+<p class="text-[11px] text-stone-600 mt-0.5">
+                Mesero: <strong>Marco R.</strong> · Motivo: <em>Demora en 2do tiempo cocina (18 min). Comensal frecuente VIP.</em>
+</p>
+</div>
+<span class="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-semibold rounded">
+              Pendiente
+            </span>
+</div>
+<div class="bg-white p-2 rounded border border-arena/30 flex justify-between items-center text-xs">
+<div>
+<span class="text-stone-500 text-[10.5px]">Monto sugerido (8% de $1,500):</span>
+<div class="font-bold text-carbon text-sm">$120 MXN</div>
+</div>
+<span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200">
+              ✓ Dentro de tu tope
+            </span>
+</div>
+<!-- Botones de Acción Inmediata -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<button class="py-2 px-3 border border-stone-300 rounded-lg text-xs font-semibold text-stone-700 bg-white hover:bg-stone-50 active:scale-95 transition-all text-center" onclick="handleRejectAuth()">
+              Rechazar
+            </button>
+<button class="py-2 px-3 bg-[#1E2F28] hover:bg-olivo-surface text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-xs" onclick="handleApproveAuth()">
+<span class="material-symbols-outlined text-[16px] text-[#D4AF7C]">check_circle</span>
+<span>Aprobar (8%)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Footer Micro-Status & Last Sync -->
+<div class="text-center py-2 text-[10.5px] text-stone-500 space-y-0.5">
+<p>CONVIVIUM Sistema de Sala v4.12 · Licencia Operativa</p>
+<p class="flex items-center justify-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Conectado a KDS Cocina &amp; Barra Central
+        </p>
+</div>
+</main>
+<!-- 6. BottomNavBar (From Shared Component JSON) -->
+<!-- Executing exact JSON: destination_count: 4, label_texts: ["Piso", "Mesas", "Avisos", "Perfil"], icons: ["grid_view", "table_restaurant", "notifications", "badge"] -->
+<!-- Active State Logic: Current page is "Supervisión de piso" -> ACTIVE TAB IS "Piso" -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-[#C9B89F]/20 max-w-md mx-auto inset-x-0 bg-[#1E2F28] dark:bg-[#1A1A1A] shadow-[0_-2px_10px_rgba(0,0,0,0.15)]">
+<!-- Destino 1: Piso (ACTIVE as per Semantic Lock) -->
+<button aria-label="Piso" class="flex flex-col items-center justify-center text-[#D4AF7C] font-semibold py-1 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined fill-icon text-[22px]">grid_view</span>
+<span class="font-label text-[10px] font-medium tracking-wide mt-0.5">Piso</span>
+</button>
+<!-- Destino 2: Mesas (INACTIVE) -->
+<button aria-label="Mesas" class="flex flex-col items-center justify-center text-[#C9B89F]/70 dark:text-[#C9B89F]/50 py-1 hover:text-[#D4AF7C] transition-colors duration-150 active:scale-95">
+<span class="material-symbols-outlined text-[22px]">table_restaurant</span>
+<span class="font-label text-[10px] font-medium tracking-wide mt-0.5">Mesas</span>
+</button>
+<!-- Destino 3: Avisos (INACTIVE with badge) -->
+<button aria-label="Avisos" class="flex flex-col items-center justify-center text-[#C9B89F]/70 dark:text-[#C9B89F]/50 py-1 hover:text-[#D4AF7C] transition-colors duration-150 active:scale-95 relative">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="font-label text-[10px] font-medium tracking-wide mt-0.5">Avisos</span>
+<span class="absolute top-0 right-1 w-2 h-2 bg-terracota-vibrant rounded-full"></span>
+</button>
+<!-- Destino 4: Perfil (INACTIVE) -->
+<button aria-label="Perfil" class="flex flex-col items-center justify-center text-[#C9B89F]/70 dark:text-[#C9B89F]/50 py-1 hover:text-[#D4AF7C] transition-colors duration-150 active:scale-95">
+<span class="material-symbols-outlined text-[22px]">badge</span>
+<span class="font-label text-[10px] font-medium tracking-wide mt-0.5">Perfil</span>
+</button>
+</nav>
+<!-- Floating Action Toast Notification (Hidden by default, triggered via JS) -->
+<div class="fixed top-16 inset-x-6 mx-auto max-w-xs bg-carbon text-white text-xs px-3.5 py-2.5 rounded-lg shadow-xl flex items-center justify-between gap-2 transform -translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none" id="toast">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C] text-[18px]" id="toast-icon">check_circle</span>
+<span id="toast-msg">Acción completada</span>
+</div>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    function showToast(msg, icon = 'check_circle') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      
+      toastMsg.textContent = msg;
+      toastIcon.textContent = icon;
+      
+      toast.classList.remove('-translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('-translate-y-20', 'opacity-0');
+      }, 2600);
+    }
+
+    function handleNotify(waiterName) {
+      showToast(`Vibrador enviado al reloj de ${waiterName}`, 'vibration');
+    }
+
+    function handleTakeOver(table) {
+      showToast(`Autoasignado: Llevando charola de ${table}`, 'room_service');
+    }
+
+    function handleApproveAuth() {
+      showToast('Descuento de $120 MXN (8%) aprobado con tu folio', 'verified');
+    }
+
+    function handleRejectAuth() {
+      showToast('Solicitud rechazada. Requiere autorización de Gerencia.', 'cancel');
+    }
+  </script>
+</body></html>

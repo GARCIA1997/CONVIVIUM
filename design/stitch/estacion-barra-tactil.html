@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>KDS Despacho Barra · CONVIVIUM</title>
+<!-- Google Fonts: Playfair Display + Inter + Public Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;family=Public+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // Palette Tokens aligned with CONVIVIUM Design System
+            convivium: {
+              olivo: "#1E2F28",
+              olivoDark: "#15221D",
+              olivoCard: "#22352D",
+              marfil: "#EAE6DD",
+              marfilLight: "#F4F1EA",
+              arena: "#C9B89F",
+              arenaMuted: "#8C7E6C",
+              terracota: "#B45A3C",
+              carbon: "#1A1A1A",
+              carbonDeep: "#121212",
+              dorado: "#D4AF7C",
+              doradoLight: "#E8C89A",
+            },
+            status: {
+              ready: "#2E7D32",
+              readyLight: "#34D399",
+              amber: "#E5A93C",
+              amberLight: "#F59E0B",
+              alert: "#C0392B",
+              alertLight: "#EF4444"
+            }
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    /* Ergonomic touch responsiveness & anti-glare display stylings */
+    body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background-color: #1A1A1A;
+    }
+    
+    .touch-target-item {
+      min-height: 68px;
+    }
+
+    /* Subtle countdown bar for undo button */
+    @keyframes shrinkWidth {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .animate-shrink {
+      animation: shrinkWidth 8s linear forwards;
+    }
+
+    /* Custom thin scrollbar for tickets with heavy orders */
+    .kds-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .kds-scroll::-webkit-scrollbar-track {
+      background: rgba(26, 26, 26, 0.4);
+    }
+    .kds-scroll::-webkit-scrollbar-thumb {
+      background: #C9B89F33;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-convivium-carbon text-convivium-marfil font-body antialiased h-screen w-screen overflow-hidden flex flex-col justify-between select-none">
+<!-- ================= TOP APP BAR / CABECERA KDS ================= -->
+<header class="bg-stone-900 dark:bg-stone-950 text-amber-200 dark:text-amber-300 docked full-width top-0 border-b border-stone-800 dark:border-stone-800 shadow-md flex justify-between items-center w-full px-6 py-2 h-16 shrink-0 z-30">
+<!-- Left Section: Brand & Station Identity -->
+<div class="flex items-center gap-5">
+<div class="flex items-center gap-3">
+<!-- CONVIVIUM Wordmark Seal -->
+<div class="flex flex-col">
+<span class="font-display tracking-[0.25em] text-xs text-convivium-arena font-bold uppercase leading-none">CONVIVIUM</span>
+<h1 class="font-headline text-lg tracking-widest uppercase text-stone-100 dark:text-stone-100 font-bold flex items-center gap-2 mt-0.5">
+<span>BARRA · Coctelería</span>
+</h1>
+</div>
+</div>
+<div class="h-6 w-px bg-stone-800 hidden sm:block"></div>
+<!-- Network status badge -->
+<div class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-convivium-olivoCard/90 border border-convivium-arena/20 text-xs font-medium text-emerald-400">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="tracking-wide">Red Local · Terminal 04 Barra</span>
+</div>
+<!-- Navigation Tabs matching JSON style directives -->
+<nav class="flex items-center space-x-1 ml-2">
+<button class="text-amber-200 dark:text-amber-300 border-b-2 border-amber-300 font-semibold px-4 py-3 tracking-wide text-sm flex items-center gap-2 transition-colors">
+<span>En curso (6)</span>
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+</button>
+<button class="text-stone-400 dark:text-stone-400 hover:text-stone-200 px-4 py-3 tracking-wide text-sm transition-colors hover:bg-stone-800 dark:hover:bg-stone-800/60 duration-150">
+<span>Despachadas del turno</span>
+</button>
+</nav>
+</div>
+<!-- Right Section: Trailing Actions, Clock & Undo Button -->
+<div class="flex items-center gap-3">
+<!-- Reloj de turno en vivo -->
+<div class="hidden md:flex items-center gap-2 bg-stone-900/90 border border-stone-800 px-3.5 py-1.5 rounded-lg text-convivium-marfil text-xs font-mono font-medium tracking-wide">
+<span class="material-symbols-outlined text-convivium-dorado text-sm" data-icon="schedule">schedule</span>
+<span id="kds-clock">21:42 · Turno Activo</span>
+</div>
+<!-- Trailing Primary Action: Deshacer con temporizador visual decreciente -->
+<div class="relative overflow-hidden bg-convivium-olivoCard border border-convivium-dorado/50 text-convivium-dorado px-3.5 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm active:scale-95 duration-100 cursor-pointer" onclick="triggerToastUndo()">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="undo">undo</span>
+<span class="text-xs uppercase tracking-wider font-semibold">Deshacer (8 s)</span>
+<!-- Countdown progress fill -->
+<div class="absolute bottom-0 left-0 h-0.5 bg-convivium-dorado animate-shrink"></div>
+</div>
+<!-- Icon Actions Cluster -->
+<div class="flex items-center gap-1 border-l border-stone-800 pl-3">
+<button class="p-2 rounded-lg text-stone-400 hover:text-amber-200 hover:bg-stone-800 transition duration-150 active:scale-95" title="Estado Wi-Fi Local">
+<span class="material-symbols-outlined text-xl" data-icon="wifi">wifi</span>
+</button>
+<button class="p-2 rounded-lg text-stone-400 hover:text-amber-200 hover:bg-stone-800 transition duration-150 active:scale-95 relative" title="Notificaciones sonoras">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-convivium-terracota rounded-full"></span>
+</button>
+<button class="p-2 rounded-lg text-stone-400 hover:text-amber-200 hover:bg-stone-800 transition duration-150 active:scale-95" title="Ajustes de terminal">
+<span class="material-symbols-outlined text-xl" data-icon="tune">tune</span>
+</button>
+</div>
+<!-- Profile/Station Badge -->
+<div class="flex items-center gap-2 pl-1">
+<div class="w-8 h-8 rounded-full bg-convivium-olivo border border-convivium-arena flex items-center justify-center text-convivium-dorado font-bold text-xs" title="Identificador de estación Barra">
+          B1
+        </div>
+</div>
+</div>
+</header>
+<!-- ================= CANVAS PRINCIPAL DE COMANDAS (HORIZONTAL TOUCH GRID) ================= -->
+<main class="flex-1 overflow-x-auto overflow-y-hidden p-4 md:p-6 bg-convivium-carbon">
+<!-- Contenedor de 4 columnas horizontales preparadas para tablet 13" con relación de aspecto landscape -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 h-full min-w-[1100px]">
+<!-- ================= TARJETA 1: MESA 4 ================= -->
+<article class="bg-convivium-olivo flex flex-col justify-between rounded-xl border border-convivium-arena/40 shadow-xl overflow-hidden transition-all duration-150">
+<!-- Header de Comanda -->
+<div class="bg-convivium-olivoDark/95 p-3.5 border-b border-convivium-arena/30">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-semibold tracking-wider text-convivium-arena uppercase">Comanda #0861</span>
+<!-- Semáforo: Tiempo Ámbar -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-status-amber/20 border border-status-amber/50 text-status-amber text-xs font-bold tracking-wide">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span>06:14 min</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<h2 class="font-display text-xl font-bold text-convivium-marfilLight tracking-wide">Mesa 4</h2>
+<span class="text-xs text-convivium-arena font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="person">person</span>
+              Ana M. <span class="opacity-75">(Terraza)</span>
+</span>
+</div>
+</div>
+<!-- Lista de Bebidas (Hit Areas Táctiles > 64px) -->
+<div class="flex-1 p-3.5 space-y-3 overflow-y-auto kds-scroll">
+<!-- Ítem a: Margarita (Pendiente) -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-dorado/60 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">2x Margarita de tamarindo</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-convivium-dorado bg-convivium-dorado/10 px-2 py-0.5 rounded border border-convivium-dorado/30">Pendiente</span>
+</div>
+<p class="mt-1 text-xs font-semibold text-convivium-doradoLight flex items-center gap-1 leading-snug">
+<span>★ SIN ESCARCHAR SAL / COPA FRÍA</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-dorado flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+<!-- Ítem b: Carajillo (Marcado LISTO con feedback resplandeciente) -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoDark/80 border border-status-ready/60 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1 opacity-80">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil line-through decoration-convivium-dorado/70">1x Carajillo Licor 43</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">Listo</span>
+</div>
+<p class="mt-1 text-xs font-medium text-convivium-arena/90 flex items-center gap-1">
+<span>★ SHAKEADO ENÉRGICO · HIELO ROCA</span>
+</p>
+</div>
+<!-- Checkbox táctil marcado -->
+<div class="w-8 h-8 rounded-lg bg-convivium-dorado border-2 border-convivium-dorado flex items-center justify-center shrink-0 mt-0.5 shadow-md shadow-convivium-dorado/30">
+<span class="material-symbols-outlined text-convivium-carbon font-extrabold text-xl check-icon" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+</div>
+<!-- Pie de Tarjeta: Botón Táctil Amplio de Despacho -->
+<div class="p-3 bg-convivium-olivoDark/90 border-t border-convivium-arena/20">
+<button class="w-full py-3.5 px-4 rounded-lg bg-convivium-dorado hover:bg-convivium-doradoLight active:scale-[0.97] transition font-headline uppercase font-bold text-sm tracking-wider text-convivium-carbon shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined font-bold text-lg" data-icon="done_all">done_all</span>
+<span>Toda lista · Despachar</span>
+</button>
+</div>
+</article>
+<!-- ================= TARJETA 2: BARRA DIRECTA ROBERTO ================= -->
+<article class="bg-convivium-olivo flex flex-col justify-between rounded-xl border border-convivium-arena/40 shadow-xl overflow-hidden transition-all duration-150">
+<!-- Header de Comanda -->
+<div class="bg-convivium-olivoDark/95 p-3.5 border-b border-convivium-arena/30">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-semibold tracking-wider text-convivium-arena uppercase">Barra Directa #0863</span>
+<!-- Semáforo: Tiempo Verde Fresco -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-status-ready/20 border border-status-ready/50 text-status-readyLight text-xs font-bold tracking-wide">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span>02:40 min</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<h2 class="font-display text-xl font-bold text-convivium-marfilLight tracking-wide">Roberto <span class="text-xs text-convivium-dorado font-mono">(Tab #14)</span></h2>
+<span class="text-xs text-convivium-arena font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="liquor">liquor</span>
+              En mostrador
+            </span>
+</div>
+</div>
+<!-- Lista de Bebidas -->
+<div class="flex-1 p-3.5 space-y-3 overflow-y-auto kds-scroll">
+<!-- Ítem a: Cubeta 6 Cervezas -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-arena/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">1x Cubeta 6 Cervezas</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-convivium-arena bg-convivium-arena/10 px-2 py-0.5 rounded border border-convivium-arena/30">En barra</span>
+</div>
+<p class="mt-1 text-xs font-semibold text-convivium-arena/95 flex items-center gap-1 leading-snug">
+<span>★ 3 Colimita + 3 Minerva Stout · Extra frías con hielo y limones</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-arena/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+<!-- Ítem b: Mezcal de cortesía -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-arena/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">1x Mezcal de la casa cortesía</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-convivium-dorado bg-convivium-dorado/10 px-2 py-0.5 rounded border border-convivium-dorado/30">Cortesía</span>
+</div>
+<p class="mt-1 text-xs font-medium text-convivium-doradoLight flex items-center gap-1 leading-snug">
+<span>★ Naranja con sal de gusano</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-arena/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+</div>
+<!-- Pie de Tarjeta -->
+<div class="p-3 bg-convivium-olivoDark/90 border-t border-convivium-arena/20">
+<button class="w-full py-3.5 px-4 rounded-lg bg-convivium-olivoCard hover:bg-convivium-olivoCard/90 border border-convivium-arena text-convivium-marfilLight active:scale-[0.97] transition font-headline uppercase font-bold text-sm tracking-wider shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined font-bold text-lg text-convivium-dorado" data-icon="done_all">done_all</span>
+<span>Toda lista · Despachar</span>
+</button>
+</div>
+</article>
+<!-- ================= TARJETA 3: MESA 9 ================= -->
+<article class="bg-convivium-olivo flex flex-col justify-between rounded-xl border border-convivium-arena/40 shadow-xl overflow-hidden transition-all duration-150">
+<!-- Header de Comanda -->
+<div class="bg-convivium-olivoDark/95 p-3.5 border-b border-convivium-arena/30">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-semibold tracking-wider text-convivium-arena uppercase">Comanda #0865</span>
+<!-- Semáforo: Tiempo Verde -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-status-ready/20 border border-status-ready/50 text-status-readyLight text-xs font-bold tracking-wide">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span>04:18 min</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<h2 class="font-display text-xl font-bold text-convivium-marfilLight tracking-wide">Mesa 9</h2>
+<span class="text-xs text-convivium-arena font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="person">person</span>
+              Luis G. <span class="opacity-75">(Salón Principal)</span>
+</span>
+</div>
+</div>
+<!-- Lista de Bebidas -->
+<div class="flex-1 p-3.5 space-y-3 overflow-y-auto kds-scroll">
+<!-- Ítem a: Mezcal Espadín -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-arena/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">1x Mezcal Espadín copa</span>
+</div>
+<p class="mt-1 text-xs font-medium text-convivium-marfil/90 flex items-center gap-1 leading-snug">
+<span>★ Marca Amores · Vaso veladora con sal de chapulín</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-arena/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+<!-- Ítem b: Paloma Rosa 2x1 -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-arena/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">2x Paloma Rosa</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-convivium-dorado bg-convivium-dorado/15 px-2 py-0.5 rounded border border-convivium-dorado/40">Happy Hour 2x1</span>
+</div>
+<p class="mt-1 text-xs font-semibold text-convivium-doradoLight flex items-center gap-1 leading-snug">
+<span>★ Tequila Blanco, toronja natural y squirt, escarcha sal volcánica</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-arena/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+</div>
+<!-- Pie de Tarjeta -->
+<div class="p-3 bg-convivium-olivoDark/90 border-t border-convivium-arena/20">
+<button class="w-full py-3.5 px-4 rounded-lg bg-convivium-olivoCard hover:bg-convivium-olivoCard/90 border border-convivium-arena text-convivium-marfilLight active:scale-[0.97] transition font-headline uppercase font-bold text-sm tracking-wider shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined font-bold text-lg text-convivium-dorado" data-icon="done_all">done_all</span>
+<span>Toda lista · Despachar</span>
+</button>
+</div>
+</article>
+<!-- ================= TARJETA 4: MESA 12 (EXCEDIDO / PRIORIDAD ROJO) ================= -->
+<article class="bg-convivium-olivo flex flex-col justify-between rounded-xl border-2 border-status-alertLight/80 shadow-2xl overflow-hidden transition-all duration-150 ring-1 ring-status-alertLight/30">
+<!-- Header de Comanda con alerta visual -->
+<div class="bg-convivium-olivoDark/95 p-3.5 border-b border-status-alertLight/40">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-semibold tracking-wider text-convivium-arena uppercase">Comanda #0859</span>
+<!-- Semáforo: Carmesí Excedido / Prioridad -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-status-alert/30 border border-status-alertLight text-status-alertLight text-xs font-extrabold tracking-wide animate-pulse">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span>11:50 min · Prioridad</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline justify-between">
+<h2 class="font-display text-xl font-bold text-convivium-marfilLight tracking-wide">Mesa 12</h2>
+<span class="text-xs text-convivium-arena font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="person">person</span>
+              Marco R.
+            </span>
+</div>
+</div>
+<!-- Lista de Bebidas -->
+<div class="flex-1 p-3.5 space-y-3 overflow-y-auto kds-scroll">
+<!-- Ítem a: Gin Tonic -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-status-alertLight/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">2x Gin Tonic Hendricks</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-status-alertLight bg-status-alertLight/10 px-2 py-0.5 rounded border border-status-alertLight/30">Demorado</span>
+</div>
+<p class="mt-1 text-xs font-semibold text-convivium-marfil/90 flex items-center gap-1 leading-snug">
+<span>★ Rodajas delgadas de pepino y pimienta rosa recién quebrada</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-status-alertLight/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+<!-- Ítem b: Cerveza Charro -->
+<div class="touch-target-item p-3 rounded-lg bg-convivium-olivoCard border-2 border-convivium-arena/40 shadow-sm cursor-pointer transition active:scale-[0.98] flex items-start justify-between gap-3" onclick="toggleItemState(this)">
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-body font-bold text-base text-convivium-marfil">1x Cerveza Charro</span>
+</div>
+<p class="mt-1 text-xs font-medium text-convivium-arena flex items-center gap-1 leading-snug">
+<span>★ Botella servida con vaso corto frío</span>
+</p>
+</div>
+<!-- Checkbox táctil -->
+<div class="w-8 h-8 rounded-lg border-2 border-convivium-arena/60 flex items-center justify-center shrink-0 mt-0.5 bg-convivium-olivoDark/60">
+<span class="material-symbols-outlined text-transparent text-xl font-bold transition-all check-icon" data-icon="check">check</span>
+</div>
+</div>
+</div>
+<!-- Pie de Tarjeta -->
+<div class="p-3 bg-convivium-olivoDark/90 border-t border-convivium-arena/20">
+<button class="w-full py-3.5 px-4 rounded-lg bg-convivium-terracota hover:bg-convivium-terracota/90 text-convivium-marfilLight active:scale-[0.97] transition font-headline uppercase font-bold text-sm tracking-wider shadow-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined font-bold text-lg" data-icon="done_all">done_all</span>
+<span>Toda lista · Despachar</span>
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- ================= RESUMEN INFERIOR / BARRA DE ESTADO TÁCTIL ================= -->
+<footer class="bg-convivium-olivoDark/95 border-t border-convivium-arena/30 px-6 py-2.5 flex items-center justify-between shrink-0 relative z-20">
+<!-- Conteo de producción desglosado -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2.5">
+<span class="flex h-3 w-3 rounded-full bg-convivium-dorado animate-ping"></span>
+<span class="font-headline font-bold text-convivium-marfil text-sm tracking-wider uppercase">14 Tragos en marcha</span>
+</div>
+<div class="hidden sm:flex items-center gap-4 text-xs font-medium text-convivium-arena border-l border-convivium-arena/20 pl-6">
+<div class="flex items-center gap-1.5">
+<span class="text-convivium-dorado font-bold">7</span>
+<span>Coctelería artesanal</span>
+</div>
+<span class="text-convivium-arena/40">·</span>
+<div class="flex items-center gap-1.5">
+<span class="text-convivium-dorado font-bold">4</span>
+<span>Cervezas artesanales</span>
+</div>
+<span class="text-convivium-arena/40">·</span>
+<div class="flex items-center gap-1.5">
+<span class="text-convivium-dorado font-bold">3</span>
+<span>Destilados &amp; Mezcales</span>
+</div>
+</div>
+</div>
+<!-- Botonera de acciones globales para el jefe de barra -->
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 rounded-lg bg-convivium-carbon border border-convivium-arena/40 hover:border-convivium-arena text-convivium-marfil text-xs font-semibold tracking-wide flex items-center gap-2 active:scale-95 transition">
+<span class="material-symbols-outlined text-sm text-convivium-dorado" data-icon="pause_circle">pause_circle</span>
+<span>Pausar comanda</span>
+</button>
+<button class="px-4 py-2 rounded-lg bg-convivium-olivoCard border border-convivium-dorado/60 hover:bg-convivium-olivo text-convivium-dorado text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-sm active:scale-95 transition">
+<span class="material-symbols-outlined text-base" data-icon="campaign">campaign</span>
+<span>Llamar a todos los meseros</span>
+</button>
+</div>
+</footer>
+<!-- ================= TOAST DE NOTIFICACIÓN FLOTANTE ================= -->
+<aside class="fixed bottom-16 left-1/2 -translate-x-1/2 z-40 transform transition-all duration-300 ease-out" id="kds-toast">
+<div class="flex items-center gap-4 bg-convivium-carbon border-2 border-convivium-dorado/80 px-5 py-3 rounded-xl shadow-2xl backdrop-blur-md">
+<!-- Icono de confirmación -->
+<div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-base font-bold" data-icon="check">check</span>
+</div>
+<!-- Mensaje exacto HU -->
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-convivium-marfil tracking-wide">
+          Notificado a Ana · Mesa 4 <span class="text-convivium-dorado font-medium">(Carajillo listo en barra)</span>
+</p>
+</div>
+<div class="h-5 w-px bg-convivium-arena/30"></div>
+<!-- Botón interactivo de deshacer aviso -->
+<button class="text-xs font-bold text-convivium-dorado hover:text-convivium-doradoLight uppercase tracking-wider hover:underline active:scale-95 transition py-1 px-2" onclick="dismissToast()">
+        Deshacer aviso
+      </button>
+<!-- Botón cerrar rápido -->
+<button class="text-convivium-arena hover:text-convivium-marfil p-0.5 rounded" onclick="dismissToast()">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+</aside>
+<!-- ================= MICRO-INTERACCIONES EN JAVASCRIPT ================= -->
+<script>
+    // Micro-interacción: Marcar / Desmarcar bebida táctil (dedo húmedo feedback)
+    function toggleItemState(container) {
+      const checkIcon = container.querySelector('.check-icon');
+      const box = checkIcon.parentElement;
+      const titleSpan = container.querySelector('.font-body.font-bold');
+      
+      const isChecked = !checkIcon.classList.contains('text-transparent');
+
+      if (isChecked) {
+        // Desmarcar
+        checkIcon.classList.add('text-transparent');
+        checkIcon.classList.remove('text-convivium-carbon');
+        box.classList.remove('bg-convivium-dorado');
+        titleSpan.classList.remove('line-through', 'decoration-convivium-dorado/70');
+        container.classList.remove('opacity-80');
+      } else {
+        // Marcar como LISTO
+        checkIcon.classList.remove('text-transparent');
+        checkIcon.classList.add('text-convivium-carbon');
+        box.classList.add('bg-convivium-dorado');
+        titleSpan.classList.add('line-through', 'decoration-convivium-dorado/70');
+        container.classList.add('opacity-80');
+      }
+    }
+
+    // Micro-interacción: Cerrar y simular deshacer de Toast
+    function dismissToast() {
+      const toast = document.getElementById('kds-toast');
+      toast.style.transform = 'translate(-50%, 40px)';
+      toast.style.opacity = '0';
+      toast.style.pointerEvents = 'none';
+    }
+
+    function triggerToastUndo() {
+      const toast = document.getElementById('kds-toast');
+      toast.style.transform = 'translate(-50%, 0)';
+      toast.style.opacity = '1';
+      toast.style.pointerEvents = 'auto';
+    }
+
+    // Actualización de reloj en tiempo real
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const clockEl = document.getElementById('kds-clock');
+      if (clockEl) {
+        clockEl.textContent = `${hours}:${minutes}:${seconds} · Turno Noche`;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body></html>

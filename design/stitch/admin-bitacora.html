@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Bitácora de Auditoría Inmutable</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              900: '#14201B',
+              800: '#1E2F28',
+              700: '#283E35',
+              600: '#344F44',
+              100: '#E2E9E5',
+              50: '#F0F4F2',
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              light: '#F7F5F0',
+              subtle: '#E2DDD2'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#E5DED3',
+              dark: '#9E8C73'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#93432B',
+              light: '#F8ECE8',
+              accent: '#C85A32'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#F3E9DA',
+              dark: '#B8925F'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              soft: '#2C2C2C',
+              muted: '#525252'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "Georgia", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      }
+    }
+  </script>
+<style>
+    .font-serif-title {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400;
+    }
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #EAE6DD;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9E8C73;
+    }
+  </style>
+</head>
+<body class="h-full font-body text-[#1A1A1A] antialiased bg-[#EAE6DD] flex overflow-hidden selection:bg-[#D4AF7C]/30 selection:text-[#1E2F28]">
+<!-- ========================================================================= -->
+<!-- 1. SHARED COMPONENT: SideNavBar                                           -->
+<!-- ========================================================================= -->
+<aside class="w-64 h-full bg-stone-900 flex flex-col justify-between shrink-0 border-r border-stone-800 shadow-md select-none z-30">
+<!-- Top Branding & Sucursal Switch -->
+<div class="p-5 flex flex-col gap-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#1E2F28] border border-[#D4AF7C]/40 flex items-center justify-center text-[#D4AF7C] shadow-inner font-serif-title text-xl font-bold tracking-tight">
+          CV
+        </div>
+<div class="flex flex-col">
+<div class="font-headline text-lg font-bold tracking-widest text-amber-200 uppercase flex items-center gap-1.5 leading-none">
+            CONVIVIUM
+          </div>
+<span class="text-[10px] uppercase font-headline tracking-widest text-[#D4AF7C] mt-1 font-medium">Dueño &amp; Dirección</span>
+</div>
+</div>
+<!-- Tagline Callout -->
+<div class="px-3 py-2 rounded-lg bg-stone-800/40 border border-stone-800 flex items-center gap-2 text-stone-400 text-xs italic">
+<span class="material-symbols-outlined text-[#D4AF7C] text-sm" data-icon="restaurant">restaurant</span>
+<span class="truncate">Donde todo sucede en la mesa.</span>
+</div>
+<!-- Main Navigation Menu -->
+<nav aria-label="Navegación Principal" class="flex flex-col gap-1.5">
+<!-- 1. Mesas y Salón -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 font-normal hover:bg-stone-800/40 hover:text-stone-100 transition-colors" href="#mesas">
+<span class="material-symbols-outlined text-lg" data-icon="table_restaurant">table_restaurant</span>
+<span class="text-sm">Mesas y Salón</span>
+</a>
+<!-- 2. Comandero KDS -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 font-normal hover:bg-stone-800/40 hover:text-stone-100 transition-colors" href="#kds">
+<span class="material-symbols-outlined text-lg" data-icon="skillet">skillet</span>
+<span class="text-sm">Comandero KDS</span>
+</a>
+<!-- 3. Caja y Cobro -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 font-normal hover:bg-stone-800/40 hover:text-stone-100 transition-colors" href="#caja">
+<span class="material-symbols-outlined text-lg" data-icon="point_of_sale">point_of_sale</span>
+<span class="text-sm">Caja y Cobro</span>
+</a>
+<!-- 4. Inventario -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 font-normal hover:bg-stone-800/40 hover:text-stone-100 transition-colors" href="#inventario">
+<span class="material-symbols-outlined text-lg" data-icon="inventory_2">inventory_2</span>
+<span class="text-sm">Inventario</span>
+</a>
+<!-- 5. Auditoría Inmutable (ACTIVE STATE PER TASK INTENT) -->
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-amber-200 bg-stone-800/60 font-medium border-l-2 border-amber-300 relative shadow-sm" href="#auditoria">
+<span class="material-symbols-outlined text-amber-300 text-lg" data-icon="verified_user">verified_user</span>
+<span class="text-sm font-semibold tracking-wide">Auditoría Inmutable</span>
+<span class="ml-auto w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+</a>
+<!-- 6. Configuración -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 font-normal hover:bg-stone-800/40 hover:text-stone-100 transition-colors" href="#configuracion">
+<span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+</nav>
+</div>
+<!-- CTA & Footer Profile -->
+<div class="p-4 border-t border-stone-800/80 flex flex-col gap-3 bg-stone-950/40">
+<button class="w-full py-2 px-3 rounded-lg border border-[#D4AF7C]/30 text-amber-200 text-xs font-headline font-semibold tracking-wider uppercase hover:bg-[#D4AF7C]/10 flex items-center justify-center gap-2 transition-all" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="add_business">add_business</span>
+        Nueva Sucursal
+      </button>
+<!-- Owner Profile Pill -->
+<div class="p-2.5 rounded-lg bg-stone-900 border border-stone-800 flex items-center justify-between">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-[#1E2F28] border border-[#D4AF7C]/60 flex items-center justify-center text-[#D4AF7C] text-xs font-bold font-serif-title shrink-0">
+            RV
+          </div>
+<div class="truncate">
+<p class="text-xs font-semibold text-stone-200 truncate">Don Roberto V.</p>
+<p class="text-[10px] text-amber-200/80 font-medium">Propietario / Dueño</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-500 hover:text-stone-300 cursor-pointer text-base" data-icon="lock">lock</span>
+</div>
+<!-- Footer Action Links -->
+<div class="flex items-center justify-between px-1 text-xs text-stone-400">
+<a class="flex items-center gap-1.5 hover:text-stone-200 transition-colors" href="#soporte">
+<span class="material-symbols-outlined text-sm" data-icon="help_outline">help_outline</span>
+          Soporte
+        </a>
+<a class="flex items-center gap-1.5 hover:text-rose-400 transition-colors" href="#logout">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+          Cerrar Sesión
+        </a>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN APPLICATION CANVAS                                                   -->
+<!-- ========================================================================= -->
+<main class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden bg-[#F7F5F0]">
+<!-- ======================================================================= -->
+<!-- 2. SHARED COMPONENT: TopNavBar                                          -->
+<!-- ======================================================================= -->
+<header class="docked full-width top bg-stone-100 flex justify-between items-center w-full px-6 py-3 border-b border-stone-300 z-20 shrink-0">
+<!-- Left: Title, Scope Badge, Branch Selector -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-800 text-xl font-semibold" data-icon="shield">shield</span>
+<h1 class="font-headline text-base font-bold text-stone-900 tracking-wide">
+            Bitácora de Auditoría
+          </h1>
+</div>
+<div class="h-4 w-px bg-stone-300"></div>
+<!-- Branch Selector Dropdown Mockup -->
+<div class="relative group">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-stone-200/60 hover:bg-stone-200 text-stone-900 text-xs font-medium border border-stone-300 transition-all">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="storefront">storefront</span>
+<span class="font-semibold">Sucursal Roma Norte</span>
+<span class="text-stone-500 font-normal">· Principal</span>
+<span class="material-symbols-outlined text-xs text-stone-500" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<!-- Security Proof Badge -->
+<div class="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#1E2F28]/10 border border-[#1E2F28]/25 text-[#1E2F28] text-xs font-medium">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="lock">lock</span>
+<span class="text-stone-900 font-semibold border-b-2 border-stone-800 pb-0.5">Solo Dueño · Registro Inmutable</span>
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-[#1E2F28] text-[#D4AF7C] font-mono tracking-tight">SHA-256</span>
+</div>
+</div>
+<!-- Right: Search, Filter, Fiscal Export, Live Alert Indicator -->
+<div class="flex items-center gap-3">
+<!-- Live Search Field -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-base" data-icon="search">search</span>
+<input class="pl-8 pr-3 py-1.5 w-64 text-xs bg-white rounded-lg border border-stone-300 focus:outline-none focus:ring-1 focus:ring-[#1E2F28] focus:border-[#1E2F28] placeholder-stone-400 transition-all shadow-sm" placeholder="Buscar por folio, mesa, platillo o PIN..." type="text"/>
+<kbd class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-stone-400 border border-stone-200 rounded px-1 bg-stone-50">⌘K</kbd>
+</div>
+<!-- Secondary Action: Filtros -->
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white hover:bg-stone-200/50 text-stone-700 text-xs font-medium active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-sm" data-icon="tune">tune</span>
+<span>Filtros</span>
+</button>
+<!-- Live Sync Pill -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+<span>Nodo en Vivo</span>
+</div>
+<div class="h-4 w-px bg-stone-300"></div>
+<!-- Trailing Action: Exportar Informe Fiscal -->
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1E2F28] hover:bg-[#14201B] text-amber-100 text-xs font-medium shadow-sm active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-amber-200 text-sm" data-icon="description">description</span>
+<span>Exportar Informe Fiscal</span>
+</button>
+<!-- Notification Bell -->
+<button class="w-8 h-8 rounded-lg border border-stone-300 bg-white flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-50 relative">
+<span class="material-symbols-outlined text-base" data-icon="notifications">notifications</span>
+<span class="absolute 1 top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#B45A3C] ring-2 ring-white"></span>
+</button>
+</div>
+</header>
+<!-- ======================================================================= -->
+<!-- CENTRAL SCROLLABLE WORKSPACE                                            -->
+<!-- ======================================================================= -->
+<div class="flex-1 flex overflow-hidden">
+<!-- LEFT / MAIN DATA COLUMN -->
+<div class="flex-1 flex flex-col overflow-y-auto px-6 py-5 gap-5">
+<!-- 4. KPI CARDS (Bento Grid Header) -->
+<section aria-label="Métricas Clave de Auditoría" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1: Eventos Críticos -->
+<div class="p-4 rounded-lg bg-white border border-[#C9B89F]/40 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-[11px] font-headline tracking-wider uppercase text-stone-500 font-semibold">Eventos Críticos en Turno</span>
+<p class="font-serif-title text-2xl font-bold text-[#B45A3C] mt-1">5 acciones</p>
+</div>
+<span class="w-9 h-9 rounded-lg bg-[#F8ECE8] text-[#B45A3C] flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="warning">warning</span>
+</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-[11px] text-stone-500 border-t border-stone-100 pt-2">
+<span class="text-[#B45A3C] font-semibold">2 cancelaciones</span>
+<span>· 3 cambios de precio</span>
+</div>
+</div>
+<!-- Card 2: Impacto Económico Bonificado -->
+<div class="p-4 rounded-lg bg-white border border-[#C9B89F]/40 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-[11px] font-headline tracking-wider uppercase text-stone-500 font-semibold">Impacto Bonificado / Ajuste</span>
+<p class="font-serif-title text-2xl font-bold text-stone-900 mt-1">$4,120.00 <span class="text-xs font-body font-normal text-stone-500">MXN</span></p>
+</div>
+<span class="w-9 h-9 rounded-lg bg-[#F0F4F2] text-[#1E2F28] flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="loyalty">loyalty</span>
+</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-[11px] text-stone-500 border-t border-stone-100 pt-2">
+<span class="font-medium text-stone-700">Cortesías ($2,890)</span>
+<span>· Mermas ($1,230)</span>
+</div>
+</div>
+<!-- Card 3: Autorizaciones Remotas -->
+<div class="p-4 rounded-lg bg-white border border-[#C9B89F]/40 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-[11px] font-headline tracking-wider uppercase text-stone-500 font-semibold">Autorizaciones Remotas</span>
+<p class="font-serif-title text-2xl font-bold text-stone-900 mt-1">8 firmas</p>
+</div>
+<span class="w-9 h-9 rounded-lg bg-[#F3E9DA] text-[#9E8C73] flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="fingerprint">fingerprint</span>
+</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-[11px] text-stone-500 border-t border-stone-100 pt-2">
+<span class="text-emerald-700 font-semibold">100% validadas</span>
+<span>por PIN criptográfico</span>
+</div>
+</div>
+<!-- Card 4: Integridad Criptográfica -->
+<div class="p-4 rounded-lg bg-[#1E2F28] text-white border border-stone-800 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<div>
+<span class="text-[11px] font-headline tracking-widest uppercase text-[#D4AF7C] font-semibold">Bloque Inmutable</span>
+<p class="font-serif-title text-2xl font-bold text-white mt-1">100% Integra</p>
+</div>
+<span class="w-9 h-9 rounded-lg bg-[#283E35] text-[#D4AF7C] flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" data-icon="lock">lock</span>
+</span>
+</div>
+<div class="mt-3 flex items-center gap-1.5 text-[11px] text-stone-300 border-t border-[#283E35] pt-2 font-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="truncate">SHA-256 #89420-BLOCK</span>
+</div>
+</div>
+</section>
+<!-- 3. BARRA DE FILTROS AVANZADOS MULTI-NIVEL -->
+<div class="bg-white rounded-lg border border-[#C9B89F]/50 p-4 shadow-sm flex flex-col gap-3">
+<!-- Top Row: Selectores Principales -->
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Preset Fechas -->
+<div class="inline-flex rounded-lg border border-stone-300 p-0.5 bg-stone-100 text-xs">
+<button class="px-2.5 py-1 rounded bg-white font-medium text-stone-900 shadow-sm">Hoy</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-stone-900">Turno en curso</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-stone-900">Últimos 7 días</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-stone-900">Corte del mes</button>
+</div>
+<!-- Selector Sucursal Mini -->
+<select class="text-xs bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-700 focus:ring-1 focus:ring-[#1E2F28]">
+<option selected="">Roma Norte (Principal)</option>
+<option>Polanco · Campos Elíseos</option>
+<option>Centro Histórico</option>
+</select>
+<!-- Selector Rol / Usuario -->
+<select class="text-xs bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-700 focus:ring-1 focus:ring-[#1E2F28]">
+<option selected="">Todos los colaboradores</option>
+<option>Gerentes (Donato G., Roberto V.)</option>
+<option>Capitanes (Luis G.)</option>
+<option>Cajeros (Sofía M.)</option>
+<option>Meseros (Marco R., Ana M.)</option>
+</select>
+<!-- Selector Terminal -->
+<select class="text-xs bg-stone-50 border border-stone-300 rounded-lg px-2.5 py-1.5 text-stone-700 focus:ring-1 focus:ring-[#1E2F28]">
+<option selected="">Todas las terminales</option>
+<option>TPV Salón 01</option>
+<option>Comandero Móvil #04</option>
+<option>KDS Cocina 02</option>
+</select>
+</div>
+<div class="text-xs text-stone-500 font-medium">
+              Sincronizado: <span class="font-mono text-stone-700">14:38:04</span>
+</div>
+</div>
+<!-- Bottom Row: Filter Chips de Acciones Sensibles -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+<span class="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mr-1 shrink-0">Acción:</span>
+<button class="px-2.5 py-1 rounded-full bg-[#1E2F28] text-amber-100 font-medium shrink-0">
+              Todas (142)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-[#F8ECE8] text-[#B45A3C] border border-[#B45A3C]/30 font-medium shrink-0 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45A3C]"></span>
+              Cancelación (12)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Cortesía (18)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Descuento (9)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-[#F8ECE8] text-[#B45A3C] border border-[#B45A3C]/20 shrink-0">
+              Devolución (4)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Reapertura de cuenta (3)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-medium shrink-0">
+              Cambio de precio (2)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Ajuste de inventario (7)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Corte de caja (4)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 shrink-0">
+              Permisos y PIN (3)
+            </button>
+</div>
+</div>
+<!-- 5. TABLA CRONOLÓGICA PRINCIPAL DE AUDITORÍA -->
+<div class="bg-white rounded-lg border border-[#C9B89F]/50 shadow-sm overflow-hidden flex flex-col flex-1">
+<!-- Table Toolbar -->
+<div class="px-5 py-3 border-b border-stone-200 flex items-center justify-between bg-stone-50/70">
+<div class="flex items-center gap-2">
+<span class="font-headline text-xs font-bold uppercase tracking-wider text-stone-700">Eventos de Auditoría Registrados</span>
+<span class="px-2 py-0.5 rounded-full bg-[#1E2F28]/10 text-[#1E2F28] text-[11px] font-bold">142 eventos</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-stone-500">
+<span class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Sellado SAT CFDI 4.0
+              </span>
+<button class="text-stone-700 hover:text-stone-900 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+                Actualizar
+              </button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse text-xs">
+<thead>
+<tr class="border-b border-stone-200 bg-stone-100/70 text-stone-600 font-headline uppercase tracking-wider text-[10px]">
+<th class="py-3 px-4 font-semibold">Timestamp Exacto</th>
+<th class="py-3 px-4 font-semibold">Colaborador / Rol</th>
+<th class="py-3 px-4 font-semibold">Tipo de Acción</th>
+<th class="py-3 px-4 font-semibold">Detalle Operativo de Incidencia</th>
+<th class="py-3 px-4 font-semibold">Autorización</th>
+<th class="py-3 px-4 font-semibold">Dispositivo / IP</th>
+<th class="py-3 px-4 font-semibold text-center">Sello SHA</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-stone-100 text-stone-800">
+<!-- ROW 1 (ACTIVE / HIGHLIGHTED ITEM: CAMBIO DE PRECIO) -->
+<tr class="bg-amber-50/40 border-l-4 border-l-[#D4AF7C] hover:bg-amber-50/70 transition-colors cursor-pointer group">
+<td class="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
+<div class="font-bold text-stone-900">27 Oct 2026</div>
+<div class="text-stone-400">14:26:12.408</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-[#1E2F28] text-amber-200 flex items-center justify-center font-bold text-[10px]">
+                        RV
+                      </div>
+<div>
+<div class="font-semibold text-stone-900 group-hover:text-[#1E2F28]">Roberto Vázquez</div>
+<div class="text-[10px] text-stone-500">Chef Ejecutivo / Socio</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="edit_note">edit_note</span>
+                      Cambio de precio
+                    </span>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="font-semibold text-stone-900 truncate">Hamburguesa Convivium ($220.00 → $245.00 MXN)</p>
+<p class="text-[10px] text-stone-500 truncate mt-0.5">Catálogo Activo · Motivo: Alza de insumo Sirloin y pan brioche</p>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-900 font-medium">Donato G. (Gerente)</div>
+<div class="text-[10px] font-mono text-stone-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px] text-emerald-600" data-icon="check_circle">check_circle</span>
+                      Token PIN-4821
+                    </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-800">Terminal Gerencia</div>
+<div class="text-[10px] font-mono text-stone-400">192.168.1.100</div>
+</td>
+<td class="py-3 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Hash Verificado: #89421">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+</span>
+</td>
+</tr>
+<!-- ROW 2: DEVOLUCIÓN DE PLATILLO (TERRACOTA ALERT) -->
+<tr class="hover:bg-stone-50/80 transition-colors cursor-pointer">
+<td class="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
+<div class="font-medium text-stone-900">27 Oct 2026</div>
+<div class="text-stone-400">14:18:05.112</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-[10px]">
+                        MR
+                      </div>
+<div>
+<div class="font-medium text-stone-900">Marco Reyes</div>
+<div class="text-[10px] text-stone-500">Mesero Salón B</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F8ECE8] text-[#B45A3C] border border-[#B45A3C]/30 font-semibold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="remove_shopping_cart">remove_shopping_cart</span>
+                      Devolución platillo
+                    </span>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="font-medium text-stone-900 truncate">Mesa 4 · Rib eye 400g (-$620.00 MXN)</p>
+<p class="text-[10px] text-stone-500 truncate mt-0.5">Motivo: Término excedido (Solicitado término medio)</p>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-900 font-medium">Luis G. (Capitán)</div>
+<div class="text-[10px] font-mono text-stone-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px] text-emerald-600" data-icon="check_circle">check_circle</span>
+                      Huella Dactilar
+                    </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-800">Comandero Android #02</div>
+<div class="text-[10px] font-mono text-stone-400">192.168.1.104</div>
+</td>
+<td class="py-3 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+</span>
+</td>
+</tr>
+<!-- ROW 3: REAPERTURA DE CUENTA (CRITICAL) -->
+<tr class="hover:bg-stone-50/80 transition-colors cursor-pointer">
+<td class="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
+<div class="font-medium text-stone-900">27 Oct 2026</div>
+<div class="text-stone-400">13:52:40.890</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-[10px]">
+                        SM
+                      </div>
+<div>
+<div class="font-medium text-stone-900">Sofía Morales</div>
+<div class="text-[10px] text-stone-500">Cajera Principal</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-stone-100 text-stone-800 border border-stone-300 font-semibold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="lock_open">lock_open</span>
+                      Reapertura de cuenta
+                    </span>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="font-medium text-stone-900 truncate">Folio #C-8921 · Mesa Terraza 02 ($1,840.00 MXN)</p>
+<p class="text-[10px] text-stone-500 truncate mt-0.5">Cliente solicitó agregar botella de Mezcal para llevar</p>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-900 font-medium">Donato G. (Gerente)</div>
+<div class="text-[10px] font-mono text-stone-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px] text-emerald-600" data-icon="check_circle">check_circle</span>
+                      Token PIN-4821
+                    </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-800">Caja Central 01</div>
+<div class="text-[10px] font-mono text-stone-400">192.168.1.102</div>
+</td>
+<td class="py-3 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+</span>
+</td>
+</tr>
+<!-- ROW 4: CORTESÍA 100% DIRECCIÓN -->
+<tr class="hover:bg-stone-50/80 transition-colors cursor-pointer">
+<td class="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
+<div class="font-medium text-stone-900">27 Oct 2026</div>
+<div class="text-stone-400">13:10:19.004</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-[#1E2F28] text-amber-200 flex items-center justify-center font-bold text-[10px]">
+                        RV
+                      </div>
+<div>
+<div class="font-medium text-stone-900">Roberto Vázquez</div>
+<div class="text-[10px] text-stone-500">Propietario / Dueño</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#1E2F28]/10 text-[#1E2F28] border border-[#1E2F28]/30 font-semibold text-[11px]">
+<span class="material-symbols-outlined text-xs" data-icon="card_giftcard">card_giftcard</span>
+                      Cortesía 100%
+                    </span>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="font-medium text-stone-900 truncate">Mesa VIP 01 · 4 Copas Carajillo Artesanal ($760.00 MXN)</p>
+<p class="text-[10px] text-stone-500 truncate mt-0.5">Atención comercial a críticos de la Guía México Gastronómico</p>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-[#1E2F28] font-bold">Auto-aprobado Dueño</div>
+<div class="text-[10px] font-mono text-stone-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px] text-emerald-600" data-icon="verified">verified</span>
+                      Clave Maestra Dueño
+                    </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-800">iPad Pro Dueño</div>
+<div class="text-[10px] font-mono text-stone-400">192.168.1.115</div>
+</td>
+<td class="py-3 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+</span>
+</td>
+</tr>
+<!-- ROW 5: CORTE Z PARCIAL -->
+<tr class="hover:bg-stone-50/80 transition-colors cursor-pointer">
+<td class="py-3 px-4 font-mono text-[11px] text-stone-600 whitespace-nowrap">
+<div class="font-medium text-stone-900">27 Oct 2026</div>
+<div class="text-stone-400">12:30:00.001</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center font-bold text-[10px]">
+                        SM
+                      </div>
+<div>
+<div class="font-medium text-stone-900">Sofía Morales</div>
+<div class="text-[10px] text-stone-500">Cajera Principal</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#1E2F28] text-white font-semibold text-[11px]">
+<span class="material-symbols-outlined text-xs text-amber-200" data-icon="receipt_long">receipt_long</span>
+                      Corte Z de Turno
+                    </span>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="font-medium text-stone-900 truncate">Corte Intermedio Turno Matutino ($48,930.00 MXN)</p>
+<p class="text-[10px] text-stone-500 truncate mt-0.5">Efectivo declarado: $12,400 | TPV Tarjetas: $36,530 | Sin descuadres</p>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-900 font-medium">Donato G. (Gerente)</div>
+<div class="text-[10px] font-mono text-stone-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[11px] text-emerald-600" data-icon="check_circle">check_circle</span>
+                      Token PIN-4821
+                    </div>
+</td>
+<td class="py-3 px-4 whitespace-nowrap">
+<div class="text-stone-800">Caja Central 01</div>
+<div class="text-[10px] font-mono text-stone-400">192.168.1.102</div>
+</td>
+<td class="py-3 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- 7. ACCIONES AL PIE / PAGINADOR FORMAL -->
+<div class="p-3 border-t border-stone-200 bg-stone-50 flex flex-wrap items-center justify-between gap-3 text-xs">
+<div class="flex items-center gap-2 text-stone-500">
+<span>Mostrando <strong>1–5</strong> de <strong>142</strong> registros inmutables</span>
+<span class="text-stone-300">|</span>
+<span class="flex items-center gap-1 text-[11px] text-stone-400">
+<span class="material-symbols-outlined text-xs" data-icon="shield">shield</span>
+                Bitácora protegida contra escritura · No modificable
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-2.5 py-1 rounded border border-stone-300 bg-white text-stone-500 cursor-not-allowed text-xs">Anterior</button>
+<button class="px-2.5 py-1 rounded bg-[#1E2F28] text-amber-200 font-semibold text-xs">1</button>
+<button class="px-2.5 py-1 rounded border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-xs">2</button>
+<button class="px-2.5 py-1 rounded border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-xs">3</button>
+<span class="text-stone-400">...</span>
+<button class="px-2.5 py-1 rounded border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-xs">15</button>
+<button class="px-2.5 py-1 rounded border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium">Siguiente</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- 6. PANEL LATERAL DERECHO: INSPECTOR DE TRAZABILIDAD (DETALLE ACTIVO)    -->
+<!-- ===================================================================== -->
+<aside class="w-96 bg-white border-l border-[#C9B89F]/60 flex flex-col shrink-0 shadow-lg z-10 overflow-y-auto">
+<!-- Inspector Header -->
+<div class="p-4 border-b border-stone-200 bg-stone-50 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#B8925F] text-lg" data-icon="policy">policy</span>
+<div>
+<span class="text-[10px] uppercase font-headline tracking-widest text-stone-500 font-bold block">Folio de Auditoría</span>
+<span class="font-mono text-xs font-bold text-stone-900">#AUD-2026-89421</span>
+</div>
+</div>
+<button class="p-1 rounded-md text-stone-400 hover:text-stone-700 hover:bg-stone-200/50 transition-colors" title="Minimizar panel">
+<span class="material-symbols-outlined text-base" data-icon="close">close</span>
+</button>
+</div>
+<!-- Inspector Content -->
+<div class="p-5 flex flex-col gap-5 flex-1">
+<!-- Main Action Badge & Time -->
+<div class="p-3.5 rounded-lg bg-amber-50 border border-amber-200/80">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-headline uppercase font-bold tracking-wider text-amber-900">Acción Sensible</span>
+<span class="font-mono text-[10px] text-amber-800">27 Oct · 14:26:12</span>
+</div>
+<p class="font-serif-title text-base font-bold text-stone-900 mt-1">Cambio de Precio en Catálogo Activo</p>
+<p class="text-xs text-amber-950/80 mt-1">Modificación directa a la carta digital y TPV sin interrupción de comensales.</p>
+</div>
+<!-- Comparador Visual "Antes y Después" -->
+<div class="flex flex-col gap-2">
+<span class="text-[11px] font-headline uppercase tracking-wider text-stone-500 font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="compare_arrows">compare_arrows</span>
+              Comparador de Parámetros
+            </span>
+<div class="grid grid-cols-2 gap-2">
+<!-- Antes -->
+<div class="p-3 rounded-lg bg-stone-50 border border-stone-200">
+<span class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Antes</span>
+<p class="font-serif-title text-lg font-bold text-stone-800 mt-0.5">$220.00 <span class="text-[10px] font-body text-stone-500 font-normal">MXN</span></p>
+<div class="mt-2 text-[10px] text-stone-500 space-y-0.5">
+<p>Margen bruto: <strong class="text-stone-700">68.2%</strong></p>
+<p class="truncate">Modif: 15 Sep 2026</p>
+</div>
+</div>
+<!-- Después -->
+<div class="p-3 rounded-lg bg-[#F0F4F2] border border-[#1E2F28]/30">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-[#1E2F28] uppercase tracking-wide">Después</span>
+<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded">+11.3%</span>
+</div>
+<p class="font-serif-title text-lg font-bold text-[#1E2F28] mt-0.5">$245.00 <span class="text-[10px] font-body text-[#1E2F28]/70 font-normal">MXN</span></p>
+<div class="mt-2 text-[10px] text-[#1E2F28] space-y-0.5">
+<p>Margen proyectado: <strong>71.5%</strong></p>
+<p class="text-emerald-800 font-medium">Vigente de inmediato</p>
+</div>
+</div>
+</div>
+<!-- Justificación Declarada -->
+<div class="p-3 rounded-lg bg-stone-50 border border-stone-200 text-xs">
+<span class="text-[10px] uppercase font-bold text-stone-400 block mb-1">Justificación Operativa Declarada</span>
+<blockquote class="italic text-stone-700 border-l-2 border-[#D4AF7C] pl-2 text-[11px]">
+                "Incremento en costo por kilo de blend Sirloin Choice (+$34/kg) y nuevo proveedor de pan brioche artesanal."
+              </blockquote>
+</div>
+</div>
+<!-- Cadena Criptográfica de Aprobación (Timeline) -->
+<div class="flex flex-col gap-2">
+<span class="text-[11px] font-headline uppercase tracking-wider text-stone-500 font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="account_tree">account_tree</span>
+              Cadena de Trazabilidad y Firmas
+            </span>
+<div class="relative pl-4 space-y-3 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-200 text-xs">
+<!-- Paso 1 -->
+<div class="relative">
+<span class="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-stone-400 ring-2 ring-white"></span>
+<p class="font-semibold text-stone-900 text-[11px]">Paso 1: Solicitud de Modificación</p>
+<p class="text-[10px] text-stone-500">Roberto V. (Chef Ejecutivo) · 14:20:10 hrs</p>
+<p class="text-[10px] text-stone-400 font-mono">Dispositivo: Terminal Central Gerencia</p>
+</div>
+<!-- Paso 2 -->
+<div class="relative">
+<span class="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-stone-400 ring-2 ring-white"></span>
+<p class="font-semibold text-stone-900 text-[11px]">Paso 2: Validación de Costos de Receta</p>
+<p class="text-[10px] text-stone-500">Módulo Contraloría Automática · 14:22:04 hrs</p>
+<p class="text-[10px] text-emerald-600 font-medium">Margen aceptado conforme a política (+3.3%)</p>
+</div>
+<!-- Paso 3 (Firma Final) -->
+<div class="relative">
+<span class="absolute -left-4 top-1 w-2.5 h-2.5 rounded-full bg-[#1E2F28] ring-2 ring-white"></span>
+<p class="font-semibold text-[#1E2F28] text-[11px]">Paso 3: Aprobación y Firma Criptográfica</p>
+<p class="text-[10px] text-stone-600">Donato G. (Gerente General en Turno)</p>
+<div class="mt-1 p-2 rounded bg-stone-100 font-mono text-[9px] text-stone-600 break-all border border-stone-200">
+<span class="text-stone-400 block font-sans text-[8px] uppercase">SHA-256 Firma Token:</span>
+                  e8b941f23789cc098d541ef4a179b0021c97a51d8820c78a
+                </div>
+</div>
+</div>
+</div>
+<!-- Metadatos de Red & Terminal -->
+<div class="p-3 rounded-lg border border-stone-200 bg-stone-50/60 text-xs space-y-1.5">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-stone-500">Terminal:</span>
+<span class="font-medium text-stone-800">iMac Gerencia Salón Norte</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-stone-500">Dirección IP Local:</span>
+<span class="font-mono text-stone-800">192.168.1.100</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-stone-500">Geolocalización:</span>
+<span class="text-emerald-700 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="location_on">location_on</span>
+                Sucursal Roma Norte
+              </span>
+</div>
+</div>
+<!-- Contextual Action Links -->
+<div class="flex flex-col gap-2 pt-1">
+<a class="text-xs text-[#1E2F28] hover:text-[#14201B] font-semibold flex items-center justify-between p-2 rounded-lg hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200" href="#producto">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#D4AF7C]" data-icon="fastfood">fastfood</span>
+                Ver Ficha del Producto (Hamburguesa)
+              </span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+<a class="text-xs text-[#1E2F28] hover:text-[#14201B] font-semibold flex items-center justify-between p-2 rounded-lg hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200" href="#historial-item">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#D4AF7C]" data-icon="history">history</span>
+                Auditar Historial Completo del Ítem
+              </span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Inspector Footer Buttons -->
+<div class="p-4 border-t border-stone-200 bg-stone-50 flex items-center gap-2 shrink-0">
+<button class="flex-1 py-2 px-3 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm text-stone-600" data-icon="print">print</span>
+<span>Imprimir Vale</span>
+</button>
+<button class="py-2 px-3 rounded-lg border border-[#B45A3C]/30 bg-[#F8ECE8] hover:bg-[#F8ECE8]/80 text-[#B45A3C] text-xs font-semibold flex items-center justify-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="flag">flag</span>
+<span>Bajo Revisión</span>
+</button>
+</div>
+</aside>
+</div>
+<!-- ======================================================================= -->
+<!-- PERMANENT IMMUTABLE CERTIFICATION FOOTER BAR                            -->
+<!-- ======================================================================= -->
+<footer class="h-10 bg-[#1E2F28] border-t border-[#283E35] px-6 flex items-center justify-between text-white text-[11px] shrink-0 z-20">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 text-amber-200 font-semibold font-headline uppercase tracking-wider text-[10px]">
+<span class="material-symbols-outlined text-sm" data-icon="gavel">gavel</span>
+          CONVIVIUM Audit Ledger v4.2
+        </span>
+<span class="text-stone-400">·</span>
+<span class="text-stone-300 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-emerald-400" data-icon="verified_user">verified_user</span>
+          Sellado Criptográfico Certificado (SHA-256) · Cumplimiento SAT CFDI 4.0 Art. 29-A
+        </span>
+</div>
+<div class="flex items-center gap-4 text-stone-300">
+<span class="text-stone-400 text-[10px]">Almacenamiento Local Cifrado: <strong class="text-stone-200 font-mono">1.4 GB / 8.0 GB</strong></span>
+<button class="text-amber-200 hover:text-white font-medium flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
+          Descargar Respaldo JSON Firmado
+        </button>
+</div>
+</footer>
+</main>
+<!-- ========================================================================= -->
+<!-- LIGHTWEIGHT INTERACTIVITY SCRIPT                                         -->
+<!-- ========================================================================= -->
+<script>
+    // Keyboard Shortcut support (Cmd+K)
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }
+    });
+
+    // Row selection micro-interaction
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+      row.addEventListener('click', () => {
+        tableRows.forEach(r => {
+          r.classList.remove('bg-amber-50/40', 'border-l-4', 'border-l-[#D4AF7C]');
+        });
+        row.classList.add('bg-amber-50/40', 'border-l-4', 'border-l-[#D4AF7C]');
+      });
+    });
+  </script>
+</body></html>

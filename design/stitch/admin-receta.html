@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Ficha Técnica de Receta &amp; Costeo: Margarita de tamarindo</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: "#1E2F28",
+              "olivo-dark": "#16231E",
+              "olivo-light": "#2A4137",
+              marfil: "#F9F8F6",
+              "marfil-subtle": "#F4F1EA",
+              arena: "#E2DDD4",
+              "arena-dark": "#C9B89F",
+              terracota: "#B45A3C",
+              "terracota-dark": "#8C3018",
+              "terracota-light": "#FDF4F0",
+              dorado: "#D4AF7C",
+              "dorado-light": "#F7F2EA",
+              carbon: "#1A1A1A"
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-serif-title {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    /* Custom scrollbars for high elegance */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4F1EA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-brand-marfil text-brand-carbon antialiased font-body min-h-screen selection:bg-brand-dorado selection:text-brand-olivo">
+<!-- ======================================================== -->
+<!-- 1. FIXED SIDEBAR COMPONENT (CONVIVIUM Identity & Anchors) -->
+<!-- ======================================================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col justify-between bg-neutral-900 border-r border-amber-900/30 z-30 shadow-sm select-none">
+<!-- Top Area: Brand & Navigation -->
+<div class="w-64 h-full flex flex-col px-4 py-6">
+<!-- Brand Logo & Header -->
+<div class="flex items-center gap-3 px-3 pb-6 border-b border-neutral-800/80 mb-5">
+<div class="w-10 h-10 rounded-lg bg-[#1E2F28] border border-brand-dorado/40 flex items-center justify-center shadow-inner">
+<span class="font-serif-title text-amber-200 text-xl font-bold tracking-tighter" title="Monograma Convivium en Dorado">C</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline tracking-widest text-lg font-bold uppercase text-amber-100">CONVIVIUM</span>
+<span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/40 text-[9px] font-semibold px-1.5 py-0.5 rounded tracking-wide uppercase">En vivo</span>
+</div>
+<span class="text-neutral-400 text-xs font-light tracking-wide">Sucursal Centro</span>
+</div>
+</div>
+<!-- Tagline micro-subtext -->
+<div class="px-3 mb-4">
+<p class="text-[11px] font-serif-title italic text-neutral-400 leading-snug">"Donde todo sucede en la mesa."</p>
+</div>
+<!-- Navigation Tabs (8 tabs from Shared Components JSON) -->
+<nav class="space-y-1.5 flex-1">
+<!-- 1. Inicio -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span>Inicio</span>
+</a>
+<!-- 2. Mesas -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+<span>Mesas</span>
+</a>
+<!-- 3. Comandas -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span>Comandas</span>
+</a>
+<!-- 4. Cocina -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">skillet</span>
+<span>Cocina</span>
+</a>
+<!-- 5. Inventario (ACTIVE DESTINATION TAB) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-amber-200 bg-amber-900/20 font-semibold transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm border-l-2 border-brand-dorado" href="#">
+<span class="material-symbols-outlined text-[20px] text-amber-200" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span>Inventario</span>
+<span class="ml-auto text-[10px] bg-brand-dorado/20 text-brand-dorado px-1.5 py-0.5 rounded font-mono">Fichas</span>
+</a>
+<!-- 6. Compras -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+<span>Compras</span>
+</a>
+<!-- 7. Reportes -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+<span>Reportes</span>
+</a>
+<!-- 8. Configuración -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 transition-colors duration-150 ease-in-out cursor-pointer select-none active:scale-[0.99] text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span>Configuración</span>
+</a>
+</nav>
+<!-- Footer Actions -->
+<div class="pt-4 border-t border-neutral-800/80 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 text-xs font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span>Soporte</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-400 hover:text-red-300 hover:bg-neutral-800/40 text-xs font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Cerrar sesión</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ======================================================== -->
+<!-- 2. TOP NAVIGATION BAR (TopAppBar Shared Component)       -->
+<!-- ======================================================== -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-stone-100 border-b border-stone-300/80 z-20 flex items-center justify-between px-8">
+<!-- Left: Search & Direct Breadcrumb Hint -->
+<div class="flex items-center gap-6 flex-1 max-w-xl">
+<div class="relative w-full max-w-sm">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-lg">search</span>
+<input class="w-full bg-white text-xs text-neutral-800 placeholder-neutral-400 pl-9 pr-4 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-brand-dorado focus:ring-1 focus:ring-brand-dorado transition-all" placeholder="Buscar receta, cóctel o insumo... (Ctrl+K)" type="text"/>
+</div>
+<div class="hidden lg:flex items-center gap-2 text-xs text-neutral-500 font-medium">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>Último recosteo: <strong class="text-neutral-800">Hoy 14:20 hrs</strong> por Chef Ejecutivo</span>
+</div>
+</div>
+<!-- Right: Primary & Secondary Actions + Profile -->
+<div class="flex items-center gap-3">
+<!-- Icon Action: Notifications -->
+<button class="w-9 h-9 rounded-lg border border-stone-300 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-stone-50 flex items-center justify-center transition-colors relative" title="Notificaciones de merma y alertas">
+<span class="material-symbols-outlined text-lg">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-terracota"></span>
+</button>
+<!-- Icon Action: Date Range -->
+<button class="w-9 h-9 rounded-lg border border-stone-300 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-stone-50 flex items-center justify-center transition-colors" title="Período operativo">
+<span class="material-symbols-outlined text-lg">date_range</span>
+</button>
+<div class="h-6 w-px bg-stone-300 mx-1"></div>
+<!-- Secondary Action: Corte X/Z -->
+<button class="px-3.5 py-1.5 rounded-lg border border-stone-300 bg-white text-neutral-700 hover:bg-stone-50 text-xs font-semibold tracking-wide transition-all shadow-sm">
+        Corte X/Z
+      </button>
+<!-- Primary Action: Nueva Orden / Exportar Receta -->
+<button class="px-3.5 py-1.5 rounded-lg bg-brand-olivo hover:bg-brand-olivo-light text-brand-dorado text-xs font-semibold tracking-wide transition-all shadow-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">add_circle</span>
+<span>Nueva Orden</span>
+</button>
+<!-- Owner Profile Picture -->
+<div class="ml-2 pl-2 border-l border-stone-300 flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-brand-olivo text-brand-dorado flex items-center justify-center font-serif-title font-semibold text-xs border border-brand-dorado/40" title="Foto de perfil del Propietario">
+          DM
+        </div>
+</div>
+</div>
+</header>
+<!-- ======================================================== -->
+<!-- 3. MAIN WORKSPACE / CANVAS                               -->
+<!-- ======================================================== -->
+<main class="ml-64 pt-20 pb-16 px-8 max-w-7xl mx-auto">
+<!-- BREADCRUMB & CONTEXT HEADER -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<nav class="flex items-center gap-2 text-xs text-neutral-500 font-medium">
+<span class="hover:text-brand-olivo cursor-pointer">Inventario</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-brand-olivo cursor-pointer">Fichas Técnicas &amp; Recetas</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-brand-olivo cursor-pointer">Barra &amp; Coctelería</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-neutral-900 font-semibold bg-brand-arena/30 px-2 py-0.5 rounded">Margarita de tamarindo</span>
+</nav>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-brand-arena bg-white hover:bg-stone-50 text-neutral-700 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-base text-neutral-500">picture_as_pdf</span>
+<span>Exportar PDF / Ficha Operativa</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-brand-dorado hover:bg-[#c49f69] text-brand-olivo-dark font-semibold text-xs flex items-center gap-1.5 shadow transition-colors">
+<span class="material-symbols-outlined text-base">edit</span>
+<span>Editar Receta</span>
+</button>
+</div>
+</div>
+<!-- 1. ENCABEZADO DE FICHA TÉCNICA DEL PRODUCTO -->
+<section class="bg-white rounded-lg border border-brand-arena p-6 shadow-sm mb-6">
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4 border-b border-brand-arena/60">
+<div>
+<div class="flex items-center gap-3 flex-wrap mb-1">
+<h1 class="font-serif-title text-3xl font-bold text-brand-carbon tracking-tight">Margarita de tamarindo</h1>
+<span class="bg-stone-100 text-neutral-800 border border-stone-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+              Coctelería de Autor
+            </span>
+<span class="font-mono text-xs text-neutral-500 bg-stone-50 px-2 py-0.5 rounded border border-stone-200">
+              Código: REC-BAR-042
+            </span>
+</div>
+<p class="text-xs text-neutral-500">Familia: <span class="font-medium text-neutral-700">Tequilas &amp; Mezcales</span> · Categoría: <span class="font-medium text-neutral-700">Coctelería Mexicana Clásica Reinterpretada</span></p>
+</div>
+<!-- Status Toggle & Pricing pill -->
+<div class="flex items-center gap-4 self-start md:self-auto">
+<div class="text-right">
+<span class="text-[11px] uppercase tracking-wider text-neutral-400 font-semibold block">Precio de Venta Carta</span>
+<span class="font-mono text-2xl font-bold text-neutral-900">$165.00 <span class="text-xs font-normal text-neutral-500">MXN</span></span>
+<span class="text-[10px] text-emerald-700 block font-medium">IVA Incluido (16%) · Margen Bruto: 75.0%</span>
+</div>
+<div class="pl-4 border-l border-brand-arena flex flex-col items-center">
+<span class="text-[10px] text-neutral-400 mb-1 font-medium">Estado TPV</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-olivo"></div>
+</label>
+<span class="text-[10px] font-semibold text-emerald-800 mt-1">Activo</span>
+</div>
+</div>
+</div>
+<!-- Quick Operational Attributes -->
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 pt-4 text-xs">
+<div>
+<span class="text-neutral-400 block text-[11px]">Rendimiento</span>
+<span class="font-medium text-neutral-800">1 Porción estándar</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Tiempo Elaboración</span>
+<span class="font-medium text-neutral-800">1.5 minutos (90 seg)</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Cristalería</span>
+<span class="font-medium text-neutral-800">Coupe Barro Artesanal 8 oz</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Método</span>
+<span class="font-medium text-neutral-800">Shaken &amp; Fine Strain</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Grado Alcohólico Aprox.</span>
+<span class="font-medium text-neutral-800">~14.5° ABV</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Estación de Barra</span>
+<span class="font-medium text-neutral-800">Estación 1 (Coctelería)</span>
+</div>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 2. TARJETAS DE COSTEO & ANÁLISIS DE COSTO TEÓRICO (HU E7-04) -->
+<!-- ======================================================== -->
+<section class="mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+<!-- Tarjeta Principal con Alerta Terracota -->
+<div class="lg:col-span-2 bg-brand-terracota-light rounded-lg border-2 border-brand-terracota p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs uppercase tracking-wider font-bold text-brand-terracota flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">warning</span>
+                Análisis de Desvío de Costo
+              </span>
+<span class="bg-brand-terracota text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Excedido +3.0%
+              </span>
+</div>
+<div class="grid grid-cols-3 gap-3 mb-4">
+<div>
+<span class="text-[11px] text-neutral-600 block">Costo Teórico / Porción</span>
+<span class="font-mono text-2xl font-extrabold text-brand-carbon">$41.20</span>
+<span class="text-[10px] text-neutral-500 block">MXN / porción</span>
+</div>
+<div>
+<span class="text-[11px] text-neutral-600 block">% Costo vs Venta</span>
+<span class="font-mono text-2xl font-extrabold text-brand-terracota">25.0%</span>
+<span class="text-[10px] text-neutral-500 block">Sobre P.V. ($165.00)</span>
+</div>
+<div>
+<span class="text-[11px] text-neutral-600 block">Target de Barra</span>
+<span class="font-mono text-2xl font-bold text-neutral-600">22.0%</span>
+<span class="text-[10px] text-neutral-500 block">Objetivo $36.30 MXN</span>
+</div>
+</div>
+</div>
+<div class="bg-white/80 backdrop-blur-sm rounded border border-brand-terracota/30 p-2.5 text-xs text-brand-terracota-dark leading-relaxed">
+<strong>⚠️ Alerta de Rentabilidad:</strong> Supera el objetivo en <strong>+3.0% ($4.95 MXN</strong> sobre costo ideal de $36.30 MXN). Se recomienda revisar el rendimiento del destilado blanco o ajustar merma de limón en temporadas de incremento de costo.
+          </div>
+</div>
+<!-- Tarjetas Secundarias Métricas Operativas -->
+<div class="bg-white rounded-lg border border-brand-arena p-5 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-neutral-400 mb-2">
+<span class="text-xs uppercase font-semibold tracking-wider">Contribución Marginal</span>
+<span class="material-symbols-outlined text-base text-brand-dorado">payments</span>
+</div>
+<span class="font-mono text-2xl font-bold text-emerald-800">$123.80 <span class="text-xs font-normal text-neutral-500">MXN</span></span>
+<div class="mt-2 text-xs text-neutral-600">
+<span class="font-semibold text-emerald-700">75.0%</span> margen por unidad vendida.
+            </div>
+</div>
+<div class="pt-3 border-t border-brand-arena/60 mt-3 text-[11px] text-neutral-500">
+            Precio sugerido para target 22%: <strong class="text-neutral-900 font-mono">$187.20 MXN</strong>
+</div>
+</div>
+<div class="bg-white rounded-lg border border-brand-arena p-5 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-neutral-400 mb-2">
+<span class="text-xs uppercase font-semibold tracking-wider">Desempeño 30 Días</span>
+<span class="material-symbols-outlined text-base text-neutral-500">trending_up</span>
+</div>
+<span class="font-mono text-2xl font-bold text-neutral-900">418 <span class="text-xs font-normal text-neutral-500">cócteles</span></span>
+<div class="mt-2 text-xs text-neutral-600">
+              Venta bruta: <strong class="text-neutral-900 font-mono">$68,970 MXN</strong>
+</div>
+</div>
+<div class="pt-3 border-t border-brand-arena/60 mt-3 flex items-center justify-between text-[11px]">
+<span class="text-neutral-500">Factor de Merma Global:</span>
+<span class="font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">3.8%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 2 COLUMNS MAIN LAYOUT (Left: Ingredients & Procedures | Right: Sub-recipes) -->
+<!-- ======================================================== -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- LEFT COLUMN: HU E7-03, HU E7-05, HU E7-11 (8 Cols) -->
+<div class="lg:col-span-8 space-y-8">
+<!-- 3. TABLA DETALLADA DE INGREDIENTES Y DESGLOSE DE COSTO (HU E7-03) -->
+<section class="bg-white rounded-lg border border-brand-arena shadow-sm overflow-hidden">
+<div class="px-6 py-4 border-b border-brand-arena/80 bg-brand-marfil-subtle/50 flex flex-wrap items-center justify-between gap-3">
+<div>
+<h2 class="font-serif-title text-lg font-bold text-brand-carbon">Composición &amp; Desglose de Insumos</h2>
+<p class="text-xs text-neutral-500">Cálculo en base a merma técnica y costo de adquisición promedio ponderado (PMP)</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-xs font-semibold text-brand-olivo hover:text-brand-olivo-light flex items-center gap-1 bg-white border border-brand-arena px-2.5 py-1 rounded">
+<span class="material-symbols-outlined text-sm">tune</span>
+                Recalcular PMP
+              </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead class="bg-stone-50 border-b border-brand-arena text-neutral-600 font-semibold uppercase text-[10px] tracking-wider">
+<tr>
+<th class="py-3 px-4">Insumo / Materia Prima</th>
+<th class="py-3 px-3">Presentación</th>
+<th class="py-3 px-3 text-right">Cant. Bruta</th>
+<th class="py-3 px-3 text-center">Merma %</th>
+<th class="py-3 px-3 text-right">Cant. Neta</th>
+<th class="py-3 px-3 text-right">Costo Unit.</th>
+<th class="py-3 px-3 text-right">Costo Porción</th>
+<th class="py-3 px-3 text-right">% Costo</th>
+<th class="py-3 px-3 text-center">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-brand-arena/50 font-mono text-neutral-800">
+<!-- Fila 1: Tequila blanco -->
+<tr class="hover:bg-brand-dorado-light/20 transition-colors">
+<td class="py-3.5 px-4 font-body">
+<div class="font-medium text-neutral-900 flex items-center gap-2">
+<span>Tequila blanco 100% Agave</span>
+</div>
+<span class="inline-block mt-0.5 bg-red-50 text-red-700 border border-red-200 text-[9px] font-sans font-semibold px-1.5 py-0.2 rounded">
+                      Insumo Crítico (Alto Valor)
+                    </span>
+</td>
+<td class="py-3.5 px-3 font-body text-neutral-500">Botella 750 ml</td>
+<td class="py-3.5 px-3 text-right font-medium">45.0 ml</td>
+<td class="py-3.5 px-3 text-center text-amber-700 font-medium">2.0%</td>
+<td class="py-3.5 px-3 text-right text-neutral-600">45.9 ml</td>
+<td class="py-3.5 px-3 text-right text-neutral-500">$0.52/ml</td>
+<td class="py-3.5 px-3 text-right font-bold text-neutral-900">$23.87</td>
+<td class="py-3.5 px-3 text-right font-bold text-brand-terracota">57.9%</td>
+<td class="py-3.5 px-3 text-center font-body">
+<button class="text-neutral-400 hover:text-neutral-700" title="Ver lote y kardex">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+</td>
+</tr>
+<!-- Fila 2: Licor de naranja -->
+<tr class="hover:bg-brand-dorado-light/20 transition-colors">
+<td class="py-3.5 px-4 font-body">
+<div class="font-medium text-neutral-900">Licor de naranja (Triple Sec)</div>
+<span class="text-[10px] text-neutral-400 font-sans">Licor aromatizante 40%</span>
+</td>
+<td class="py-3.5 px-3 font-body text-neutral-500">Botella 700 ml</td>
+<td class="py-3.5 px-3 text-right font-medium">15.0 ml</td>
+<td class="py-3.5 px-3 text-center text-neutral-600">1.5%</td>
+<td class="py-3.5 px-3 text-right text-neutral-600">15.2 ml</td>
+<td class="py-3.5 px-3 text-right text-neutral-500">$0.38/ml</td>
+<td class="py-3.5 px-3 text-right font-bold text-neutral-900">$5.79</td>
+<td class="py-3.5 px-3 text-right font-semibold text-neutral-700">14.1%</td>
+<td class="py-3.5 px-3 text-center font-body">
+<button class="text-neutral-400 hover:text-neutral-700">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+</td>
+</tr>
+<!-- Fila 3: Jarabe de tamarindo artesanal (Subreceta) -->
+<tr class="bg-emerald-50/30 hover:bg-emerald-50/60 transition-colors border-l-2 border-emerald-600">
+<td class="py-3.5 px-4 font-body">
+<div class="font-medium text-neutral-900 flex items-center gap-1.5">
+<span>Jarabe de tamarindo artesanal</span>
+</div>
+<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[9px] font-sans font-bold px-1.5 py-0.5 rounded mt-0.5">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">dataset</span>
+                      SUBRECETA INTERNA · Rendimiento 1 L
+                    </span>
+</td>
+<td class="py-3.5 px-3 font-body text-neutral-500">Lote 1,000 ml</td>
+<td class="py-3.5 px-3 text-right font-medium">30.0 ml</td>
+<td class="py-3.5 px-3 text-center text-neutral-600">3.0%</td>
+<td class="py-3.5 px-3 text-right text-neutral-600">30.9 ml</td>
+<td class="py-3.5 px-3 text-right text-neutral-500">$0.22/ml</td>
+<td class="py-3.5 px-3 text-right font-bold text-neutral-900">$6.80</td>
+<td class="py-3.5 px-3 text-right font-semibold text-neutral-700">16.5%</td>
+<td class="py-3.5 px-3 text-center font-body">
+<a class="text-emerald-700 hover:text-emerald-900 font-medium" href="#subreceta-detail" title="Ir al desglose de subreceta">
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</td>
+</tr>
+<!-- Fila 4: Jugo de limón verde -->
+<tr class="hover:bg-brand-dorado-light/20 transition-colors">
+<td class="py-3.5 px-4 font-body">
+<div class="font-medium text-neutral-900">Jugo de limón verde persa fresco</div>
+<span class="text-[10px] text-amber-700 font-sans">Exprimidor manual en barra</span>
+</td>
+<td class="py-3.5 px-3 font-body text-neutral-500">Caja 5 kg ($38/kg)</td>
+<td class="py-3.5 px-3 text-right font-medium">20.0 ml</td>
+<td class="py-3.5 px-3 text-center text-brand-terracota font-bold">8.0%</td>
+<td class="py-3.5 px-3 text-right text-neutral-600">21.6 ml</td>
+<td class="py-3.5 px-3 text-right text-neutral-500">$0.15/ml</td>
+<td class="py-3.5 px-3 text-right font-bold text-neutral-900">$3.24</td>
+<td class="py-3.5 px-3 text-right font-semibold text-neutral-700">7.9%</td>
+<td class="py-3.5 px-3 text-center font-body">
+<button class="text-neutral-400 hover:text-neutral-700">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+</td>
+</tr>
+<!-- Fila 5: Escarchado -->
+<tr class="hover:bg-brand-dorado-light/20 transition-colors">
+<td class="py-3.5 px-4 font-body">
+<div class="font-medium text-neutral-900">Escarchado de chile-sal con chapulín</div>
+<span class="text-[10px] text-neutral-400 font-sans">Mezcla seca de autor</span>
+</td>
+<td class="py-3.5 px-3 font-body text-neutral-500">Frasco 250 g</td>
+<td class="py-3.5 px-3 text-right font-medium">5.0 g</td>
+<td class="py-3.5 px-3 text-center text-brand-terracota font-bold">10.0%</td>
+<td class="py-3.5 px-3 text-right text-neutral-600">5.5 g</td>
+<td class="py-3.5 px-3 text-right text-neutral-500">$0.30/g</td>
+<td class="py-3.5 px-3 text-right font-bold text-neutral-900">$1.50</td>
+<td class="py-3.5 px-3 text-right font-semibold text-neutral-700">3.6%</td>
+<td class="py-3.5 px-3 text-center font-body">
+<button class="text-neutral-400 hover:text-neutral-700">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+</td>
+</tr>
+</tbody>
+<!-- Fila de Totales -->
+<tfoot class="bg-brand-marfil-subtle font-mono text-neutral-900 border-t-2 border-brand-arena font-bold">
+<tr>
+<td class="py-3.5 px-4 font-body text-right uppercase tracking-wider text-xs" colspan="2">
+                    Totales por Porción Estándar:
+                  </td>
+<td class="py-3.5 px-3 text-right text-brand-carbon text-xs">110.0 ml + 5g</td>
+<td class="py-3.5 px-3 text-center text-xs text-neutral-500">Pond. 3.8%</td>
+<td class="py-3.5 px-3 text-right text-xs">118.2 ml equiv.</td>
+<td class="py-3.5 px-3 text-right text-neutral-400">—</td>
+<td class="py-3.5 px-3 text-right text-sm text-brand-carbon font-extrabold">$41.20 MXN</td>
+<td class="py-3.5 px-3 text-right text-xs text-brand-terracota font-extrabold">100.0%</td>
+<td></td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div class="p-3 bg-stone-50 border-t border-brand-arena/60 text-[11px] text-neutral-500 flex items-center justify-between">
+<span>* Las mermas de destilados y licores contemplan goteo de speed pourer y remanente de lavado de shaker.</span>
+<span class="text-neutral-700 font-medium">Margen Teórico: $123.80 MXN (75%)</span>
+</div>
+</section>
+<!-- 4. SECCIÓN DE RECETAS POR MODIFICADOR / VARIACIONES DE COMANDA (HU E7-05) -->
+<section class="bg-white rounded-lg border border-brand-arena p-6 shadow-sm">
+<div class="mb-4">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-brand-olivo text-xl">alt_route</span>
+<h2 class="font-serif-title text-lg font-bold text-brand-carbon">Modificadores de Comanda &amp; Recalculo de Kardex</h2>
+</div>
+<p class="text-xs text-neutral-600">
+              Impacto automático en comanda y descuento proporcional en kardex de inventario cuando el mesero o comensal solicita modificadores en el TPV.
+            </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Modificador 1: Doble Tequila -->
+<div class="border border-brand-arena rounded-lg p-3.5 bg-brand-marfil/30 hover:border-brand-dorado transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-semibold text-xs text-neutral-900 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-brand-dorado"></span>
+                  Doble Tequila (+45 ml blanco)
+                </span>
+<span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  +$55.00 MXN en TPV
+                </span>
+</div>
+<p class="text-[11px] text-neutral-600 mb-2">Descuenta 45.9 ml adicionales de Tequila Blanco 100% Agave del almacén de barra.</p>
+<div class="flex justify-between text-[11px] font-mono border-t border-brand-arena/60 pt-2 text-neutral-500">
+<span>Diferencial de Costo: <strong class="text-brand-carbon">+$23.87 MXN</strong></span>
+<span>Nuevo Costo: <strong class="text-brand-carbon">$65.07 (29.5%)</strong></span>
+</div>
+</div>
+<!-- Modificador 2: Sin escarchado de sal -->
+<div class="border border-brand-arena rounded-lg p-3.5 bg-brand-marfil/30 hover:border-brand-dorado transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-semibold text-xs text-neutral-900 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-neutral-400"></span>
+                  Sin escarchado de sal
+                </span>
+<span class="font-mono text-xs font-bold text-neutral-600 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">
+                  $0.00 MXN en TPV
+                </span>
+</div>
+<p class="text-[11px] text-neutral-600 mb-2">Omite el consumo de 5 g de mezcla de chile-sal con chapulín en la comanda.</p>
+<div class="flex justify-between text-[11px] font-mono border-t border-brand-arena/60 pt-2 text-neutral-500">
+<span>Ahorro en Costo: <strong class="text-emerald-700">-$1.50 MXN</strong></span>
+<span>Nuevo Costo: <strong class="text-brand-carbon">$39.70 (24.0%)</strong></span>
+</div>
+</div>
+<!-- Modificador 3: Cambio a Mezcal Espadín -->
+<div class="border border-brand-arena rounded-lg p-3.5 bg-brand-marfil/30 hover:border-brand-dorado transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-semibold text-xs text-neutral-900 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-brand-olivo"></span>
+                  Cambio a Mezcal Espadín Casa
+                </span>
+<span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  +$25.00 MXN en TPV
+                </span>
+</div>
+<p class="text-[11px] text-neutral-600 mb-2">Sustituye 45 ml de tequila por 45 ml de Mezcal Espadín Oaxaqueño 45°.</p>
+<div class="flex justify-between text-[11px] font-mono border-t border-brand-arena/60 pt-2 text-neutral-500">
+<span>Diferencial de Costo: <strong class="text-brand-terracota">+$4.20 MXN</strong></span>
+<span>Nuevo Costo: <strong class="text-brand-carbon">$45.40 (23.8%)</strong></span>
+</div>
+</div>
+<!-- Modificador 4: Extra picante Tajín Habanero -->
+<div class="border border-brand-arena rounded-lg p-3.5 bg-brand-marfil/30 hover:border-brand-dorado transition-colors">
+<div class="flex justify-between items-start mb-2">
+<span class="font-semibold text-xs text-neutral-900 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-red-600"></span>
+                  Extra Picante / Tajín Habanero
+                </span>
+<span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  +$10.00 MXN en TPV
+                </span>
+</div>
+<p class="text-[11px] text-neutral-600 mb-2">Adiciona 3 g de mezcla de habanero seco molido en vaso y coctelera.</p>
+<div class="flex justify-between text-[11px] font-mono border-t border-brand-arena/60 pt-2 text-neutral-500">
+<span>Diferencial de Costo: <strong class="text-brand-carbon">+$0.95 MXN</strong></span>
+<span>Margen Incrementado: <strong class="text-emerald-700">+$9.05 MXN</strong></span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. PROCEDIMIENTO ESTANDARIZADO DE BARRA (HU E7-11) -->
+<section class="bg-white rounded-lg border border-brand-arena p-6 shadow-sm">
+<!-- Banner para Terminal Táctil / KDS -->
+<div class="bg-brand-olivo text-brand-dorado rounded-lg px-4 py-3 mb-6 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-2xl text-brand-dorado">touch_app</span>
+<div>
+<h3 class="text-xs font-bold uppercase tracking-wider text-amber-100">Visible en Pantalla KDS Barra &amp; Terminales Táctiles</h3>
+<p class="text-[11px] text-stone-300">Guía de apego técnico estandarizado para mixólogos, bartenders de turno y nuevos ingresos.</p>
+</div>
+</div>
+<span class="text-[11px] font-mono bg-brand-olivo-dark px-2.5 py-1 rounded border border-brand-dorado/30 text-amber-200">
+              V2.4 Certificada
+            </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+<!-- Imagen oficial del cóctel con el placeholder DATA:IMAGE:IMAGE_16 -->
+<div class="md:col-span-5">
+<div class="rounded-lg overflow-hidden border border-brand-arena shadow-sm relative group bg-brand-marfil">
+<img alt="Presentación en Copa Coupe de barro artesanal, escarchado perimetral 50%, hielo roca cristalino y rodaja de limón deshidratado con chile japonés" class="w-full h-72 object-cover object-center group-hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIoKVGJb89JVUha9fgMw8Akqyixx4lNvN-wWRLz-wTJAwfyVkV6R0jjmEzaLq8qAS-oVZFcGbeBAuuWw36qI1gGVsOUfuYAW0270kInZ4N_IXHsVfYlyfGkb-tWr3qEyNBNgjRnIHHl-JynKzCrixidAC5FxQZye36TXFn0-ZuMS0QsCJExHhTL6INFgI5xktY1i_73N6nwtKltReWdNyGD_G4ZhBAk7pI1Bgskxut-0ArvSHnc-ms_aXINSUf1LzcJpWQyLh-0BVe"/>
+<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 text-white">
+<p class="text-[11px] font-medium leading-tight">Presentación Oficial Convivium</p>
+<p class="text-[10px] text-stone-300 mt-0.5 font-light">Copa Coupe artesanal, chile seco, hielo roca 5x5 cm.</p>
+</div>
+</div>
+<!-- Cristalería & Herramientas -->
+<div class="mt-4 p-3.5 bg-stone-50 rounded-lg border border-brand-arena text-xs space-y-2">
+<div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-brand-dorado">wine_bar</span>
+                  Cristalería &amp; Herramientas
+                </div>
+<div class="grid grid-cols-2 gap-2 text-[11px] text-neutral-600">
+<div>• Copa Coupe barro 8 oz</div>
+<div>• Jigger japonés 1oz / 2oz</div>
+<div>• Boston Shaker inox</div>
+<div>• Colador Hawthorne &amp; Fino</div>
+<div>• Pinza de precisión</div>
+<div>• Exprimidor manual codo</div>
+</div>
+</div>
+</div>
+<!-- Pasos del Procedimiento Técnico -->
+<div class="md:col-span-7 space-y-4">
+<h3 class="font-serif-title font-bold text-base text-neutral-900 border-b border-brand-arena pb-2 flex items-center justify-between">
+<span>Técnica Operativa Paso a Paso</span>
+<span class="text-xs font-sans font-normal text-neutral-500">Tiempo objetivo: 90s</span>
+</h3>
+<ol class="space-y-3.5 text-xs text-neutral-700">
+<!-- Paso 1 -->
+<li class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-brand-olivo text-brand-dorado text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+<div>
+<h4 class="font-bold text-neutral-900">Escarchado Perimetral al 50%</h4>
+<p class="text-neutral-600 mt-0.5 leading-relaxed">Humedecer suavemente la mitad exterior del labio de la copa de barro usando una rodaja de limón fresco. Pasar por la sal de chapulín cuidando no saturar la cavidad interior del vaso.</p>
+</div>
+</li>
+<!-- Paso 2 -->
+<li class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-brand-olivo text-brand-dorado text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+<div>
+<h4 class="font-bold text-neutral-900">Dosificación en Shaker con Jigger</h4>
+<p class="text-neutral-600 mt-0.5 leading-relaxed">En el vaso metálico verter en orden: <strong>45 ml Tequila blanco</strong>, <strong>15 ml Triple Sec</strong>, <strong>30 ml Jarabe artesanal de tamarindo</strong> y <strong>20 ml Jugo de limón verde</strong> recién exprimido.</p>
+</div>
+</li>
+<!-- Paso 3 -->
+<li class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-brand-olivo text-brand-dorado text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+<div>
+<h4 class="font-bold text-neutral-900">Emulsión y Shake Vigoroso (12 segundos)</h4>
+<p class="text-neutral-600 mt-0.5 leading-relaxed">Llenar el shaker a 3/4 con hielo cúbico macizo de máquina. Cerrar herméticamente y agitar con vigor durante exactamente 12 segundos hasta lograr escarcha uniforme en el exterior del metal.</p>
+</div>
+</li>
+<!-- Paso 4 -->
+<li class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-brand-olivo text-brand-dorado text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+<div>
+<h4 class="font-bold text-neutral-900">Doble Colado</h4>
+<p class="text-neutral-600 mt-0.5 leading-relaxed">Colocar 1 cubo de hielo roca cristalino dentro de la copa. Verter utilizando colador gusanillo y tamiz fino para retener fragmentos de hielo y fibra residual de tamarindo.</p>
+</div>
+</li>
+<!-- Paso 5 -->
+<li class="flex items-start gap-3">
+<span class="w-6 h-6 rounded-full bg-brand-olivo text-brand-dorado text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span>
+<div>
+<h4 class="font-bold text-neutral-900">Garnitura &amp; Despacho Inmediato</h4>
+<p class="text-neutral-600 mt-0.5 leading-relaxed">Montar con pinza de precisión una rodaja de limón deshidratado con un chile de árbol tostado apoyado diagonalmente. Despachar a la charola de servicio en menos de 30 segundos.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</section>
+</div>
+<!-- RIGHT COLUMN: HU E7-03 SUBRECETA, KARDEX & AUDITORÍA (4 Cols) -->
+<div class="lg:col-span-4 space-y-6" id="subreceta-detail">
+<!-- CARD DE SUBRECETA: JARABE DE TAMARINDO -->
+<section class="bg-white rounded-lg border-2 border-emerald-700/40 p-5 shadow-sm relative">
+<div class="flex items-center justify-between pb-3 border-b border-brand-arena">
+<div>
+<span class="text-[10px] uppercase tracking-wider font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Subreceta Vinculada
+              </span>
+<h3 class="font-serif-title text-base font-bold text-neutral-900 mt-1">Jarabe de tamarindo de la casa</h3>
+</div>
+<span class="font-mono text-xs text-neutral-500 bg-stone-100 px-2 py-0.5 rounded">SUB-BAR-008</span>
+</div>
+<!-- Métricas del Lote -->
+<div class="grid grid-cols-2 gap-3 py-3 border-b border-brand-arena text-xs">
+<div>
+<span class="text-neutral-400 block text-[11px]">Lote Estándar</span>
+<span class="font-mono font-bold text-neutral-900">1,000 ml (1 L)</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Rendimiento Cócteles</span>
+<span class="font-mono font-bold text-neutral-900">33.3 porciones (30ml)</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Costo Total Lote</span>
+<span class="font-mono font-bold text-neutral-900">$220.00 MXN</span>
+</div>
+<div>
+<span class="text-neutral-400 block text-[11px]">Costo por ml</span>
+<span class="font-mono font-bold text-emerald-800">$0.220 MXN / ml</span>
+</div>
+</div>
+<!-- Stock actual en Barra -->
+<div class="my-3 p-3 bg-brand-dorado-light/40 border border-brand-dorado/30 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-brand-olivo text-xl">liquor</span>
+<div>
+<span class="text-[11px] text-neutral-600 block">Stock Actual en Barra:</span>
+<span class="font-mono text-sm font-bold text-neutral-900">2,450 ml disponibles</span>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded">~81 cócteles</span>
+</div>
+<!-- Desglose de Insumos del Lote -->
+<div class="mt-4">
+<h4 class="text-[11px] uppercase tracking-wider font-semibold text-neutral-500 mb-2">Ingredientes del Lote Base (1 L):</h4>
+<div class="space-y-2 text-xs">
+<div class="flex justify-between items-center py-1 border-b border-brand-arena/40">
+<span class="text-neutral-800">Pulpa de tamarindo natural</span>
+<span class="font-mono text-neutral-600">400 g · $110.00</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-brand-arena/40">
+<span class="text-neutral-800">Azúcar morena estándar</span>
+<span class="font-mono text-neutral-600">350 g · $42.00</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-brand-arena/40">
+<span class="text-neutral-800">Agua purificada filtrada</span>
+<span class="font-mono text-neutral-600">600 ml · $6.00</span>
+</div>
+<div class="flex justify-between items-center py-1 border-b border-brand-arena/40">
+<span class="text-neutral-800">Pizca de sal de mar Colima</span>
+<span class="font-mono text-neutral-600">2 g · $0.50</span>
+</div>
+<div class="flex justify-between items-center py-1 text-neutral-500 text-[11px]">
+<span>Mano de obra y cocción (gas)</span>
+<span class="font-mono">$61.50</span>
+</div>
+</div>
+</div>
+<!-- CTA Producción Lote -->
+<div class="mt-5 pt-3 border-t border-brand-arena">
+<button class="w-full py-2.5 px-3 rounded-lg bg-brand-olivo hover:bg-brand-olivo-light text-brand-dorado text-xs font-semibold tracking-wide flex items-center justify-center gap-2 shadow transition-all">
+<span class="material-symbols-outlined text-base">blender</span>
+<span>Registrar Producción de Lote (+1 L / +2 L)</span>
+</button>
+<p class="text-[10px] text-neutral-400 text-center mt-1.5">Descarga insumos del almacén central y acredita a almacén de barra.</p>
+</div>
+<!-- Auditoría del último lote elaborado -->
+<div class="mt-4 p-2.5 bg-stone-50 rounded border border-stone-200 text-[11px] text-neutral-500 space-y-1">
+<div class="flex justify-between">
+<span>Último lote elaborado:</span>
+<strong class="text-neutral-800">23 Oct · 11:30 hrs</strong>
+</div>
+<div class="flex justify-between">
+<span>Mixólogo a cargo:</span>
+<span class="text-neutral-700">Elena Morales (Bar 1)</span>
+</div>
+<div class="flex justify-between">
+<span>Caducidad en frío:</span>
+<span class="text-amber-800 font-medium">14 días (Restan 9 días)</span>
+</div>
+</div>
+</section>
+<!-- KARDEX & MOVIMIENTOS RECIENTES -->
+<section class="bg-white rounded-lg border border-brand-arena p-5 shadow-sm">
+<div class="flex items-center justify-between mb-3 pb-2 border-b border-brand-arena">
+<h3 class="font-serif-title font-bold text-sm text-neutral-900">Historial de Consumo en Turno</h3>
+<span class="text-[11px] text-neutral-400">Hoy, 24 Oct</span>
+</div>
+<div class="space-y-3 text-xs">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-semibold text-neutral-800 block">Comanda #1042 · Mesa 4</span>
+<span class="text-[11px] text-neutral-500">2 Margaritas tamarindo (1 c/ doble tequila)</span>
+</div>
+<span class="font-mono text-neutral-600 text-right font-medium">14:12 hrs<br/><span class="text-red-700">-90ml teq</span></span>
+</div>
+<div class="flex items-start justify-between pt-2 border-t border-brand-arena/40">
+<div>
+<span class="font-semibold text-neutral-800 block">Comanda #1038 · Barra Directa</span>
+<span class="text-[11px] text-neutral-500">1 Margarita tamarindo tradicional</span>
+</div>
+<span class="font-mono text-neutral-600 text-right font-medium">13:50 hrs<br/><span class="text-red-700">-45ml teq</span></span>
+</div>
+<div class="flex items-start justify-between pt-2 border-t border-brand-arena/40">
+<div>
+<span class="font-semibold text-neutral-800 block">Ajuste Merma / Derrame en Coctelera</span>
+<span class="text-[11px] text-neutral-500">Reportado por Bartender Juan C.</span>
+</div>
+<span class="font-mono text-brand-terracota text-right font-medium">12:30 hrs<br/><span>-15ml teq</span></span>
+</div>
+</div>
+<button class="w-full mt-4 py-1.5 text-center text-xs font-semibold text-brand-olivo hover:text-brand-olivo-light border border-brand-arena rounded bg-stone-50 hover:bg-stone-100 transition-colors">
+            Ver Kardex Completo en Tiempo Real
+          </button>
+</section>
+<!-- TIPS OPERATIVOS PARA CONTROL DE MERMAS -->
+<section class="bg-brand-marfil-subtle rounded-lg border border-brand-arena p-4 text-xs">
+<div class="flex items-center gap-2 mb-2 text-brand-terracota font-bold">
+<span class="material-symbols-outlined text-base">tips_and_updates</span>
+<span>Avisos de Control Operativo</span>
+</div>
+<p class="text-neutral-600 leading-relaxed text-[11px]">
+            La pulpa de tamarindo presenta una variación estacional de acidez. Ajustar el jarabe con refractómetro a <strong>55° Brix</strong> para evitar correcciones al vuelo de azúcar o limón en barra.
+          </p>
+</section>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- 7. PIE DE PÁGINA OPERATIVO & AUDITORÍA                   -->
+<!-- ======================================================== -->
+<footer class="mt-12 pt-6 border-t border-brand-arena flex flex-col md:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
+<div class="flex items-center gap-3">
+<div class="w-5 h-5 rounded-full bg-brand-olivo text-brand-dorado flex items-center justify-center font-serif-title text-[10px]">C</div>
+<span>CONVIVIUM SaaS · Módulo de Inventario &amp; Fichas Estandarizadas (HU E7-03 / E7-04 / E7-05 / E7-11)</span>
+</div>
+<div class="flex items-center gap-4 text-[11px]">
+<span>Versión Ficha: <strong class="text-neutral-800 font-mono">v2.4 (2024)</strong></span>
+<span>·</span>
+<span>Aprobado por: <strong class="text-neutral-800">Chef Corporativo &amp; F&amp;B Manager</strong></span>
+<span>·</span>
+<span class="flex items-center gap-1 text-emerald-800 font-medium">
+<span class="material-symbols-outlined text-sm">cloud_done</span>
+          Sincronizado con Kardex TPV
+        </span>
+</div>
+</footer>
+</main>
+<!-- MICRO-INTERACTIVITY SCRIPT -->
+<script>
+    // Example interactive toast for "Editar Receta" or "Registrar Producción"
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const text = this.innerText.trim();
+        if (text.includes('Registrar Producción')) {
+          const qty = prompt("Ingrese los litros de jarabe de tamarindo producidos (1, 2 o 5 Litros):", "1");
+          if (qty) {
+            alert(`✅ Entrada de lote de ${qty}L de Jarabe de Tamarindo (SUB-BAR-008) registrada en el almacén de barra. Se han descontado los insumos proporcionales de cocina.`);
+          }
+        }
+      });
+    });
+  </script>
+</body></html>

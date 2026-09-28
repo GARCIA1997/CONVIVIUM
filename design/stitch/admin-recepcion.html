@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#F8F6F0]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Recepción de Mercancía Almacén</title>
+<!-- Google Fonts: Playfair Display + Inter + Public Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // CONVIVIUM Brand Palette tokens mapped strictly
+            surface: "#F8F6F0",
+            "surface-container": "#F3EFE6",
+            "surface-card": "#FFFFFF",
+            primary: "#1E2F28", // Verde Olivo
+            "primary-hover": "#283E35",
+            "on-primary": "#F8F6F0", // Marfil text
+            secondary: "#C9B89F", // Arena
+            "secondary-dark": "#B09C80",
+            terracota: "#B45A3C", // Terracota alert
+            "terracota-light": "#FBEFEA",
+            dorado: "#D4AF7C", // Dorado
+            carbon: "#1A1A1A",
+            "outline-variant": "#E3DCCF",
+            "on-surface-variant": "#57534E",
+            "status-green-bg": "#EBF3EE",
+            "status-green-text": "#1E543B"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Touch optimization for warehouse wet/gloved finger use */
+    .touch-target {
+      min-height: 48px;
+      min-width: 48px;
+    }
+    /* Tabular figures for weights, invoices, balances */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-body text-carbon antialiased bg-[#F8F6F0] selection:bg-dorado/30 selection:text-primary">
+<!-- TOP SHELL: Convivium TopAppBar (Shared Component Execution) -->
+<header class="w-full h-16 px-6 flex justify-between items-center select-none bg-surface border-b border-outline-variant z-30 sticky top-0">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-2xl cursor-pointer hover:opacity-80 transition-opacity">arrow_back</span>
+<div class="h-6 w-px bg-outline-variant"></div>
+<span class="font-headline font-bold text-lg tracking-widest text-primary uppercase">CONVIVIUM</span>
+</div>
+<nav class="hidden lg:flex items-center space-x-6 text-sm">
+<a class="text-primary border-b-2 border-primary font-medium py-1" href="#">Almacén</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors duration-150 py-1" href="#">Órdenes de Compra</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors duration-150 py-1" href="#">Proveedores</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors duration-150 py-1" href="#">Inventario Físico</a>
+</nav>
+</div>
+<!-- Trailing Actions & SAT XML badge status -->
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#EBF3EE] border border-[#C6DEC9] text-[#1E543B] text-xs font-medium">
+<span class="material-symbols-outlined text-base text-[#1E543B]">document_scanner</span>
+<span class="truncate max-w-[210px]">CFDI_VerdurasBajio_4860.xml validado</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#1E543B] text-white">SAT OK</span>
+</div>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-surface border border-secondary text-primary hover:bg-[#F3EFE6] transition-colors shadow-sm active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-base">upload_file</span>
+<span>Cargar XML CFDI</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-lg relative" type="button">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+</div>
+</header>
+<!-- WORKSPACE BODY WITH SIDE EMBEDDED CONTEXT & MAIN TABLE -->
+<main class="flex-1 flex overflow-hidden">
+<!-- SUB-NAV / CONTEXT RAIL (Tablet optimized) -->
+<aside class="w-60 bg-surface-container border-r border-outline-variant flex flex-col justify-between p-4 hidden md:flex shrink-0">
+<div class="space-y-4">
+<!-- Station Identity -->
+<div class="bg-surface p-3.5 rounded-lg border border-outline-variant shadow-xs">
+<div class="flex items-center gap-2.5 mb-1.5">
+<span class="w-7 h-7 rounded-md bg-primary text-dorado flex items-center justify-center font-headline font-bold text-xs">C</span>
+<div>
+<p class="font-headline font-semibold text-xs text-primary leading-tight">Almacén Central</p>
+<p class="text-[11px] text-on-surface-variant">Turno Matutino</p>
+</div>
+</div>
+<div class="mt-2 pt-2 border-t border-outline-variant/60 flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant">Báscula #1 (Mettler)</span>
+<span class="inline-flex items-center gap-1 text-[#1E543B] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1E543B] animate-pulse"></span> Activa
+            </span>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-xs bg-surface text-primary font-semibold rounded-lg border border-dorado/30 shadow-xs" href="#">
+<span class="material-symbols-outlined text-lg text-dorado">inventory_2</span>
+<span>Recepción OC</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-xs text-on-surface-variant hover:text-carbon hover:bg-surface/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">fact_check</span>
+<span>Inventario</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-xs text-on-surface-variant hover:text-carbon hover:bg-surface/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">assignment_late</span>
+<span>Mermas y Devoluciones</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-xs text-on-surface-variant hover:text-carbon hover:bg-surface/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+<span>Proveedores</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-xs text-on-surface-variant hover:text-carbon hover:bg-surface/50 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">payments</span>
+<span>Cuentas por Pagar</span>
+</a>
+</nav>
+<button class="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg bg-surface border border-terracota/40 text-terracota hover:bg-terracota-light transition-colors" type="button">
+<span class="material-symbols-outlined text-base">report_problem</span>
+<span>Nueva Incidencia</span>
+</button>
+</div>
+<!-- Remisión Física Document Preview Card -->
+<div class="space-y-3">
+<div class="p-3 bg-surface rounded-lg border border-outline-variant">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Factura Física</span>
+<span class="text-[10px] text-on-surface-variant">Foto 1 de 1</span>
+</div>
+<div class="relative rounded-md overflow-hidden border border-outline-variant bg-[#F0EBE1] group">
+<img class="w-full h-24 object-cover filter contrast-[1.05]" data-alt="Clear high resolution photograph of a restaurant commercial supplier delivery invoice receipt lying flat on a stainless steel warehouse prep table under clean daylight illumination with printed itemized produce lines, supplier rubber stamp in blue ink, and Mexican tax remittance stamps, captured in realistic editorial hospitality style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDs0dBrcT2WPpWfPb8y7-bUnP6WmLYXz3bwEjx7Zwt2uHwzIxmkUQiP0oF-BU8wP65rwUwMImJHLEySZBL7EjyAIaqcglqZvtNBXvAZoxIIWxxu7XuAlVI1TgRm6ZLPy2HvbqQBHf8qwSQ2ba963X9K8bepxjJgkdOeupf8eQEbVpK0PBxQgy9oU6BYCNLEbSqSchpLmcO1O5R-4qQXqEBQVRvv7x4IZ1PPOWjHAZbKL1sRcJZuYb39rNV1iceRKCOrp8BVqsOD-vJr"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">zoom_in</span>
+</div>
+</div>
+<button class="w-full mt-2 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-primary hover:text-dorado py-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+<span>Ver o retomar foto</span>
+</button>
+</div>
+<div class="pt-2 border-t border-outline-variant/60 flex items-center justify-between text-xs text-on-surface-variant">
+<div class="flex items-center gap-1.5 cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined text-base">tune</span>
+<span>Ajustes</span>
+</div>
+<div class="flex items-center gap-1.5 cursor-pointer hover:text-primary">
+<span class="material-symbols-outlined text-base">help_outline</span>
+<span>Soporte</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- MAIN INTERACTIVE CANVAS -->
+<div class="flex-1 flex flex-col overflow-y-auto">
+<!-- SCREEN HEADER (HU E8-03 / E8-04) -->
+<div class="p-6 pb-4 bg-surface border-b border-outline-variant">
+<!-- Breadcrumbs & Status Tag -->
+<div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+<span>Almacén Central</span>
+<span class="text-secondary">•</span>
+<span class="font-medium text-carbon">Recepción de Mercancía</span>
+<span class="ml-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary text-dorado">
+<span class="w-1.5 h-1.5 rounded-full bg-dorado animate-pulse"></span>
+              En cotejo físico
+            </span>
+</div>
+<div class="text-xs text-on-surface-variant">
+            Folio interno: <span class="font-semibold text-primary font-mono">REC-2026-0894</span>
+</div>
+</div>
+<!-- Prominent Title -->
+<div class="flex flex-col md:flex-row md:items-baseline justify-between gap-2 mb-3">
+<h1 class="font-headline text-2xl lg:text-3xl font-bold text-primary tracking-tight">
+            Recepción · OC-0142 · Verduras del Bajío · <span class="font-normal italic text-carbon text-xl">crédito 15 días</span>
+</h1>
+</div>
+<!-- Metadata Badges -->
+<div class="flex flex-wrap items-center gap-2.5 text-xs">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-carbon">
+<span class="material-symbols-outlined text-sm text-secondary-dark">calendar_today</span>
+<span>Fecha pactada: <strong class="font-semibold text-primary">Hoy (14:30 hrs)</strong></span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-carbon">
+<span class="material-symbols-outlined text-sm text-secondary-dark">person</span>
+<span>Comprador: <strong class="font-semibold text-primary">Chef Ejecutivo (Eduardo V.)</strong></span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-carbon">
+<span class="material-symbols-outlined text-sm text-secondary-dark">kitchen</span>
+<span>Almacén destino: <strong class="font-semibold text-primary">Cocina Principal</strong></span>
+</div>
+<div class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#F8F3E9] border border-dorado/40 text-primary font-medium">
+<span class="material-symbols-outlined text-sm text-dorado">verified</span>
+<span>Proveedor Certificado T1</span>
+</div>
+</div>
+</div>
+<!-- TOUCH-FIRST RECONCILIATION TABLE CONTAINER -->
+<div class="p-6 flex-1 bg-surface-container/40">
+<div class="bg-surface rounded-xl border border-secondary shadow-sm overflow-hidden">
+<!-- Table Toolbar -->
+<div class="px-5 py-3.5 bg-surface border-b border-outline-variant flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="font-headline font-semibold text-sm text-primary uppercase tracking-wider">Lista de Insumos a Conciliar (4 renglones)</span>
+<span class="text-xs px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-mono">Báscula conectada [COM3]</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded bg-surface hover:bg-surface-container border border-outline-variant text-carbon font-medium transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">scale</span>
+<span>Tarar báscula (0.00 kg)</span>
+</button>
+<button class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded bg-surface hover:bg-surface-container border border-outline-variant text-carbon font-medium transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">filter_alt</span>
+<span>Solo discrepancias (2)</span>
+</button>
+</div>
+</div>
+<!-- The Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container/70 border-b border-outline-variant text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">
+<th class="py-3 px-4" scope="col">Insumo y Código</th>
+<th class="py-3 px-3 text-right" scope="col">Pedido (OC)</th>
+<th class="py-3 px-4 text-center w-52 bg-dorado/10 text-primary" scope="col">Recibido (Báscula/Físico)</th>
+<th class="py-3 px-3 text-center" scope="col">Unidad</th>
+<th class="py-3 px-3 text-right" scope="col">Precio Pactado</th>
+<th class="py-3 px-3 text-right" scope="col">Facturado (CFDI)</th>
+<th class="py-3 px-4" scope="col">Lote / Caducidad</th>
+<th class="py-3 px-4" scope="col">Diferencia / Estatus</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/60 text-xs">
+<!-- ROW 1: Limón Persa (FALTANTE) -->
+<tr class="hover:bg-amber-50/20 transition-colors bg-white">
+<td class="py-4 px-4 align-middle">
+<div class="font-semibold text-primary text-sm">Limón con semilla (persa)</div>
+<div class="text-[11px] text-on-surface-variant font-mono">SKU-VERD-0104 · Frutas y Cítricos</div>
+</td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon text-sm">
+                    20.00
+                  </td>
+<!-- Touch Input Field for Physical Warehouse Intake -->
+<td class="py-3 px-3 align-middle bg-dorado/5">
+<div class="flex items-center justify-center gap-1.5 bg-surface-card p-1.5 rounded-lg border-2 border-terracota shadow-sm">
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        -
+                      </button>
+<input aria-label="Cantidad recibida limón" class="w-20 text-center font-bold text-base text-carbon border-0 focus:ring-0 p-0 tabular-nums bg-transparent" type="text" value="18.00"/>
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        +
+                      </button>
+<button class="p-2 ml-1 rounded-md text-dorado hover:text-primary transition-colors" title="Pesar en báscula digital" type="button">
+<span class="material-symbols-outlined text-lg">scale</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-3 text-center align-middle font-medium text-carbon">
+                    kg
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums text-on-surface-variant font-medium">
+                    $38.00 MXN
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon">
+                    $38.00 MXN
+                  </td>
+<td class="py-4 px-4 align-middle">
+<div class="inline-flex flex-col text-[11px] bg-surface-container px-2.5 py-1.5 rounded border border-outline-variant">
+<span class="font-mono text-primary font-medium">Lote: L-2410-09</span>
+<span class="text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px] text-dorado">event</span>
+                        Cad: 18 Nov 2026
+                      </span>
+</div>
+</td>
+<td class="py-4 px-4 align-middle">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-terracota-light border border-terracota/40 text-terracota">
+<span class="material-symbols-outlined text-sm">remove_circle_outline</span>
+<span>-2.0 kg (-10%) Faltante / Ajuste de nota</span>
+</span>
+</td>
+</tr>
+<!-- ROW 2: Aguacate Hass extra (VARIACIÓN PRECIO ALERTA) -->
+<tr class="hover:bg-amber-50/20 transition-colors bg-white">
+<td class="py-4 px-4 align-middle">
+<div class="font-semibold text-primary text-sm">Aguacate Hass extra</div>
+<div class="text-[11px] text-on-surface-variant font-mono">SKU-VERD-0045 · Perecederos Clave</div>
+</td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon text-sm">
+                    10.00
+                  </td>
+<!-- Touch Input Field -->
+<td class="py-3 px-3 align-middle bg-dorado/5">
+<div class="flex items-center justify-center gap-1.5 bg-surface-card p-1.5 rounded-lg border border-outline-variant shadow-sm">
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        -
+                      </button>
+<input aria-label="Cantidad recibida aguacate" class="w-20 text-center font-bold text-base text-carbon border-0 focus:ring-0 p-0 tabular-nums bg-transparent" type="text" value="10.00"/>
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        +
+                      </button>
+<button class="p-2 ml-1 rounded-md text-dorado hover:text-primary transition-colors" title="Pesar en báscula digital" type="button">
+<span class="material-symbols-outlined text-lg">scale</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-3 text-center align-middle font-medium text-carbon">
+                    kg
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums text-on-surface-variant line-through decoration-terracota">
+                    $65.00 MXN
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-bold text-terracota text-sm">
+                    $70.20 MXN
+                  </td>
+<td class="py-4 px-4 align-middle">
+<div class="inline-flex flex-col text-[11px] bg-surface-container px-2.5 py-1.5 rounded border border-outline-variant">
+<span class="font-mono text-primary font-medium">Lote: L-2410-AG</span>
+<span class="text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px] text-dorado">event</span>
+                        Cad: 29 Oct 2026
+                      </span>
+</div>
+</td>
+<td class="py-4 px-4 align-middle">
+<div class="space-y-1">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-[#FFF4ED] border border-terracota/30 text-terracota">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>Precio subió +8.0% (+ $5.20/kg sobre pactado en OC)</span>
+</span>
+<div class="text-[11px] font-medium text-terracota flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">gavel</span>
+<span>Requiere aprobación de incremento</span>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Jitomate Saladette (100% OK) -->
+<tr class="hover:bg-stone-50 transition-colors bg-white">
+<td class="py-4 px-4 align-middle">
+<div class="font-semibold text-primary text-sm">Jitomate Saladette maduro</div>
+<div class="text-[11px] text-on-surface-variant font-mono">SKU-VERD-0012 · Verdura Fresca</div>
+</td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon text-sm">
+                    15.00
+                  </td>
+<!-- Touch Input Field -->
+<td class="py-3 px-3 align-middle bg-dorado/5">
+<div class="flex items-center justify-center gap-1.5 bg-surface-card p-1.5 rounded-lg border border-outline-variant shadow-sm">
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        -
+                      </button>
+<input aria-label="Cantidad recibida jitomate" class="w-20 text-center font-bold text-base text-carbon border-0 focus:ring-0 p-0 tabular-nums bg-transparent" type="text" value="15.00"/>
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        +
+                      </button>
+<button class="p-2 ml-1 rounded-md text-secondary-dark hover:text-primary transition-colors" title="Pesar en báscula digital" type="button">
+<span class="material-symbols-outlined text-lg">scale</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-3 text-center align-middle font-medium text-carbon">
+                    kg
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums text-on-surface-variant font-medium">
+                    $32.00 MXN
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon">
+                    $32.00 MXN
+                  </td>
+<td class="py-4 px-4 align-middle text-on-surface-variant text-[11px] italic">
+                    No requiere lote / Entrada general
+                  </td>
+<td class="py-4 px-4 align-middle">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-status-green-bg border border-[#C6DEC9] text-status-green-text">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>Conforme (100% OK)</span>
+</span>
+</td>
+</tr>
+<!-- ROW 4: Cebolla blanca limpia (100% OK) -->
+<tr class="hover:bg-stone-50 transition-colors bg-white">
+<td class="py-4 px-4 align-middle">
+<div class="font-semibold text-primary text-sm">Cebolla blanca limpia</div>
+<div class="text-[11px] text-on-surface-variant font-mono">SKU-VERD-0008 · Bulbos y Raíces</div>
+</td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon text-sm">
+                    8.00
+                  </td>
+<!-- Touch Input Field -->
+<td class="py-3 px-3 align-middle bg-dorado/5">
+<div class="flex items-center justify-center gap-1.5 bg-surface-card p-1.5 rounded-lg border border-outline-variant shadow-sm">
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        -
+                      </button>
+<input aria-label="Cantidad recibida cebolla" class="w-20 text-center font-bold text-base text-carbon border-0 focus:ring-0 p-0 tabular-nums bg-transparent" type="text" value="8.00"/>
+<button class="touch-target w-10 h-10 rounded-md bg-[#F3EFE6] hover:bg-[#EAE6DD] active:scale-95 text-primary font-bold text-lg flex items-center justify-center transition-transform select-none" type="button">
+                        +
+                      </button>
+<button class="p-2 ml-1 rounded-md text-secondary-dark hover:text-primary transition-colors" title="Pesar en báscula digital" type="button">
+<span class="material-symbols-outlined text-lg">scale</span>
+</button>
+</div>
+</td>
+<td class="py-4 px-3 text-center align-middle font-medium text-carbon">
+                    kg
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums text-on-surface-variant font-medium">
+                    $24.00 MXN
+                  </td>
+<td class="py-4 px-3 text-right align-middle tabular-nums font-semibold text-carbon">
+                    $24.00 MXN
+                  </td>
+<td class="py-4 px-4 align-middle text-on-surface-variant text-[11px] italic">
+                    No requiere lote
+                  </td>
+<td class="py-4 px-4 align-middle">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-status-green-bg border border-[#C6DEC9] text-status-green-text">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+<span>Conforme (100% OK)</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Quick Touch Bar Helper for Table -->
+<div class="px-5 py-2.5 bg-[#FAF8F4] border-t border-outline-variant flex flex-wrap items-center justify-between text-xs text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-dorado">touch_app</span>
+<span>Modo almacén: Toca dos veces cualquier renglón para invocar teclado numérico flotante.</span>
+</span>
+<span class="font-medium text-primary">Pesaje total físico recibido: <strong class="tabular-nums font-bold">51.00 kg</strong></span>
+</div>
+</div>
+<!-- BENTO CARD: SUMMARY, ACCOUNTING & DESTINATION BREAKDOWN -->
+<div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+<!-- Destination Sub-area & Logistics -->
+<div class="lg:col-span-4 bg-surface p-5 rounded-xl border border-secondary shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-headline font-semibold text-xs uppercase tracking-wider text-primary">Destino en Almacén</span>
+<span class="text-xs px-2 py-0.5 rounded bg-surface-container text-primary font-medium">Cocina</span>
+</div>
+<label class="block text-xs font-medium text-on-surface-variant mb-1.5">Sub-área de resguardo asignada:</label>
+<div class="relative">
+<select class="w-full text-xs font-medium bg-[#F8F6F0] border border-outline-variant rounded-lg py-2.5 px-3 text-carbon focus:ring-1 focus:ring-primary focus:border-primary pr-8 appearance-none">
+<option selected="">Cámara fría #2 (Verduras y Ensaladas)</option>
+<option>Cámara fría #1 (Proteínas)</option>
+<option>Cava / Almacén Seco</option>
+<option>Estación de Producción Prep</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 pointer-events-none text-base text-on-surface-variant">expand_more</span>
+</div>
+<!-- Accounting Notice Banner -->
+<div class="mt-4 p-3 bg-surface-container rounded-lg border border-outline-variant text-xs space-y-1">
+<div class="flex items-center gap-1.5 text-primary font-semibold">
+<span class="material-symbols-outlined text-sm text-dorado">account_balance_wallet</span>
+<span>Condición Comercial:</span>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+                  Se generará cuenta por pagar con vencimiento <strong class="text-primary font-semibold">12 oct 2026</strong> (Plazo 15 días pactado con Verduras del Bajío).
+                </p>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between text-xs text-on-surface-variant">
+<span>Tipo de comprobante:</span>
+<span class="font-mono font-semibold text-primary">CFDI 4.0 Ingreso</span>
+</div>
+</div>
+<!-- Financial Discrepancy & Consolidated Breakdown -->
+<div class="lg:col-span-8 bg-surface p-5 rounded-xl border border-secondary shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2 mb-3">
+<span class="font-headline font-semibold text-xs uppercase tracking-wider text-primary">Desglose Contable y Conciliación Fiscal</span>
+<span class="text-[11px] text-terracota font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">warning</span>
+                  Desvío neto detectado
+                </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+<div class="p-3 bg-surface-container rounded-lg border border-outline-variant">
+<div class="text-[11px] text-on-surface-variant">Subtotal OC Pactado</div>
+<div class="text-lg font-bold text-primary tabular-nums mt-0.5">$1,002.00 <span class="text-xs font-normal">MXN</span></div>
+<div class="text-[10px] text-on-surface-variant mt-1">4 renglones base</div>
+</div>
+<div class="p-3 bg-surface-container rounded-lg border border-outline-variant">
+<div class="text-[11px] text-on-surface-variant">Total Factura Capturado</div>
+<div class="text-lg font-bold text-carbon tabular-nums mt-0.5">$4,860.00 <span class="text-xs font-normal">MXN</span></div>
+<div class="text-[10px] text-on-surface-variant mt-1">Lote consolidado perecederos</div>
+</div>
+<div class="p-3 bg-terracota-light rounded-lg border border-terracota/30">
+<div class="text-[11px] text-terracota font-medium">Ajuste / Nota Proveedor</div>
+<div class="text-lg font-bold text-terracota tabular-nums mt-0.5">-$76.00 <span class="text-xs font-normal">MXN</span></div>
+<div class="text-[10px] text-terracota mt-1">Por 2.0 kg limón no entregado</div>
+</div>
+</div>
+<!-- Consolidated Discrepancy Alert Strip -->
+<div class="p-3 bg-[#FFFDF9] border border-dorado/50 rounded-lg flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-dorado/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-dorado text-lg">flag</span>
+</div>
+<div class="flex-1 text-xs">
+<span class="font-semibold text-primary">Resumen de discrepancias en báscula:</span>
+<p class="text-on-surface-variant">
+                    1 faltante (-2 kg limón) · 1 variación de precio (+8% aguacate) · IVA exento / Tasa 0% SAT aplicable a verduras frescas.
+                  </p>
+</div>
+<button class="text-xs text-primary font-semibold hover:text-dorado underline decoration-dorado transition-colors shrink-0" type="button">
+                  Ver bitácora
+                </button>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-variant flex items-center justify-between text-[11px] text-on-surface-variant">
+<span>Certificación UUID: <span class="font-mono">8F23A0B1-4860-49FE-BC54-2026E803</span></span>
+<span>Receptor: <span class="font-medium text-carbon">CONVIVIUM GASTRONOMÍA SAPI DE CV</span></span>
+</div>
+</div>
+</div>
+</div>
+<!-- FOOTER STICKY ACTION BAR (Large touch targets for tablet operations) -->
+<footer class="p-4 px-6 bg-surface border-t border-outline-variant sticky bottom-0 z-20 shadow-lg">
+<div class="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-full">
+<div class="flex items-center gap-3 text-xs text-on-surface-variant w-full sm:w-auto">
+<span class="material-symbols-outlined text-dorado text-xl">verified_user</span>
+<div>
+<p class="font-semibold text-primary">Validación previa completada</p>
+<p class="text-[11px]">Se actualizará existencia en Kardex y se notificará a Compras.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+<!-- Secondary outlined button for supplier claim -->
+<button class="touch-target flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg border-2 border-terracota text-terracota bg-surface hover:bg-terracota-light active:scale-[0.98] transition-all font-semibold text-xs tracking-wide shadow-xs" type="button">
+<span class="material-symbols-outlined text-base">send_and_archive</span>
+<span>Nota de diferencias al proveedor</span>
+</button>
+<!-- Primary prominent olive button for final warehouse intake -->
+<button class="touch-target flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-primary hover:bg-primary-hover active:scale-[0.98] text-[#F8F6F0] border border-dorado/50 transition-all font-bold text-xs uppercase tracking-wider shadow-md" type="button">
+<span class="material-symbols-outlined text-dorado text-base">check_circle</span>
+<span>Confirmar recepción</span>
+</button>
+</div>
+</div>
+</footer>
+</div>
+</main>
+<!-- Interactive feedback micro-script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Touch stepper feedback for warehouse floor use
+      const steppers = document.querySelectorAll('button.touch-target');
+      steppers.forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.classList.add('bg-dorado/20');
+          setTimeout(() => btn.classList.remove('bg-dorado/20'), 150);
+        });
+      });
+    });
+  </script>
+</body></html>

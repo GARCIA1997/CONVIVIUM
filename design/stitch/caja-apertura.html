@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM - Apertura de Caja</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: "#1E2F28",
+            "olivo-dark": "#16231E",
+            marfil: "#EAE6DD",
+            "marfil-subtle": "#F5F2EB",
+            arena: "#C9B89F",
+            "arena-light": "#E2DACF",
+            terracota: "#B45A3C",
+            carbon: "#1A1A1A",
+            dorado: "#D4AF7C",
+            "dorado-hover": "#C59F6C"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            display: ["Playfair Display", "serif"],
+            headline: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil font-body text-carbon antialiased overflow-x-hidden selection:bg-dorado selection:text-olivo">
+<!-- SIDEBAR (Fixed Left Layout according to Shared Components) -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 flex flex-col p-4 bg-[#1E2F28] border-r border-[#C9B89F]/20 shadow-sm text-marfil justify-between">
+<!-- Header Branding -->
+<div>
+<div class="px-2 py-3 flex items-center gap-3 border-b border-arena/20 pb-4">
+<div class="w-10 h-10 rounded-lg bg-olivo-dark border border-dorado/40 flex items-center justify-center text-dorado font-display font-semibold text-lg tracking-wider shadow-inner">
+          CV
+        </div>
+<div>
+<span class="block font-display text-xl tracking-[0.2em] font-semibold text-[#EAE6DD]">CONVIVIUM</span>
+<span class="block text-xs font-body text-arena/80 tracking-wide">TPV &amp; Caja • Sucursal Roma</span>
+</div>
+</div>
+<!-- Quick CTA Button -->
+<div class="mt-4 px-1">
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-dorado/15 hover:bg-dorado/25 text-dorado border border-dorado/30 transition-all font-medium text-xs uppercase tracking-wider active:scale-[0.99]">
+<span class="material-symbols-outlined text-base">add_circle</span>
+<span>Nueva Venta</span>
+</button>
+</div>
+<!-- Main Navigation Tabs -->
+<nav aria-label="Navegación principal" class="mt-6 flex flex-col gap-1.5">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#C9B89F]/10 transition-colors" href="#cuentas">
+<span class="material-symbols-outlined text-xl">receipt_long</span>
+<span class="text-sm font-medium tracking-wide">Cuentas</span>
+</a>
+<!-- Active Tab: Caja y Cobro / Apertura -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#C9B89F]/15 text-[#D4AF7C] font-medium shadow-sm border border-dorado/20" href="#caja">
+<span class="material-symbols-outlined text-xl">point_of_sale</span>
+<span class="text-sm font-medium tracking-wide">Caja y Cobro</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#C9B89F]/10 transition-colors" href="#movimientos">
+<span class="material-symbols-outlined text-xl">sync_alt</span>
+<span class="text-sm font-medium tracking-wide">Movimientos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#C9B89F]/10 transition-colors" href="#corte">
+<span class="material-symbols-outlined text-xl">analytics</span>
+<span class="text-sm font-medium tracking-wide">Corte de Turno</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls -->
+<div class="pt-4 border-t border-arena/20 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#C9B89F]/10 transition-colors" href="#configuracion">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span class="text-sm">Configuración</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-terracota hover:bg-terracota/10 transition-colors" href="#logout">
+<span class="material-symbols-outlined text-lg">logout</span>
+<span class="text-sm">Cerrar Sesión</span>
+</a>
+<!-- Terminal Status Pill -->
+<div class="mt-3 px-3 py-2 rounded-lg bg-olivo-dark/60 border border-white/5 flex items-center justify-between text-[11px] text-arena/70">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          TPV-01 · v4.18
+        </span>
+<span class="font-mono text-arena/50">Online</span>
+</div>
+</div>
+</aside>
+<!-- TOP APP BAR -->
+<header class="pl-64 pr-8 h-16 w-full flex items-center justify-between z-30 fixed top-0 bg-[#EAE6DD] border-b border-[#C9B89F]">
+<div class="flex items-center gap-6">
+<h1 class="font-display font-medium text-lg text-[#1E2F28] tracking-tight">Apertura de Caja</h1>
+<div class="h-4 w-px bg-arena"></div>
+<!-- Navigation Links / Operational Context -->
+<div class="flex items-center gap-4">
+<span class="text-[#1E2F28] font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-dorado">wb_sunny</span>
+          Turno Matutino
+        </span>
+<span class="text-[#1A1A1A]/60 text-xs uppercase tracking-wider">Caja 01</span>
+<span class="text-[#1A1A1A]/60 text-xs uppercase tracking-wider">Cajera: Sofía M.</span>
+</div>
+</div>
+<!-- Trailing Actions & User Profile -->
+<div class="flex items-center gap-5">
+<!-- Sync Status Badge -->
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-300/60 text-xs font-medium">
+<span class="material-symbols-outlined text-sm text-emerald-600">cloud_done</span>
+<span>Sincronizado</span>
+</div>
+<div class="flex items-center gap-1 text-carbon/70">
+<button class="p-2 hover:text-olivo hover:bg-arena/30 rounded-full transition-colors relative" title="Notificaciones">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+<button class="p-2 hover:text-olivo hover:bg-arena/30 rounded-full transition-colors" title="Soporte y Ayuda">
+<span class="material-symbols-outlined text-xl">help_outline</span>
+</button>
+</div>
+<div class="h-6 w-px bg-arena"></div>
+<!-- Profile Indicator -->
+<div class="flex items-center gap-3 pl-1">
+<div class="text-right">
+<p class="text-xs font-semibold text-carbon tracking-tight">Sofía Morales</p>
+<p class="text-[10px] text-carbon/60 uppercase tracking-wider">Cajera Principal</p>
+</div>
+<img alt="Foto de perfil de la cajera Sofía" class="w-9 h-9 rounded-full object-cover border border-dorado/60 shadow-sm" data-alt="Retrato fotográfico editorial de Sofía Morales, una cajera profesional mexicana de 30 años con cabello recogido pulcramente, vestimenta elegante contemporánea en tono verde olivo con delantal de lino de restaurante gourmet de alta cocina mexicana, iluminación cálida de estudio sobria y natural." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUfvbHFZ6xwQi9mNejO5GIlGsfslbXu_FDi6QOTmtJjyn5znK4z5z5i7_7uX5y4-19sdSyZRLwVdaTFs5_myqpR9RW12fzO2P1DoEYkCkiWiWrRzm4h2WeAoNIewhsjAOv4kyRFxzW7mD2BkujME8wJRcHGNmAH4Kr8XLP1vvZU9xl8K7dwpjGA0p5hSZWUaOthGl6vq0lYz8eFF5ts404NycH82LNA2FzkWUAfmlH0ByML6W2xdgey8TYHc5-mePB6dtB70UJ3NlA"/>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS (Offset by Left Sidebar 256px and Topbar 64px) -->
+<main class="ml-64 pt-20 pb-12 px-8 min-h-screen">
+<div class="max-w-7xl mx-auto space-y-6">
+<!-- Breadcrumbs & Meta Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-xs text-carbon/70">
+<span>Operación Diaria</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span>Gestión de Efectivo</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-olivo font-semibold">Apertura de Terminal</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-arena/40 text-olivo border border-arena">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            HU E6-01 · Protocolo de Apertura
+          </span>
+<span class="text-xs text-carbon/60 font-mono">Terminal: TPV-ROM-01</span>
+</div>
+</div>
+<!-- MAIN OPERATIONAL GRID -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- LEFT COLUMN: Main Form & Denominations (8 cols) -->
+<div class="xl:col-span-8 space-y-6">
+<!-- Operational Card: Header Info -->
+<div class="bg-marfil-subtle rounded-xl border border-arena shadow-sm p-6 relative overflow-hidden">
+<div class="absolute -right-16 -top-16 w-44 h-44 rounded-full bg-arena/20 pointer-events-none blur-xl"></div>
+<div class="flex flex-wrap items-start justify-between gap-4 border-b border-arena/40 pb-5">
+<div>
+<span class="inline-block text-[11px] font-semibold text-dorado uppercase tracking-widest bg-olivo px-2.5 py-0.5 rounded">
+                  HU E6-01 · Turno Matutino
+                </span>
+<h2 class="font-display text-2xl font-bold text-olivo mt-2 tracking-tight">
+                  Abrir caja · Caja 1 · Sucursal Centro
+                </h2>
+<p class="text-xs text-carbon/70 mt-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-dorado">calendar_today</span>
+                  27 sep 2026 · 08:00 hrs
+                  <span class="text-arena">•</span>
+<span class="font-medium text-carbon">Apertura Inicial Programada</span>
+</p>
+</div>
+<!-- Cajera Profile Badge -->
+<div class="flex items-center gap-3 bg-white/70 p-3 rounded-lg border border-arena/50 backdrop-blur-sm">
+<img alt="Perfil Sofía Morales" class="w-11 h-11 rounded-lg object-cover border border-arena shadow-inner" data-alt="Detalle de primer plano de cajera profesional en restaurante de lujo con gafete metálico de latón grabado 'CONVIVIUM' y 'Sofía Morales - Cajera Principal', fondo con estantería tenue de botellas de mezcal y copas de cristal refinado." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW0FqjqBRtNPKIsy20uXHwNT5eldYhyCjgBJEJG6cO2MqwAiZ0ZLTh4b0HkXqS1hbyzuFHKFedGBTYDn2BQ3bDuo_P7eZRcpEdAZq4mAvu0I2ppDAQ13gWtlsLJqSLdPdL4DBkXA27DgAM_GFAg778zhGTDheJTvs5u4MPKDUDdBUZLodOENu1pbxZ5-xyMjU1MOB-LqRhk1bpVmXvfvMSMKxA0Pb_ARIYOm30wX6JTg6w84ZKU3WE8NL_69Nroz5JRWHsA174ZOvw"/>
+<div>
+<h4 class="text-sm font-semibold text-carbon leading-snug">Sofía Morales</h4>
+<p class="text-[11px] text-carbon/60">Cajera Principal · ID: EMP-0418</p>
+<span class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Terminal Asignada TPV-01
+                  </span>
+</div>
+</div>
+</div>
+<!-- Operational Warning Banner -->
+<div class="mt-5 p-3.5 bg-amber-50/90 rounded-lg border border-amber-200/80 flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-700 text-xl mt-0.5 shrink-0">security_update_warning</span>
+<div class="text-xs text-amber-950 leading-relaxed">
+<strong class="font-semibold text-amber-900">Aviso de Control Interno:</strong> 
+                Solo se permite una caja abierta por usuario y terminal simultáneamente. Toda venta, cobro posterior y movimiento de efectivo será auditado y firmado digitalmente bajo el identificador de sesión de <strong class="font-medium">Sofía M.</strong>
+</div>
+</div>
+<!-- DENOMINATIONS FORM -->
+<div class="mt-6">
+<div class="flex items-center justify-between pb-3 border-b border-arena/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-olivo text-xl">payments</span>
+<h3 class="font-display font-semibold text-base text-olivo tracking-wide">
+                    Desglose de Efectivo para Fondo Fijo
+                  </h3>
+</div>
+<div class="text-xs text-carbon/60">
+                  Fondo base estipulado: <span class="font-semibold text-olivo font-mono">$1,500.00 MXN</span>
+</div>
+</div>
+<!-- Bill Breakdown -->
+<div class="mt-4">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-semibold uppercase tracking-wider text-carbon/80">Billetes Nacionales (MXN)</span>
+<span class="text-xs text-carbon/50">Subtotal sugerido: $1,500.00</span>
+</div>
+<div class="space-y-2.5">
+<!-- $500 Row -->
+<div class="grid grid-cols-12 items-center gap-3 p-2.5 rounded-lg bg-white border border-arena/60 hover:border-dorado transition-colors">
+<div class="col-span-3 flex items-center gap-2">
+<span class="w-7 h-7 rounded bg-emerald-50 text-emerald-800 text-xs font-mono font-bold flex items-center justify-center border border-emerald-200">
+                        $500
+                      </span>
+<span class="text-xs font-medium text-carbon">Billete $500</span>
+</div>
+<div class="col-span-5 flex items-center justify-center gap-1.5">
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b500', -1, 500)">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-16 h-8 text-center text-sm font-semibold border-arena rounded py-0 focus:ring-1 focus:ring-dorado focus:border-dorado" id="input-b500" min="0" oninput="calculateTotal()" type="number" value="1"/>
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b500', 1, 500)">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="col-span-4 text-right">
+<span class="text-sm font-mono font-semibold text-olivo" id="subtotal-b500">$500.00 MXN</span>
+</div>
+</div>
+<!-- $200 Row -->
+<div class="grid grid-cols-12 items-center gap-3 p-2.5 rounded-lg bg-white border border-arena/60 hover:border-dorado transition-colors">
+<div class="col-span-3 flex items-center gap-2">
+<span class="w-7 h-7 rounded bg-emerald-50 text-emerald-800 text-xs font-mono font-bold flex items-center justify-center border border-emerald-200">
+                        $200
+                      </span>
+<span class="text-xs font-medium text-carbon">Billete $200</span>
+</div>
+<div class="col-span-5 flex items-center justify-center gap-1.5">
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b200', -1, 200)">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-16 h-8 text-center text-sm font-semibold border-arena rounded py-0 focus:ring-1 focus:ring-dorado focus:border-dorado" id="input-b200" min="0" oninput="calculateTotal()" type="number" value="2"/>
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b200', 1, 200)">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="col-span-4 text-right">
+<span class="text-sm font-mono font-semibold text-olivo" id="subtotal-b200">$400.00 MXN</span>
+</div>
+</div>
+<!-- $100 Row -->
+<div class="grid grid-cols-12 items-center gap-3 p-2.5 rounded-lg bg-white border border-arena/60 hover:border-dorado transition-colors">
+<div class="col-span-3 flex items-center gap-2">
+<span class="w-7 h-7 rounded bg-red-50 text-red-800 text-xs font-mono font-bold flex items-center justify-center border border-red-200">
+                        $100
+                      </span>
+<span class="text-xs font-medium text-carbon">Billete $100</span>
+</div>
+<div class="col-span-5 flex items-center justify-center gap-1.5">
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b100', -1, 100)">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-16 h-8 text-center text-sm font-semibold border-arena rounded py-0 focus:ring-1 focus:ring-dorado focus:border-dorado" id="input-b100" min="0" oninput="calculateTotal()" type="number" value="3"/>
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b100', 1, 100)">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="col-span-4 text-right">
+<span class="text-sm font-mono font-semibold text-olivo" id="subtotal-b100">$300.00 MXN</span>
+</div>
+</div>
+<!-- $50 Row -->
+<div class="grid grid-cols-12 items-center gap-3 p-2.5 rounded-lg bg-white border border-arena/60 hover:border-dorado transition-colors">
+<div class="col-span-3 flex items-center gap-2">
+<span class="w-7 h-7 rounded bg-purple-50 text-purple-800 text-xs font-mono font-bold flex items-center justify-center border border-purple-200">
+                        $50
+                      </span>
+<span class="text-xs font-medium text-carbon">Billete $50</span>
+</div>
+<div class="col-span-5 flex items-center justify-center gap-1.5">
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b50', -1, 50)">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-16 h-8 text-center text-sm font-semibold border-arena rounded py-0 focus:ring-1 focus:ring-dorado focus:border-dorado" id="input-b50" min="0" oninput="calculateTotal()" type="number" value="4"/>
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b50', 1, 50)">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="col-span-4 text-right">
+<span class="text-sm font-mono font-semibold text-olivo" id="subtotal-b50">$200.00 MXN</span>
+</div>
+</div>
+<!-- $20 Row -->
+<div class="grid grid-cols-12 items-center gap-3 p-2.5 rounded-lg bg-white border border-arena/60 hover:border-dorado transition-colors">
+<div class="col-span-3 flex items-center gap-2">
+<span class="w-7 h-7 rounded bg-blue-50 text-blue-800 text-xs font-mono font-bold flex items-center justify-center border border-blue-200">
+                        $20
+                      </span>
+<span class="text-xs font-medium text-carbon">Billete $20</span>
+</div>
+<div class="col-span-5 flex items-center justify-center gap-1.5">
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b20', -1, 20)">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-16 h-8 text-center text-sm font-semibold border-arena rounded py-0 focus:ring-1 focus:ring-dorado focus:border-dorado" id="input-b20" min="0" oninput="calculateTotal()" type="number" value="5"/>
+<button class="w-8 h-8 rounded border border-arena/60 bg-marfil-subtle hover:bg-arena/30 active:scale-95 flex items-center justify-center text-carbon transition-all" onclick="adjustDenom('b20', 1, 20)">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="col-span-4 text-right">
+<span class="text-sm font-mono font-semibold text-olivo" id="subtotal-b20">$100.00 MXN</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center px-3 py-2 mt-2 bg-arena/20 rounded-md text-xs font-medium text-carbon">
+<span>Subtotal en Billetes:</span>
+<span class="font-mono font-bold text-olivo" id="subtotal-billetes-display">$1,500.00 MXN</span>
+</div>
+</div>
+<!-- Collapsible Monedas Fraccionarias -->
+<details class="group mt-4 rounded-lg border border-arena/60 bg-white overflow-hidden transition-all">
+<summary class="flex items-center justify-between p-3 cursor-pointer bg-marfil-subtle/80 hover:bg-arena/20 select-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-dorado group-open:rotate-90 transition-transform">chevron_right</span>
+<span class="text-xs font-semibold uppercase tracking-wider text-carbon/80">Monedas Metálicas ($10, $5, $2, $1, $0.50)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-mono font-semibold text-carbon/70" id="subtotal-monedas-summary">$0.00 MXN</span>
+<span class="text-[11px] text-dorado underline">Desplegar</span>
+</div>
+</summary>
+<div class="p-3 space-y-2 border-t border-arena/40 bg-white">
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+<!-- Moneda 10 -->
+<div class="p-2 border border-arena/40 rounded bg-marfil-subtle/40">
+<span class="font-bold text-carbon block">$10</span>
+<div class="flex items-center justify-center gap-1 mt-1">
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m10', -1, 10)">-</button>
+<input class="w-10 h-6 text-center text-xs p-0 border-arena rounded" id="input-m10" min="0" oninput="calculateTotal()" type="number" value="0"/>
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m10', 1, 10)">+</button>
+</div>
+</div>
+<!-- Moneda 5 -->
+<div class="p-2 border border-arena/40 rounded bg-marfil-subtle/40">
+<span class="font-bold text-carbon block">$5</span>
+<div class="flex items-center justify-center gap-1 mt-1">
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m5', -1, 5)">-</button>
+<input class="w-10 h-6 text-center text-xs p-0 border-arena rounded" id="input-m5" min="0" oninput="calculateTotal()" type="number" value="0"/>
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m5', 1, 5)">+</button>
+</div>
+</div>
+<!-- Moneda 2 -->
+<div class="p-2 border border-arena/40 rounded bg-marfil-subtle/40">
+<span class="font-bold text-carbon block">$2</span>
+<div class="flex items-center justify-center gap-1 mt-1">
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m2', -1, 2)">-</button>
+<input class="w-10 h-6 text-center text-xs p-0 border-arena rounded" id="input-m2" min="0" oninput="calculateTotal()" type="number" value="0"/>
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m2', 1, 2)">+</button>
+</div>
+</div>
+<!-- Moneda 1 -->
+<div class="p-2 border border-arena/40 rounded bg-marfil-subtle/40">
+<span class="font-bold text-carbon block">$1</span>
+<div class="flex items-center justify-center gap-1 mt-1">
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m1', -1, 1)">-</button>
+<input class="w-10 h-6 text-center text-xs p-0 border-arena rounded" id="input-m1" min="0" oninput="calculateTotal()" type="number" value="0"/>
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m1', 1, 1)">+</button>
+</div>
+</div>
+<!-- Moneda 0.50 -->
+<div class="p-2 border border-arena/40 rounded bg-marfil-subtle/40">
+<span class="font-bold text-carbon block">$0.50</span>
+<div class="flex items-center justify-center gap-1 mt-1">
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m05', -1, 0.5)">-</button>
+<input class="w-10 h-6 text-center text-xs p-0 border-arena rounded" id="input-m05" min="0" oninput="calculateTotal()" type="number" value="0"/>
+<button class="w-6 h-6 rounded bg-arena/30 text-xs" onclick="adjustCoin('m05', 1, 0.5)">+</button>
+</div>
+</div>
+</div>
+</div>
+</details>
+<!-- Optional USD Foreign Currency Section -->
+<div class="mt-4 p-4 rounded-lg border border-arena/60 bg-white/60">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<input class="rounded border-arena text-olivo focus:ring-dorado h-4 w-4" id="enable-usd" onchange="toggleUSD()" type="checkbox"/>
+<label class="text-xs font-semibold text-carbon select-none cursor-pointer" for="enable-usd">
+                      Habilitar fondo en divisas extranjeras (Dólares USD)
+                    </label>
+</div>
+<span class="text-[11px] text-carbon/60 italic">Sucursal Roma / Centro Turístico</span>
+</div>
+<div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 hidden" id="usd-container">
+<div class="flex items-center gap-2">
+<label class="text-xs text-carbon/70">Fondo Inicial en USD:</label>
+<div class="relative rounded-md shadow-sm w-36">
+<span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-xs text-carbon/50 font-mono">$</span>
+<input class="pl-6 w-full text-xs font-mono font-medium rounded border-arena focus:ring-dorado focus:border-dorado py-1.5" id="input-usd" min="0" placeholder="0.00" step="10" type="number" value="0.00"/>
+</div>
+</div>
+<div class="text-xs text-carbon/60 flex items-center justify-end">
+<span>Equivalente estimado: <strong class="font-mono text-olivo">$0.00 MXN</strong></span>
+</div>
+</div>
+</div>
+<!-- Currency Exchange Rate Lock -->
+<div class="mt-4 p-3.5 rounded-lg bg-arena/15 border border-arena/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-dorado text-lg">currency_exchange</span>
+<div>
+<span class="font-medium text-carbon">T.C. del día:</span>
+<strong class="font-mono text-olivo font-bold text-sm ml-1">$17.20 MXN / USD</strong>
+<span class="text-carbon/50 ml-1">(Fijado por Tesorería)</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded bg-white text-[10px] font-medium text-carbon/70 border border-arena/50 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-carbon/60">lock</span>
+                    Editable · Requiere PIN de Gerente
+                  </span>
+<button class="text-[11px] text-dorado hover:text-olivo font-medium underline transition-colors" onclick="requestManagerPin()">
+                    Autorizar cambio
+                  </button>
+</div>
+</div>
+<!-- Physical Cash Verification Checkbox -->
+<div class="mt-6 pt-5 border-t border-arena/50">
+<label class="flex items-start gap-3 cursor-pointer group select-none">
+<input class="mt-0.5 rounded border-arena text-olivo focus:ring-dorado h-5 w-5" id="audit-check" type="checkbox"/>
+<div class="text-xs text-carbon leading-snug">
+<span class="font-semibold text-carbon group-hover:text-olivo transition-colors">
+                      He contado físicamente el efectivo presente en la gaveta y coincide con el fondo declarado.
+                    </span>
+<p class="text-carbon/60 text-[11px] mt-0.5">
+                      Declaro bajo responsabilidad operativa que la gaveta TPV-01 se encuentra limpia, sin tickets rezagados y lista para iniciar operaciones.
+                    </p>
+</div>
+</label>
+</div>
+<!-- Big Primary CTA Button -->
+<div class="mt-6">
+<button class="w-full py-4 px-6 rounded-lg bg-olivo hover:bg-olivo-dark text-marfil border border-dorado/40 shadow-md hover:shadow-lg transition-all flex items-center justify-between group active:scale-[0.99]" id="open-shift-btn" onclick="confirmCashRegisterOpen()">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-md bg-dorado/20 text-dorado flex items-center justify-center border border-dorado/40 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-xl">key</span>
+</span>
+<div class="text-left">
+<span class="block text-xs font-semibold uppercase tracking-wider text-dorado">Acción Operativa</span>
+<span class="block font-display text-base font-bold text-white tracking-wide">
+                        Abrir caja y comenzar turno
+                      </span>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-olivo-dark/60 px-4 py-2 rounded border border-dorado/30">
+<span class="text-xs text-arena font-mono">Fondo:</span>
+<span class="font-mono font-bold text-sm text-dorado" id="btn-total-display">$1,500.00 MXN</span>
+<span class="material-symbols-outlined text-sm text-dorado group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: High-End Summary & Audit Logs (4 cols) -->
+<div class="xl:col-span-4 space-y-6">
+<!-- Bento Card 1: Resumen Destacado de Fondo -->
+<div class="bg-[#1E2F28] text-marfil rounded-xl p-6 border border-arena/20 shadow-md relative overflow-hidden">
+<div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-9xl">account_balance_wallet</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center justify-between text-xs text-dorado font-semibold uppercase tracking-widest">
+<span>Resumen de Apertura</span>
+<span class="material-symbols-outlined text-sm">verified</span>
+</div>
+<div class="mt-4">
+<span class="text-xs text-arena/80 uppercase tracking-wider block">Total Fondo Inicial Declarado</span>
+<div class="font-display text-3xl font-bold text-[#EAE6DD] tracking-tight mt-1 flex items-baseline gap-1">
+<span id="grand-total-display">$1,500.00</span>
+<span class="text-sm font-sans font-normal text-dorado">MXN</span>
+</div>
+</div>
+<!-- Comparison Sub-metrics -->
+<div class="mt-6 pt-5 border-t border-arena/20 space-y-3 text-xs">
+<div class="flex items-center justify-between text-arena/80">
+<span>Fondo Sugerido Conforme:</span>
+<span class="font-mono text-[#EAE6DD] font-semibold">$1,500.00 MXN</span>
+</div>
+<div class="flex items-center justify-between text-arena/80">
+<span>Diferencia de inicio:</span>
+<span class="font-mono font-semibold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30" id="diff-display">
+                    $0.00 MXN (Exacto)
+                  </span>
+</div>
+<div class="flex items-center justify-between text-arena/80">
+<span>Hora de corte previa:</span>
+<span class="font-mono text-[#EAE6DD]/90">01:45 hrs · Turno Nocturno</span>
+</div>
+</div>
+<!-- Quick Security Stamp -->
+<div class="mt-5 p-3 rounded-lg bg-olivo-dark/70 border border-white/5 flex items-center gap-3">
+<span class="material-symbols-outlined text-dorado text-base">verified_user</span>
+<span class="text-[11px] text-arena/70 leading-tight">
+                  Token de inicio firmado por el dispositivo criptográfico TPV-01.
+                </span>
+</div>
+</div>
+</div>
+<!-- Bento Card 2: Historial de Últimos Cortes con Diferencias -->
+<div class="bg-marfil-subtle rounded-xl p-5 border border-arena shadow-sm">
+<div class="flex items-center justify-between pb-3 border-b border-arena/40">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-olivo">history</span>
+<h4 class="font-display font-semibold text-sm text-olivo">
+                  Historial de últimos cortes
+                </h4>
+</div>
+<span class="text-[10px] text-carbon/50 uppercase tracking-widest font-mono">Auditoría Caja 1</span>
+</div>
+<div class="mt-4 space-y-3">
+<!-- Item 1: 26 sep Noche (-$120) -->
+<div class="p-3 rounded-lg bg-white border border-red-200/80 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-terracota"></span>
+<strong class="font-medium text-carbon">26 sep 2026</strong>
+<span class="text-[10px] text-carbon/60">(Cierre Noche)</span>
+</div>
+<span class="font-mono text-xs font-bold text-terracota bg-terracota/10 px-2 py-0.5 rounded border border-terracota/20">
+                    -$120.00 MXN
+                  </span>
+</div>
+<div class="mt-2 text-[11px] grid grid-cols-2 gap-2 text-carbon/70 font-mono">
+<div>Esperado: <span class="text-carbon font-semibold">$34,840.00</span></div>
+<div>Contado: <span class="text-carbon font-semibold">$34,720.00</span></div>
+</div>
+<div class="mt-1 text-[10px] text-terracota flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">description</span>
+<span>Faltante justificado - Acta firmada por Gerencia</span>
+</div>
+</div>
+<!-- Item 2: 26 sep Matutino ($0.00) -->
+<div class="p-3 rounded-lg bg-white border border-emerald-200/70 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<strong class="font-medium text-carbon">26 sep 2026</strong>
+<span class="text-[10px] text-carbon/60">(Corte Matutino)</span>
+</div>
+<span class="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    $0.00 MXN
+                  </span>
+</div>
+<div class="mt-2 text-[11px] grid grid-cols-2 gap-2 text-carbon/70 font-mono">
+<div>Esperado: <span class="text-carbon font-semibold">$18,450.00</span></div>
+<div>Contado: <span class="text-carbon font-semibold">$18,450.00</span></div>
+</div>
+<div class="mt-1 text-[10px] text-emerald-800 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+<span>Cuadre perfecto auditado</span>
+</div>
+</div>
+<!-- Item 3: 25 sep Noche (+$50) -->
+<div class="p-3 rounded-lg bg-white border border-arena/60 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-dorado"></span>
+<strong class="font-medium text-carbon">25 sep 2026</strong>
+<span class="text-[10px] text-carbon/60">(Cierre Noche)</span>
+</div>
+<span class="font-mono text-xs font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    +$50.00 MXN
+                  </span>
+</div>
+<div class="mt-2 text-[11px] grid grid-cols-2 gap-2 text-carbon/70 font-mono">
+<div>Esperado: <span class="text-carbon font-semibold">$41,200.00</span></div>
+<div>Contado: <span class="text-carbon font-semibold">$41,250.00</span></div>
+</div>
+<div class="mt-1 text-[10px] text-carbon/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">info</span>
+<span>Sobrante ingresado a caja chica</span>
+</div>
+</div>
+</div>
+<!-- Link to Full Cash History -->
+<div class="mt-4 pt-3 border-t border-arena/40 text-center">
+<a class="text-xs text-olivo hover:text-dorado font-medium inline-flex items-center gap-1 transition-colors" href="#historial-completo">
+<span>Ver historial de auditoría de turnos</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Bento Card 3: Quick Hardware Diagnostic -->
+<div class="p-4 rounded-xl bg-white/80 border border-arena/80 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-marfil flex items-center justify-center text-olivo border border-arena/50">
+<span class="material-symbols-outlined text-xl">print</span>
+</div>
+<div>
+<p class="text-xs font-semibold text-carbon">Impresora Epson TM-T88VI</p>
+<p class="text-[11px] text-carbon/60">Gaveta RJ11 conectada y lista</p>
+</div>
+</div>
+<button class="px-2.5 py-1 text-xs font-medium rounded border border-arena/60 hover:bg-marfil active:scale-95 transition-all text-olivo" onclick="testDrawer()">
+              Test Gaveta
+            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive JavaScript for Calculations & State -->
+<script>
+    const EXPECTED_INITIAL_FUND = 1500.0;
+
+    function adjustDenom(id, delta, unitValue) {
+      const input = document.getElementById(`input-${id}`);
+      let currentVal = parseInt(input.value) || 0;
+      currentVal = Math.max(0, currentVal + delta);
+      input.value = currentVal;
+      calculateTotal();
+    }
+
+    function adjustCoin(id, delta, unitValue) {
+      const input = document.getElementById(`input-${id}`);
+      let currentVal = parseInt(input.value) || 0;
+      currentVal = Math.max(0, currentVal + delta);
+      input.value = currentVal;
+      calculateTotal();
+    }
+
+    function toggleUSD() {
+      const isChecked = document.getElementById('enable-usd').checked;
+      const container = document.getElementById('usd-container');
+      if (isChecked) {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function calculateTotal() {
+      // Billetes
+      const b500 = (parseInt(document.getElementById('input-b500').value) || 0) * 500;
+      const b200 = (parseInt(document.getElementById('input-b200').value) || 0) * 200;
+      const b100 = (parseInt(document.getElementById('input-b100').value) || 0) * 100;
+      const b50  = (parseInt(document.getElementById('input-b50').value) || 0) * 50;
+      const b20  = (parseInt(document.getElementById('input-b20').value) || 0) * 20;
+
+      document.getElementById('subtotal-b500').innerText = `$${b500.toFixed(2)} MXN`;
+      document.getElementById('subtotal-b200').innerText = `$${b200.toFixed(2)} MXN`;
+      document.getElementById('subtotal-b100').innerText = `$${b100.toFixed(2)} MXN`;
+      document.getElementById('subtotal-b50').innerText  = `$${b50.toFixed(2)} MXN`;
+      document.getElementById('subtotal-b20').innerText  = `$${b20.toFixed(2)} MXN`;
+
+      const totalBilletes = b500 + b200 + b100 + b50 + b20;
+      document.getElementById('subtotal-billetes-display').innerText = `$${totalBilletes.toFixed(2)} MXN`;
+
+      // Monedas
+      const m10 = (parseInt(document.getElementById('input-m10')?.value) || 0) * 10;
+      const m5  = (parseInt(document.getElementById('input-m5')?.value) || 0) * 5;
+      const m2  = (parseInt(document.getElementById('input-m2')?.value) || 0) * 2;
+      const m1  = (parseInt(document.getElementById('input-m1')?.value) || 0) * 1;
+      const m05 = (parseInt(document.getElementById('input-m05')?.value) || 0) * 0.5;
+
+      const totalMonedas = m10 + m5 + m2 + m1 + m05;
+      const subtotalMonedasElem = document.getElementById('subtotal-monedas-summary');
+      if (subtotalMonedasElem) {
+        subtotalMonedasElem.innerText = `$${totalMonedas.toFixed(2)} MXN`;
+      }
+
+      const grandTotal = totalBilletes + totalMonedas;
+      const formattedTotal = `$${grandTotal.toFixed(2)}`;
+
+      document.getElementById('grand-total-display').innerText = formattedTotal;
+      document.getElementById('btn-total-display').innerText = `${formattedTotal} MXN`;
+
+      // Difference indicator
+      const diff = grandTotal - EXPECTED_INITIAL_FUND;
+      const diffElem = document.getElementById('diff-display');
+      if (diff === 0) {
+        diffElem.className = "font-mono font-semibold px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/30";
+        diffElem.innerText = "$0.00 MXN (Exacto)";
+      } else if (diff > 0) {
+        diffElem.className = "font-mono font-semibold px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-500/30";
+        diffElem.innerText = `+$${diff.toFixed(2)} MXN (Sobrante)`;
+      } else {
+        diffElem.className = "font-mono font-semibold px-2 py-0.5 rounded bg-red-950/60 text-red-300 border border-red-500/30";
+        diffElem.innerText = `-$${Math.abs(diff).toFixed(2)} MXN (Faltante)`;
+      }
+    }
+
+    function confirmCashRegisterOpen() {
+      const checkbox = document.getElementById('audit-check');
+      if (!checkbox.checked) {
+        alert("Por favor confirme haber contado físicamente el efectivo marcando la casilla de arqueo.");
+        checkbox.focus();
+        return;
+      }
+      const total = document.getElementById('grand-total-display').innerText;
+      const confirmed = confirm(`¿Desea formalizar la apertura de Caja 01 con un fondo inicial de ${total} MXN para la cajera Sofía Morales?`);
+      if (confirmed) {
+        const btn = document.getElementById('open-shift-btn');
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined animate-spin text-dorado">progress_activity</span>
+            <div class="text-left">
+              <span class="block text-xs font-semibold uppercase tracking-wider text-dorado">Iniciando Turno</span>
+              <span class="block font-display text-base font-bold text-white tracking-wide">Imprimiendo comprobante fiscal de apertura...</span>
+            </div>
+          </div>
+        `;
+        btn.classList.add('opacity-90', 'cursor-wait');
+        setTimeout(() => {
+          alert("¡Caja 01 abierta con éxito! Se ha impreso el ticket de inicio de turno (Folio AP-2026-0927-01). Redirigiendo a Punto de Venta...");
+        }, 1200);
+      }
+    }
+
+    function requestManagerPin() {
+      const pin = prompt("Ingrese PIN de Gerencia para modificar el Tipo de Cambio:");
+      if (pin === "1234" || pin === "2026") {
+        const newRate = prompt("Nuevo tipo de cambio (MXN / USD):", "17.20");
+        if (newRate) {
+          alert(`Tipo de cambio actualizado temporalmente a $${newRate} MXN por USD para este turno.`);
+        }
+      } else if (pin !== null) {
+        alert("PIN de Gerencia incorrecto o no autorizado.");
+      }
+    }
+
+    function testDrawer() {
+      alert("Comando de apertura de gaveta enviado a través de la impresora Epson TM-T88VI [OK].");
+    }
+
+    // Init calculation on load
+    window.addEventListener('DOMContentLoaded', () => {
+      calculateTotal();
+    });
+  </script>
+</body></html>

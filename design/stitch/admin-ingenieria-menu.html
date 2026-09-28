@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM | Dirección &amp; Ingeniería de Menú</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              950: '#15211C',
+              900: '#1E2F28',
+              800: '#2A3F36',
+              700: '#3A5449',
+              100: '#E4ECE8',
+            },
+            marfil: {
+              50: '#FCFBF9',
+              100: '#F7F5F0',
+              200: '#EAE6DD',
+              300: '#DFDACF',
+            },
+            arena: {
+              200: '#DFD5C6',
+              300: '#C9B89F',
+              400: '#B5A084',
+              500: '#9B8569',
+            },
+            dorado: {
+              200: '#F3E4CA',
+              300: '#E6CDA3',
+              400: '#D4AF7C',
+              500: '#BF965D',
+              600: '#99733F',
+            },
+            terracota: {
+              100: '#FCECE8',
+              300: '#E59A83',
+              500: '#C85A32',
+              600: '#B44C27',
+              700: '#8C381B',
+            },
+            carbon: {
+              900: '#1A1A1A',
+              800: '#2B2B2B',
+              600: '#4A4A4A',
+              400: '#7A7A7A',
+            }
+          },
+          fontFamily: {
+            headline: ["'Playfair Display'", 'serif'],
+            display: ["'Playfair Display'", 'serif'],
+            body: ["'Inter'", 'sans-serif'],
+            label: ["'Inter'", 'sans-serif']
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-headline { font-family: 'Playfair Display', serif; }
+    .font-body { font-family: 'Inter', sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #EAE6DD;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #9B8569;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil-200 text-carbon-900 font-body antialiased flex overflow-hidden selection:bg-dorado-300 selection:text-olivo-950">
+<!-- ========================================================================= -->
+<!-- SIDEBAR NAVIGATION (SHARED COMPONENT: SideNavBar)                         -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-screen w-64 flex flex-col justify-between bg-emerald-950 dark:bg-neutral-900 border-r border-amber-900/20 z-40 select-none shadow-xl">
+<!-- Top Branding & Branch -->
+<div>
+<div class="p-6 border-b border-white/10 flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-emerald-900/80 border border-dorado-400/40 flex items-center justify-center shadow-inner">
+<span class="font-headline text-dorado-400 font-bold text-xl tracking-wider">C</span>
+</div>
+<div>
+<h1 class="font-headline text-lg tracking-widest text-amber-200 uppercase font-bold leading-tight">CONVIVIUM</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="font-label text-xs uppercase tracking-wider text-stone-300">Roma Norte</span>
+</div>
+</div>
+</div>
+<!-- Main Navigation Links -->
+<nav class="p-4 space-y-1.5">
+<p class="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-stone-400/70 font-headline">Analítica y Operación</p>
+<!-- Active: Reportes (Current Screen: Reportes / BCG Matrix) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-amber-200 bg-emerald-900/50 dark:bg-neutral-800 font-medium transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px] text-amber-200">analytics</span>
+<span class="font-body text-sm tracking-wide">Reportes</span>
+<span class="ml-auto w-1.5 h-4 bg-amber-400 rounded-full"></span>
+</a>
+<!-- Inactive items from JSON -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-300 dark:text-stone-400 hover:text-stone-100 hover:bg-emerald-900/30 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+<span class="font-body text-sm">Mesas</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-300 dark:text-stone-400 hover:text-stone-100 hover:bg-emerald-900/30 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="font-body text-sm">Comandas</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-300 dark:text-stone-400 hover:text-stone-100 hover:bg-emerald-900/30 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+<span class="font-body text-sm">Menú</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-stone-300 dark:text-stone-400 hover:text-stone-100 hover:bg-emerald-900/30 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+<span class="font-body text-sm">Caja</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls from JSON -->
+<div class="p-4 border-t border-white/10 space-y-1">
+<div class="px-4 py-2.5 mb-2 rounded bg-emerald-900/30 border border-emerald-800/40">
+<div class="flex items-center justify-between text-xs text-stone-300">
+<span>Kardex TPV:</span>
+<span class="text-emerald-400 font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Al día
+          </span>
+</div>
+</div>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-emerald-900/30 font-normal transition-colors duration-150 text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span>Ajustes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-terracota-300 hover:text-terracota-100 hover:bg-terracota-700/20 font-normal transition-colors duration-150 text-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CONTAINER (Offset by 64 = 256px for Sidebar)              -->
+<!-- ========================================================================= -->
+<div class="ml-64 flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TOP NAV BAR (SHARED COMPONENT: TopNavBar) -->
+<header class="h-16 bg-stone-100 dark:bg-neutral-900 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between px-8 z-30 flex-shrink-0">
+<!-- Title & Context Breadcrumb -->
+<div class="flex items-center gap-4">
+<div>
+<span class="font-headline font-semibold text-lg text-emerald-950 dark:text-stone-100">Ingeniería de Menú y Costos</span>
+<div class="flex items-center gap-2 text-[11px] text-stone-500 font-label">
+<span>Reportes y Análisis</span>
+<span>&gt;</span>
+<span class="text-emerald-900 font-medium">Matriz BCG Octubre 2026</span>
+</div>
+</div>
+<div class="hidden lg:flex items-center gap-4 ml-6 pl-6 border-l border-stone-300">
+<span class="text-xs text-stone-600 font-medium flex items-center gap-1.5 bg-stone-200/70 px-2.5 py-1 rounded">
+<span class="material-symbols-outlined text-sm text-stone-500">storefront</span> Sucursal: Roma Norte
+          </span>
+<span class="text-xs text-emerald-950 font-medium border-b-2 border-amber-600 pb-0.5 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-amber-700">calendar_month</span> Período: Este Mes
+          </span>
+</div>
+</div>
+<!-- Trailing Action Buttons & Profile -->
+<div class="flex items-center gap-3">
+<button class="px-3.5 py-1.5 bg-white border border-arena-300 text-olivo-900 rounded-lg text-xs font-medium hover:bg-stone-50 transition-all flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[17px] text-stone-600">tune</span>
+          Filtros
+        </button>
+<button class="px-4 py-1.5 bg-olivo-900 hover:bg-olivo-800 text-dorado-300 rounded-lg text-xs font-semibold tracking-wide transition-all flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[17px] text-dorado-400">download</span>
+          Exportar Reporte
+        </button>
+<div class="h-6 w-px bg-stone-300 mx-1"></div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 text-stone-600 hover:text-emerald-950 rounded-lg hover:bg-stone-200/60 transition-colors relative" title="Notificaciones">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-terracota-500 ring-2 ring-white"></span>
+</button>
+<button class="p-1.5 text-stone-600 hover:text-emerald-950 rounded-lg hover:bg-stone-200/60 transition-colors" title="Ayuda y Documentación">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+<div class="flex items-center gap-2.5 pl-3 border-l border-stone-300 ml-1">
+<img class="w-8 h-8 rounded-full border border-dorado-400/60 object-cover shadow-sm" data-alt="Close up photographic portrait of a refined Mexican executive restaurant director in a bespoke linen shirt, soft natural indoor lighting inside an upscale contemporary dining establishment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsroRW9h2g_6cqoopHl8I7EXy3mvKLiSsQdeS9cacDxsvT_Zop8ltDVGRcwwHi1S7PvIqePDX8Nq0iSaItZy9s6G9J6-noCE8W9s3MyAgRF75Ch1evmd05mndWvVtg8HBqCRIn2jo9z72MzzvySi4GSXtsHxeoxE3JBq-BWtRA99_aPo_oF7GTBBtMqB6tiBWYpiWjJVuZUuWWnhIP5T_xtPAQJuTcNQJ8iEYdqJ_PGDx--vfDhmzsaYnbXhL7A-Ze2f8NkzF-WJ9D"/>
+<div class="hidden xl:block text-left">
+<div class="text-xs font-semibold text-emerald-950 leading-tight">Lic. Rodrigo Morales</div>
+<div class="text-[10px] text-stone-500 font-label">Director Operativo</div>
+</div>
+</div>
+</div>
+</header>
+<!-- SCROLLABLE INTERIOR CANVAS -->
+<main class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+<!-- ===================================================================== -->
+<!-- SECTION 1: RESUMEN EJECUTIVO KPI (Top metric ribbons)                 -->
+<!-- ===================================================================== -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- KPI 1: Ventas Totales -->
+<div class="bg-white p-4 rounded-xl border border-arena-300/80 shadow-sm flex flex-col justify-between hover:border-dorado-400 transition-colors">
+<div class="flex items-center justify-between text-stone-500 text-xs">
+<span class="font-medium tracking-wide">Ventas Totales de Carta</span>
+<span class="p-1.5 rounded-lg bg-emerald-50 text-olivo-900 border border-emerald-100">
+<span class="material-symbols-outlined text-base">payments</span>
+</span>
+</div>
+<div class="mt-2">
+<div class="text-2xl font-bold font-headline text-olivo-950 tracking-tight">$482,650 <span class="text-xs font-body font-normal text-stone-500">MXN</span></div>
+<div class="flex items-center gap-1.5 mt-1 text-xs text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+<span>1,840 unidades vendidas</span>
+<span class="text-stone-400 font-normal">· +12.4% vs mes ant.</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Margen de Contribución Unitario -->
+<div class="bg-white p-4 rounded-xl border border-arena-300/80 shadow-sm flex flex-col justify-between hover:border-dorado-400 transition-colors">
+<div class="flex items-center justify-between text-stone-500 text-xs">
+<span class="font-medium tracking-wide">Margen Contribución Promedio</span>
+<span class="p-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-100">
+<span class="material-symbols-outlined text-base">price_change</span>
+</span>
+</div>
+<div class="mt-2">
+<div class="text-2xl font-bold font-headline text-olivo-950 tracking-tight">$148.50 <span class="text-xs font-body font-normal text-stone-500">MXN/ítem</span></div>
+<div class="flex items-center gap-1.5 mt-1 text-xs text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>61.2% margen bruto</span>
+<span class="text-stone-400 font-normal">· Óptimo carta</span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Costo Teórico Promedio -->
+<div class="bg-white p-4 rounded-xl border border-arena-300/80 shadow-sm flex flex-col justify-between hover:border-dorado-400 transition-colors">
+<div class="flex items-center justify-between text-stone-500 text-xs">
+<span class="font-medium tracking-wide">Costo Teórico (Recetario TPV)</span>
+<span class="p-1.5 rounded-lg bg-stone-100 text-stone-700 border border-stone-200">
+<span class="material-symbols-outlined text-base">menu_book</span>
+</span>
+</div>
+<div class="mt-2">
+<div class="text-2xl font-bold font-headline text-olivo-950 tracking-tight">29.5% <span class="text-xs font-body font-normal text-stone-500">de carta</span></div>
+<div class="flex items-center gap-1.5 mt-1 text-xs text-stone-600 font-medium">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span>Meta estándar: 28% - 30%</span>
+</div>
+</div>
+</div>
+<!-- KPI 4: Costo Real Auditado (Alerta) -->
+<div class="bg-white p-4 rounded-xl border-2 border-terracota-500/40 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white via-white to-terracota-100/30">
+<div class="flex items-center justify-between text-terracota-700 text-xs">
+<span class="font-semibold uppercase tracking-wider">Costo Real Auditado (Kardex)</span>
+<span class="p-1.5 rounded-lg bg-terracota-100 text-terracota-600">
+<span class="material-symbols-outlined text-base">warning</span>
+</span>
+</div>
+<div class="mt-2">
+<div class="text-2xl font-bold font-headline text-terracota-700 tracking-tight">32.1% <span class="text-xs font-body font-medium text-terracota-600">(+2.6% desviación)</span></div>
+<div class="flex items-center gap-1.5 mt-1 text-xs text-terracota-700 font-medium">
+<span class="material-symbols-outlined text-sm">trending_down</span>
+<span>Brecha crítica: -$8,400.00 MXN</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- SECTION 2: MATRIZ BCG SCATTER + TABLA LATERAL DE ACCIÓN               -->
+<!-- ===================================================================== -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- COLUMNA IZQUIERDA (65% -> 8 de 12 columnas): BCG MATRIX SCATTER GRAPH -->
+<div class="lg:col-span-8 bg-white p-5 rounded-xl border border-arena-300/80 shadow-sm flex flex-col">
+<!-- Header del gráfico -->
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-arena-200">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline text-lg font-bold text-olivo-950">Matriz de Rendimiento BCG (Menú Engineering)</h2>
+<span class="text-xs px-2 py-0.5 rounded bg-dorado-200/80 text-dorado-600 font-semibold border border-dorado-300">Octubre 2026</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Dispersión de los 28 platillos activos clasificados según volumen de venta mensual vs. margen unitario.</p>
+</div>
+<!-- Selector de categorías de carta -->
+<div class="inline-flex rounded-lg border border-arena-300 p-0.5 bg-marfil-100 text-xs">
+<button class="px-2.5 py-1 rounded bg-olivo-900 text-dorado-300 font-medium shadow-xs">Todos (28)</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-olivo-950 font-medium">Platillos fuertes</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-olivo-950 font-medium">Coctelería</button>
+<button class="px-2.5 py-1 rounded text-stone-600 hover:text-olivo-950 font-medium">Entradas</button>
+</div>
+</div>
+<!-- Matriz Interactiva SVG Canvas / Container -->
+<div class="relative w-full h-[470px] mt-4 bg-marfil-50 rounded-lg border border-arena-200 overflow-hidden select-none">
+<!-- Quadrant Labels and Background Colors -->
+<div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+<!-- Quadrant 1 (Top-Left): ROMPECABEZAS / INCÓGNITAS (High Margin, Low Volume) -->
+<div class="border-r border-b border-dashed border-arena-400/80 bg-arena-200/15 p-3 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-arena-300/40 text-stone-800 text-[11px] font-semibold tracking-wide uppercase font-label">
+<span class="material-symbols-outlined text-sm text-dorado-600">help</span> INCÓGNITAS / PUZZLES
+                  </span>
+<span class="text-[10px] text-stone-500 italic">Alto margen / Baja venta</span>
+</div>
+<div class="text-[11px] text-stone-600/80 bg-white/70 backdrop-blur-xs p-2 rounded border border-arena-200 w-fit">
+<strong class="text-stone-800">Estrategia:</strong> Impulsar venta sugestiva en meseros y optimizar diseño en carta.
+                </div>
+</div>
+<!-- Quadrant 2 (Top-Right): ESTRELLAS (High Margin, High Volume) -->
+<div class="border-b border-dashed border-arena-400/80 bg-dorado-200/20 p-3 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-dorado-300 text-olivo-950 text-[11px] font-bold tracking-wide uppercase font-label shadow-xs">
+<span class="material-symbols-outlined text-sm text-olivo-900" style="font-variation-settings: 'FILL' 1;">star</span> ESTRELLAS
+                  </span>
+<span class="text-[10px] text-amber-900 font-medium italic">Alto margen / Alta venta</span>
+</div>
+<div class="text-[11px] text-stone-700 bg-white/80 backdrop-blur-xs p-2 rounded border border-dorado-300 w-fit self-end text-right">
+<strong class="text-olivo-950">Estrategia:</strong> Blindar receta, monitorear porciones y no subir precio.
+                </div>
+</div>
+<!-- Quadrant 3 (Bottom-Left): PERROS (Low Margin, Low Volume) -->
+<div class="border-r border-dashed border-arena-400/80 bg-terracota-100/30 p-3 flex flex-col justify-between">
+<div class="text-[11px] text-stone-600 bg-white/70 backdrop-blur-xs p-2 rounded border border-terracota-300/60 w-fit">
+<strong class="text-terracota-700">Estrategia:</strong> Retirar de carta o sustituir insumos de baja rotación.
+                </div>
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-terracota-100 text-terracota-700 text-[11px] font-bold tracking-wide uppercase font-label">
+<span class="material-symbols-outlined text-sm text-terracota-600">pest_control</span> PERROS / DOGS
+                  </span>
+<span class="text-[10px] text-terracota-700 italic">Bajo margen / Baja venta</span>
+</div>
+</div>
+<!-- Quadrant 4 (Bottom-Right): VACAS LECHERAS (Low Margin, High Volume) -->
+<div class="bg-emerald-950/5 p-3 flex flex-col justify-between">
+<div class="text-[11px] text-stone-700 bg-white/70 backdrop-blur-xs p-2 rounded border border-emerald-900/20 w-fit self-end text-right">
+<strong class="text-olivo-900">Estrategia:</strong> Aumento selectivo de precio (+$10-$15 MXN) o renegociar costo de mayoreo.
+                </div>
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-olivo-900 text-dorado-300 text-[11px] font-semibold tracking-wide uppercase font-label">
+<span class="material-symbols-outlined text-sm text-dorado-400">inventory_2</span> VACAS / CASH COWS
+                  </span>
+<span class="text-[10px] text-stone-600 italic">Bajo margen / Alta venta</span>
+</div>
+</div>
+</div>
+<!-- Ejes Centrales (Líneas Medianas) -->
+<!-- Línea Y (Corte de Unidades: Mediana 250 uds) -->
+<div class="absolute top-0 bottom-0 left-1/2 w-px bg-arena-400/90 pointer-events-none"></div>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/95 px-2 py-0.5 rounded text-[10px] font-semibold text-stone-600 border border-arena-300 shadow-xs">
+              Corte Mediana: 250 Uds / mes
+            </div>
+<!-- Línea X (Corte de Margen: Mediana $120.00 MXN) -->
+<div class="absolute left-0 right-0 top-1/2 h-px bg-arena-400/90 pointer-events-none"></div>
+<div class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/95 px-2 py-0.5 rounded text-[10px] font-semibold text-stone-600 border border-arena-300 shadow-xs">
+              Corte Margen: $120.00 MXN
+            </div>
+<!-- ============================================== -->
+<!-- PUNTOS CLAVE DE DISPERSIÓN (SCATTER NODES)    -->
+<!-- ============================================== -->
+<!-- NODO 1: ESTRELLA - Hamburguesa Convivium (X: 74%, Y: 28%) -->
+<div class="absolute left-[74%] top-[24%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20">
+<div class="w-6 h-6 rounded-full bg-dorado-400 border-2 border-olivo-950 flex items-center justify-center shadow-md group-hover:scale-125 transition-transform">
+<span class="w-2 h-2 rounded-full bg-olivo-950"></span>
+</div>
+<span class="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold text-olivo-950 bg-white/95 px-2 py-0.5 rounded border border-dorado-400 shadow-xs">
+                Hamburguesa Convivium
+              </span>
+<!-- TOOLTIP ACTIVO EN HOVER -->
+<div class="absolute bottom-9 left-1/2 -translate-x-1/2 w-64 p-3 bg-olivo-950 text-marfil-100 rounded-lg shadow-2xl border border-dorado-400/70 hidden group-hover:flex flex-col gap-2 pointer-events-none z-30">
+<div class="flex items-center gap-2.5 border-b border-white/10 pb-2">
+<img class="w-10 h-10 rounded-md object-cover border border-dorado-400" data-alt="Editorial close up of a gourmet hamburger on a vintage wooden serving board with brioche bun caramelized onions and melted artisanal cheese in an ambient bar lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNN8OuYVY0sJa9mxxbZWo6zTEQyw_j4K0e-CsHad5x_6NLYO0YAjtYCOnWO4GS3Loed3xsSxjyJtfS63l33wfYfZSIWOoav8ISZYfbHlhbSaUWrD4gqwqhvUzYrbM_5Om7CiFNodq1n8PTj9Rr3onREroW-KvORh6--5uFp9If7NCaHGgt3vnQ_1U32EQEYQlPVJcTA4z4uz_JToCpihceqKUDUqKTCUl7ZqfMOA8_xTHstX8obT4nVBzpjh3P9Yb8vv6LltMSOGaR"/>
+<div>
+<h4 class="font-headline font-bold text-xs text-dorado-300 leading-tight">Hamburguesa Convivium</h4>
+<span class="text-[10px] text-emerald-300 font-label">Estrella indiscutible</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-1 text-[11px]">
+<span class="text-stone-400">P.V.P.: <strong class="text-white">$245.00</strong></span>
+<span class="text-stone-400">Costo: <strong class="text-white">$78.00 (31%)</strong></span>
+<span class="text-stone-400">Margen Unit.: <strong class="text-dorado-300">$167.00</strong></span>
+<span class="text-stone-400">Ventas: <strong class="text-emerald-300">412 uds</strong></span>
+</div>
+<div class="text-[10px] bg-dorado-900/40 p-1.5 rounded border border-dorado-500/30 text-dorado-200">
+                  Contribuye con $68,804 MXN al beneficio bruto mensual.
+                </div>
+</div>
+</div>
+<!-- NODO 2: ESTRELLA - Margarita de tamarindo (X: 72%, Y: 38%) -->
+<div class="absolute left-[70%] top-[36%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20">
+<div class="w-5 h-5 rounded-full bg-dorado-400 border-2 border-white flex items-center justify-center shadow-md group-hover:scale-125 transition-transform">
+<span class="w-1.5 h-1.5 rounded-full bg-olivo-950"></span>
+</div>
+<span class="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-medium text-stone-800 bg-white/90 px-1.5 py-0.5 rounded border border-arena-300 shadow-xs">
+                Margarita Tamarindo
+              </span>
+</div>
+<!-- NODO 3: VACA - Tacos al pastor (X: 86%, Y: 68%) -->
+<div class="absolute left-[84%] top-[66%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20">
+<div class="w-6 h-6 rounded-full bg-olivo-800 border-2 border-dorado-300 flex items-center justify-center shadow-md group-hover:scale-125 transition-transform">
+<span class="w-2 h-2 rounded-full bg-dorado-400"></span>
+</div>
+<span class="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold text-olivo-900 bg-white/95 px-2 py-0.5 rounded border border-olivo-800 shadow-xs">
+                Tacos al Pastor (5 pzas)
+              </span>
+</div>
+<!-- NODO 4: VACA - Cerveza Charro (X: 92%, Y: 82%) -->
+<div class="absolute left-[92%] top-[80%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10">
+<div class="w-4 h-4 rounded-full bg-olivo-700 border-2 border-white"></div>
+<span class="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-stone-600 bg-white/80 px-1 rounded">
+                Cerveza Charro
+              </span>
+</div>
+<!-- NODO 5: INCÓGNITA - Rib Eye 400g (X: 22%, Y: 14%) -->
+<div class="absolute left-[20%] top-[14%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20">
+<div class="w-6 h-6 rounded-full bg-arena-400 border-2 border-carbon-900 flex items-center justify-center shadow-md group-hover:scale-125 transition-transform">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+</div>
+<span class="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold text-carbon-900 bg-white/95 px-2 py-0.5 rounded border border-arena-400 shadow-xs">
+                Rib Eye 400g Sonorense
+              </span>
+</div>
+<!-- NODO 6: INCÓGNITA - Mezcalita Jamaica (X: 28%, Y: 30%) -->
+<div class="absolute left-[26%] top-[30%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10">
+<div class="w-4 h-4 rounded-full bg-arena-300 border-2 border-white"></div>
+<span class="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-stone-600 bg-white/80 px-1 rounded">
+                Mezcalita Jamaica
+              </span>
+</div>
+<!-- NODO 7: PERRO - Ensalada César con Pollo (X: 18%, Y: 74%) -->
+<div class="absolute left-[16%] top-[72%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20">
+<div class="w-6 h-6 rounded-full bg-terracota-500 border-2 border-white flex items-center justify-center shadow-md group-hover:scale-125 transition-transform">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+</div>
+<span class="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-semibold text-terracota-700 bg-white/95 px-2 py-0.5 rounded border border-terracota-300 shadow-xs">
+                Ensalada César Pollo
+              </span>
+</div>
+<!-- NODO 8: PERRO - Tuétanos Asados (X: 14%, Y: 64%) -->
+<div class="absolute left-[12%] top-[62%] -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10">
+<div class="w-4 h-4 rounded-full bg-terracota-500/80 border-2 border-white"></div>
+<span class="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-terracota-700 bg-white/80 px-1 rounded">
+                Tuétanos al Grill
+              </span>
+</div>
+<!-- Varios puntos fantasma tenues para realismo del scatter -->
+<div class="absolute left-[62%] top-[32%] w-3 h-3 rounded-full bg-dorado-300/70"></div>
+<div class="absolute left-[78%] top-[42%] w-3 h-3 rounded-full bg-dorado-300/70"></div>
+<div class="absolute left-[66%] top-[72%] w-3 h-3 rounded-full bg-olivo-700/60"></div>
+<div class="absolute left-[88%] top-[62%] w-3 h-3 rounded-full bg-olivo-700/60"></div>
+<div class="absolute left-[34%] top-[20%] w-3 h-3 rounded-full bg-arena-400/60"></div>
+<div class="absolute left-[24%] top-[86%] w-3 h-3 rounded-full bg-terracota-400/60"></div>
+</div>
+<!-- Leyenda de Ejes y Controles -->
+<div class="flex items-center justify-between text-xs text-stone-500 mt-3 pt-3 border-t border-arena-200">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-dorado-400"></span> Estrellas (8)</span>
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-olivo-800"></span> Vacas (7)</span>
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-arena-400"></span> Incógnitas (6)</span>
+<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-terracota-500"></span> Perros (7)</span>
+</div>
+<span class="text-[11px] text-stone-400 font-label">Eje X: Popularidad mensual | Eje Y: Margen MXN</span>
+</div>
+</div>
+<!-- COLUMNA DERECHA (35% -> 4 de 12 columnas): TABLA DE ACCIÓN Y RECOMENDACIÓN -->
+<div class="lg:col-span-4 bg-white p-5 rounded-xl border border-arena-300/80 shadow-sm flex flex-col h-[578px]">
+<div class="flex items-center justify-between pb-3 border-b border-arena-200">
+<div>
+<h3 class="font-headline font-bold text-base text-olivo-950">Acciones Ejecutivas</h3>
+<p class="text-xs text-stone-500">Dictamen prioritario para dirección</p>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-dorado-100 text-dorado-600 font-semibold text-xs border border-dorado-300">
+              4 sugerencias
+            </span>
+</div>
+<!-- Pestañas de Cuadrante -->
+<div class="flex items-center gap-1 mt-3 pb-2 border-b border-arena-100 overflow-x-auto text-[11px]">
+<button class="px-2.5 py-1 rounded bg-olivo-900 text-dorado-300 font-medium">Prioritarias</button>
+<button class="px-2 py-1 rounded text-stone-600 hover:bg-marfil-200">Estrellas</button>
+<button class="px-2 py-1 rounded text-stone-600 hover:bg-marfil-200">Vacas</button>
+<button class="px-2 py-1 rounded text-stone-600 hover:bg-marfil-200">Incógnitas</button>
+<button class="px-2 py-1 rounded text-stone-600 hover:bg-marfil-200">Perros</button>
+</div>
+<!-- Lista de Productos y Acciones -->
+<div class="flex-1 overflow-y-auto custom-scrollbar mt-3 space-y-3 pr-1">
+<!-- Card 1: Hamburguesa Convivium (Estrella) -->
+<div class="p-3 rounded-lg border border-dorado-300/80 bg-dorado-50/40 hover:shadow-xs transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-dorado-400"></span>
+<h4 class="font-headline font-semibold text-sm text-olivo-950">Hamburguesa Convivium</h4>
+</div>
+<span class="text-[11px] text-stone-500">Platillo Fuerte · 412 ventas</span>
+</div>
+<span class="text-xs font-bold text-olivo-950 font-mono">+$167.00 mgn</span>
+</div>
+<div class="mt-2 text-xs bg-white p-2 rounded border border-dorado-200 text-stone-700">
+<span class="font-semibold text-dorado-600">Recomendación:</span> Mantener estándar de ensamble y calidad. Monitorear gramaje de carne para evitar fugas.
+              </div>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-[10px] text-stone-500">PVP: $245 | Costo: 31%</span>
+<button class="text-xs font-medium text-olivo-900 hover:text-dorado-500 flex items-center gap-1">
+                  Auditar receta <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Tacos al Pastor (Vaca Lechera) -->
+<div class="p-3 rounded-lg border border-emerald-900/30 bg-emerald-950/5 hover:shadow-xs transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-olivo-800"></span>
+<h4 class="font-headline font-semibold text-sm text-olivo-950">Tacos al Pastor (5 pzas)</h4>
+</div>
+<span class="text-[11px] text-stone-500">Platillo Fuerte · 520 ventas (Top 1)</span>
+</div>
+<span class="text-xs font-bold text-olivo-900 font-mono">+$82.00 mgn</span>
+</div>
+<div class="mt-2 text-xs bg-white p-2 rounded border border-emerald-900/20 text-stone-700">
+<span class="font-semibold text-olivo-900">Recomendación:</span> Incrementar precio sugerido a $195 MXN (+$15) para absorber alza en piña y cerdo. Margen estimado sube a 54%.
+              </div>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-[10px] text-stone-500">Impacto: +$7,800 MXN/mes</span>
+<button class="text-xs font-semibold px-2 py-0.5 rounded bg-olivo-900 text-dorado-300 hover:bg-olivo-800">
+                  Simular Ajuste
+                </button>
+</div>
+</div>
+<!-- Card 3: Rib Eye 400g (Incógnita) -->
+<div class="p-3 rounded-lg border border-arena-300 bg-arena-200/20 hover:shadow-xs transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-arena-500"></span>
+<h4 class="font-headline font-semibold text-sm text-olivo-950">Rib Eye 400g Sonorense</h4>
+</div>
+<span class="text-[11px] text-stone-500">Cortes · 84 ventas (Bajo volumen)</span>
+</div>
+<span class="text-xs font-bold text-olivo-950 font-mono">+$385.00 mgn</span>
+</div>
+<div class="mt-2 text-xs bg-white p-2 rounded border border-arena-300 text-stone-700">
+<span class="font-semibold text-stone-800">Recomendación:</span> Excelente margen unitario. Reubicar en el tercio superior de la carta física e instruir al staff de salón.
+              </div>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-[10px] text-stone-500">PVP: $620 | Margen: 62%</span>
+<button class="text-xs font-medium text-olivo-900 hover:text-dorado-500 flex items-center gap-1">
+                  Brief Meseros <span class="material-symbols-outlined text-sm">assignment</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Ensalada César (Perro) -->
+<div class="p-3 rounded-lg border border-terracota-300 bg-terracota-100/30 hover:shadow-xs transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-terracota-500"></span>
+<h4 class="font-headline font-semibold text-sm text-terracota-700">Ensalada César con Pollo</h4>
+</div>
+<span class="text-[11px] text-stone-500">Entradas · 45 ventas</span>
+</div>
+<span class="text-xs font-bold text-terracota-700 font-mono">+$68.00 mgn</span>
+</div>
+<div class="mt-2 text-xs bg-white p-2 rounded border border-terracota-300/60 text-stone-700">
+<span class="font-semibold text-terracota-700">Recomendación:</span> Genera merma de lechuga romana y pechuga. Evaluar descontinuar en la carta de invierno.
+              </div>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-[10px] text-terracota-600 font-medium">Merma reportada: 14%</span>
+<button class="text-xs font-medium text-terracota-700 hover:underline">
+                  Programar Baja
+                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- SECTION 3: INFORME DE DESVIACIÓN 'COSTO REAL VS TEÓRICO' (AUDITORÍA)  -->
+<!-- ===================================================================== -->
+<section class="bg-white rounded-xl border border-arena-300/80 shadow-sm overflow-hidden">
+<!-- Banner de Diagnóstico Crítico -->
+<div class="bg-gradient-to-r from-olivo-950 via-olivo-900 to-olivo-950 text-white p-5 border-b border-dorado-400/30 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-start gap-3.5">
+<div class="p-2.5 rounded-lg bg-terracota-600/30 border border-terracota-500/50 text-terracota-300 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">troubleshoot</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-headline font-bold text-lg text-dorado-300 tracking-wide">Conciliación de Desviación de Costo de Alimentos &amp; Bebidas</h3>
+<span class="text-[10px] px-2 py-0.5 rounded bg-terracota-600 text-white font-semibold uppercase tracking-wider">Desvío Crítico</span>
+</div>
+<p class="text-xs text-stone-300 mt-1">
+                Comparativo entre costo de recetario sistematizado (<strong class="text-white">Teórico 29.5%</strong>) vs. salida física de bodega (<strong class="text-terracota-300">Real 32.1%</strong>).
+              </p>
+</div>
+</div>
+<div class="bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-lg border border-white/15 text-right">
+<span class="text-[11px] uppercase tracking-wider text-stone-300 font-label block">Fuga Total Detectada</span>
+<div class="text-xl font-bold font-headline text-terracota-300">-$8,400.00 <span class="text-xs font-body font-normal text-white">MXN</span></div>
+<span class="text-[10px] text-stone-300">Equivale a 2.6% del costo de ventas</span>
+</div>
+</div>
+<!-- Desglose en 3 Bloques Analíticos de Fuga -->
+<div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-marfil-50/50">
+<!-- Bloque 1: Mermas de Producción & Barra -->
+<div class="bg-white p-4 rounded-lg border border-arena-300 flex flex-col justify-between shadow-xs">
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-arena-200">
+<div class="flex items-center gap-2">
+<span class="p-1.5 rounded bg-terracota-100 text-terracota-600">
+<span class="material-symbols-outlined text-sm">local_bar</span>
+</span>
+<h4 class="font-semibold text-xs text-carbon-900 uppercase tracking-wide">1. Mermas de Barra y Cocina</h4>
+</div>
+<span class="text-xs font-bold text-terracota-600">-$3,840 MXN</span>
+</div>
+<div class="mt-3 space-y-2 text-xs text-stone-600">
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Derrame de destilados en barra</span>
+<strong class="text-carbon-900 font-mono">-$1,420 MXN</strong>
+</div>
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Porcionado de Rib Eye (limpieza grasa)</span>
+<strong class="text-carbon-900 font-mono">-$1,640 MXN</strong>
+</div>
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Perecederos en cámara fría</span>
+<strong class="text-carbon-900 font-mono">-$780 MXN</strong>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-arena-200 text-[11px] text-stone-500 flex items-center justify-between">
+<span>Representa <strong>45.7%</strong> de la brecha</span>
+<span class="text-terracota-600 font-medium">Mayor impacto</span>
+</div>
+</div>
+<!-- Bloque 2: Devoluciones y Comandas Rehechas -->
+<div class="bg-white p-4 rounded-lg border border-arena-300 flex flex-col justify-between shadow-xs">
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-arena-200">
+<div class="flex items-center gap-2">
+<span class="p-1.5 rounded bg-amber-100 text-amber-800">
+<span class="material-symbols-outlined text-sm">replay</span>
+</span>
+<h4 class="font-semibold text-xs text-carbon-900 uppercase tracking-wide">2. Devoluciones &amp; Rehechos</h4>
+</div>
+<span class="text-xs font-bold text-amber-800">-$2,680 MXN</span>
+</div>
+<div class="mt-3 space-y-2 text-xs text-stone-600">
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>12 devoluciones autorizadas en KDS</span>
+<strong class="text-carbon-900 font-mono">-$1,950 MXN</strong>
+</div>
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Errores de captura comanda meseros</span>
+<strong class="text-carbon-900 font-mono">-$730 MXN</strong>
+</div>
+<div class="p-2 rounded bg-amber-50 text-[11px] text-amber-900 border border-amber-200">
+                  Motivo recurrente: "Término de carne excedido" (7 casos en parrilla).
+                </div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-arena-200 text-[11px] text-stone-500 flex items-center justify-between">
+<span>Representa <strong>31.9%</strong> de la brecha</span>
+<span class="text-amber-800 font-medium">Auditar cocina</span>
+</div>
+</div>
+<!-- Bloque 3: Diferencias de Conteo Físico -->
+<div class="bg-white p-4 rounded-lg border border-arena-300 flex flex-col justify-between shadow-xs">
+<div>
+<div class="flex items-center justify-between pb-2 border-b border-arena-200">
+<div class="flex items-center gap-2">
+<span class="p-1.5 rounded bg-stone-100 text-stone-700">
+<span class="material-symbols-outlined text-sm">inventory</span>
+</span>
+<h4 class="font-semibold text-xs text-carbon-900 uppercase tracking-wide">3. Faltante Conteo Físico</h4>
+</div>
+<span class="text-xs font-bold text-carbon-900">-$1,880 MXN</span>
+</div>
+<div class="mt-3 space-y-2 text-xs text-stone-600">
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Tequila Blanco 750ml (2 botellas)</span>
+<strong class="text-carbon-900 font-mono">-$1,120 MXN</strong>
+</div>
+<div class="flex justify-between items-center bg-marfil-100 p-2 rounded">
+<span>Queso Provolone Importado (1.8 kg)</span>
+<strong class="text-carbon-900 font-mono">-$760 MXN</strong>
+</div>
+<div class="p-2 rounded bg-stone-100 text-[11px] text-stone-600">
+                  Desviación reportada en el cierre semanal de Bodega A.
+                </div>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-arena-200 text-[11px] text-stone-500 flex items-center justify-between">
+<span>Representa <strong>22.4%</strong> de la brecha</span>
+<span class="text-stone-700 font-medium">Ajuste de Kardex</span>
+</div>
+</div>
+</div>
+<!-- Footer Acciones de Corrección -->
+<div class="bg-marfil-100 px-6 py-3 border-t border-arena-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+<div class="flex items-center gap-2 text-stone-600">
+<span class="material-symbols-outlined text-base text-olivo-900">verified_user</span>
+<span>Última auditoría realizada el 28 de Octubre 2026 por el Chef Ejecutivo y Contraloría.</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-3.5 py-1.5 bg-white border border-arena-300 text-stone-800 rounded-lg hover:bg-stone-50 font-medium transition-all shadow-2xs">
+              Ver Bitácora de Mermas en Almacén
+            </button>
+<button class="px-4 py-1.5 bg-olivo-900 hover:bg-olivo-800 text-dorado-300 rounded-lg font-semibold transition-all shadow-sm">
+              Emitir Póliza de Ajuste de Costos
+            </button>
+</div>
+</div>
+</section>
+<!-- Espacio final para respiro visual de alta gama -->
+<footer class="pt-2 pb-6 text-center text-xs text-stone-400">
+        CONVIVIUM SaaS Hostelería · Dirección Roma Norte, CDMX · Sistema sincronizado con Kardex TPV
+      </footer>
+</main>
+</div>
+</body></html>
