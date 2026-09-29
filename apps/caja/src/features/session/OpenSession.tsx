@@ -1,16 +1,17 @@
 /* Diseño: design/stitch/caja-apertura.html (Stitch). Marcado y clases originales; datos reales. E6-01. */
 import { useSession } from "@convivium/app-shell";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Identificador fijo de la caja física; en producción viene de la configuración del dispositivo.
 const REGISTER_ID = "00000000-0000-4000-8000-000000000001";
-const USD_RATE = 1720; // TODO: tipo de cambio de la sucursal
 const BILLS: [number, string][] = [[500, "bg-emerald-50 text-emerald-800 border-emerald-200"], [200, "bg-emerald-50 text-emerald-800 border-emerald-200"], [100, "bg-red-50 text-red-800 border-red-200"], [50, "bg-purple-50 text-purple-800 border-purple-200"], [20, "bg-blue-50 text-blue-800 border-blue-200"]];
 const COINS = [10, 5, 2, 1, 0.5];
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
 
 export function OpenSession({ onOpened }: { onOpened: () => void }) {
   const { client, session } = useSession();
+  const [usdRate, setUsdRate] = useState(0);
+  useEffect(() => { client.request<{ usdRate: number | null }>("GET", "/branch").then((b) => setUsdRate(b.usdRate ?? 0)); }, [client]);
   const [counts, setCounts] = useState<Record<string, number>>({ "500": 1, "200": 2, "100": 3, "50": 4, "20": 5 });
   const [usdOn, setUsdOn] = useState(false);
   const [usd, setUsd] = useState("");
@@ -22,7 +23,7 @@ export function OpenSession({ onOpened }: { onOpened: () => void }) {
   const bills = BILLS.reduce((s, [d]) => s + d * 100 * get(d), 0);
   const coins = COINS.reduce((s, d) => s + Math.round(d * 100) * get(d), 0);
   const total = bills + coins;
-  const usdMxn = Math.round(Number(usd || 0) * USD_RATE);
+  const usdMxn = Math.round(Number(usd || 0) * usdRate);
   const now = new Date();
 
   const open = () =>
@@ -136,7 +137,7 @@ export function OpenSession({ onOpened }: { onOpened: () => void }) {
                   </div>
                 </details>
 
-                <div className="mt-4 p-4 rounded-lg border border-arena/60 bg-white/60">
+                {usdRate > 0 && <div className="mt-4 p-4 rounded-lg border border-arena/60 bg-white/60">
                   <div className="flex items-center gap-2">
                     <input checked={usdOn} onChange={(e) => setUsdOn(e.target.checked)} className="rounded border-arena text-olivo focus:ring-dorado h-4 w-4" id="enable-usd" type="checkbox" />
                     <label className="text-xs font-semibold text-carbon select-none cursor-pointer" htmlFor="enable-usd">Habilitar fondo en divisas extranjeras (Dólares USD)</label>
@@ -152,14 +153,14 @@ export function OpenSession({ onOpened }: { onOpened: () => void }) {
                       </div>
                     </div>
                   )}
-                </div>
+                </div>}
 
                 <div className="mt-4 p-3.5 rounded-lg bg-arena/15 border border-arena/60 flex flex-wrap items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2.5">
                     <span className="material-symbols-outlined text-dorado text-lg">currency_exchange</span>
                     <div>
                       <span className="font-medium text-carbon">T.C. del día:</span>
-                      <strong className="font-mono text-olivo font-bold text-sm ml-1">{money(USD_RATE)} MXN / USD</strong>
+                      <strong className="font-mono text-olivo font-bold text-sm ml-1">{money(usdRate)} MXN / USD</strong>
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded bg-white text-[10px] font-medium text-carbon/70 border border-arena/50 flex items-center gap-1">

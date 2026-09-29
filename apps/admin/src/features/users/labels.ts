@@ -20,7 +20,7 @@ export const GROUPS: { key: string; label: string; perms: [Permission, string, s
     ["compras.proponer_oc", "Proponer orden de compra", "shopping_cart"], ["compras.aprobar_oc", "Aprobar orden de compra", "approval"], ["compras.recibir", "Recibir mercancía", "local_shipping"], ["cxp.pagar", "Pagar a proveedores", "account_balance_wallet"],
   ] },
   { key: "admin", label: "Administración", perms: [
-    ["menu.editar", "Editar menú y precios", "restaurant_menu"], ["mesas.editar", "Editar plano de mesas", "grid_view"], ["estaciones.editar", "Estaciones y dispositivos", "devices"],
+    ["menu.editar", "Editar menú y precios", "restaurant_menu"], ["mesas.editar", "Editar plano de mesas", "grid_view"], ["estaciones.editar", "Estaciones y dispositivos", "devices"], ["sucursal.configurar", "Configurar sucursal (IVA, tipo de cambio)", "storefront"],
     ["usuarios.gestionar", "Gestionar personal", "group"], ["roles.gestionar", "Asignar roles Dueño/Gerente", "admin_panel_settings"],
     ["reportes.ver", "Ver reportes", "bar_chart"], ["dashboard.ver", "Ver tablero del dueño", "dashboard"], ["auditoria.ver", "Ver bitácora de auditoría", "history_edu"],
   ] },

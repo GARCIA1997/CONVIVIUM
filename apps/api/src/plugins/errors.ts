@@ -9,7 +9,6 @@ export class AppError extends Error {
 export const notFound = (what: string) => new AppError(404, "not_found", `${what} no encontrado`);
 export const forbidden = (msg = "Sin permiso") => new AppError(403, "forbidden", msg);
 export const conflict = (code: string, msg: string) => new AppError(409, code, msg);
-export const notImplemented = () => new AppError(501, "not_implemented", "Endpoint definido, pendiente de implementar");
 
 export default fp(async (app) => {
   app.setErrorHandler((err: Error & { validation?: unknown; statusCode?: number }, req, reply) => {
