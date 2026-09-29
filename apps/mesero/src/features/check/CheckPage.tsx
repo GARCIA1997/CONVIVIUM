@@ -4,6 +4,7 @@ import { useRealtime, useSession } from "@convivium/app-shell";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ReadyNotifications } from "../notifications/ReadyNotifications";
+import { ReturnSheet } from "./ReturnSheet";
 
 type Course = "entrada" | "fuerte" | "postre" | "bebida" | "sin_tiempo";
 type Draft = { key: number; product: Product; modifierIds: string[]; note?: string; guest: number; course: Course };
@@ -37,6 +38,8 @@ export function CheckPage() {
   const [draft, setDraft] = useState<Draft[]>([]);
   const [picking, setPicking] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [returning, setReturning] = useState<OrderItem | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(() => client.orders.get(checkId!).then(setCheck), [client, checkId]);
   useEffect(() => {
@@ -196,6 +199,12 @@ export function CheckPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-[#1E2F28]">{mxn(i.unitPrice * i.quantity)}</span>
+                          {i.state === "entregado" && i.unitPrice > 0 && (
+                            <button onClick={() => setReturning(i)} className="px-2 py-0.5 bg-white border border-[#B45A3C]/40 text-[#B45A3C] rounded text-[10px] font-semibold tracking-wide active:scale-95 transition-all flex items-center gap-0.5" type="button">
+                              <span className="material-symbols-outlined text-[12px]">undo</span>
+                              <span>Devolver</span>
+                            </button>
+                          )}
                           {i.state === "listo" && (
                             <button onClick={() => client.orders.transition(i.id, "entregado").then(load)} className="px-2 py-0.5 bg-[#D4AF7C] text-[#1E2F28] rounded text-[10px] font-semibold tracking-wide active:scale-95 transition-all flex items-center gap-0.5 shadow-sm" type="button">
                               <span className="material-symbols-outlined text-[12px]">done_all</span>
@@ -265,6 +274,10 @@ export function CheckPage() {
         </section>
       </main>
 
+      {returning && (
+        <ReturnSheet item={returning} tableLabel={title} onClose={() => setReturning(null)} onDone={(m) => { setReturning(null); setNotice(m); load(); }} />
+      )}
+
       {picking && (
         <ModifierSheet product={picking} guests={guests} guest={guest} course={isBar(picking) ? "bebida" : course}
           onCancel={() => setPicking(null)} onAdd={(ids, note, g) => add(picking, ids, note, g)} />
@@ -273,6 +286,7 @@ export function CheckPage() {
       <div className="fixed bottom-0 left-0 right-0 z-30 px-3 py-2 pb-4 bg-gradient-to-t from-[#EAE6DD] via-[#EAE6DD]/95 to-transparent pointer-events-none">
         <div className="max-w-xl mx-auto pointer-events-auto">
           {error && <p className="text-[11px] text-[#B45A3C] font-medium mb-1 text-center">{error}</p>}
+          {notice && <p onClick={() => setNotice(null)} className="text-[11px] text-[#1E2F28] bg-[#D4AF7C]/30 rounded-full px-3 py-1 font-medium mb-1 text-center">{notice}</p>}
           {draft.length > 0 && (
             <div className="flex gap-1.5 overflow-x-auto custom-scrollbar mb-1.5">
               {draft.map((d) => (

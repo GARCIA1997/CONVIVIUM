@@ -7,7 +7,7 @@ import { ReadyNotifications } from "../notifications/ReadyNotifications";
 const initials = (name: string) => name.split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
 export function MeseroLayout({ children, subheader }: { children: ReactNode; subheader?: ReactNode }) {
-  const { session, logout } = useSession();
+  const { session, logout, client } = useSession();
   return (
     <div className="bg-[#1A1A1A] flex justify-center items-start min-h-screen font-body antialiased selection:bg-[#D4AF7C] selection:text-[#1E2F28] p-0">
       <div className="w-full max-w-[414px] min-h-screen bg-[#F5F3EF] flex flex-col relative shadow-2xl overflow-hidden border border-[#C9B89F]/30 pb-20">
@@ -48,6 +48,12 @@ export function MeseroLayout({ children, subheader }: { children: ReactNode; sub
             <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>table_restaurant</span>
             <span className="text-[10px] font-medium tracking-tight mt-0.5">Mesas</span>
           </NavLink>
+          {client.can("aprobacion.resolver") && (
+            <NavLink to="/capitan" className={({ isActive }) => `flex flex-col items-center justify-center flex-1 py-1 transition-colors ${isActive ? "text-[#D4AF7C] font-medium" : "text-[#C9B89F] opacity-75"}`}>
+              <span className="material-symbols-outlined text-[22px]">supervisor_account</span>
+              <span className="text-[10px] tracking-tight mt-0.5">Capitán</span>
+            </NavLink>
+          )}
           <button onClick={logout} className="flex flex-col items-center justify-center flex-1 py-1 text-[#C9B89F] opacity-75 hover:opacity-100 transition-opacity">
             <div className="w-6 h-6 rounded-full border border-[#D4AF7C]/60 bg-[#14201B] text-[#D4AF7C] flex items-center justify-center text-[10px] font-bold">{initials(session.user.name)}</div>
             <span className="text-[10px] tracking-tight mt-0.5">{session.user.name}</span>

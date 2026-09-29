@@ -74,6 +74,54 @@ export class OrdersService {
       .sort((a, b) => Number(b.status === "pidio_cuenta") - Number(a.status === "pidio_cuenta") || a.openedAt.localeCompare(b.openedAt));
   }
 
+  /** E4-10 · Supervisión del piso para capitán: demoras en pase, carga por mesero y cuentas de barra. */
+  async floorOverview(who: Principal, delayMin = 5) {
+    const checks = await this.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, who.branchId), inArray(schema.checks.status, ["abierta", "pidio_cuenta"])));
+    const ids = checks.map((c) => c.id);
+    const [items, tables, waiters, allTables] = await Promise.all([
+      ids.length ? this.db.select().from(schema.orderItems).where(inArray(schema.orderItems.checkId, ids)) : [],
+      this.db.select().from(schema.tables).where(eq(schema.tables.branchId, who.branchId)),
+      checks.length ? this.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, [...new Set(checks.map((c) => c.waiterId))])) : [],
+      this.db.select({ id: schema.tables.id }).from(schema.tables).where(and(eq(schema.tables.branchId, who.branchId), eq(schema.tables.active, true))),
+    ]);
+    const label = (c: (typeof checks)[number]) => tables.find((t) => t.id === c.tableId)?.label ?? (c.name ? `Barra · ${c.name}` : "");
+    const now = Date.now();
+    const delays = items
+      .filter((i) => i.state === "listo" && i.readyAt && now - i.readyAt.getTime() > delayMin * 60e3)
+      .map((i) => {
+        const c = checks.find((x) => x.id === i.checkId)!;
+        return { itemId: i.id, product: i.productName, quantity: i.quantity, where: label(c), waiterId: c.waiterId, waiterName: waiters.find((w) => w.id === c.waiterId)?.name ?? "", minutes: Math.floor((now - i.readyAt!.getTime()) / 60e3), readyAt: i.readyAt!.toISOString() };
+      })
+      .sort((a, b) => b.minutes - a.minutes);
+    const byWaiter = waiters.map((w) => {
+      const mine = checks.filter((c) => c.waiterId === w.id);
+      const mineItems = items.filter((i) => mine.some((c) => c.id === i.checkId));
+      return {
+        id: w.id,
+        name: w.name,
+        tables: mine.filter((c) => c.kind === "mesa").map(label),
+        checks: mine.length,
+        pendingDelivery: mineItems.filter((i) => i.state === "listo").length,
+        inKitchen: mineItems.filter((i) => i.state === "enviado" || i.state === "en_preparacion").length,
+        billRequested: mine.filter((c) => c.status === "pidio_cuenta").length,
+      };
+    }).sort((a, b) => b.checks - a.checks);
+    const bar = checks.filter((c) => c.kind === "barra").map((c) => {
+      const mine = items.filter((i) => i.checkId === c.id && i.unitPrice > 0 && i.state !== "cancelado" && i.state !== "devuelto");
+      return { checkId: c.id, name: c.name ?? "", total: mine.reduce((s, i) => s + lineTotal(i), 0), summary: mine.map((i) => `${i.quantity}x ${i.productName}`).join(", "), minutes: Math.floor((now - c.openedAt.getTime()) / 60e3) };
+    });
+    const occupied = new Set(checks.map((c) => c.tableId).filter(Boolean)).size;
+    return { delayMin, delays, waiters: byWaiter, bar, occupancy: { occupied, total: allTables.length, billRequested: checks.filter((c) => c.status === "pidio_cuenta").length } };
+  }
+
+  /** Vuelve a avisar al mesero que un producto sigue listo en el pase. */
+  async nudge(who: Principal, itemId: string) {
+    const item = await this.getItem(who, itemId);
+    if (item.state !== "listo") throw conflict("not_ready", "El producto ya no está en el pase");
+    await this.notifyItem(item);
+    return { ok: true };
+  }
+
   async openCheck(who: Principal, body: z.infer<typeof orders.OpenCheckBody>) {
     if (body.kind === "mesa") {
       const [busy] = await this.db

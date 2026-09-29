@@ -19,6 +19,12 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return svc.listOpen(req.user, [...statuses]);
   });
 
+  /** E4-10 · Vista del capitán (requiere poder resolver autorizaciones). */
+  app.get("/floor-overview", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, querystring: z.object({ delayMin: z.coerce.number().int().min(1).max(60).default(5) }) } }, async (req) =>
+    svc.floorOverview(req.user, req.query.delayMin),
+  );
+  app.post("/items/:id/nudge", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, params: IdParam } }, async (req) => svc.nudge(req.user, req.params.id));
+
   app.post("/checks", { onRequest: [app.guard("mesa.abrir")], schema: { tags, body: orders.OpenCheckBody } }, async (req, reply) =>
     reply.status(201).send(await svc.openCheck(req.user, req.body)),
   );
