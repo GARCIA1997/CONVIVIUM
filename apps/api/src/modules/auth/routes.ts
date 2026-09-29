@@ -14,7 +14,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const rows = await db.select().from(schema.userRoles).where(and(eq(schema.userRoles.userId, userId), eq(schema.userRoles.branchId, branchId)));
     const roles = rows.map((r) => r.role) as Role[];
     const accessToken = app.jwt.sign({ userId, tenantId, branchId, roles, deviceId });
-    return { accessToken, user: { id: userId, name, roles }, permissions: [...permissionsOf(roles)], branchId };
+    return { accessToken, user: { id: userId, name, roles }, permissions: [...permissionsOf(roles, (await app.policy.get(tenantId)).overrides)], branchId };
   }
 
   /** E1-04 · Vincula un dispositivo del restaurante con código de 6 dígitos. */
@@ -86,7 +86,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return { ok: true };
   });
 
-  app.get("/me", { onRequest: [app.guard()], schema: { tags: ["auth"] } }, async (req) => ({ ...req.user, permissions: [...permissionsOf(req.user.roles)] }));
+  app.get("/me", { onRequest: [app.guard()], schema: { tags: ["auth"] } }, async (req) => ({ ...req.user, permissions: [...permissionsOf(req.user.roles, (await app.policy.get(req.user.tenantId)).overrides)] }));
 };
 
 export const authModule: ApiModule = { prefix: "auth", plugin };

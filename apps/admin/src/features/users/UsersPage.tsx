@@ -1,37 +1,15 @@
 /* Diseño: design/stitch/admin-usuarios-permisos.html (Stitch). Marcado y clases originales; datos reales. E1-02, E1-05, E1-07. */
 import { client } from "@convivium/app-shell";
 import { DEFAULT_DISCOUNT_CAP, permissionsOf, ROLES, type Permission, type Role } from "@convivium/domain";
+import { GROUPS, ROLE_LABEL } from "./labels";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface User { id: string; name: string; active: boolean; hasPin: boolean; roles: Role[] }
-const ROLE_LABEL: Record<Role, string> = { dueno: "Dueño", gerente: "Gerente", capitan: "Capitán", mesero: "Mesero", cajero: "Cajero", cocina: "Cocina", barra: "Barra", almacenista: "Almacén" };
 const ROLE_CHIP: Partial<Record<Role, string>> = { dueno: "bg-amber-100/70 text-amber-900", gerente: "bg-amber-100/70 text-amber-900", capitan: "bg-stone-200/80 text-stone-800", cocina: "bg-orange-100/60 text-convivium-terracota" };
 const AVATAR: Partial<Record<Role, string>> = { dueno: "bg-convivium-olivo text-convivium-dorado", gerente: "bg-convivium-olivo text-convivium-dorado", capitan: "bg-[#3B2C24] text-amber-200", cocina: "bg-stone-800 text-convivium-dorado" };
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
 const top = (roles: Role[]) => ROLES.find((r) => roles.includes(r)) ?? "mesero";
 
-const GROUPS: { key: string; label: string; perms: [Permission, string, string][] }[] = [
-  { key: "op", label: "Comandas y Cocina", perms: [
-    ["mesa.abrir", "Abrir mesa y asignar comensal", "table_restaurant"], ["comanda.capturar", "Capturar y enviar comanda", "edit_note"],
-    ["comanda.cancelar_no_enviado", "Cancelar producto no enviado", "remove_shopping_cart"], ["comanda.cancelar_enviado", "Cancelar producto ya enviado", "block"],
-    ["comanda.cancelar_preparado", "Cancelar producto preparado", "delete_forever"], ["comanda.devolver", "Registrar devolución", "undo"],
-    ["cortesia.aplicar", "Aplicar cortesía", "redeem"], ["descuento.aplicar", "Aplicar descuento", "percent"], ["aprobacion.resolver", "Resolver solicitudes de autorización", "verified_user"],
-    ["estacion.despachar", "Despachar en estación (KDS)", "skillet"],
-  ] },
-  { key: "caja", label: "Caja y Cobro", perms: [
-    ["caja.abrir", "Abrir caja", "point_of_sale"], ["caja.cobrar", "Cobrar cuentas", "payments"], ["caja.movimiento", "Entradas y retiros de efectivo", "swap_vert"],
-    ["caja.corte_x", "Corte X (parcial)", "receipt_long"], ["caja.corte_z", "Corte Z (cierre)", "lock_clock"], ["cuenta.reabrir", "Reabrir cuenta cobrada", "lock_open"],
-  ] },
-  { key: "inv", label: "Inventario y Compras", perms: [
-    ["inventario.gestionar", "Mermas, traspasos y producción", "inventory_2"], ["inventario.contar", "Conteo físico", "fact_check"], ["inventario.aprobar_ajuste", "Aprobar ajustes de conteo", "rule"],
-    ["compras.proponer_oc", "Proponer orden de compra", "shopping_cart"], ["compras.aprobar_oc", "Aprobar orden de compra", "approval"], ["compras.recibir", "Recibir mercancía", "local_shipping"], ["cxp.pagar", "Pagar a proveedores", "account_balance_wallet"],
-  ] },
-  { key: "admin", label: "Administración", perms: [
-    ["menu.editar", "Editar menú y precios", "restaurant_menu"], ["mesas.editar", "Editar plano de mesas", "grid_view"], ["estaciones.editar", "Estaciones y dispositivos", "devices"],
-    ["usuarios.gestionar", "Gestionar personal", "group"], ["roles.gestionar", "Asignar roles Dueño/Gerente", "admin_panel_settings"],
-    ["reportes.ver", "Ver reportes", "bar_chart"], ["dashboard.ver", "Ver tablero del dueño", "dashboard"], ["auditoria.ver", "Ver bitácora de auditoría", "history_edu"],
-  ] },
-];
 
 export function UsersPage() {
   const session = client.session!;
@@ -44,7 +22,9 @@ export function UsersPage() {
   const load = useCallback(() => client.request<User[]>("GET", "/users").then(setUsers), []);
   useEffect(() => { load(); }, [load]);
 
-  const matrix = useMemo(() => Object.fromEntries(ROLES.map((r) => [r, permissionsOf([r])])) as Record<Role, Set<Permission>>, []);
+  const [roleInfo, setRoleInfo] = useState<{ role: Role; effective: Permission[]; cap: number | null }[]>([]);
+  useEffect(() => { client.request<typeof roleInfo>("GET", "/roles").then(setRoleInfo); }, []);
+  const matrix = useMemo(() => Object.fromEntries(ROLES.map((r) => [r, new Set(roleInfo.find((x) => x.role === r)?.effective ?? permissionsOf([r]))])) as Record<Role, Set<Permission>>, [roleInfo]);
   const shown = users.filter((u) => u.name.toLowerCase().includes(q.toLowerCase()));
   const groups = GROUPS.filter((g) => filter === "all" || g.key === filter);
   const total = GROUPS.reduce((n, g) => n + g.perms.length, 0);
@@ -161,7 +141,8 @@ export function UsersPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {(["mesero", "capitan", "gerente"] as const).map((r) => {
-              const cap = DEFAULT_DISCOUNT_CAP[r];
+              const info = roleInfo.find((x) => x.role === r);
+              const cap = info ? info.cap : DEFAULT_DISCOUNT_CAP[r];
               const main = r === "capitan";
               return (
                 <div key={r} className={main ? "p-4 rounded-lg bg-white border-2 border-convivium-dorado/50 shadow-sm flex flex-col justify-between relative" : "p-4 rounded-lg bg-[#FAF8F5] border border-stone-200 flex flex-col justify-between"}>

@@ -1,5 +1,5 @@
 import { and, eq, inArray, schema } from "@convivium/db";
-import { can, ROLES, type Role } from "@convivium/domain";
+import { ROLES, type Role } from "@convivium/domain";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
@@ -16,8 +16,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
   const tags = ["usuarios"];
   const guard = { onRequest: [app.guard("usuarios.gestionar")] };
 
-  function checkEscalation(actor: Role[], touched: Role[]) {
-    if (touched.some((r) => PRIVILEGED.includes(r)) && !can(actor, "roles.gestionar"))
+  async function checkEscalation(actor: { tenantId: string; roles: Role[] }, touched: Role[]) {
+    if (touched.some((r) => PRIVILEGED.includes(r)) && !(await app.policy.can(actor, "roles.gestionar")))
       throw new AppError(403, "forbidden", "Solo el Dueño puede asignar los roles Dueño o Gerente");
   }
 
@@ -38,7 +38,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   });
 
   app.post("/", { ...guard, schema: { tags, body: z.object({ name: z.string().trim().min(2), roles: RoleList, pin: Pin }) } }, async (req) => {
-    checkEscalation(req.user.roles, req.body.roles);
+    await checkEscalation(req.user, req.body.roles);
     const [u] = await db.insert(schema.users).values({ tenantId: req.user.tenantId, name: req.body.name, pinHash: await bcrypt.hash(req.body.pin, 10) }).returning({ id: schema.users.id });
     await db.insert(schema.userRoles).values(req.body.roles.map((role) => ({ userId: u!.id, branchId: req.user.branchId, role })));
     await recordEvent(db, req.user, { type: "user.created", entity: "user", entityId: u!.id, data: { name: req.body.name, roles: req.body.roles } });
@@ -51,7 +51,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     if (!u) throw new AppError(404, "not_found", "Usuario no encontrado");
     const before = (await db.select().from(schema.userRoles).where(and(eq(schema.userRoles.userId, id), eq(schema.userRoles.branchId, req.user.branchId)))).map((r) => r.role as Role);
     const changed = [...before.filter((r) => !req.body.roles.includes(r)), ...req.body.roles.filter((r) => !before.includes(r))];
-    checkEscalation(req.user.roles, before.includes("dueno") || before.includes("gerente") ? [...changed, ...before] : changed);
+    await checkEscalation(req.user, before.includes("dueno") || before.includes("gerente") ? [...changed, ...before] : changed);
     if (id === req.user.userId && !req.body.active) throw new AppError(400, "self", "No puedes desactivar tu propio usuario");
     await db.transaction(async (tx) => {
       await tx.update(schema.users).set({ name: req.body.name, active: req.body.active }).where(eq(schema.users.id, id));
@@ -65,7 +65,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   /** Cambio de PIN (el nuevo PIN nunca se guarda ni se registra en claro). */
   app.post("/:id/pin", { ...guard, schema: { tags, params: z.object({ id: z.string().uuid() }), body: z.object({ pin: Pin }) } }, async (req) => {
     const roles = (await db.select().from(schema.userRoles).where(and(eq(schema.userRoles.userId, req.params.id), inArray(schema.userRoles.role, PRIVILEGED)))).map((r) => r.role as Role);
-    if (req.params.id !== req.user.userId) checkEscalation(req.user.roles, roles);
+    if (req.params.id !== req.user.userId) await checkEscalation(req.user, roles);
     const r = await db.update(schema.users).set({ pinHash: await bcrypt.hash(req.body.pin, 10) }).where(and(eq(schema.users.id, req.params.id), eq(schema.users.tenantId, req.user.tenantId))).returning({ id: schema.users.id });
     if (!r.length) throw new AppError(404, "not_found", "Usuario no encontrado");
     await recordEvent(db, req.user, { type: "user.pin_changed", entity: "user", entityId: req.params.id, data: {} });

@@ -79,9 +79,9 @@ const plugin: ApiModule["plugin"] = async (app) => {
 
   /** E6-07 · Corte X / Z. El Z exige permiso de gerente: propio o autorizado en sitio con su PIN. */
   app.post("/sessions/current/counts", { onRequest: [app.guard("caja.corte_x")], schema: { tags, body: cash.CashCountBody } }, async (req) => {
-    if (req.body.kind === "Z" && !can(req.user.roles, "caja.corte_z")) {
+    if (req.body.kind === "Z" && !(await app.policy.can(req.user, "caja.corte_z"))) {
       if (!req.body.approverPin) throw forbidden("El corte Z requiere autorización de gerente");
-      const approver = await findApproverByPin(req.user.branchId, req.body.approverPin);
+      const approver = await findApproverByPin(req.user.tenantId, req.user.branchId, req.body.approverPin);
       if (!approver) throw new AppError(401, "bad_pin", "PIN de gerente incorrecto");
       return svc.count(req.user, req.body, approver);
     }
@@ -89,14 +89,15 @@ const plugin: ApiModule["plugin"] = async (app) => {
   });
 
   /** Busca en la sucursal un usuario con permiso de corte Z cuyo PIN coincida. */
-  async function findApproverByPin(branchId: string, pin: string) {
+  async function findApproverByPin(tenantId: string, branchId: string, pin: string) {
+    const { overrides } = await app.policy.get(tenantId);
     const rows = await db
       .select({ id: schema.users.id, pinHash: schema.users.pinHash, role: schema.userRoles.role })
       .from(schema.users)
       .innerJoin(schema.userRoles, eq(schema.userRoles.userId, schema.users.id))
       .where(and(eq(schema.userRoles.branchId, branchId), eq(schema.users.active, true)));
     for (const r of rows) {
-      if (!can([r.role as Role], "caja.corte_z") || !r.pinHash) continue;
+      if (!can([r.role as Role], "caja.corte_z", overrides) || !r.pinHash) continue;
       if (await bcrypt.compare(pin, r.pinHash)) return r.id;
     }
     return null;
