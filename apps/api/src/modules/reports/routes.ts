@@ -2,18 +2,19 @@ import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
 import { breakdownIncludedTaxes, classifyMenu, menuAdvice } from "@convivium/domain";
 import { lineTotal } from "../orders/mapper.js";
 import { InventoryService } from "../inventory/service.js";
+import { forbidden } from "../../plugins/errors.js";
+import type { Principal } from "../../plugins/auth.js";
+import { prepTimesReport, salesReport, tipsReport, type Scope } from "./analytics.js";
 
 /** Importe de un producto sin importar su estado (para medir lo cancelado o devuelto). */
 const lineTotalRaw = (i: { unitPrice: number; quantity: number; modifiers: { priceDelta: number }[] }) => (i.unitPrice + i.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * i.quantity;
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
-import { notImplemented } from "../../plugins/errors.js";
 
 const Range = z.object({ from: z.string().datetime().optional(), to: z.string().datetime().optional() });
 
 const plugin: ApiModule["plugin"] = async (app) => {
   const tags = ["reportes"];
-  const todo = async () => { throw notImplemented(); };
 
   /** E9-01 · Dashboard en vivo (día en curso) con comparativo contra el mismo día de la semana anterior. */
   app.get("/live", { onRequest: [app.guard("reportes.ver")], schema: { tags } }, async (req) => {
@@ -118,7 +119,47 @@ const plugin: ApiModule["plugin"] = async (app) => {
     };
   });
 
-  app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]) }) } }, todo); // E9-02
+  /** `branch`: otra sucursal o "todas" (E9-06). Solo quien ve el tablero del dueño puede salir de la suya. */
+  const Period = z.object({ days: z.coerce.number().int().min(1).max(365).default(7), branch: z.union([z.literal("todas"), z.string().uuid()]).optional() });
+  const scopeOf = async (req: { user: Principal; query: { days: number; branch?: string } }): Promise<Scope> => {
+    const branches = await app.db.select({ id: schema.branches.id, tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.tenantId, req.user.tenantId));
+    let branchIds = [req.user.branchId];
+    if (req.query.branch && req.query.branch !== req.user.branchId) {
+      if (!(await app.policy.can(req.user, "dashboard.ver"))) throw forbidden("Solo el dueño compara sucursales");
+      branchIds = req.query.branch === "todas" ? branches.map((b) => b.id) : branches.filter((b) => b.id === req.query.branch).map((b) => b.id);
+      if (!branchIds.length) throw forbidden("Sucursal de otra empresa");
+    }
+    const from = new Date(Date.now() - req.query.days * 864e5);
+    if (req.query.days === 1) from.setHours(0, 0, 0, 0);
+    const tz = branches.find((b) => b.id === branchIds[0])?.tz ?? "America/Mexico_City";
+    return { tenantId: req.user.tenantId, branchIds, from, to: new Date(), timezone: tz };
+  };
+
+  /** E9-06 · Comparativo de sucursales: venta, ticket, propinas, puntualidad de cocina y excepciones. */
+  app.get("/branches", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Period.pick({ days: true }) } }, async (req) => {
+    const branches = await app.db.select().from(schema.branches).where(eq(schema.branches.tenantId, req.user.tenantId));
+    const base = await scopeOf({ user: req.user, query: { days: req.query.days } });
+    const rows = await Promise.all(branches.map(async (b) => {
+      const s = { ...base, branchIds: [b.id], timezone: b.timezone };
+      const [sales, tips, times, exc, lastSync] = await Promise.all([
+        salesReport(app.db, s, "categoria"), tipsReport(app.db, s), prepTimesReport(app.db, s),
+        app.db.select({ n: sql<number>`count(*)::int` }).from(schema.events).where(and(eq(schema.events.branchId, b.id), inArray(schema.events.type, ["item.cancelled", "item.returned"]), gte(schema.events.createdAt, s.from))),
+        app.db.select({ at: sql<string | null>`max(${schema.devices.lastSeenAt})` }).from(schema.devices).where(and(eq(schema.devices.branchId, b.id), eq(schema.devices.kind, "nodo"))),
+      ]);
+      return {
+        branchId: b.id, name: b.name,
+        sales: sales.summary.total, checks: sales.summary.checks, avgTicket: sales.summary.avgTicket, perGuest: sales.summary.perGuest,
+        tipsPct: tips.summary.pctOfSales, onTimePct: times.summary.onTimePct, p90Sec: times.summary.p90Sec,
+        exceptions: exc[0]?.n ?? 0, topCategory: sales.rows[0]?.label ?? null, lastSyncAt: lastSync[0]?.at ?? null,
+      };
+    }));
+    const total = rows.reduce((n, r) => n + r.sales, 0);
+    return { days: req.query.days, total, branches: rows.map((r) => ({ ...r, sharePct: total ? Math.round((r.sales / total) * 1000) / 10 : 0 })).sort((a, b) => b.sales - a.sales) };
+  });
+
+  /** E9-02 · Ventas por producto, categoría, mesero, estación, forma de pago u hora. */
+  app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]).default("producto") }) } }, async (req) =>
+    salesReport(app.db, await scopeOf(req), req.query.groupBy));
   /** E9-03 · Devoluciones, cancelaciones, cortesías y descuentos por motivo y por empleado, con radar de desviación. */
   app.get("/exceptions", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: z.object({ days: z.coerce.number().int().min(1).max(90).default(7) }) } }, async (req) => {
     const { tenantId, branchId } = req.user;
@@ -166,7 +207,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
     }).sort((a, b) => b.amount - a.amount);
     return { days: req.query.days, totals: { devolucion: sum("devolucion"), cancelacion: sum("cancelacion"), cortesia: sum("cortesia"), descuento: sum("descuento") }, byReason, employees, rows };
   });
-  app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo); // E9-04
+  /** E9-04 · Tiempos de preparación por estación y producto (promedio y percentiles). */
+  app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period } }, async (req) => prepTimesReport(app.db, await scopeOf(req)));
   /** E9-05 · Ingeniería de menú: popularidad vs. margen, costo teórico vs. real (kardex) y recomendaciones. */
   app.get("/menu-engineering", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Range.extend({ days: z.coerce.number().int().min(1).max(365).default(30) }) } }, async (req) => {
     const { db } = app;
@@ -225,7 +267,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
       items: items.map((i) => ({ ...i, advice: menuAdvice(i, marginThreshold, ivaFactor) })),
     };
   });
-  app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo);
+  /** Propinas por mesero y forma de pago. */
+  app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period } }, async (req) => tipsReport(app.db, await scopeOf(req)));
 };
 
 export const reportsModule: ApiModule = { prefix: "reports", plugin };

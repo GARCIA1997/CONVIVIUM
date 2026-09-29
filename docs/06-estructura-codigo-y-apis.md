@@ -117,6 +117,12 @@ Usuarios de prueba, PINs y código de vinculación: ver comentario al inicio de 
 - **Seguridad**: solo tokens de dispositivos tipo `nodo`, vigentes y de esa sucursal; se valida que cada fila (y la que
   reemplaza) sea de la misma empresa; solo tablas de la lista blanca (`packages/db/src/sync.ts`).
 
+- **Operación nodo → nube (reportes consolidados, E9-06)**: `checks`, `order_items`, `payments`, `tips`, `discounts`,
+  `approvals`, `cash_sessions`, `cash_counts`, `cash_movements`, `stock` y `stock_movements` usan el mismo registro con
+  `kind = 'ops'`. Solo suben (el nodo es la autoridad); la nube valida empresa y sucursal y nunca los regresa. Así los
+  reportes corren igual en la nube por sucursal (`?branch=<id>`), consolidados (`?branch=todas`) o comparados
+  (`GET /v1/reports/branches`). Solo el Dueño sale de su sucursal. El historial anterior a la migración 0013 no se replica.
+
 **Vincular un nodo nuevo** (base vacía con migraciones aplicadas):
 
 1. En el admin de la nube → Estaciones y dispositivos → *Generar código*.
@@ -126,6 +132,13 @@ Usuarios de prueba, PINs y código de vinculación: ver comentario al inicio de 
 
 ## 7. Siguientes incrementos sugeridos
 
-1. Proyección de eventos en la nube para reportes consolidados multi-sucursal (E9-06).
-2. Pruebas de integración de la API en CI (incluida la sincronización con dos bases).
+1. Replicar compras y cuentas por pagar (hoy se capturan en nodo o nube indistintamente).
+2. Depurar en el nodo el registro de cambios ya subidos.
 3. Instalador del mini-PC (Docker Compose con nodo, Postgres y PWA) y despliegue de la nube en Hostinger.
+
+## 8. Pruebas
+
+- `pnpm -r test`: reglas puras de `domain` y pruebas de integración de la API (`apps/api/test`).
+- Las de la API recrean `convivium_test` (con seed) y `convivium_test_node` en cada corrida y levantan la API en memoria.
+  Con `LOG_LEVEL=error pnpm --filter @convivium/api test` se ven los errores del servidor.
+- CI: `.github/workflows/ci.yml` (Postgres 16, typecheck y pruebas).

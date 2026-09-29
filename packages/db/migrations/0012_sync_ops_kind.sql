@@ -1,0 +1,1 @@
+ALTER TABLE "config_changes" ADD COLUMN "kind" text DEFAULT 'config' NOT NULL;
