@@ -137,10 +137,26 @@ describe("caja e inventario", () => {
     const moved = stockAfter.filter((a) => a.stock < stockBefore.find((b) => b.name === a.name)!.stock);
     expect(moved.length).toBeGreaterThan(0);
     // El cajero no tiene corte Z: sin PIN se rechaza, con PIN de gerente pasa.
+    // Una cuenta cobrada no se vuelve a cobrar.
+    expect((await api("POST", `/cash/checks/${id}/pay`, cajero, { payments: [{ method: "tarjeta", amount: total }] })).status).toBe(409);
     const counted = { efectivo_mxn: 100000 + total };
     expect((await api("POST", "/cash/sessions/current/counts", cajero, { kind: "Z", counted })).status).toBe(403);
     const z = await api("POST", "/cash/sessions/current/counts", cajero, { kind: "Z", counted, approverPin: "2222" });
     expect(z.status, JSON.stringify(z.body)).toBeLessThan(300);
+  });
+});
+
+describe("dólares con el tipo de cambio de la sucursal", () => {
+  it("ignora el tipo de cambio que manda el dispositivo", async () => {
+    await api("POST", "/cash/sessions", cajero, { registerId: (await deviceToken()).id, openingFloat: 0 });
+    const id = await openTable("M8");
+    await addItem(id, "Tacos al pastor");
+    const total = (await getCheck(id)).total;
+    // 5 USD a 17.20 = $86 + el resto en pesos cuadra exacto. Si el servidor aceptara el tipo de cambio
+    // inflado que manda el dispositivo (100 MXN/USD), habría un "cambio" imposible y respondería 400.
+    const r = await api("POST", `/cash/checks/${id}/pay`, cajero, { payments: [{ method: "efectivo_usd", amount: 500, exchangeRate: 10000 }, { method: "efectivo_mxn", amount: total - 8600 }] });
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ paid: total, change: 0, checkStatus: "cobrada" });
   });
 });
 
@@ -152,7 +168,7 @@ describe("reportes (E9-02, E9-04)", () => {
     expect(sum(byProduct)).toBe(byProduct.summary.total);
     expect(sum(byPay)).toBe(byProduct.summary.total); // el cambio entregado no cuenta como venta
     expect(sum(byHour)).toBe(byProduct.summary.total);
-    expect(byPay.rows.map((r: any) => r.key)).toEqual(["efectivo_mxn"]);
+    expect(byPay.rows.map((r: any) => r.key).sort()).toEqual(["efectivo_mxn", "efectivo_usd"]);
   });
   it("tiempos de preparación con percentiles por estación", async () => {
     const r = (await api("GET", "/reports/prep-times?days=1", gerente)).body;

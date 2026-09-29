@@ -1,32 +1,34 @@
-# Nube CONVIVIUM en Hostinger VPS: API (modo cloud) + Postgres + Caddy (TLS automático).
+# Nube CONVIVIUM (VPS): API modo cloud (admin remoto, sincronización, menú digital) + Postgres + Caddy (TLS automático).
+# Uso: cp .env.example .env && docker compose up -d --build
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: convivium
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
       POSTGRES_DB: convivium
     volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U convivium"], interval: 5s, retries: 20 }
   api:
     build: { context: ../.., dockerfile: apps/api/Dockerfile }
+    image: convivium/api:${VERSION:-local}
     restart: unless-stopped
     environment:
       CONVIVIUM_MODE: cloud
-      PORT: 4000
       DATABASE_URL: postgres://convivium:${POSTGRES_PASSWORD}@postgres:5432/convivium
-      JWT_SECRET: ${JWT_SECRET}
-    depends_on: [postgres]
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      PUBLIC_MENU_URL: ${PUBLIC_MENU_URL:-}
+    depends_on: { postgres: { condition: service_healthy } }
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443"]
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - web:/srv/web:ro
-      - caddy_data:/data
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Define APP_DOMAIN en .env}
+      MENU_DOMAIN: ${MENU_DOMAIN:?Define MENU_DOMAIN en .env}
+    volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data]
     depends_on: [api]
 volumes:
   pgdata:
   caddy_data:
-  web:

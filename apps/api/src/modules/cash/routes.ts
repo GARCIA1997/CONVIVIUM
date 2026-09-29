@@ -44,7 +44,12 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const s = await currentSession(req.user.branchId, req.user.userId);
     if (!s) throw new AppError(409, "no_session", "No hay caja abierta");
     const check = await orders.getCheck(req.user, req.params.id);
+    if (check.status === "cobrada" || check.status === "cancelada") throw new AppError(409, "check_closed", "La cuenta ya está cerrada");
     const prev = await db.select().from(schema.payments).where(eq(schema.payments.checkId, check.id));
+    // El tipo de cambio lo fija la sucursal, nunca el dispositivo.
+    const [branch] = await db.select({ usdRate: schema.branches.usdRate }).from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
+    if (req.body.payments.some((p) => p.method === "efectivo_usd") && !branch?.usdRate) throw new AppError(400, "no_usd_rate", "La sucursal no tiene tipo de cambio configurado");
+    req.body.payments = req.body.payments.map((p) => (p.method === "efectivo_usd" ? { ...p, exchangeRate: branch!.usdRate! } : p));
     const toMxn = (p: { method: string; amount: number; exchangeRate?: number | null }) =>
       p.method === "efectivo_usd" ? Math.round((p.amount * (p.exchangeRate ?? 0)) / 100) : p.amount;
     const prevPaid = prev.reduce((sum, p) => sum + toMxn(p), 0);

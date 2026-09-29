@@ -14,6 +14,8 @@ const Env = z.object({
   /** Token del nodo para autenticarse con la nube (se obtiene al vincular el nodo). */
   NODE_TOKEN: z.string().optional(),
   SYNC_INTERVAL_MS: z.coerce.number().default(10_000),
+  /** Aplica migraciones pendientes al arrancar (recomendado en producción). */
+  AUTO_MIGRATE: z.enum(["true", "false"]).default("true").transform((v) => v === "true"),
 });
 
 export const config = Env.parse(process.env);

@@ -58,7 +58,6 @@ const cloudPlugin: ApiModule["plugin"] = async (app) => {
       .values(req.body.events.map((e) => ({ ...e, data: e.data as object, createdAt: new Date(e.createdAt), syncedAt: new Date().toISOString() })))
       .onConflictDoNothing({ target: schema.events.id })
       .returning({ id: schema.events.id });
-    // TODO: proyectar eventos a tablas de reporte consolidadas por sucursal (E9-06).
     return { accepted: rows.length };
   });
 

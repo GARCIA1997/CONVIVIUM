@@ -39,10 +39,14 @@ export async function salesReport(db: Db, s: Scope, groupBy: SalesGroup) {
       const ps = pays.filter((p) => p.checkId === c.id);
       const ct = items.filter((i) => i.checkId === c.id).reduce((n, i) => n + lineTotal(i), 0);
       const tendered = ps.reduce((n, p) => n + (p.method === "efectivo_usd" ? Math.round((p.amount * (p.exchangeRate ?? 0)) / 100) : p.amount), 0) || 1;
-      for (const p of ps) {
+      // Reparto proporcional; el último pago absorbe el residuo del redondeo para que la cuenta cuadre al centavo.
+      let assigned = 0;
+      ps.forEach((p, i) => {
         const mxn = p.method === "efectivo_usd" ? Math.round((p.amount * (p.exchangeRate ?? 0)) / 100) : p.amount;
-        add(p.method, LABEL[p.method] ?? p.method, Math.round((ct * mxn) / tendered), 0, c.id);
-      }
+        const share = i === ps.length - 1 ? ct - assigned : Math.round((ct * mxn) / tendered);
+        assigned += share;
+        add(p.method, LABEL[p.method] ?? p.method, share, 0, c.id);
+      });
       if (!ps.length && ct) add("sin_pago", "Sin pago registrado", ct, 0, c.id);
     }
   } else {

@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 
 type Method = "efectivo_mxn" | "tarjeta" | "efectivo_usd";
 type Filter = "todas" | "por_cobrar" | "consumo";
-const USD_RATE = 1720; // TODO: tipo de cambio configurado en la sucursal
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
 const elapsed = (iso: string) => {
   const m = Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / 60000));
@@ -25,6 +24,9 @@ export function ChecksView({ onCount, initialCheckId }: { onCount: (n: number) =
   const [amounts, setAmounts] = useState<Record<Method, string>>({ efectivo_mxn: "", tarjeta: "", efectivo_usd: "" });
   const [cardRef, setCardRef] = useState("");
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // Tipo de cambio de la sucursal (0 = no se aceptan dólares).
+  const [usdRate, setUsdRate] = useState(0);
+  useEffect(() => { client.request<{ usdRate: number | null }>("GET", "/branch").then((b) => setUsdRate(b.usdRate ?? 0)); }, [client]);
 
   const load = useCallback(() => client.orders.openChecks().then((l) => { setList(l); onCount(l.length); }), [client, onCount]);
   useEffect(() => { load(); }, [load]);
@@ -48,7 +50,7 @@ export function ChecksView({ onCount, initialCheckId }: { onCount: (n: number) =
   const taxes = check ? breakdownIncludedTaxes(check.total, { ivaPct: 16, iepsPct: 0 }) : null;
   const tip = check ? Math.round((check.total * tipPct) / 100) : 0;
   const cents = (v: string) => Math.round(Number(v || 0) * 100);
-  const entered = cents(amounts.efectivo_mxn) + cents(amounts.tarjeta) + Math.round((cents(amounts.efectivo_usd) * USD_RATE) / 100);
+  const entered = cents(amounts.efectivo_mxn) + cents(amounts.tarjeta) + Math.round((cents(amounts.efectivo_usd) * usdRate) / 100);
   const due = check ? check.total + tip : 0;
   const change = Math.max(0, entered - due);
 
@@ -79,7 +81,7 @@ export function ChecksView({ onCount, initialCheckId }: { onCount: (n: number) =
         ["tarjeta", card - tipCard],
         ["efectivo_usd", cents(amounts.efectivo_usd)],
         ["efectivo_mxn", cash - tipCash],
-      ] as const).filter(([, a]) => a > 0).map(([method, amount]) => ({ method, amount, ...(method === "efectivo_usd" ? { exchangeRate: USD_RATE } : {}), ...(method === "tarjeta" && cardRef ? { reference: cardRef } : {}) }));
+      ] as const).filter(([, a]) => a > 0).map(([method, amount]) => ({ method, amount, ...(method === "efectivo_usd" ? { exchangeRate: usdRate } : {}), ...(method === "tarjeta" && cardRef ? { reference: cardRef } : {}) }));
       const r = await client.cash.pay(check.id, { payments, ...(tip ? { tip: { amount: tip, method: tipCash >= tipCard ? "efectivo_mxn" : "tarjeta" } } : {}) });
       setMsg({ ok: r.checkStatus === "cobrada", text: r.checkStatus === "cobrada" ? `Cobro registrado · cambio ${money(r.change)}` : `Pago parcial registrado · faltan ${money(check.total - r.paid)}` });
       setCheck(null); load();
@@ -322,7 +324,7 @@ export function ChecksView({ onCount, initialCheckId }: { onCount: (n: number) =
                         </div>
                       </div>
                     </div>
-                    <PayBox icon="currency_exchange" title="Dólares USD (Efectivo)" tag={`T.C. ${money(USD_RATE)} MXN`} value={amounts.efectivo_usd} onChange={(v) => setAmounts((a) => ({ ...a, efectivo_usd: v }))} unit="USD" />
+                    {usdRate > 0 && <PayBox icon="currency_exchange" title="Dólares USD (Efectivo)" tag={`T.C. ${money(usdRate)} MXN`} value={amounts.efectivo_usd} onChange={(v) => setAmounts((a) => ({ ...a, efectivo_usd: v }))} unit="USD" />}
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-stone-100 border border-arena/80 space-y-2">

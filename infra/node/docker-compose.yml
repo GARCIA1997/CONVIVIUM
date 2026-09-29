@@ -1,30 +1,37 @@
 # Nodo local de sucursal (mini-PC preinstalado por CONVIVIUM).
-# Sirve API (modo edge) + las 4 PWA en la red WiFi del restaurante: https://convivium.local
+# Sirve la API (modo edge) y las 4 PWA en la WiFi del restaurante: https://convivium.local
+# Uso: cp .env.example .env && docker compose up -d --build
 services:
   postgres:
     image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_USER: convivium
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
       POSTGRES_DB: convivium
     volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U convivium"], interval: 5s, retries: 20 }
   api:
-    image: ghcr.io/convivium/api:${VERSION:-latest}
+    build: { context: ../.., dockerfile: apps/api/Dockerfile }
+    image: convivium/api:${VERSION:-local}
     restart: always
     environment:
       CONVIVIUM_MODE: edge
-      PORT: 4000
       DATABASE_URL: postgres://convivium:${POSTGRES_PASSWORD}@postgres:5432/convivium
-      JWT_SECRET: ${JWT_SECRET}
-      CLOUD_URL: ${CLOUD_URL}
-      BRANCH_ID: ${BRANCH_ID}
-    depends_on: [postgres]
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      CLOUD_URL: ${CLOUD_URL:-}
+      NODE_TOKEN: ${NODE_TOKEN:-}
+      BRANCH_ID: ${BRANCH_ID:-}
+      PUBLIC_MENU_URL: ${PUBLIC_MENU_URL:-}
+    # Solo en el propio equipo: Caddy (red del host) lo publica con TLS a la WiFi.
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { postgres: { condition: service_healthy } }
   caddy:
     image: caddy:2-alpine
     restart: always
     network_mode: host
     volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data]
+    depends_on: [api]
 volumes:
   pgdata:
   caddy_data:

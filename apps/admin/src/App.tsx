@@ -11,6 +11,7 @@ import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { BranchPage } from "./features/branch/BranchPage";
 import { MenuGeneratorPage } from "./features/menu/MenuGeneratorPage";
 import { NewPurchasePage } from "./features/purchasing/NewPurchasePage";
 import { SuppliersPage } from "./features/purchasing/SuppliersPage";
@@ -34,6 +35,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "generador-menu", label: "Generador de menú", icon: "menu_book", perm: "menu.editar", element: <MenuGeneratorPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", element: <FloorEditorPage /> },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
+  { path: "sucursal", label: "Sucursal", icon: "storefront", perm: "sucursal.configurar", element: <BranchPage /> },
   { path: "usuarios", label: "Usuarios", icon: "group", perm: "usuarios.gestionar", element: <UsersPage /> },
   { path: "roles", label: "Editor de roles", icon: "admin_panel_settings", perm: "roles.gestionar", element: <RolesPage /> },
   { path: "inventario", label: "Insumos y almacenes", icon: "inventory_2", perm: "inventario.contar", element: <InventoryPage /> },
@@ -60,24 +62,9 @@ export function App() {
         <Routes>
           <Route path="/" element={<Navigate to={`/${visible[0]?.path ?? "inicio"}`} />} />
           {client.can("compras.proponer_oc") && <Route path="/compras/nueva" element={<NewPurchasePage />} />}
-          {visible.map((s) => <Route key={s.path} path={`/${s.path}`} element={s.element ?? <Pending title={s.label} design={s.design!} />} />)}
+          {visible.map((s) => <Route key={s.path} path={`/${s.path}`} element={s.element} />)}
         </Routes>
       </AdminLayout>
     </BrowserRouter>
-  );
-}
-
-function Pending({ title, design }: { title: string; design: string }) {
-  return (
-    <>
-      <AdminHeader />
-      <main className="flex-1 p-8">
-        <h1 className="font-display text-3xl font-bold text-neutral-900 tracking-tight">{title}</h1>
-        <div className="mt-6 max-w-xl bg-white border border-[#C9B89F]/60 rounded-xl p-5 text-sm text-neutral-600 flex items-start gap-3">
-          <span className="material-symbols-outlined text-[#D4AF7C]">design_services</span>
-          <p>Diseño listo en <code className="font-mono text-xs bg-stone-100 px-1.5 py-0.5 rounded">design/stitch/{design}.html</code>. Se conecta a datos en un incremento posterior.</p>
-        </div>
-      </main>
-    </>
   );
 }
