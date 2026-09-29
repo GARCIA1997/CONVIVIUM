@@ -12,6 +12,7 @@ import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
+import { FloorEditorPage } from "./features/floor/FloorEditorPage";
 import { StationsPage } from "./features/stations/StationsPage";
 import { RolesPage } from "./features/users/RolesPage";
 import { UsersPage } from "./features/users/UsersPage";
@@ -24,7 +25,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "inicio", label: "Inicio", icon: "dashboard", perm: "reportes.ver", element: <DashboardPage /> },
   { path: "aprobaciones", label: "Aprobaciones", icon: "verified", perm: "aprobacion.resolver", element: <ApprovalsPage /> },
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
-  { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", design: "admin-editor-plano" },
+  { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", element: <FloorEditorPage /> },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
   { path: "usuarios", label: "Usuarios", icon: "group", perm: "usuarios.gestionar", element: <UsersPage /> },
   { path: "roles", label: "Editor de roles", icon: "admin_panel_settings", perm: "roles.gestionar", element: <RolesPage /> },
