@@ -50,6 +50,41 @@
       "when": 1790707741659,
       "tag": "0006_producto_descripcion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790708210870,
+      "tag": "0007_sync_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790708211403,
+      "tag": "0008_sync_config_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790708307210,
+      "tag": "0009_sync_row_tenant",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790708467075,
+      "tag": "0010_sync_quote_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790708527389,
+      "tag": "0011_sync_row_alias",
+      "breakpoints": true
     }
   ]
 }
