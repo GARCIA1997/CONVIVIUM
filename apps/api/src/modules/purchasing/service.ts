@@ -54,7 +54,7 @@ export class PurchasingService {
     const [prices, orders, receipts, payables] = await Promise.all([
       this.db.select({ id: schema.supplierPrices.id, ingredientId: schema.supplierPrices.ingredientId, unitPrice: schema.supplierPrices.unitPrice, validFrom: schema.supplierPrices.validFrom, name: schema.ingredients.name, purchaseUnit: schema.ingredients.purchaseUnit })
         .from(schema.supplierPrices).innerJoin(schema.ingredients, eq(schema.ingredients.id, schema.supplierPrices.ingredientId))
-        .where(eq(schema.supplierPrices.supplierId, id)).orderBy(desc(schema.supplierPrices.validFrom), desc(schema.supplierPrices.id)),
+        .where(eq(schema.supplierPrices.supplierId, id)).orderBy(desc(schema.supplierPrices.validFrom), desc(schema.supplierPrices.createdAt)),
       this.db.select().from(schema.purchaseOrders).where(and(eq(schema.purchaseOrders.supplierId, id), eq(schema.purchaseOrders.tenantId, who.tenantId))),
       this.db.select().from(schema.receipts).where(and(eq(schema.receipts.supplierId, id), gte(schema.receipts.createdAt, since))),
       this.db.select().from(schema.payables).where(and(eq(schema.payables.supplierId, id), eq(schema.payables.tenantId, who.tenantId))),

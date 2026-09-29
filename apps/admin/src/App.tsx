@@ -11,6 +11,9 @@ import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { MenuGeneratorPage } from "./features/menu/MenuGeneratorPage";
+import { NewPurchasePage } from "./features/purchasing/NewPurchasePage";
+import { SuppliersPage } from "./features/purchasing/SuppliersPage";
 import { MenuEngineeringPage } from "./features/reports/MenuEngineeringPage";
 import { PromotionsPage } from "./features/promotions/PromotionsPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
@@ -28,6 +31,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "aprobaciones", label: "Aprobaciones", icon: "verified", perm: "aprobacion.resolver", element: <ApprovalsPage /> },
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
   { path: "promociones", label: "Promociones", icon: "local_offer", perm: "menu.editar", element: <PromotionsPage /> },
+  { path: "generador-menu", label: "Generador de menú", icon: "menu_book", perm: "menu.editar", element: <MenuGeneratorPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", element: <FloorEditorPage /> },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
   { path: "usuarios", label: "Usuarios", icon: "group", perm: "usuarios.gestionar", element: <UsersPage /> },
@@ -36,6 +40,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "recetas", label: "Recetas", icon: "menu_book", perm: "inventario.contar", element: <RecipesPage /> },
   { path: "conteo", label: "Conteo físico", icon: "fact_check", perm: "inventario.contar", element: <CountPage /> },
   { path: "compras", label: "Compras", icon: "shopping_cart", perm: "compras.proponer_oc", element: <PurchasesPage /> },
+  { path: "proveedores", label: "Proveedores", icon: "storefront", perm: "compras.proponer_oc", element: <SuppliersPage /> },
   { path: "recepcion", label: "Recepción", icon: "local_shipping", perm: "compras.recibir", element: <ReceptionPage /> },
   { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", element: <PayablesPage /> },
   { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", element: <ReportsPage /> },
@@ -54,6 +59,7 @@ export function App() {
       <AdminLayout session={session} sections={visible} onLogout={logout}>
         <Routes>
           <Route path="/" element={<Navigate to={`/${visible[0]?.path ?? "inicio"}`} />} />
+          {client.can("compras.proponer_oc") && <Route path="/compras/nueva" element={<NewPurchasePage />} />}
           {visible.map((s) => <Route key={s.path} path={`/${s.path}`} element={s.element ?? <Pending title={s.label} design={s.design!} />} />)}
         </Routes>
       </AdminLayout>

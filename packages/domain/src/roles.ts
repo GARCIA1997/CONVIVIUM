@@ -20,6 +20,7 @@ const INHERITS: Record<Role, Role[]> = {
 export const PERMISSIONS = [
   // Operación
   "mesa.abrir",
+  "pedido_llevar.abrir",
   "comanda.capturar",
   "comanda.cancelar_no_enviado",
   "comanda.cancelar_enviado",
@@ -60,9 +61,9 @@ export type Permission = (typeof PERMISSIONS)[number];
 
 /** Permisos propios de cada rol (sin contar los heredados). */
 const OWN: Record<Role, Permission[]> = {
-  mesero: ["mesa.abrir", "comanda.capturar", "comanda.cancelar_no_enviado", "comanda.devolver", "cuenta_barra.abrir"],
+  mesero: ["mesa.abrir", "pedido_llevar.abrir", "comanda.capturar", "comanda.cancelar_no_enviado", "comanda.devolver", "cuenta_barra.abrir"],
   capitan: ["comanda.cancelar_enviado", "cortesia.aplicar", "descuento.aplicar", "aprobacion.resolver"],
-  cajero: ["caja.abrir", "caja.cobrar", "caja.movimiento", "caja.corte_x"],
+  cajero: ["caja.abrir", "caja.cobrar", "caja.movimiento", "caja.corte_x", "pedido_llevar.abrir"],
   cocina: ["estacion.despachar"],
   barra: ["estacion.despachar", "cuenta_barra.abrir"],
   // Almacenista: sin pagos a proveedores ni aprobación de sus propios ajustes (separación de funciones).

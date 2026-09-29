@@ -2,10 +2,10 @@
 import { useSession } from "@convivium/app-shell";
 import type { ReactNode } from "react";
 
-export type CajaView = "cuentas" | "corte";
+export type CajaView = "cuentas" | "llevar" | "corte";
 const initials = (name: string) => name.split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
-export function CajaLayout(props: { view: CajaView; onView: (v: CajaView) => void; openCount: number; sessionOpen: boolean; children: ReactNode }) {
+export function CajaLayout(props: { view: CajaView; onView: (v: CajaView) => void; openCount: number; takeoutCount?: number; sessionOpen: boolean; children: ReactNode }) {
   const { session, logout } = useSession();
   const item = (v: CajaView, icon: string, label: string, badge?: number) =>
     props.view === v ? (
@@ -46,6 +46,7 @@ export function CajaLayout(props: { view: CajaView; onView: (v: CajaView) => voi
               {props.sessionOpen && (
                 <nav className="mt-6 flex flex-col gap-1.5">
                   {item("cuentas", "receipt_long", "Cuentas", props.openCount)}
+                  {item("llevar", "takeout_dining", "Para llevar", props.takeoutCount)}
                   {item("corte", "calculate", "Corte de Turno")}
                 </nav>
               )}

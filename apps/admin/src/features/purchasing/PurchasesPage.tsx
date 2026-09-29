@@ -1,7 +1,7 @@
 /* Diseño: design/stitch/admin-compras-oc.html (Stitch). Marcado y clases originales; datos reales. E7-12, E8-01, E8-02. */
 import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PurchasingApi, type PurchaseOrder, type Suggestion } from "./api";
 
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
@@ -29,8 +29,11 @@ export function PurchasesPage() {
     setSug(s);
     setQty(Object.fromEntries(s.map((x) => [x.ingredientId, x.suggestedQty])));
     setOrders(o);
+    return o;
   }, []);
-  useEffect(() => { load(); }, [load]);
+  const [params] = useSearchParams();
+  // ?oc=<id>: abre la orden recién creada desde "Nueva compra".
+  useEffect(() => { load().then((o) => { const id = params.get("oc"); const found = id && o.find((x) => x.id === id); if (found) setCurrent(found); }); }, [load, params]);
 
   const bySupplier = useMemo(() => {
     const m = new Map<string, { name: string; items: Suggestion[] }>();
@@ -67,7 +70,13 @@ export function PurchasesPage() {
               Mínimos y máximos por insumo
             </span>
           </div>
-          <h1 className="font-headline text-2xl font-bold text-olivo tracking-tight">Sugerencia de Reabastecimiento</h1>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="font-headline text-2xl font-bold text-olivo tracking-tight">Sugerencia de Reabastecimiento</h1>
+            <div className="flex gap-2">
+              <button onClick={() => nav("/proveedores")} className="px-3 py-2 rounded-lg border border-arena bg-white text-olivo text-xs font-semibold flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">storefront</span>Proveedores</button>
+              <button onClick={() => nav("/compras/nueva")} className="px-3 py-2 rounded-lg bg-olivo text-dorado text-xs font-semibold flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">add_shopping_cart</span>Nueva orden de compra</button>
+            </div>
+          </div>
           <p className="text-xs text-carbon-muted mt-1 leading-relaxed max-w-xl">Insumos por debajo de su mínimo; la cantidad sugerida lleva la existencia al máximo, en unidades de compra y con el mejor precio pactado.</p>
           {msg && <p className="mt-3 text-xs font-medium text-olivo">{msg}</p>}
         </div>

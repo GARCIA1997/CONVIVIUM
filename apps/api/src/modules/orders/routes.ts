@@ -25,13 +25,15 @@ const plugin: ApiModule["plugin"] = async (app) => {
   );
   app.post("/items/:id/nudge", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, params: IdParam } }, async (req) => svc.nudge(req.user, req.params.id));
 
-  app.post("/checks", { onRequest: [app.guard("mesa.abrir")], schema: { tags, body: orders.OpenCheckBody } }, async (req, reply) =>
-    reply.status(201).send(await svc.openCheck(req.user, req.body)),
-  );
+  app.post("/checks", { onRequest: [app.guard()], schema: { tags, body: orders.OpenCheckBody } }, async (req, reply) => {
+    const need = req.body.kind === "llevar" ? "pedido_llevar.abrir" : "mesa.abrir";
+    if (!(await app.policy.can(req.user, need))) throw forbidden(`Requiere permiso ${need}`);
+    return reply.status(201).send(await svc.openCheck(req.user, req.body));
+  });
 
   /** E3-11 · Pedidos para llevar del día y entrega al cliente. */
-  app.get("/takeout", { onRequest: [app.guard("mesa.abrir")], schema: { tags } }, async (req) => svc.takeoutBoard(req.user));
-  app.post("/checks/:id/hand-over", { onRequest: [app.guard("mesa.abrir")], schema: { tags, params: IdParam } }, async (req) => svc.handOver(req.user, req.params.id));
+  app.get("/takeout", { onRequest: [app.guard("pedido_llevar.abrir")], schema: { tags } }, async (req) => svc.takeoutBoard(req.user));
+  app.post("/checks/:id/hand-over", { onRequest: [app.guard("pedido_llevar.abrir")], schema: { tags, params: IdParam } }, async (req) => svc.handOver(req.user, req.params.id));
 
   app.get("/checks/:id", { onRequest: [app.guard()], schema: { tags, params: IdParam, response: { 200: orders.Check } } }, async (req) =>
     svc.getCheck(req.user, req.params.id),

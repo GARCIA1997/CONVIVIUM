@@ -29,6 +29,8 @@ export const supplierPrices = pgTable("supplier_prices", {
   ingredientId: uuid("ingredient_id").notNull(),
   unitPrice: integer("unit_price").notNull(),
   validFrom: date("valid_from").notNull(),
+  /** Orden exacto de captura (varios cambios el mismo día). */
+  createdAt: createdAt(),
 });
 
 export const purchaseOrders = pgTable("purchase_orders", {

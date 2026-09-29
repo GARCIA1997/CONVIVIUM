@@ -15,7 +15,7 @@ const elapsed = (iso: string) => {
 const hhmm = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false }) : "");
 const label = (c: { kind: string; tableLabel: string | null; name: string | null }) => (c.kind === "barra" ? `Barra · ${c.name}` : `Mesa ${c.tableLabel?.replace(/^M/, "")}`);
 
-export function ChecksView({ onCount }: { onCount: (n: number) => void }) {
+export function ChecksView({ onCount, initialCheckId }: { onCount: (n: number) => void; initialCheckId?: string | null }) {
   const { client } = useSession();
   const [list, setList] = useState<CheckSummary[]>([]);
   const [filter, setFilter] = useState<Filter>("todas");
@@ -35,6 +35,9 @@ export function ChecksView({ onCount }: { onCount: (n: number) => void }) {
     setAmounts({ efectivo_mxn: "", tarjeta: "", efectivo_usd: "" }); setCardRef("");
     setCheck(await client.orders.get(id));
   };
+
+  // Viene de "Cobrar" en Para llevar: abre esa cuenta.
+  useEffect(() => { if (initialCheckId) void select(initialCheckId); }, [initialCheckId]);
 
   const shown = list.filter((c) => filter === "todas" || (filter === "por_cobrar" ? c.status === "pidio_cuenta" : c.status === "abierta"));
   const openTotal = list.reduce((s, c) => s + c.total, 0);

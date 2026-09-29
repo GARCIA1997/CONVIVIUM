@@ -86,7 +86,11 @@ export function CheckPage() {
 
   if (!check || !menu) return <div className="bg-[#EAE6DD] min-h-screen p-6 text-sm text-[#1E2F28]">Cargando…</div>;
 
-  const title = check.kind === "barra" ? `Barra · ${check.name}` : `Mesa · ${check.guests} comensales`;
+  const pickup = check.pickupAt ? ` · recoge ${new Date(check.pickupAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}` : "";
+  const title =
+    check.kind === "barra" ? `Barra · ${check.name}`
+    : check.kind === "llevar" ? `${check.tableLabel} · ${check.customerName ?? ""}${pickup}`
+    : `${check.tableLabel ?? "Mesa"} · ${check.guests} comensales`;
   const minutes = Math.floor((Date.now() - Date.parse(check.openedAt)) / 60000);
   const guests = Array.from({ length: Math.max(1, check.guests ?? 1) }, (_, i) => i + 1);
   const liveItems = check.items.filter((i) => i.unitPrice > 0 || i.priority === "rehacer");
