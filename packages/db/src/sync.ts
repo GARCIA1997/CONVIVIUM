@@ -31,7 +31,7 @@ export const CONFIG_TABLES = [
 
 export type ConfigTable = (typeof CONFIG_TABLES)[number]["table"];
 export interface ConfigChange {
-  table: ConfigTable;
+  table: ConfigTable | (typeof OPS_TABLES)[number];
   op: "upsert" | "delete";
   pk: Record<string, unknown>;
   data: Record<string, unknown> | null;
@@ -39,6 +39,10 @@ export interface ConfigChange {
 }
 const TABLES = new Set<string>(CONFIG_TABLES.map((t) => t.table));
 export const isConfigTable = (t: string): t is ConfigTable => TABLES.has(t);
+
+/** Operación de la sucursal: solo sube del nodo a la nube (el nodo es la autoridad). */
+export const OPS_TABLES = ["checks", "order_items", "payments", "tips", "discounts", "approvals", "cash_sessions", "cash_counts", "cash_movements", "stock", "stock_movements"] as const;
+export const isOpsTable = (t: string): t is (typeof OPS_TABLES)[number] => (OPS_TABLES as readonly string[]).includes(t);
 
 /** Foto completa de la configuración de una sucursal, en orden de dependencias. */
 export async function configSnapshot(db: Db, tenantId: string, branchId: string): Promise<ConfigChange[]> {

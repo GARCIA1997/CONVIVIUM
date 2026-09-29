@@ -2,6 +2,8 @@ import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
 import { breakdownIncludedTaxes, classifyMenu, menuAdvice } from "@convivium/domain";
 import { lineTotal } from "../orders/mapper.js";
 import { InventoryService } from "../inventory/service.js";
+import { forbidden } from "../../plugins/errors.js";
+import type { Principal } from "../../plugins/auth.js";
 import { prepTimesReport, salesReport, tipsReport, type Scope } from "./analytics.js";
 
 /** Importe de un producto sin importar su estado (para medir lo cancelado o devuelto). */
@@ -117,13 +119,43 @@ const plugin: ApiModule["plugin"] = async (app) => {
     };
   });
 
-  const Period = z.object({ days: z.coerce.number().int().min(1).max(365).default(7) });
-  const scopeOf = async (req: { user: { tenantId: string; branchId: string }; query: { days: number } }): Promise<Scope> => {
-    const [b] = await app.db.select({ tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
+  /** `branch`: otra sucursal o "todas" (E9-06). Solo quien ve el tablero del dueño puede salir de la suya. */
+  const Period = z.object({ days: z.coerce.number().int().min(1).max(365).default(7), branch: z.union([z.literal("todas"), z.string().uuid()]).optional() });
+  const scopeOf = async (req: { user: Principal; query: { days: number; branch?: string } }): Promise<Scope> => {
+    const branches = await app.db.select({ id: schema.branches.id, tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.tenantId, req.user.tenantId));
+    let branchIds = [req.user.branchId];
+    if (req.query.branch && req.query.branch !== req.user.branchId) {
+      if (!(await app.policy.can(req.user, "dashboard.ver"))) throw forbidden("Solo el dueño compara sucursales");
+      branchIds = req.query.branch === "todas" ? branches.map((b) => b.id) : branches.filter((b) => b.id === req.query.branch).map((b) => b.id);
+      if (!branchIds.length) throw forbidden("Sucursal de otra empresa");
+    }
     const from = new Date(Date.now() - req.query.days * 864e5);
     if (req.query.days === 1) from.setHours(0, 0, 0, 0);
-    return { tenantId: req.user.tenantId, branchIds: [req.user.branchId], from, to: new Date(), timezone: b?.tz ?? "America/Mexico_City" };
+    const tz = branches.find((b) => b.id === branchIds[0])?.tz ?? "America/Mexico_City";
+    return { tenantId: req.user.tenantId, branchIds, from, to: new Date(), timezone: tz };
   };
+
+  /** E9-06 · Comparativo de sucursales: venta, ticket, propinas, puntualidad de cocina y excepciones. */
+  app.get("/branches", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Period.pick({ days: true }) } }, async (req) => {
+    const branches = await app.db.select().from(schema.branches).where(eq(schema.branches.tenantId, req.user.tenantId));
+    const base = await scopeOf({ user: req.user, query: { days: req.query.days } });
+    const rows = await Promise.all(branches.map(async (b) => {
+      const s = { ...base, branchIds: [b.id], timezone: b.timezone };
+      const [sales, tips, times, exc, lastSync] = await Promise.all([
+        salesReport(app.db, s, "categoria"), tipsReport(app.db, s), prepTimesReport(app.db, s),
+        app.db.select({ n: sql<number>`count(*)::int` }).from(schema.events).where(and(eq(schema.events.branchId, b.id), inArray(schema.events.type, ["item.cancelled", "item.returned"]), gte(schema.events.createdAt, s.from))),
+        app.db.select({ at: sql<string | null>`max(${schema.devices.lastSeenAt})` }).from(schema.devices).where(and(eq(schema.devices.branchId, b.id), eq(schema.devices.kind, "nodo"))),
+      ]);
+      return {
+        branchId: b.id, name: b.name,
+        sales: sales.summary.total, checks: sales.summary.checks, avgTicket: sales.summary.avgTicket, perGuest: sales.summary.perGuest,
+        tipsPct: tips.summary.pctOfSales, onTimePct: times.summary.onTimePct, p90Sec: times.summary.p90Sec,
+        exceptions: exc[0]?.n ?? 0, topCategory: sales.rows[0]?.label ?? null, lastSyncAt: lastSync[0]?.at ?? null,
+      };
+    }));
+    const total = rows.reduce((n, r) => n + r.sales, 0);
+    return { days: req.query.days, total, branches: rows.map((r) => ({ ...r, sharePct: total ? Math.round((r.sales / total) * 1000) / 10 : 0 })).sort((a, b) => b.sales - a.sales) };
+  });
 
   /** E9-02 · Ventas por producto, categoría, mesero, estación, forma de pago u hora. */
   app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]).default("producto") }) } }, async (req) =>

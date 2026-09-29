@@ -20,6 +20,12 @@ export default fp(async (app) => {
       const error = err.statusCode === 401 ? "unauthorized" : "bad_request";
       return reply.status(err.statusCode).send({ error, message: err.statusCode === 401 ? "Sesión vencida o inválida" : err.message });
     }
+    // Violación de integridad de Postgres (23xxx: nulos, llaves, únicos): dato inválido del cliente.
+    const code = (err as { code?: string }).code;
+    if (typeof code === "string" && code.startsWith("23")) {
+      req.log.warn({ code, msg: err.message }, "dato rechazado por la base");
+      return reply.status(code === "23505" ? 409 : 400).send({ error: code === "23505" ? "duplicate" : "invalid_data", message: "Datos inválidos o duplicados" });
+    }
     req.log.error(err);
     return reply.status(500).send({ error: "internal", message: "Error interno" });
   });

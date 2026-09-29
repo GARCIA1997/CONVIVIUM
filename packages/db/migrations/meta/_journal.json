@@ -85,6 +85,20 @@
       "when": 1790708527389,
       "tag": "0011_sync_row_alias",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790709602943,
+      "tag": "0012_sync_ops_kind",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790709603503,
+      "tag": "0013_sync_ops_triggers",
+      "breakpoints": true
     }
   ]
 }

@@ -3,7 +3,8 @@ import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useState } from "react";
 import { ExceptionsTab } from "./ExceptionsTab";
 
-type Tab = "ventas" | "devoluciones" | "propinas" | "tiempos";
+type Tab = "ventas" | "devoluciones" | "propinas" | "tiempos" | "sucursales";
+interface BranchRow { branchId: string; name: string; sales: number; checks: number; avgTicket: number; perGuest: number; tipsPct: number; onTimePct: number; p90Sec: number; exceptions: number; topCategory: string | null; lastSyncAt: string | null; sharePct: number }
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
 const mins = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
@@ -25,8 +26,14 @@ export function ReportsPage() {
   const [days, setDays] = useState(7);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const onExport = useCallback((r: Record<string, unknown>[]) => setRows(r), []);
+  const isOwner = !!client.session?.permissions.includes("dashboard.ver");
+  const [branches, setBranches] = useState<{ total: number; branches: BranchRow[] } | null>(null);
+  const [branch, setBranch] = useState<string>(client.session?.branchId ?? "");
+  useEffect(() => { if (isOwner) client.request<{ total: number; branches: BranchRow[] }>("GET", `/reports/branches?days=${days}`).then(setBranches).catch(() => setBranches(null)); }, [isOwner, days]);
+  const multi = (branches?.branches.length ?? 0) > 1;
+  const q = branch && branch !== client.session?.branchId ? `&branch=${branch}` : "";
   useEffect(() => { history.replaceState(null, "", `#${tab}`); setRows([]); }, [tab]);
-  const TABS: [Tab, string][] = [["ventas", "Ventas"], ["devoluciones", "Devoluciones y cortesías"], ["propinas", "Propinas"], ["tiempos", "Tiempos de Servicio (SLA)"]];
+  const TABS: [Tab, string][] = [["ventas", "Ventas"], ["devoluciones", "Devoluciones y cortesías"], ["propinas", "Propinas"], ["tiempos", "Tiempos de Servicio (SLA)"], ...(multi ? [["sucursales", "Sucursales"] as [Tab, string]] : [])];
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#F7F5F0]">
@@ -36,6 +43,15 @@ export function ReportsPage() {
           <h2 className="font-headline font-semibold text-xl tracking-tight text-convivium-olivo mt-0.5">Reportes de la Sucursal</h2>
         </div>
         <div className="flex items-center gap-3">
+          {multi && tab !== "sucursales" && tab !== "devoluciones" && (
+            <label className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-convivium-arena/70 shadow-sm text-xs font-medium text-convivium-carbon">
+              <span className="material-symbols-outlined text-base text-convivium-olivo">storefront</span>
+              <select value={branch} onChange={(e) => setBranch(e.target.value)} className="border-0 bg-transparent p-0 pr-6 text-xs font-medium focus:ring-0">
+                {branches!.branches.map((b) => <option key={b.branchId} value={b.branchId}>{b.name}</option>)}
+                <option value="todas">Todas las sucursales</option>
+              </select>
+            </label>
+          )}
           <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-lg border border-convivium-arena/70 shadow-sm text-xs font-medium text-convivium-carbon">
             <span className="material-symbols-outlined text-base text-convivium-dorado px-1">calendar_today</span>
             {[1, 7, 30].map((d) => <button key={d} onClick={() => setDays(d)} className={days === d ? "px-2.5 py-1 rounded bg-convivium-olivo text-amber-100 font-semibold" : "px-2.5 py-1 rounded text-convivium-carbon-muted hover:text-convivium-carbon"}>{d === 1 ? "Hoy" : `Últimos ${d} días`}</button>)}
@@ -53,10 +69,11 @@ export function ReportsPage() {
         </nav>
       </div>
       <main className="flex-1 p-8">
-        {tab === "ventas" && <SalesTab days={days} onExport={onExport} />}
+        {tab === "ventas" && <SalesTab days={days} q={q} onExport={onExport} />}
         {tab === "devoluciones" && <ExceptionsTab days={days} onExport={onExport} />}
-        {tab === "propinas" && <TipsTab days={days} onExport={onExport} />}
-        {tab === "tiempos" && <TimesTab days={days} onExport={onExport} />}
+        {tab === "propinas" && <TipsTab days={days} q={q} onExport={onExport} />}
+        {tab === "tiempos" && <TimesTab days={days} q={q} onExport={onExport} />}
+        {tab === "sucursales" && branches && <BranchesTab data={branches} onExport={onExport} />}
       </main>
     </div>
   );
@@ -81,12 +98,12 @@ const Table = ({ head, children }: { head: string[]; children: React.ReactNode }
 );
 const Bar = ({ pct }: { pct: number }) => <div className="w-full bg-convivium-marfil-subtle rounded-full h-1.5 overflow-hidden mt-1"><div className="bg-convivium-dorado h-1.5 rounded-full" style={{ width: `${Math.min(100, pct)}%` }} /></div>;
 
-type Exp = { days: number; onExport: (r: Record<string, unknown>[]) => void };
+type Exp = { days: number; q?: string; onExport: (r: Record<string, unknown>[]) => void };
 
-function SalesTab({ days, onExport }: Exp) {
+function SalesTab({ days, q = "", onExport }: Exp) {
   const [by, setBy] = useState("producto");
   const [r, setR] = useState<any>(null);
-  useEffect(() => { client.request("GET", `/reports/sales?days=${days}&groupBy=${by}`).then(setR); }, [days, by]);
+  useEffect(() => { client.request("GET", `/reports/sales?days=${days}&groupBy=${by}${q}`).then(setR); }, [days, by, q]);
   useEffect(() => { if (r) onExport(r.rows.map((x: any) => ({ [by]: x.label, importe: x.amount / 100, unidades: x.units, cuentas: x.checks, porcentaje: x.pct }))); }, [r, by, onExport]);
   if (!r) return null;
   const GROUPS: [string, string][] = [["producto", "Producto"], ["categoria", "Categoría"], ["mesero", "Mesero"], ["estacion", "Estación"], ["forma_pago", "Forma de pago"], ["hora", "Hora"]];
@@ -117,9 +134,9 @@ function SalesTab({ days, onExport }: Exp) {
   );
 }
 
-function TipsTab({ days, onExport }: Exp) {
+function TipsTab({ days, q = "", onExport }: Exp) {
   const [r, setR] = useState<any>(null);
-  useEffect(() => { client.request("GET", `/reports/tips?days=${days}`).then(setR); }, [days]);
+  useEffect(() => { client.request("GET", `/reports/tips?days=${days}${q}`).then(setR); }, [days, q]);
   useEffect(() => { if (r) onExport(r.byWaiter.map((w: any) => ({ mesero: w.name, propinas: w.amount / 100, cuentas_con_propina: w.count, venta: w.sales / 100, porcentaje: w.pctOfSales }))); }, [r, onExport]);
   if (!r) return null;
   const METHOD: Record<string, string> = { efectivo_mxn: "Efectivo MXN", efectivo_usd: "Efectivo USD", tarjeta: "Tarjeta", transferencia: "Transferencia", vales: "Vales" };
@@ -146,9 +163,9 @@ function TipsTab({ days, onExport }: Exp) {
   );
 }
 
-function TimesTab({ days, onExport }: Exp) {
+function TimesTab({ days, q = "", onExport }: Exp) {
   const [r, setR] = useState<any>(null);
-  useEffect(() => { client.request("GET", `/reports/prep-times?days=${days}`).then(setR); }, [days]);
+  useEffect(() => { client.request("GET", `/reports/prep-times?days=${days}${q}`).then(setR); }, [days, q]);
   useEffect(() => { if (r) onExport(r.byProduct.map((p: any) => ({ producto: p.name, muestras: p.samples, promedio_min: +(p.avgSec / 60).toFixed(1), p50_min: +(p.p50Sec / 60).toFixed(1), p90_min: +(p.p90Sec / 60).toFixed(1), meta_min: +(p.targetSec / 60).toFixed(1), a_tiempo_pct: p.onTimePct }))); }, [r, onExport]);
   if (!r) return null;
   const tone = (pct: number) => (pct >= 85 ? "text-emerald-700" : pct >= 70 ? "text-amber-700" : "text-convivium-terracota-alert");
@@ -178,6 +195,40 @@ function TimesTab({ days, onExport }: Exp) {
       </section>
       <Table head={["Estación", ...head.slice(1)]}><Rows list={r.byStation} label={(x) => x.name} /></Table>
       <Table head={["Producto (más lentos primero)", ...head.slice(1)]}><Rows list={r.byProduct} label={(x) => x.name} /></Table>
+    </div>
+  );
+}
+
+/** E9-06 · Comparativo lado a lado; la mejor cifra de cada columna se resalta. */
+function BranchesTab({ data, onExport }: { data: { total: number; branches: BranchRow[] }; onExport: Exp["onExport"] }) {
+  useEffect(() => onExport(data.branches.map((b) => ({ sucursal: b.name, venta: b.sales / 100, participacion_pct: b.sharePct, cuentas: b.checks, ticket_promedio: b.avgTicket / 100, por_comensal: b.perGuest / 100, propinas_pct: b.tipsPct, cocina_a_tiempo_pct: b.onTimePct, cancelaciones_devoluciones: b.exceptions, ultima_sincronizacion: b.lastSyncAt ?? "" }))), [data, onExport]);
+  const best = (k: keyof BranchRow, low = false) => { const v = data.branches.map((b) => b[k] as number); return low ? Math.min(...v) : Math.max(...v); };
+  const hl = (b: BranchRow, k: keyof BranchRow, low = false) => (data.branches.length > 1 && b[k] === best(k, low) ? "text-emerald-700 font-bold" : "");
+  const since = (iso: string | null) => { if (!iso) return "Sin nodo vinculado"; const m = Math.floor((Date.now() - Date.parse(iso)) / 60000); return m < 2 ? "En línea" : m < 60 ? `Hace ${m} min` : `Hace ${Math.floor(m / 60)} h`; };
+  return (
+    <div className="space-y-6">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Kpi title="Venta consolidada" value={money(data.total)} sub={`${data.branches.length} sucursales`} icon="storefront" />
+        <Kpi title="Líder en venta" value={data.branches[0]?.name ?? "—"} sub={`${data.branches[0]?.sharePct ?? 0}% del total`} icon="emoji_events" />
+        <Kpi title="Mejor puntualidad de cocina" value={[...data.branches].sort((a, b) => b.onTimePct - a.onTimePct)[0]?.name ?? "—"} sub={`${best("onTimePct")}% a tiempo`} icon="timer" />
+      </section>
+      <Table head={["Sucursal", "Venta", "Participación", "Cuentas", "Ticket prom.", "Por comensal", "Propinas", "Cocina a tiempo", "Cancel./devol.", "Sincronización"]}>
+        {data.branches.map((b) => (
+          <tr key={b.branchId} className="hover:bg-convivium-marfil-subtle/50">
+            <td className="py-2.5 px-4 font-medium text-convivium-carbon">{b.name}{b.topCategory && <span className="block text-[10px] text-convivium-carbon-muted font-normal">Top: {b.topCategory}</span>}</td>
+            <td className={`py-2.5 px-4 text-right font-mono ${hl(b, "sales")}`}>{money(b.sales)}</td>
+            <td className="py-2.5 px-4 text-right w-32"><span className="font-mono">{b.sharePct}%</span><Bar pct={b.sharePct} /></td>
+            <td className="py-2.5 px-4 text-right font-mono">{b.checks}</td>
+            <td className={`py-2.5 px-4 text-right font-mono ${hl(b, "avgTicket")}`}>{money(b.avgTicket)}</td>
+            <td className={`py-2.5 px-4 text-right font-mono ${hl(b, "perGuest")}`}>{money(b.perGuest)}</td>
+            <td className="py-2.5 px-4 text-right font-mono">{b.tipsPct}%</td>
+            <td className={`py-2.5 px-4 text-right font-mono ${hl(b, "onTimePct")}`}>{b.onTimePct}%</td>
+            <td className={`py-2.5 px-4 text-right font-mono ${hl(b, "exceptions", true)}`}>{b.exceptions}</td>
+            <td className="py-2.5 px-4 text-right text-[11px] text-convivium-carbon-muted">{since(b.lastSyncAt)}</td>
+          </tr>
+        ))}
+      </Table>
+      <p className="text-[11px] text-convivium-carbon-muted">Cada nodo sube sus ventas, caja e inventario a la nube en su siguiente ciclo de sincronización; una sucursal sin internet aparece con sus últimos datos subidos.</p>
     </div>
   );
 }

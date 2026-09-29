@@ -13,7 +13,7 @@ export default defineConfig({
       DATABASE_URL: TEST_DB,
       JWT_SECRET: "clave-solo-para-pruebas-123456",
       CONVIVIUM_MODE: "edge",
-      LOG_LEVEL: "silent",
+      LOG_LEVEL: process.env.LOG_LEVEL ?? "silent",
     },
   },
 });

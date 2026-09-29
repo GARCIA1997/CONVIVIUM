@@ -5,7 +5,8 @@ import { config } from "../config.js";
 /**
  * Sincronización del nodo con la nube (doc 05 §5). En cada ciclo:
  *  1. Sube eventos operativos no sincronizados (idempotente por id).
- *  2. Sube la configuración editada en el nodo (la nube resuelve last-writer-wins).
+ *  2. Sube la configuración editada en el nodo (la nube resuelve last-writer-wins) y la operación
+ *     de la sucursal (ventas, caja, inventario) para reportes consolidados.
  *  3. Baja la configuración de la nube desde el último cursor (la primera vez, foto completa).
  * El orden 2 → 3 evita que un cambio local aún no subido se pise con la versión de la nube.
  * Si no hay internet, el nodo sigue operando y reintenta en el siguiente ciclo.
@@ -46,12 +47,12 @@ export function startSyncWorker(app: FastifyInstance) {
     while (true) {
       const rows = await app.db.select().from(schema.configChanges).where(gt(schema.configChanges.seq, since)).orderBy(asc(schema.configChanges.seq)).limit(500);
       if (!rows.length) return;
-      const r = await cloud<{ applied: number; stale: number }>("POST", "/config", {
+      const r = await cloud<{ applied: number; stale: number; ops: number }>("POST", "/config", {
         changes: rows.map((c) => ({ table: c.tableName, op: c.op, pk: c.pk, data: c.data, changedAt: c.changedAt.toISOString() })),
       });
       since = rows.at(-1)!.seq;
       await setCursor("config.pushed", since);
-      app.log.info(`sync: configuración local subida (${r.applied} aplicados, ${r.stale} ya superados en la nube)`);
+      app.log.info(`sync: subidos ${r.ops} registros de operación y ${r.applied} de configuración (${r.stale} ya superados en la nube)`);
     }
   }
 

@@ -52,11 +52,11 @@ describe("sincronización de configuración nube ↔ nodo", () => {
     const row = { ...cat!.row, name: "Renombrada en el nodo" };
     const change = (changedAt: string): ConfigChange => ({ table: "categories", op: "upsert", pk: { id: row.id }, data: row, changedAt });
     const ok = await api("POST", "/sync/config", nodeToken, { changes: [change(new Date().toISOString())] });
-    expect(ok.body).toEqual({ applied: 1, stale: 0 });
+    expect(ok.body).toEqual({ applied: 1, stale: 0, ops: 0 });
     const back = await api<{ changes: ConfigChange[] }>("GET", `/sync/config?since=${cursor}`, nodeToken);
     expect(back.body.changes).toEqual([]);
     const old = await api("POST", "/sync/config", nodeToken, { changes: [change("2020-01-01T00:00:00.000Z")] });
-    expect(old.body).toEqual({ applied: 0, stale: 1 });
+    expect(old.body).toEqual({ applied: 0, stale: 1, ops: 0 });
   });
 
   it("rechaza filas de otra empresa y tablas fuera de la lista", async () => {
@@ -64,7 +64,34 @@ describe("sincronización de configuración nube ↔ nodo", () => {
     const foreign = { ...cat!.row, tenant_id: "00000000-0000-0000-0000-000000000001" };
     const now = new Date().toISOString();
     expect((await api("POST", "/sync/config", nodeToken, { changes: [{ table: "categories", op: "upsert", pk: { id: foreign.id }, data: foreign, changedAt: now }] })).status).toBe(403);
-    expect((await api("POST", "/sync/config", nodeToken, { changes: [{ table: "payments", op: "delete", pk: { id: foreign.id }, data: null, changedAt: now }] })).status).toBe(400);
+    expect((await api("POST", "/sync/config", nodeToken, { changes: [{ table: "devices", op: "delete", pk: { id: foreign.id }, data: null, changedAt: now }] })).status).toBe(400);
+  });
+
+  it("la operación del nodo sube a la nube (no regresa) y alimenta el comparativo de sucursales", async () => {
+    const cloud = getApp().db;
+    const [ctx] = (await cloud.execute(sql`SELECT t.id AS tenant, b.id AS branch, (SELECT id FROM users WHERE tenant_id = t.id LIMIT 1) AS waiter, (SELECT to_jsonb(p) FROM products p WHERE p.tenant_id = t.id LIMIT 1) AS product, (SELECT station_id FROM product_stations LIMIT 1) AS station FROM tenants t JOIN branches b ON b.tenant_id = t.id LIMIT 1`)) as unknown as { tenant: string; branch: string; waiter: string; product: any; station: string }[];
+    const now = new Date().toISOString();
+    const checkId = crypto.randomUUID(), itemId = crypto.randomUUID();
+    const check = { id: checkId, tenant_id: ctx!.tenant, branch_id: ctx!.branch, kind: "barra", table_id: null, joined_table_ids: [], name: "Venta del nodo", guests: 2, waiter_id: ctx!.waiter, status: "cobrada", invoice_status: null, created_at: now, closed_at: now };
+    const item = { id: itemId, tenant_id: ctx!.tenant, branch_id: ctx!.branch, check_id: checkId, product_id: ctx!.product.id, product_name: ctx!.product.name, station_id: ctx!.station, quantity: 3, unit_price: 10000, modifiers: [], note: null, guest: null, course: "sin_tiempo", state: "entregado", priority: "normal", target_prep_sec: 600, created_by: ctx!.waiter, created_at: now, sent_at: now, ready_at: now, delivered_at: now, ready_by: null, promo_discount: 0, promotion_id: null };
+    const before = (await api("GET", "/reports/branches?days=1", owner)).body.branches[0].sales;
+    const r = await api("POST", "/sync/config", nodeToken, { changes: [
+      { table: "checks", op: "upsert", pk: { id: checkId }, data: check, changedAt: now },
+      { table: "order_items", op: "upsert", pk: { id: itemId }, data: item, changedAt: now },
+    ] });
+    expect(r.body).toEqual({ applied: 0, stale: 0, ops: 2 });
+    const after = (await api("GET", "/reports/branches?days=1", owner)).body;
+    expect(after.branches[0].sales - before).toBe(30000);
+    expect((await api<{ changes: ConfigChange[] }>("GET", `/sync/config?since=${cursor}`, nodeToken)).body.changes).toEqual([]);
+    // Otra sucursal o empresa: rechazado.
+    const foreign = { ...check, id: crypto.randomUUID(), branch_id: crypto.randomUUID() };
+    expect((await api("POST", "/sync/config", nodeToken, { changes: [{ table: "checks", op: "upsert", pk: { id: foreign.id }, data: foreign, changedAt: now }] })).status).toBe(403);
+  });
+
+  it("solo el dueño consulta otras sucursales o el consolidado", async () => {
+    const gerente = (await api("POST", "/auth/login", undefined, { email: "dueno@demo.mx", password: "demo12345" })).body.accessToken;
+    expect((await api("GET", "/reports/sales?days=1&branch=todas", gerente)).status).toBe(200);
+    expect((await api("GET", `/reports/sales?days=1&branch=${crypto.randomUUID()}`, gerente)).status).toBe(403);
   });
 
   it("un nodo revocado ya no sincroniza", async () => {

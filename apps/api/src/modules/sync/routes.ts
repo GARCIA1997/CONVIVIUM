@@ -1,4 +1,4 @@
-import { and, asc, configSnapshot, desc, eq, gt, isConfigTable, isNull, ne, or, schema, sql, type ConfigChange } from "@convivium/db";
+import { and, asc, configSnapshot, desc, eq, gt, isConfigTable, isNull, isOpsTable, ne, or, schema, sql, type ConfigChange } from "@convivium/db";
 import type { FastifyRequest } from "fastify";
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
@@ -30,7 +30,7 @@ const EventBatch = z.object({
 
 const ChangeBatch = z.object({
   changes: z.array(z.object({
-    table: z.string().refine(isConfigTable, "Tabla no sincronizable"),
+    table: z.string().refine((t) => isConfigTable(t) || isOpsTable(t), "Tabla no sincronizable"),
     op: z.enum(["upsert", "delete"]),
     pk: z.record(z.unknown()),
     data: z.record(z.unknown()).nullable(),
@@ -73,6 +73,7 @@ const cloudPlugin: ApiModule["plugin"] = async (app) => {
     const rows = await app.db.select().from(schema.configChanges)
       .where(and(
         eq(schema.configChanges.tenantId, tenantId),
+        eq(schema.configChanges.kind, "config"),
         gt(schema.configChanges.seq, req.query.since),
         or(isNull(schema.configChanges.branchId), eq(schema.configChanges.branchId, branchId)),
         or(isNull(schema.configChanges.originDevice), ne(schema.configChanges.originDevice, deviceId!)),
@@ -92,9 +93,20 @@ const cloudPlugin: ApiModule["plugin"] = async (app) => {
    */
   app.post("/config", { onRequest: [nodeGuard], schema: { tags, body: ChangeBatch } }, async (req) => {
     const { tenantId, deviceId } = req.user;
-    let applied = 0, stale = 0;
+    let applied = 0, stale = 0, ops = 0;
     await app.db.transaction(async (tx) => {
       for (const c of req.body.changes as ConfigChange[]) {
+        // Operación de la sucursal: el nodo es la autoridad; se aplica tal cual y no se propaga.
+        if (isOpsTable(c.table)) {
+          const owner = (c.data?.tenant_id ?? null) as string | null;
+          const rows = (await tx.execute(sql`SELECT (config_current_row(${c.table}, ${JSON.stringify(c.pk)}::jsonb) ->> 'tenant_id') AS cur`)) as unknown as { cur: string | null }[];
+          const cur = rows[0]?.cur ?? null;
+          if ((cur && cur !== tenantId) || (c.op === "upsert" && owner !== tenantId)) throw forbidden("Cambio de otra empresa");
+          if (c.op === "upsert" && c.data?.branch_id && c.data.branch_id !== req.user.branchId) throw forbidden("Operación de otra sucursal");
+          await tx.execute(sql`SELECT apply_config_change(${c.table}, ${c.op}, ${JSON.stringify(c.pk)}::jsonb, ${c.data ? JSON.stringify(c.data) : null}::jsonb, true, ${deviceId ?? null}::uuid)`);
+          ops++;
+          continue;
+        }
         const [newer] = await tx.select({ seq: schema.configChanges.seq }).from(schema.configChanges)
           .where(and(eq(schema.configChanges.tableName, c.table), sql`${schema.configChanges.pk} = ${JSON.stringify(c.pk)}::jsonb`, gt(schema.configChanges.changedAt, new Date(c.changedAt))))
           .limit(1);
@@ -108,7 +120,7 @@ const cloudPlugin: ApiModule["plugin"] = async (app) => {
       }
     });
     app.policy.invalidate(tenantId);
-    return { applied, stale };
+    return { applied, stale, ops };
   });
 };
 

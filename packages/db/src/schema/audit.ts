@@ -37,6 +37,8 @@ export const configChanges = pgTable("config_changes", {
   op: text("op").$type<"upsert" | "delete">().notNull(),
   data: jsonb("data").$type<Record<string, unknown>>(),
   changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+  /** config: nube ↔ nodo · ops: operación de la sucursal, solo sube del nodo a la nube (reportes consolidados). */
+  kind: text("kind").$type<"config" | "ops">().notNull().default("config"),
   /** Dispositivo (nodo) que originó el cambio; la nube no se lo regresa. */
   originDevice: uuid("origin_device"),
 });
