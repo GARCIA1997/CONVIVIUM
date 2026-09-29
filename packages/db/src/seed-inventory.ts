@@ -46,7 +46,7 @@ async function main() {
   const [carnes] = await db.insert(schema.suppliers).values({ tenantId: t, name: "Carnes Selectas del Norte", creditDays: 8 }).returning();
   const today = new Date().toISOString().slice(0, 10);
   const prices: [typeof verduras, string, number][] = [
-    [verduras, "Limón", 4200], [verduras, "Aguacate Hass", 7500], [verduras, "Pulpa de tamarindo", 9500],
+    [verduras, "Limón", 42000], [verduras, "Aguacate Hass", 75000], [verduras, "Pulpa de tamarindo", 9500],
     [cava, "Tequila blanco", 38000], [cava, "Mezcal Espadín", 52000], [cava, "Licor de naranja", 31000],
     [carnes, "Rib eye", 52000], [carnes, "Carne molida sirloin", 28500], [carnes, "Carne al pastor", 18000],
   ];
