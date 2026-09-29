@@ -5,10 +5,22 @@ import { Cents, Id, Timestamp } from "./common.js";
 export const ItemState = z.enum(ITEM_STATES);
 export const Course = z.enum(["entrada", "fuerte", "postre", "bebida", "sin_tiempo"]);
 
-/** Cuenta: de mesa o de barra (E3-10). */
+export const TakeoutChannel = z.enum(["mostrador", "telefono", "whatsapp"]);
+
+/** Cuenta: de mesa, de barra o para llevar (E3-10, E3-11). */
 export const OpenCheckBody = z.union([
   z.object({ kind: z.literal("mesa"), tableId: Id, guests: z.number().int().min(1), joinTableIds: z.array(Id).max(6).optional() }),
   z.object({ kind: z.literal("barra"), name: z.string().min(1) }),
+  z.object({
+    kind: z.literal("llevar"),
+    customerName: z.string().trim().min(1).max(60),
+    customerPhone: z.string().regex(/^\d{10}$/, "Teléfono a 10 dígitos").nullable().default(null),
+    /** Nulo = lo antes posible. */
+    pickupAt: Timestamp.nullable().default(null),
+    channel: TakeoutChannel.default("mostrador"),
+    disposables: z.boolean().default(true),
+    note: z.string().max(140).nullable().default(null),
+  }),
 ]);
 
 export const OrderItemInput = z.object({
@@ -50,7 +62,15 @@ export type OrderItem = z.infer<typeof OrderItem>;
 
 export const Check = z.object({
   id: Id,
-  kind: z.enum(["mesa", "barra"]),
+  kind: z.enum(["mesa", "barra", "llevar"]),
+  folio: z.number().int().nullable().default(null),
+  customerName: z.string().nullable().default(null),
+  customerPhone: z.string().nullable().default(null),
+  pickupAt: Timestamp.nullable().default(null),
+  channel: z.string().nullable().default(null),
+  disposables: z.boolean().nullable().default(null),
+  note: z.string().nullable().default(null),
+  handedOverAt: Timestamp.nullable().default(null),
   tableId: Id.nullable(),
   name: z.string().nullable(),
   guests: z.number().int().nullable(),
@@ -70,7 +90,9 @@ export const Check = z.object({
 /** Resumen para listas de cuentas abiertas (caja). */
 export const CheckSummary = z.object({
   id: Id,
-  kind: z.enum(["mesa", "barra"]),
+  kind: z.enum(["mesa", "barra", "llevar"]),
+  folio: z.number().int().nullable().default(null),
+  pickupAt: Timestamp.nullable().default(null),
   status: z.enum(["abierta", "pidio_cuenta", "cobrada", "cancelada"]),
   tableLabel: z.string().nullable(),
   name: z.string().nullable(),

@@ -1,4 +1,5 @@
-import { date, integer, numeric, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { boolean, date, integer, numeric, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
 export const poStatusEnum = pgEnum("po_status", ["borrador", "aprobada", "enviada", "recibida_parcial", "recibida", "cancelada"]);
@@ -13,6 +14,13 @@ export const suppliers = pgTable("suppliers", {
   email: text("email"),
   creditDays: integer("credit_days").notNull().default(0),
   deliveryDays: text("delivery_days").array(),
+  tradeName: text("trade_name"),
+  contactName: text("contact_name"),
+  categories: text("categories").array().notNull().default(sql`'{}'::text[]`),
+  /** Pedido mínimo en centavos. */
+  minOrder: integer("min_order").notNull().default(0),
+  notes: text("notes"),
+  active: boolean("active").notNull().default(true),
 });
 
 export const supplierPrices = pgTable("supplier_prices", {
@@ -21,6 +29,8 @@ export const supplierPrices = pgTable("supplier_prices", {
   ingredientId: uuid("ingredient_id").notNull(),
   unitPrice: integer("unit_price").notNull(),
   validFrom: date("valid_from").notNull(),
+  /** Orden exacto de captura (varios cambios el mismo día). */
+  createdAt: createdAt(),
 });
 
 export const purchaseOrders = pgTable("purchase_orders", {

@@ -20,15 +20,20 @@ export function FloorPage() {
   const nav = useNavigate();
   const [plan, setPlan] = useState<FloorPlan | null>(null);
   const [areaId, setAreaId] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<{ kind: "mesa"; table: Table } | { kind: "barra" } | null>(null);
+  const [sheet, setSheet] = useState<{ kind: "mesa"; table: Table } | { kind: "barra" } | { kind: "llevar" } | null>(null);
+  const [takeout, setTakeout] = useState<{ id: string; label: string; customerName: string | null; stage: string; pickupAt: string | null }[]>([]);
+  const canTakeout = session.permissions.includes("pedido_llevar.abrir");
+  const loadTakeout = useCallback(() => (canTakeout ? client.request<typeof takeout>("GET", "/orders/takeout").then((l) => setTakeout(l.filter((t) => t.stage !== "entregado"))) : Promise.resolve()), [client, canTakeout]);
+  useEffect(() => { loadTakeout(); }, [loadTakeout]);
 
   const load = useCallback(() => client.floor.get().then((p) => { setPlan(p); setAreaId((a) => a ?? p.areas[0]?.id ?? null); }), [client]);
   useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
-  useRealtime(["floor"], () => load());
+  useRealtime(["floor"], () => { load(); loadTakeout(); });
 
   const openTable = (t: Table) => (t.openCheckId ? nav(`/cuenta/${t.openCheckId}`) : setSheet({ kind: "mesa", table: t }));
   const confirmTable = async (tableId: string, guests: number, joinTableIds: string[]) => nav(`/cuenta/${(await client.orders.open({ kind: "mesa", tableId, guests, joinTableIds })).id}`);
   const confirmBar = async (name: string) => nav(`/cuenta/${(await client.orders.open({ kind: "barra", name })).id}`);
+  const confirmTakeout = async (body: TakeoutForm) => nav(`/cuenta/${(await client.orders.open({ kind: "llevar", ...body })).id}`);
 
   const tables = plan?.tables.filter((t) => t.areaId === areaId) ?? [];
   const count = (s: string) => plan?.tables.filter((t) => t.status === s).length ?? 0;
@@ -74,11 +79,29 @@ export function FloorPage() {
       <main className="flex-1 px-3 py-2 overflow-y-auto custom-scrollbar">
         {!plan && <p className="text-xs text-stone-500 p-4">Cargando plano…</p>}
         <div className="grid grid-cols-2 gap-2.5">
+          {takeout.length > 0 && (
+            <div className="col-span-2 -mt-1 mb-1 flex gap-2 overflow-x-auto pb-1">
+              {takeout.map((t) => (
+                <button key={t.id} onClick={() => nav(`/cuenta/${t.id}`)} className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium ${t.stage === "listo" ? "bg-[#D4AF7C] text-[#1E2F28] border-[#1E2F28]/30" : "bg-white text-[#1E2F28] border-[#C9B89F]"}`}>
+                  <span className="material-symbols-outlined text-[16px]">takeout_dining</span>
+                  <span className="font-display font-bold">{t.label}</span>
+                  <span className="text-[11px] opacity-80 max-w-[90px] truncate">{t.customerName}</span>
+                  {t.stage === "listo" && <span className="text-[10px] font-semibold">· Listo</span>}
+                </button>
+              ))}
+            </div>
+          )}
           {tables.map((t) => <TableCard key={t.id} t={t} me={session.user.id} onClick={() => openTable(t)} />)}
         </div>
       </main>
 
-      <div className="fixed bottom-[74px] right-[calc(50%-195px+14px)] max-md:right-4 z-40">
+      <div className="fixed bottom-[74px] right-[calc(50%-195px+14px)] max-md:right-4 z-40 flex flex-col items-end gap-2">
+        {canTakeout && (
+          <button onClick={() => setSheet({ kind: "llevar" })} className="bg-[#D4AF7C] text-[#1E2F28] border border-[#1E2F28]/20 shadow-lg px-3.5 py-2.5 rounded-full flex items-center gap-2 active:scale-95 transition-all text-xs font-semibold tracking-wide">
+            <span className="material-symbols-outlined text-[18px]">takeout_dining</span>
+            <span>Para llevar</span>
+          </button>
+        )}
         <button onClick={() => setSheet({ kind: "barra" })} className="bg-[#1E2F28] text-[#D4AF7C] border border-[#D4AF7C]/40 shadow-lg px-3.5 py-2.5 rounded-full flex items-center gap-2 hover:bg-[#14201B] active:scale-95 transition-all text-xs font-medium tracking-wide">
           <span className="material-symbols-outlined text-[18px]">add</span>
           <span>Cuenta de barra</span>
@@ -87,6 +110,7 @@ export function FloorPage() {
 
       {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} partners={plan?.tables.filter((o) => sheet.table.mergeableWith.includes(o.id) && o.status === "libre") ?? []} onCancel={() => setSheet(null)} onConfirm={(g, j) => confirmTable(sheet.table.id, g, j)} />}
       {sheet?.kind === "barra" && <BarSheet onCancel={() => setSheet(null)} onConfirm={confirmBar} />}
+      {sheet?.kind === "llevar" && <TakeoutSheet onCancel={() => setSheet(null)} onConfirm={confirmTakeout} />}
     </MeseroLayout>
   );
 }
@@ -262,6 +286,54 @@ function BarSheet({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: (n
       <input autoFocus placeholder="Nombre o pulsera" value={name} onChange={(e) => setName(e.target.value)} className="w-full h-12 rounded-lg border-[#C9B89F] bg-white text-sm focus:ring-[#D4AF7C] focus:border-[#D4AF7C]" />
       <button disabled={!name.trim()} onClick={() => onConfirm(name.trim())} className="mt-3 w-full h-12 rounded-lg bg-[#1E2F28] text-[#D4AF7C] font-semibold tracking-wide disabled:opacity-40">
         Abrir cuenta
+      </button>
+    </Sheet>
+  );
+}
+
+interface TakeoutForm { customerName: string; customerPhone: string | null; pickupAt: string | null; channel: "mostrador" | "telefono" | "whatsapp"; disposables: boolean; note: string | null }
+
+/* Alta de pedido para llevar: mismos componentes de hoja inferior del comandero. */
+function TakeoutSheet({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: (b: TakeoutForm) => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [when, setWhen] = useState<"asap" | 15 | 30 | "hora">("asap");
+  const [time, setTime] = useState("");
+  const [channel, setChannel] = useState<TakeoutForm["channel"]>("mostrador");
+  const [note, setNote] = useState("");
+  const [disposables, setDisposables] = useState(true);
+  const chip = (on: boolean) => `px-3 py-2 rounded-lg text-xs font-medium border ${on ? "bg-[#1E2F28] text-[#D4AF7C] border-[#1E2F28]" : "bg-white text-[#1E2F28] border-[#C9B89F]"}`;
+  const pickupAt = () => {
+    if (when === "asap") return null;
+    if (when === "hora") { if (!time) return null; const [h, m] = time.split(":").map(Number); const d = new Date(); d.setHours(h!, m!, 0, 0); return d.toISOString(); }
+    return new Date(Date.now() + when * 60000).toISOString();
+  };
+  const digits = phone.replace(/\D/g, "");
+  const valid = name.trim() && (!digits || digits.length === 10) && (when !== "hora" || time);
+  return (
+    <Sheet title="Nuevo pedido para llevar" onCancel={onCancel}>
+      <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+        <input autoFocus placeholder="Nombre del cliente *" value={name} onChange={(e) => setName(e.target.value)} className="w-full h-12 rounded-lg border-[#C9B89F] bg-white text-sm focus:ring-[#D4AF7C] focus:border-[#D4AF7C]" />
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-emerald-700">chat</span>
+          <input inputMode="numeric" placeholder="Teléfono (10 dígitos, opcional)" value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d ]/g, "").slice(0, 14))} className="w-full h-12 pl-10 rounded-lg border-[#C9B89F] bg-white text-sm focus:ring-[#D4AF7C] focus:border-[#D4AF7C]" />
+        </div>
+        <div>
+          <span className="block text-[11px] font-semibold uppercase tracking-wider text-[#1E2F28]/70 mb-1.5">¿Cuándo lo recoge?</span>
+          <div className="flex flex-wrap gap-2">
+            {([["asap", "Lo antes posible"], [15, "En 15 min"], [30, "En 30 min"], ["hora", "Elegir hora"]] as const).map(([k, l]) => <button key={String(k)} onClick={() => setWhen(k)} className={chip(when === k)}>{l}</button>)}
+          </div>
+          {when === "hora" && <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-2 h-11 rounded-lg border-[#C9B89F] bg-white text-sm" />}
+        </div>
+        <div>
+          <span className="block text-[11px] font-semibold uppercase tracking-wider text-[#1E2F28]/70 mb-1.5">Canal</span>
+          <div className="flex gap-2">{([["mostrador", "Mostrador"], ["telefono", "Teléfono"], ["whatsapp", "WhatsApp"]] as const).map(([k, l]) => <button key={k} onClick={() => setChannel(k)} className={chip(channel === k)}>{l}</button>)}</div>
+        </div>
+        <textarea placeholder="Nota del pedido (ej. sin cubiertos)" rows={2} maxLength={140} value={note} onChange={(e) => setNote(e.target.value)} className="w-full rounded-lg border-[#C9B89F] bg-white text-sm resize-none focus:ring-[#D4AF7C] focus:border-[#D4AF7C]" />
+        <label className="flex items-center justify-between text-sm text-[#1E2F28]"><span>Incluir desechables</span><input type="checkbox" checked={disposables} onChange={(e) => setDisposables(e.target.checked)} className="w-5 h-5 rounded text-[#1E2F28] border-[#C9B89F]" /></label>
+      </div>
+      <button disabled={!valid} onClick={() => onConfirm({ customerName: name.trim(), customerPhone: digits || null, pickupAt: pickupAt(), channel, disposables, note: note.trim() || null })} className="mt-3 w-full h-12 rounded-lg bg-[#1E2F28] text-[#D4AF7C] font-semibold tracking-wide disabled:opacity-40">
+        Abrir pedido y capturar
       </button>
     </Sheet>
   );

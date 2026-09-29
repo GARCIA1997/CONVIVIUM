@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, integer, numeric, pgEnum, pgTable, primaryKey, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, numeric, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId, updatedAt } from "./_shared";
 
 export const stationKindEnum = pgEnum("station_kind", ["cocina", "barra"]);
@@ -34,6 +34,8 @@ export const products = pgTable("products", {
   description: text("description"),
   /** Código interno SKU / PLU. */
   sku: text("sku"),
+  /** Etiquetas del menú: nuevo, picante, vegetariano, recomendado. */
+  badges: text("badges").array().notNull().default(sql`'{}'::text[]`),
   /** Precio con impuestos incluidos, en centavos. */
   price: integer("price").notNull(),
   iepsPct: numeric("ieps_pct", { precision: 5, scale: 2 }).notNull().default("0"),
@@ -121,5 +123,20 @@ export const promotions = pgTable("promotions", {
   toleranceMin: integer("tolerance_min").notNull().default(0),
   status: promoStatusEnum("status").notNull().default("borrador"),
   createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Menú publicado (impreso y digital) de una sucursal. `config` guarda orden de categorías,
+ * productos ocultos, plantilla, tamaño y opciones; `slug` es la dirección pública del menú digital.
+ */
+export const menuPublications = pgTable("menu_publications", {
+  id: id(),
+  tenantId: tenantId(),
+  branchId: branchId(),
+  slug: text("slug").notNull().unique(),
+  config: jsonb("config").$type<Record<string, unknown>>().notNull().default({}),
+  published: boolean("published").notNull().default(false),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
   updatedAt: updatedAt(),
 });

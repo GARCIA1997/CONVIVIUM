@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
-import { integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
-export const checkKindEnum = pgEnum("check_kind", ["mesa", "barra"]);
+export const checkKindEnum = pgEnum("check_kind", ["mesa", "barra", "llevar"]);
 export const checkStatusEnum = pgEnum("check_status", ["abierta", "pidio_cuenta", "cobrada", "cancelada"]);
 export const itemStateEnum = pgEnum("item_state", ["pendiente", "enviado", "en_preparacion", "listo", "entregado", "cancelado", "devuelto"]);
 export const courseEnum = pgEnum("course", ["entrada", "fuerte", "postre", "bebida", "sin_tiempo"]);
@@ -25,6 +25,18 @@ export const checks = pgTable("checks", {
   invoiceStatus: text("invoice_status"),
   openedAt: createdAt(),
   closedAt: timestamp("closed_at", { withTimezone: true }),
+  // ── Para llevar ──
+  /** Folio del día por sucursal (L-001…). */
+  folio: integer("folio"),
+  customerName: text("customer_name"),
+  customerPhone: text("customer_phone"),
+  pickupAt: timestamp("pickup_at", { withTimezone: true }),
+  /** mostrador | telefono | whatsapp */
+  channel: text("channel"),
+  disposables: boolean("disposables"),
+  note: text("note"),
+  /** Entregado al cliente. */
+  handedOverAt: timestamp("handed_over_at", { withTimezone: true }),
 });
 
 export const orderItems = pgTable("order_items", {

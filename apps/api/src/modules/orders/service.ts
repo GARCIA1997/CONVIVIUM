@@ -1,5 +1,5 @@
 import type { orders } from "@convivium/contracts";
-import { and, arrayOverlaps, eq, inArray, or, schema, type Db } from "@convivium/db";
+import { and, arrayOverlaps, eq, gte, inArray, ne, or, schema, sql, type Db } from "@convivium/db";
 import { applyPromotions as computePromotions, cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
 import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
@@ -11,6 +11,9 @@ import { AppError, conflict, notFound } from "../../plugins/errors.js";
 import { lineTotal, toItemDto } from "./mapper.js";
 
 type ItemRow = typeof schema.orderItems.$inferSelect;
+
+/** L-007 */
+export const takeoutFolio = (n: number | null) => `L-${String(n ?? 0).padStart(3, "0")}`;
 
 export class OrdersService {
   private printer: PrintQueue;
@@ -34,9 +37,12 @@ export class OrdersService {
     const promoName = (id: string | null) => promos.find((p) => p.id === id)?.name ?? null;
     return {
       ...check,
-      tableLabel: table?.label ?? null,
+      tableLabel: table?.label ?? (check.kind === "llevar" ? `Llevar ${takeoutFolio(check.folio)}` : null),
       waiterName: waiter?.name ?? null,
       openedAt: check.openedAt.toISOString(),
+      pickupAt: check.pickupAt?.toISOString() ?? null,
+      handedOverAt: check.handedOverAt?.toISOString() ?? null,
+      closedAt: check.closedAt?.toISOString() ?? null,
       items: items.map((i) => ({ ...toItemDto(i), promotionName: promoName(i.promotionId) })),
       promotions: promos.map((p) => ({ name: p.name, amount: items.filter((i) => i.promotionId === p.id && lineTotal(i) >= 0 && i.state !== "cancelado" && i.state !== "devuelto").reduce((n, i) => n + i.promoDiscount, 0) })).filter((p) => p.amount > 0),
       subtotal,
@@ -65,9 +71,11 @@ export class OrdersService {
         return {
           id: c.id,
           kind: c.kind,
+          folio: c.folio,
+          pickupAt: c.pickupAt?.toISOString() ?? null,
           status: c.status,
           tableLabel: tables.find((t) => t.id === c.tableId)?.label ?? null,
-          name: c.name,
+          name: c.kind === "llevar" ? `Llevar ${takeoutFolio(c.folio)} · ${c.customerName ?? ""}` : c.name,
           guests: c.guests,
           waiterName: waiters.find((w) => w.id === c.waiterId)?.name ?? null,
           total: Math.max(0, sub - disc),
@@ -153,12 +161,16 @@ export class OrdersService {
         tableId: body.kind === "mesa" ? body.tableId : null,
         joinedTableIds: joined,
         guests: body.kind === "mesa" ? body.guests : null,
-        name: body.kind === "barra" ? body.name : null,
+        name: body.kind === "barra" ? body.name : body.kind === "llevar" ? body.customerName : null,
+        ...(body.kind === "llevar"
+          ? { folio: await this.nextTakeoutFolio(who.branchId), customerName: body.customerName, customerPhone: body.customerPhone, pickupAt: body.pickupAt ? new Date(body.pickupAt) : null, channel: body.channel, disposables: body.disposables, note: body.note }
+          : {}),
         waiterId: who.userId,
       })
       .returning();
     await recordEvent(this.db, who, { type: "check.opened", entity: "check", entityId: check!.id, data: body });
     if (body.kind === "mesa") for (const tableId of [body.tableId, ...joined]) this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "ocupada" });
+    if (body.kind === "llevar") this.app.hub.publish(["floor"], { type: "takeout.updated", checkId: check!.id });
     return check!;
   }
 
@@ -292,6 +304,50 @@ export class OrdersService {
     await this.db.update(schema.orderItems).set({ checkId: body.toCheckId }).where(and(inArray(schema.orderItems.id, body.itemIds), eq(schema.orderItems.branchId, who.branchId)));
     await recordEvent(this.db, who, { type: "items.moved", entity: "check", entityId: body.toCheckId, data: body });
     for (const c of new Set([body.toCheckId, ...from.map((f) => f.checkId)])) await this.applyPromotions(c);
+    return { ok: true };
+  }
+
+  /** Folio consecutivo del día para pedidos para llevar (se reinicia cada día, por sucursal). */
+  private async nextTakeoutFolio(branchId: string) {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const [r] = await this.db.select({ max: sql<number | null>`max(${schema.checks.folio})` }).from(schema.checks)
+      .where(and(eq(schema.checks.branchId, branchId), eq(schema.checks.kind, "llevar"), gte(schema.checks.openedAt, start)));
+    return (r?.max ?? 0) + 1;
+  }
+
+  /** E3-11 · Tablero de pedidos para llevar: activos y entregados hoy. */
+  async takeoutBoard(who: Principal) {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const checks = await this.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, who.branchId), eq(schema.checks.kind, "llevar"), gte(schema.checks.openedAt, start), ne(schema.checks.status, "cancelada")));
+    const ids = checks.map((c) => c.id);
+    const items = ids.length ? await this.db.select().from(schema.orderItems).where(inArray(schema.orderItems.checkId, ids)) : [];
+    return checks.map((c) => {
+      const mine = items.filter((i) => i.checkId === c.id && i.state !== "cancelado" && i.state !== "devuelto");
+      const priced = mine.filter((i) => i.unitPrice > 0);
+      // Listo cuando todo lo enviado ya salió de cocina/barra.
+      const ready = mine.length > 0 && mine.every((i) => ["listo", "entregado"].includes(i.state));
+      const stage = c.handedOverAt ? "entregado" : ready ? "listo" : "preparacion";
+      return {
+        id: c.id, folio: c.folio, label: takeoutFolio(c.folio), customerName: c.customerName, customerPhone: c.customerPhone, channel: c.channel,
+        pickupAt: c.pickupAt?.toISOString() ?? null, openedAt: c.openedAt.toISOString(), handedOverAt: c.handedOverAt?.toISOString() ?? null,
+        disposables: c.disposables, note: c.note, stage, paid: c.status === "cobrada",
+        total: priced.reduce((n, i) => n + lineTotal(i), 0),
+        summary: priced.map((i) => `${i.quantity} ${i.productName}`).join(", "),
+        itemCount: priced.reduce((n, i) => n + i.quantity, 0),
+      };
+    }).sort((a, b) => (a.pickupAt ?? a.openedAt).localeCompare(b.pickupAt ?? b.openedAt));
+  }
+
+  /** Entrega al cliente: exige que la cuenta esté cobrada. */
+  async handOver(who: Principal, checkId: string) {
+    const check = await this.getCheck(who, checkId);
+    if (check.kind !== "llevar") throw conflict("not_takeout", "No es un pedido para llevar");
+    if (check.status !== "cobrada") throw conflict("not_paid", "Cobra el pedido antes de entregarlo");
+    await this.db.update(schema.checks).set({ handedOverAt: new Date() }).where(eq(schema.checks.id, checkId));
+    // Lo listo en el pase pasa a entregado.
+    await this.db.update(schema.orderItems).set({ state: "entregado", deliveredAt: new Date() }).where(and(eq(schema.orderItems.checkId, checkId), eq(schema.orderItems.state, "listo")));
+    await recordEvent(this.db, who, { type: "takeout.handed_over", entity: "check", entityId: checkId, data: {} });
+    this.app.hub.publish(["floor"], { type: "takeout.updated", checkId });
     return { ok: true };
   }
 

@@ -11,7 +11,7 @@ interface ModGroup { id: string; name: string; minSelect: number; maxSelect: num
 interface RecipeRow { id: string; productId: string | null; modifierId: string | null; isSubRecipe: boolean; cost: number }
 interface Draft {
   id?: string; name: string; description: string; sku: string; categoryId: string; price: number; iepsPct: number;
-  targetPrepSec: number; stationIds: string[]; modifierGroupIds: string[]; active: boolean; soldOut: boolean; photoUrl: string | null;
+  targetPrepSec: number; stationIds: string[]; modifierGroupIds: string[]; active: boolean; soldOut: boolean; photoUrl: string | null; badges: string[];
 }
 
 const mxn = (c: number) => `$${(c / 100).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -23,7 +23,7 @@ const IEPS: [number, string, string][] = [
 ];
 const toDraft = (p: Product): Draft => ({
   id: p.id, name: p.name, description: p.description ?? "", sku: p.sku ?? "", categoryId: p.categoryId, price: p.price, iepsPct: p.iepsPct,
-  targetPrepSec: p.targetPrepSec, stationIds: p.stationIds, modifierGroupIds: p.modifierGroups.map((g) => g.id), active: p.active, soldOut: p.soldOut, photoUrl: p.photoUrl,
+  targetPrepSec: p.targetPrepSec, stationIds: p.stationIds, modifierGroupIds: p.modifierGroups.map((g) => g.id), active: p.active, soldOut: p.soldOut, photoUrl: p.photoUrl, badges: p.badges ?? [],
 });
 
 export function MenuPage() {
@@ -66,7 +66,7 @@ export function MenuPage() {
   const category = menu?.categories.find((c) => c.id === (draft?.categoryId ?? categoryId));
   const linked = groups.filter((g) => draft?.modifierGroupIds.includes(g.id));
 
-  const newProduct = () => setDraft({ name: "", description: "", sku: "", categoryId: categoryId ?? menu!.categories[0]!.id, price: 0, iepsPct: 0, targetPrepSec: 720, stationIds: stations[0] ? [stations[0].id] : [], modifierGroupIds: [], active: true, soldOut: false, photoUrl: null });
+  const newProduct = () => setDraft({ name: "", description: "", sku: "", categoryId: categoryId ?? menu!.categories[0]!.id, price: 0, iepsPct: 0, targetPrepSec: 720, stationIds: stations[0] ? [stations[0].id] : [], modifierGroupIds: [], active: true, soldOut: false, photoUrl: null, badges: [] });
   const save = async () => {
     if (!draft) return;
     setMsg(null);
@@ -198,6 +198,9 @@ export function MenuPage() {
                 <div className="md:col-span-2"><label className="block text-xs font-semibold text-stone-700 mb-1.5">Descripción para mesero y comanda digital</label>
                   <textarea value={draft.description} maxLength={160} onChange={(e) => set({ description: e.target.value })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-lg text-xs text-stone-800 p-2.5 focus:bg-white focus:ring-1 focus:ring-olivo resize-none" rows={2} />
                   <p className="text-[11px] text-stone-400 mt-1 flex justify-between"><span>Aparece en la pantalla del mesero y comanda de cocina KDS.</span><span>{draft.description.length} / 160 caracteres</span></p>
+                </div>
+                <div><span className="block text-xs font-semibold text-stone-700 mb-1.5">Etiquetas en el menú impreso y digital</span>
+                  <div className="flex flex-wrap gap-1.5">{([["nuevo", "Nuevo"], ["picante", "Picante"], ["vegetariano", "Vegetariano"], ["recomendado", "Recomendado"]] as const).map(([b, l]) => { const on = draft.badges.includes(b); return <button key={b} onClick={() => set({ badges: on ? draft.badges.filter((x) => x !== b) : [...draft.badges, b] })} className={on ? "px-3 py-1 rounded-full bg-olivo text-dorado text-[11px] font-medium" : "px-3 py-1 rounded-full bg-white border border-arena-border text-stone-600 text-[11px]"}>{l}</button>; })}</div>
                 </div>
                 <div><label className="block text-xs font-semibold text-stone-700 mb-1.5">Código SKU / PLU Interno</label>
                   <div className="flex"><span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-arena-border bg-stone-100 text-stone-500 font-mono text-xs">#</span><input value={draft.sku} maxLength={24} onChange={(e) => set({ sku: e.target.value.toUpperCase() })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-r-lg text-xs font-mono px-3 py-2 text-stone-800 focus:bg-white focus:ring-1 focus:ring-olivo" type="text" /></div>

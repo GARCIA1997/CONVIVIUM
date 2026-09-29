@@ -1,4 +1,6 @@
-import { and, desc, eq, inArray, schema, sql, type Db } from "@convivium/db";
+import type { purchasing } from "@convivium/contracts";
+import { and, desc, eq, gte, inArray, schema, sql, type Db } from "@convivium/db";
+import type { z } from "zod";
 import type { FastifyInstance } from "fastify";
 import { recordEvent } from "../../lib/audit.js";
 import type { Principal } from "../../plugins/auth.js";
@@ -31,15 +33,64 @@ export class PurchasingService {
     }));
   }
 
-  async upsertSupplier(who: Principal, body: { name: string; rfc: string | null; phone: string | null; email: string | null; creditDays: number }, id?: string) {
+  async upsertSupplier(who: Principal, body: z.infer<typeof purchasing.SupplierUpsert>, id?: string) {
     if (id) {
-      const [r] = await this.db.update(schema.suppliers).set(body).where(and(eq(schema.suppliers.id, id), eq(schema.suppliers.tenantId, who.tenantId))).returning();
-      if (!r) throw notFound("Proveedor");
-      return r;
+      const [before] = await this.db.select().from(schema.suppliers).where(and(eq(schema.suppliers.id, id), eq(schema.suppliers.tenantId, who.tenantId)));
+      if (!before) throw notFound("Proveedor");
+      const [r] = await this.db.update(schema.suppliers).set(body).where(eq(schema.suppliers.id, id)).returning();
+      await recordEvent(this.db, who, { type: "supplier.updated", entity: "supplier", entityId: id, data: { before, after: body } });
+      return r!;
     }
     const [r] = await this.db.insert(schema.suppliers).values({ ...body, tenantId: who.tenantId }).returning();
     await recordEvent(this.db, who, { type: "supplier.created", entity: "supplier", entityId: r!.id, data: body });
     return r!;
+  }
+
+  /** Ficha del proveedor: lista de precios vigente con variación, compras de 90 días, órdenes abiertas y saldo. */
+  async supplierDetail(who: Principal, id: string) {
+    const [sup] = await this.db.select().from(schema.suppliers).where(and(eq(schema.suppliers.id, id), eq(schema.suppliers.tenantId, who.tenantId)));
+    if (!sup) throw notFound("Proveedor");
+    const since = new Date(Date.now() - 90 * 864e5);
+    const [prices, orders, receipts, payables] = await Promise.all([
+      this.db.select({ id: schema.supplierPrices.id, ingredientId: schema.supplierPrices.ingredientId, unitPrice: schema.supplierPrices.unitPrice, validFrom: schema.supplierPrices.validFrom, name: schema.ingredients.name, purchaseUnit: schema.ingredients.purchaseUnit })
+        .from(schema.supplierPrices).innerJoin(schema.ingredients, eq(schema.ingredients.id, schema.supplierPrices.ingredientId))
+        .where(eq(schema.supplierPrices.supplierId, id)).orderBy(desc(schema.supplierPrices.validFrom), desc(schema.supplierPrices.createdAt)),
+      this.db.select().from(schema.purchaseOrders).where(and(eq(schema.purchaseOrders.supplierId, id), eq(schema.purchaseOrders.tenantId, who.tenantId))),
+      this.db.select().from(schema.receipts).where(and(eq(schema.receipts.supplierId, id), gte(schema.receipts.createdAt, since))),
+      this.db.select().from(schema.payables).where(and(eq(schema.payables.supplierId, id), eq(schema.payables.tenantId, who.tenantId))),
+    ]);
+    // Precio vigente = el más reciente por insumo; el anterior sirve para la variación.
+    const byIngredient = new Map<string, typeof prices>();
+    for (const p of prices) byIngredient.set(p.ingredientId, [...(byIngredient.get(p.ingredientId) ?? []), p]);
+    const priceList = [...byIngredient.values()].map(([cur, prev]) => ({
+      ingredientId: cur!.ingredientId, name: cur!.name, purchaseUnit: cur!.purchaseUnit, unitPrice: cur!.unitPrice, validFrom: cur!.validFrom,
+      previousPrice: prev?.unitPrice ?? null, changePct: prev?.unitPrice ? Math.round(((cur!.unitPrice - prev.unitPrice) / prev.unitPrice) * 1000) / 10 : null,
+    })).sort((a, b) => a.name.localeCompare(b.name));
+    const open = payables.filter((p) => p.balance > 0);
+    const nextDue = open.map((p) => p.dueAt).filter(Boolean).sort()[0] ?? null;
+    return {
+      ...sup,
+      priceList,
+      stats: {
+        purchases90d: receipts.reduce((n, r) => n + r.total, 0),
+        receipts90d: receipts.length,
+        openOrders: orders.filter((o) => ["borrador", "aprobada", "enviada", "recibida_parcial"].includes(o.status)).length,
+        balance: open.reduce((n, p) => n + p.balance, 0),
+        nextDue,
+        overdue: open.some((p) => p.dueAt && new Date(p.dueAt) < new Date()),
+      },
+    };
+  }
+
+  /** Actualiza la lista de precios: un precio distinto crea un registro nuevo (queda historial). */
+  async setSupplierPrices(who: Principal, id: string, body: z.infer<typeof purchasing.SupplierPricesBody>) {
+    const detail = await this.supplierDetail(who, id);
+    const today = new Date().toISOString().slice(0, 10);
+    const changed = body.prices.filter((p) => detail.priceList.find((x) => x.ingredientId === p.ingredientId)?.unitPrice !== p.unitPrice);
+    if (changed.length) await this.db.insert(schema.supplierPrices).values(changed.map((p) => ({ supplierId: id, ingredientId: p.ingredientId, unitPrice: p.unitPrice, validFrom: today })));
+    if (body.removed.length) await this.db.delete(schema.supplierPrices).where(and(eq(schema.supplierPrices.supplierId, id), inArray(schema.supplierPrices.ingredientId, body.removed)));
+    await recordEvent(this.db, who, { type: "supplier.prices_updated", entity: "supplier", entityId: id, data: { changed: changed.length, removed: body.removed.length } });
+    return this.supplierDetail(who, id);
   }
 
   // ---------- Órdenes de compra (E8-02) ----------

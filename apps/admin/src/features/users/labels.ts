@@ -5,7 +5,7 @@ export const ROLE_LABEL: Record<Role, string> = { dueno: "Dueño", gerente: "Ger
 
 export const GROUPS: { key: string; label: string; perms: [Permission, string, string][] }[] = [
   { key: "op", label: "Comandas y Cocina", perms: [
-    ["mesa.abrir", "Abrir mesa y asignar comensal", "table_restaurant"], ["comanda.capturar", "Capturar y enviar comanda", "edit_note"],
+    ["mesa.abrir", "Abrir mesa y asignar comensal", "table_restaurant"], ["pedido_llevar.abrir", "Pedidos para llevar", "takeout_dining"], ["comanda.capturar", "Capturar y enviar comanda", "edit_note"],
     ["comanda.cancelar_no_enviado", "Cancelar producto no enviado", "remove_shopping_cart"], ["comanda.cancelar_enviado", "Cancelar producto ya enviado", "block"],
     ["comanda.cancelar_preparado", "Cancelar producto preparado", "delete_forever"], ["comanda.devolver", "Registrar devolución", "undo"],
     ["cortesia.aplicar", "Aplicar cortesía", "redeem"], ["descuento.aplicar", "Aplicar descuento", "percent"], ["aprobacion.resolver", "Resolver solicitudes de autorización", "verified_user"],

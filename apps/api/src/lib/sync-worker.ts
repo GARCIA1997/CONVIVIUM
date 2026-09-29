@@ -1,4 +1,4 @@
-import { applyConfigChanges, asc, eq, gt, inArray, isNull, schema, type ConfigChange } from "@convivium/db";
+import { and, applyConfigChanges, asc, eq, gt, inArray, isNull, lt, lte, schema, type ConfigChange } from "@convivium/db";
 import type { FastifyInstance } from "fastify";
 import { config } from "../config.js";
 
@@ -52,6 +52,8 @@ export function startSyncWorker(app: FastifyInstance) {
       });
       since = rows.at(-1)!.seq;
       await setCursor("config.pushed", since);
+      // Lo ya subido solo se conserva 7 días en el nodo (la nube guarda el historial completo).
+      await app.db.delete(schema.configChanges).where(and(lte(schema.configChanges.seq, since), lt(schema.configChanges.changedAt, new Date(Date.now() - 7 * 864e5))));
       app.log.info(`sync: subidos ${r.ops} registros de operación y ${r.applied} de configuración (${r.stale} ya superados en la nube)`);
     }
   }
