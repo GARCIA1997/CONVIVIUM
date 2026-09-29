@@ -1,4 +1,4 @@
-import { boolean, date, integer, numeric, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, integer, numeric, pgEnum, pgTable, real, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
 export const useUnitEnum = pgEnum("use_unit", ["g", "ml", "pz"]);
@@ -20,19 +20,24 @@ export const ingredients = pgTable("ingredients", {
   conversion: numeric("conversion", { precision: 12, scale: 4 }).notNull(),
   minStock: numeric("min_stock", { precision: 12, scale: 3 }).notNull().default("0"),
   maxStock: numeric("max_stock", { precision: 12, scale: 3 }).notNull().default("0"),
-  /** Costo promedio por unidad de uso, en centésimas de centavo. */
-  avgCost: integer("avg_cost").notNull().default(0),
+  /** Costo promedio en centavos por unidad de uso (admite decimales: 0.52 ¢/ml). */
+  avgCost: real("avg_cost").notNull().default(0),
+  category: text("category"),
   critical: boolean("critical").notNull().default(false),
   lotTracking: boolean("lot_tracking").notNull().default(false),
 });
 
-export const stock = pgTable("stock", {
-  id: id(),
-  tenantId: tenantId(),
-  warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id),
-  ingredientId: uuid("ingredient_id").notNull().references(() => ingredients.id),
-  quantity: numeric("quantity", { precision: 14, scale: 3 }).notNull().default("0"),
-});
+export const stock = pgTable(
+  "stock",
+  {
+    id: id(),
+    tenantId: tenantId(),
+    warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id),
+    ingredientId: uuid("ingredient_id").notNull().references(() => ingredients.id),
+    quantity: numeric("quantity", { precision: 14, scale: 3 }).notNull().default("0"),
+  },
+  (t) => [unique("stock_warehouse_ingredient").on(t.warehouseId, t.ingredientId)],
+);
 
 export const recipes = pgTable("recipes", {
   id: id(),
@@ -63,11 +68,35 @@ export const stockMovements = pgTable("stock_movements", {
   ingredientId: uuid("ingredient_id").notNull(),
   warehouseId: uuid("warehouse_id").notNull(),
   quantity: numeric("quantity", { precision: 14, scale: 3 }).notNull(),
-  unitCost: integer("unit_cost"),
+  unitCost: real("unit_cost"),
   referenceId: uuid("reference_id"),
   reasonId: uuid("reason_id"),
   lot: text("lot"),
   expiresAt: date("expires_at"),
   createdBy: uuid("created_by").notNull(),
   createdAt: createdAt(),
+});
+
+export const countStatusEnum = pgEnum("count_status", ["borrador", "pendiente_aprobacion", "aprobado", "rechazado"]);
+
+/** Conteo físico (E7-09); los ajustes los aprueba el gerente (separación de funciones). */
+export const inventoryCounts = pgTable("inventory_counts", {
+  id: id(),
+  tenantId: tenantId(),
+  branchId: branchId(),
+  warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id),
+  status: countStatusEnum("status").notNull().default("pendiente_aprobacion"),
+  countedBy: uuid("counted_by").notNull(),
+  approvedBy: uuid("approved_by"),
+  createdAt: createdAt(),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+});
+
+export const inventoryCountLines = pgTable("inventory_count_lines", {
+  id: id(),
+  countId: uuid("count_id").notNull().references(() => inventoryCounts.id, { onDelete: "cascade" }),
+  ingredientId: uuid("ingredient_id").notNull(),
+  theoretical: numeric("theoretical", { precision: 14, scale: 3 }).notNull(),
+  counted: numeric("counted", { precision: 14, scale: 3 }).notNull(),
+  unitCost: real("unit_cost").notNull().default(0),
 });

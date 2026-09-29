@@ -5,6 +5,7 @@ import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
 import { PrintQueue } from "../../lib/printer.js";
+import { InventoryService } from "../inventory/service.js";
 import type { Principal } from "../../plugins/auth.js";
 import { AppError, conflict, notFound } from "../../plugins/errors.js";
 import { lineTotal, toItemDto } from "./mapper.js";
@@ -15,7 +16,9 @@ export class OrdersService {
   private printer: PrintQueue;
   constructor(private app: FastifyInstance, private db: Db = app.db) {
     this.printer = new PrintQueue(app);
+    this.inventory = new InventoryService(app);
   }
+  private inventory: InventoryService;
 
   async getCheck(who: Principal, checkId: string) {
     const [check] = await this.db.select().from(schema.checks).where(and(eq(schema.checks.id, checkId), eq(schema.checks.branchId, who.branchId)));
@@ -143,6 +146,7 @@ export class OrdersService {
     const inserted = await this.db.insert(schema.orderItems).values(rows).returning();
     await recordEvent(this.db, who, { type: "items.added", entity: "check", entityId: checkId, data: body });
     this.broadcastSent(inserted.filter((i) => i.state === "enviado"));
+    this.stock(who, inserted.filter((i) => i.state === "enviado"), 1);
     return inserted.map(toItemDto);
   }
 
@@ -155,6 +159,7 @@ export class OrdersService {
       .where(and(eq(schema.orderItems.checkId, checkId), eq(schema.orderItems.course, course as never), eq(schema.orderItems.state, "pendiente")))
       .returning();
     this.broadcastSent(updated);
+    this.stock(who, updated, 1);
     return updated.map(toItemDto);
   }
 
@@ -180,6 +185,8 @@ export class OrdersService {
     if (!canTransition(item.state, "cancelado")) throw conflict("invalid_transition", "No se puede cancelar");
     const [updated] = await this.db.update(schema.orderItems).set({ state: "cancelado" }).where(eq(schema.orderItems.id, itemId)).returning();
     await recordEvent(this.db, who, { type: "item.cancelled", entity: "order_item", entityId: itemId, data: { ...body, fromState: item.state }, authorizedBy });
+    // Enviado sin preparar → regresa al inventario; ya preparado → queda como merma.
+    if (item.state === "enviado") this.stock(who, [item], -1);
     await this.notifyItem(updated!);
     return { status: "cancelled" as const, item: toItemDto(updated!) };
   }
@@ -199,6 +206,7 @@ export class OrdersService {
         .values({ ...rest, state: "enviado", priority: "rehacer", sentAt: new Date(), createdBy: who.userId })
         .returning();
       this.broadcastSent([redo!]);
+      this.stock(who, [redo!], 1);
       return { status: "remade" as const, item: toItemDto(redo!) };
     }
     return { status: "removed" as const };
@@ -222,6 +230,11 @@ export class OrdersService {
     const [item] = await this.db.select().from(schema.orderItems).where(and(eq(schema.orderItems.id, itemId), eq(schema.orderItems.branchId, who.branchId)));
     if (!item) throw notFound("Producto de comanda");
     return item;
+  }
+
+  /** E7-06 · Descuento de inventario por receta; nunca bloquea la operación de piso. */
+  private stock(who: Principal, items: ItemRow[], sign: 1 | -1) {
+    void this.inventory.applySale(who, items, sign).catch((err) => this.app.log.error(err, "descuento de inventario"));
   }
 
   private broadcastSent(items: ItemRow[]) {
