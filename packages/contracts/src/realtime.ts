@@ -6,6 +6,8 @@ export const RealtimeEvent = z.discriminatedUnion("type", [
   z.object({ type: z.literal("item.sent"), item: OrderItem }),
   /** El catálogo cambió (producto, precio, modificadores): los comanderos recargan el menú. */
   z.object({ type: z.literal("menu.updated") }),
+  /** Cambió el plano (mesas, áreas o estructura). */
+  z.object({ type: z.literal("floor.updated") }),
   z.object({ type: z.literal("item.updated"), item: OrderItem }),
   z.object({ type: z.literal("item.ready"), item: OrderItem, tableLabel: z.string().nullable(), waiterId: z.string() }),
   z.object({ type: z.literal("product.sold_out"), productId: z.string(), soldOut: z.boolean() }),

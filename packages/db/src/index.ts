@@ -10,3 +10,4 @@ export function createDb(url: string) {
   return drizzle(client, { schema });
 }
 export type Db = ReturnType<typeof createDb>;
+export * from "./sync.js";

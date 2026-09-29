@@ -128,6 +128,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
       await tx.delete(schema.floorFixtures).where(eq(schema.floorFixtures.branchId, branchId));
       if (req.body.fixtures.length) await tx.insert(schema.floorFixtures).values(req.body.fixtures.map((f) => ({ ...f, tenantId, branchId })));
     });
+    app.hub.publish(["floor"], { type: "floor.updated" });
     await recordEvent(db, req.user, { type: "floor.published", entity: "floor", data: { tables: tables.length, created: tables.filter((t) => !t.id).length, removed: removed.length, fixtures: req.body.fixtures.length } });
     return { ok: true };
   });

@@ -101,10 +101,31 @@ Usuarios de prueba, PINs y código de vinculación: ver comentario al inicio de 
 - **Caja**: dividir, corte X/Z con conteo ciego (Z solo gerente), reabrir con permiso.
 - **Seguridad**: los tokens se redactan en los logs.
 
-## 6. Siguientes incrementos sugeridos
+## 6. Sincronización de configuración nube ↔ nodo (hecho)
 
-1. Configuración versionada nube → nodo y proyección de eventos para reportes consolidados.
-2. Inventario: recetas, descuento automático por venta, conteos.
-3. Compras y cuentas por pagar.
-4. Corte Z autorizado por PIN de gerente sobre la caja del cajero; zona horaria de la sucursal en tickets.
-5. Pruebas de integración de la API en CI.
+- **Registro por trigger**: cada tabla de configuración (empresa, sucursal, usuarios y roles, categorías, productos, estaciones,
+  modificadores, disponibilidad, promociones, motivos, áreas, mesas, estructura del plano, almacenes, insumos y recetas)
+  tiene un trigger que anota el cambio en `config_changes`. No importa si lo hizo la API, un script o SQL directo.
+- **Nube → nodo** (`GET /v1/sync/config?since=N`): la primera vez (`since=0`) entrega la foto completa de la sucursal
+  en orden de dependencias; después, solo cambios nuevos de la empresa o de esa sucursal. El nodo los aplica con
+  `apply_config_change(..., silent = true)` (sin volver a registrarlos: no hay eco) y avisa en tiempo real
+  (`menu.updated`, `floor.updated`, recarga de permisos).
+- **Nodo → nube** (`POST /v1/sync/config`): lo editado en el admin del nodo (p. ej. sin internet) sube en el siguiente ciclo.
+  La nube aplica *last-writer-wins* por registro: si ya tiene un cambio más reciente, descarta el del nodo (`stale`).
+  Lo registra con el nodo de origen para propagarlo a otras sucursales sin regresárselo.
+- **Orden del ciclo**: eventos ↑ → configuración ↑ → configuración ↓ (evita pisar cambios locales aún no subidos).
+- **Seguridad**: solo tokens de dispositivos tipo `nodo`, vigentes y de esa sucursal; se valida que cada fila (y la que
+  reemplaza) sea de la misma empresa; solo tablas de la lista blanca (`packages/db/src/sync.ts`).
+
+**Vincular un nodo nuevo** (base vacía con migraciones aplicadas):
+
+1. En el admin de la nube → Estaciones y dispositivos → *Generar código*.
+2. `POST {nube}/v1/auth/devices/pair` con `{ "code": "…", "name": "Nodo Roma Norte", "kind": "nodo" }` → `deviceToken`, `branchId`.
+3. Arrancar el nodo con `CONVIVIUM_MODE=edge`, `CLOUD_URL`, `NODE_TOKEN=<deviceToken>`, `BRANCH_ID=<branchId>`.
+   En el primer ciclo baja la foto completa; revocar el dispositivo corta la sincronización.
+
+## 7. Siguientes incrementos sugeridos
+
+1. Proyección de eventos en la nube para reportes consolidados multi-sucursal (E9-06).
+2. Pruebas de integración de la API en CI (incluida la sincronización con dos bases).
+3. Instalador del mini-PC (Docker Compose con nodo, Postgres y PWA) y despliegue de la nube en Hostinger.
