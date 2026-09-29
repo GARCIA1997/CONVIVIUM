@@ -10,4 +10,4 @@ Imagen de fábrica que CONVIVIUM instala en cada mini-PC antes de enviarlo:
 
 Los celulares, TVs y cajas **no instalan nada**: abren `https://convivium.local/<app>/` y la instalan como PWA desde el navegador.
 
-Pendiente: servir los `dist/` de las PWA desde la API (`@fastify/static`) en modo edge y worker de sincronización.
+Instalación, vinculación con la nube, actualización y respaldo: ver `docs/DESPLIEGUE.md`.

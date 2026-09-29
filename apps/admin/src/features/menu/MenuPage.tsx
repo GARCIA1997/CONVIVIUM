@@ -66,7 +66,14 @@ export function MenuPage() {
   const category = menu?.categories.find((c) => c.id === (draft?.categoryId ?? categoryId));
   const linked = groups.filter((g) => draft?.modifierGroupIds.includes(g.id));
 
-  const newProduct = () => setDraft({ name: "", description: "", sku: "", categoryId: categoryId ?? menu!.categories[0]!.id, price: 0, iepsPct: 0, targetPrepSec: 720, stationIds: stations[0] ? [stations[0].id] : [], modifierGroupIds: [], active: true, soldOut: false, photoUrl: null, badges: [] });
+  const newProduct = async () => {
+    // Un platillo necesita categoría: en un menú vacío primero se crea la categoría.
+    let cat = categoryId ?? menu?.categories[0]?.id;
+    if (!cat) cat = await newCategory();
+    if (!cat) return;
+    startDraft(cat);
+  };
+  const startDraft = (cat: string) => setDraft({ name: "", description: "", sku: "", categoryId: cat, price: 0, iepsPct: 0, targetPrepSec: 720, stationIds: stations[0] ? [stations[0].id] : [], modifierGroupIds: [], active: true, soldOut: false, photoUrl: null, badges: [] });
   const save = async () => {
     if (!draft) return;
     setMsg(null);
@@ -88,11 +95,12 @@ export function MenuPage() {
     const fresh = m.products.find((x) => x.id === p.id);
     if (fresh && draft?.id === p.id) setDraft((d) => (d ? { ...d, soldOut: fresh.soldOut } : d));
   };
-  const newCategory = async () => {
-    const name = prompt("Nombre de la nueva categoría (ej. Postres, Cervezas)");
-    if (!name?.trim()) return;
+  const newCategory = async (): Promise<string | undefined> => {
+    const name = prompt("Nombre de la nueva categoría (ej. Entradas, Postres, Cervezas)");
+    if (!name?.trim()) return undefined;
     const c = await client.request<{ id: string }>("POST", "/catalog/categories", { name: name.trim() });
     await load(); setCategoryId(c.id); setQ("");
+    return c.id;
   };
   const scrollTo = (k: keyof typeof sections) => sections[k].current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -337,7 +345,18 @@ export function MenuPage() {
             </div>
           </div>
         </main>
-      ) : <main className="flex-1 flex items-center justify-center text-sm text-stone-500">Selecciona un producto o crea uno nuevo.</main>}
+      ) : (
+        <main className="flex-1 flex flex-col items-center justify-center gap-3 text-sm text-stone-500">
+          {menu && !menu.categories.length ? (
+            <>
+              <span className="material-symbols-outlined text-4xl text-arena">restaurant_menu</span>
+              <p className="font-serif-brand text-lg text-stone-800">Tu menú está vacío</p>
+              <p>Empieza creando una categoría (Entradas, Fuertes, Bebidas…) y después agrega sus platillos.</p>
+              <button onClick={() => newProduct()} className="px-4 py-2 rounded-lg bg-olivo text-white text-xs font-semibold">Crear primera categoría y platillo</button>
+            </>
+          ) : "Selecciona un producto o crea uno nuevo."}
+        </main>
+      )}
 
       {editingGroup && <GroupEditor group={editingGroup === "new" ? null : editingGroup} onClose={() => setEditingGroup(null)} onSaved={async (id) => { await loadGroups(); await load(); if (editingGroup === "new" && id) set({ modifierGroupIds: [...(draft?.modifierGroupIds ?? []), id] }); setEditingGroup(null); }} />}
     </div>

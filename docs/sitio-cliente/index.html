@@ -1,0 +1,450 @@
+<title>Manual CONVIVIUM</title>
+<meta name="description" content="Guía de uso de CONVIVIUM para dueños, gerentes, meseros, cocina, barra, caja y almacén.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  :root {
+    --olivo: #1E2F28; --dorado: #D4AF7C; --terracota: #B45A3C;
+    --bg: #F4F1EA; --surface: #FFFFFF; --panel: #EAE6DD; --line: #D9CFBF; --arena: #C9B89F;
+    --ink: #1A1A1A; --muted: #5F5A51; --accent: #1E2F28; --accent-ink: #D4AF7C; --link: #7A4A2E;
+    --ok: #2F6B45; --warn: #9A6B12; --bad: #B45A3C;
+    --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #141B18; --surface: #1B2420; --panel: #22302A; --line: #33443C; --arena: #6E6353;
+      --ink: #ECE7DD; --muted: #A9A294; --accent: #D4AF7C; --accent-ink: #141B18; --link: #E2C08F;
+      --ok: #7FC196; --warn: #E0B35A; --bad: #E08A6C;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #141B18; --surface: #1B2420; --panel: #22302A; --line: #33443C; --arena: #6E6353;
+    --ink: #ECE7DD; --muted: #A9A294; --accent: #D4AF7C; --accent-ink: #141B18; --link: #E2C08F;
+    --ok: #7FC196; --warn: #E0B35A; --bad: #E08A6C;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+  a { color: var(--link); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--dorado); outline-offset: 2px; }
+
+  .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--olivo); color: #EFE8DA; padding-inline: 16px; }
+  .top-in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 14px; min-height: 60px; }
+  .mono { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--dorado); color: var(--dorado); display: grid; place-items: center; font-family: var(--serif); font-weight: 700; flex: none; }
+  .brand { font-family: var(--serif); letter-spacing: .28em; font-size: 17px; color: #F3E9D2; }
+  .brand small { display: block; font-family: var(--sans); letter-spacing: .12em; font-size: 10.5px; text-transform: uppercase; color: var(--arena); margin-top: -2px; }
+  .menu-btn { margin-left: auto; display: none; background: transparent; border: 1px solid #4B5E55; color: #EFE8DA; border-radius: 8px; padding: 6px 12px; font: 500 13px var(--sans); cursor: pointer; }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 48px; }
+  nav.index { position: sticky; top: calc(60px + env(safe-area-inset-top, 0px)); align-self: start; max-height: calc(100vh - 60px); overflow-y: auto; padding-block: 28px 40px; }
+  .search { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 9px 12px; font: 14px var(--sans); }
+  .index h4 { font: 600 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 22px 0 6px; }
+  .index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+  .index a { display: block; text-decoration: none; color: var(--ink); font-size: 14px; padding: 5px 10px; border-radius: 6px; border-left: 2px solid transparent; }
+  .index a:hover { background: var(--panel); }
+  .index a.on { border-left-color: var(--dorado); background: var(--panel); font-weight: 600; }
+  .nores { font-size: 13px; color: var(--muted); padding: 8px 10px; }
+
+  main { padding-block: 36px 96px; min-width: 0; }
+  .hero { padding-block: 8px 34px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .eyebrow { font: 600 11.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terracota); }
+  h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(34px, 5vw, 50px); line-height: 1.08; margin: 10px 0 14px; text-wrap: balance; color: var(--ink); }
+  h1 em { font-style: italic; font-weight: 500; color: var(--terracota); }
+  .lead { font-size: 18px; color: var(--muted); max-width: 64ch; margin: 0; }
+  section { padding-top: 44px; scroll-margin-top: 80px; }
+  h2 { font-family: var(--serif); font-size: 30px; line-height: 1.2; margin: 0 0 6px; text-wrap: balance; }
+  h2 + .who { font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+  h3 { font-family: var(--serif); font-size: 21px; margin: 30px 0 8px; text-wrap: balance; }
+  p, li { max-width: 68ch; }
+  .muted { color: var(--muted); }
+  ol.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 10px; }
+  ol.steps > li { counter-increment: s; position: relative; padding-left: 42px; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 600 13px var(--sans); display: grid; place-items: center; }
+  ul { padding-left: 20px; }
+  ul li { margin: 4px 0; }
+  .note { background: var(--panel); border-radius: 10px; padding: 14px 16px; margin: 16px 0; max-width: 68ch; font-size: 15px; }
+  .note b:first-child { font: 600 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; display: block; margin-bottom: 4px; color: var(--muted); }
+  .note.warn { box-shadow: inset 3px 0 0 var(--warn); }
+  .note.bad { box-shadow: inset 3px 0 0 var(--bad); }
+  kbd, code { font-family: var(--mono); font-size: .86em; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
+  .chip { display: inline-block; font: 600 12px var(--sans); border-radius: 999px; padding: 2px 10px; border: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+  .chip.ok { color: var(--ok); } .chip.warn { color: var(--warn); } .chip.bad { color: var(--bad); }
+  .tablebox { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 600 11.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--panel); }
+  tr:last-child td { border-bottom: 0; }
+  td.c { text-align: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 18px 0; }
+  .role { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+  .role strong { font-family: var(--serif); font-size: 18px; }
+  .role span { font-size: 14px; color: var(--muted); }
+  .role a { font-size: 14px; }
+  .arch { font-family: var(--mono); font-size: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; white-space: pre; line-height: 1.55; color: var(--ink); }
+  details { border-bottom: 1px solid var(--line); padding-block: 12px; max-width: 72ch; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 8px 0 0; }
+  dl.gloss { display: grid; grid-template-columns: minmax(120px, 190px) 1fr; gap: 8px 20px; max-width: 76ch; }
+  dl.gloss dt { font-weight: 600; } dl.gloss dd { margin: 0; color: var(--muted); }
+  .hide { display: none !important; }
+  footer { border-top: 1px solid var(--line); margin-top: 60px; padding-top: 18px; font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: 1fr; gap: 0; }
+    .menu-btn { display: inline-block; }
+    nav.index { position: fixed; inset: calc(60px + env(safe-area-inset-top, 0px)) 0 0 0; max-height: none; background: var(--bg); padding: 20px 16px 40px; z-index: 15; }
+    nav.index:not(.open) { display: none; }
+    dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; }
+  }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <span class="mono">C</span>
+    <span class="brand">CONVIVIUM<small>Manual de uso</small></span>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="index">Índice</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="index" id="index" aria-label="Índice del manual">
+    <label for="q" class="muted" style="font-size:13px">Buscar en el manual</label>
+    <input id="q" class="search" type="search" placeholder="Ej. corte Z, QR, para llevar">
+    <div id="toc"></div>
+    <p class="nores hide" id="nores">Sin resultados. Prueba con otra palabra.</p>
+  </nav>
+
+  <main id="top">
+    <div class="hero">
+      <div class="eyebrow">Donde todo sucede en la mesa</div>
+      <h1>Todo el restaurante, <em>de la comanda al corte</em></h1>
+      <p class="lead">Este manual explica cómo usar CONVIVIUM en el día a día: tomar comandas desde el celular, preparar en cocina y barra con pantallas, cobrar en caja, controlar inventario y compras, y revisar cómo va el negocio. Cada sección indica quién la usa.</p>
+    </div>
+
+    <section id="como-funciona" data-group="Empezar">
+      <h2>Cómo funciona</h2>
+      <p class="who">Para todos</p>
+      <p>CONVIVIUM tiene dos partes que trabajan juntas:</p>
+      <ul>
+        <li><b>El nodo del local:</b> un mini-PC instalado en el restaurante. Da servicio a todos los dispositivos por la WiFi del local, así que <b>la operación sigue aunque se caiga internet</b>: comandas, pantallas de cocina, avisos a meseros y caja.</li>
+        <li><b>La nube:</b> guarda una copia de todo, permite administrar y ver reportes desde cualquier lugar, publica el menú digital y junta la información de varias sucursales.</li>
+      </ul>
+      <div class="arch" role="img" aria-label="Diagrama: celulares, pantallas y caja se conectan al nodo del local por WiFi; el nodo sincroniza con la nube">Celulares de meseros ─┐
+Pantallas de cocina ──┼──  WiFi del local  ──  Nodo (mini-PC)  ⇄  Nube
+Barra y caja ─────────┘                          sin internet        admin remoto,
+                                                  sigue operando      reportes, menú QR</div>
+      <p>Los dispositivos <b>no instalan nada</b>: se abre una dirección en el navegador y se agrega a la pantalla de inicio. Hay cuatro aplicaciones:</p>
+      <div class="tablebox"><table>
+        <thead><tr><th>Aplicación</th><th>Dirección en el local</th><th>Quién la usa</th></tr></thead>
+        <tbody>
+          <tr><td>Comandero</td><td><code>convivium.local/mesero/</code></td><td>Meseros y capitanes, en su celular</td></tr>
+          <tr><td>Estación</td><td><code>convivium.local/estacion/</code></td><td>Cocina y barra: TV o pantalla táctil</td></tr>
+          <tr><td>Caja</td><td><code>convivium.local/caja/</code></td><td>Cajeros</td></tr>
+          <tr><td>Administración</td><td><code>convivium.local/admin/</code> o la dirección de la nube</td><td>Dueño, gerente y almacén</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="puesta-en-marcha" data-group="Empezar">
+      <h2>Puesta en marcha</h2>
+      <p class="who">Dueño o gerente, una sola vez</p>
+      <ol class="steps">
+        <li><b>Recibe tu cuenta.</b> CONVIVIUM da de alta tu empresa y te entrega el correo y la contraseña del Dueño, tu PIN y un código de vinculación de 6 dígitos (válido 24 horas).</li>
+        <li><b>Conecta el nodo.</b> Enchufa el mini-PC a la corriente y al router del local. Arranca solo.</li>
+        <li><b>Entra a Administración</b> con tu correo y contraseña. En <b>Sucursal</b> revisa el nombre, la zona horaria, el IVA (16 % o 8 % en región fronteriza) y, si aceptas dólares, el tipo de cambio.</li>
+        <li><b>Captura el menú</b> en <b>Menú</b>: categorías, platillos con precio (impuestos incluidos), estación donde se preparan y modificadores como el término de la carne.</li>
+        <li><b>Dibuja el plano</b> en <b>Mesas</b> y revisa <b>Estaciones y dispositivos</b> (Cocina y Barra vienen creadas).</li>
+        <li><b>Da de alta al personal</b> en <b>Usuarios</b>, con sus roles y un PIN para cada quien.</li>
+        <li><b>Vincula cada dispositivo:</b> en <b>Estaciones y dispositivos → Generar código</b>, y en el celular, TV o caja abre su dirección y escribe ese código. Queda vinculado; después cada persona solo entra con su PIN.</li>
+        <li><b>Opcional para el primer día:</b> recetas e insumos (para descontar inventario), proveedores y el menú digital con QR.</li>
+      </ol>
+      <div class="note"><b>Consejo</b>Haz una comanda de prueba completa (abrir mesa, enviar, preparar, cobrar) antes de abrir al público. Luego cancélala: queda registrada en la bitácora como prueba.</div>
+    </section>
+
+    <section id="roles" data-group="Empezar">
+      <h2>Roles y qué puede hacer cada uno</h2>
+      <p class="who">Para el dueño y el gerente</p>
+      <p>Los roles son jerárquicos: el <b>Dueño</b> puede todo lo del Gerente, y el <b>Gerente</b> todo lo del Capitán, Cajero, Cocina, Barra y Almacén. El Capitán incluye lo del Mesero. Una persona puede tener varios roles, por ejemplo Mesero y Cajero.</p>
+      <div class="grid">
+        <div class="role"><strong>Mesero</strong><span>Abre mesas, toma comandas, pide la cuenta, registra devoluciones y pedidos para llevar.</span><a href="#comandero">Ver guía</a></div>
+        <div class="role"><strong>Capitán</strong><span>Todo lo del mesero, más cortesías y descuentos con tope, cancelaciones de lo enviado y autorizaciones.</span><a href="#capitan">Ver guía</a></div>
+        <div class="role"><strong>Cocina y Barra</strong><span>Ven y despachan los platillos de su estación.</span><a href="#estaciones-kds">Ver guía</a></div>
+        <div class="role"><strong>Cajero</strong><span>Abre caja, cobra, entrega pedidos para llevar y hace el corte X.</span><a href="#caja">Ver guía</a></div>
+        <div class="role"><strong>Almacén</strong><span>Mermas, traspasos, conteos, propone compras y recibe mercancía.</span><a href="#inventario">Ver guía</a></div>
+        <div class="role"><strong>Gerente</strong><span>Corte Z, aprueba compras y ajustes, paga a proveedores, configura menú, mesas, estaciones y personal.</span><a href="#admin">Ver guía</a></div>
+        <div class="role"><strong>Dueño</strong><span>Todo, más editor de roles, tablero, bitácora e ingeniería de menú.</span><a href="#reportes">Ver guía</a></div>
+      </div>
+      <p>En <b>Editor de roles</b> el Dueño puede dar o quitar permisos a un rol (por ejemplo, permitir al Capitán el corte X) y ajustar su tope de descuento. Solo el Dueño asigna los roles Dueño y Gerente.</p>
+    </section>
+
+    <section id="comandero" data-group="Servicio">
+      <h2>Comandero del mesero</h2>
+      <p class="who">Meseros y capitanes, en el celular</p>
+      <h3>Entrar</h3>
+      <p>Toca tu nombre y escribe tu PIN. Por seguridad la sesión se cierra sola tras unos minutos sin uso.</p>
+      <h3>El plano</h3>
+      <p>Las mesas se ven por área (Salón, Terraza…) con su estado:</p>
+      <p><span class="chip">Libre</span> <span class="chip ok">Ocupada</span> <span class="chip warn">Listo para entregar</span> <span class="chip bad">Pidió la cuenta</span></p>
+      <p>Las mesas de tu sección aparecen como “★ Tu sección”.</p>
+      <h3>Abrir una mesa</h3>
+      <ol class="steps">
+        <li>Toca una mesa libre y elige el número de comensales.</li>
+        <li>Si es un grupo grande y la mesa se puede unir, aparece “¿Grupo grande? Unir con…”: elige las mesas y se abre una sola cuenta para todas.</li>
+      </ol>
+      <h3>Tomar la comanda</h3>
+      <ol class="steps">
+        <li>Elige categoría y platillo. Si tiene opciones obligatorias (como el término), el sistema las pide.</li>
+        <li>Asigna comensal (C1, C2…) si la cuenta se va a dividir por persona, y el tiempo: entrada, fuerte o postre.</li>
+        <li>Toca <b>Enviar</b>. Cada platillo llega solo a su estación. Lo que dejes “retenido” se manda con <b>Marchar</b> cuando sea su tiempo.</li>
+      </ol>
+      <p>Cuando cocina o barra marca algo como listo, tu celular vibra y avisa mesa, platillo y estación. Los platillos agotados aparecen bloqueados en tiempo real. Si hay una promoción vigente (por ejemplo 2x1), el descuento se aplica solo y se ve el precio tachado.</p>
+      <h3>Cancelar y devolver</h3>
+      <div class="tablebox"><table>
+        <thead><tr><th>Estado del platillo</th><th>Cancelar</th></tr></thead>
+        <tbody>
+          <tr><td>Sin enviar</td><td>El mesero lo quita directamente.</td></tr>
+          <tr><td>Enviado, sin preparar</td><td>Requiere capitán o gerente, con motivo. El insumo regresa al inventario.</td></tr>
+          <tr><td>Ya preparado</td><td>Requiere gerente, con motivo. Queda como merma.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Si un comensal regresa un platillo entregado, usa <b>Devolver</b> y elige el motivo (frío, mal término, equivocado…). “Rehacer” lo manda de nuevo a cocina con prioridad y conserva el cobro. “Retirar de la cuenta” requiere autorización.</p>
+      <h3 id="para-llevar-mesero">Pedidos para llevar</h3>
+      <ol class="steps">
+        <li>En el plano toca <b>Para llevar</b>.</li>
+        <li>Escribe el nombre del cliente y, si quieres avisarle por WhatsApp, su teléfono a 10 dígitos. Elige cuándo lo recoge, el canal (mostrador, teléfono o WhatsApp), una nota y si lleva desechables.</li>
+        <li><b>Abrir pedido y capturar</b>: se asigna un folio del día (L-001, L-002…) y capturas los platillos como en una mesa.</li>
+      </ol>
+      <p>Los pedidos activos aparecen en una franja arriba del plano. La caja los cobra y los entrega.</p>
+      <h3>Cuenta de barra</h3>
+      <p>Para clientes en la barra sin mesa: <b>Cuenta de barra</b> y un nombre o número de pulsera.</p>
+    </section>
+
+    <section id="capitan" data-group="Servicio">
+      <h2>Capitán</h2>
+      <p class="who">Capitanes y gerentes</p>
+      <p>La vista de capitán (en el comandero) muestra todas las mesas con su tiempo, total y platillos atrasados. Desde ahí se pide a cocina que apure un platillo.</p>
+      <ul>
+        <li><b>Descuentos y cortesías:</b> el capitán puede aplicarlos hasta su tope (10 % por omisión). Si piden más, se genera una solicitud para el gerente.</li>
+        <li><b>Autorizaciones:</b> las cancelaciones y devoluciones que piden los meseros llegan a <b>Aprobaciones</b>. También se pueden autorizar en el momento con el PIN del gerente en el celular del mesero.</li>
+      </ul>
+    </section>
+
+    <section id="estaciones-kds" data-group="Servicio">
+      <h2>Cocina y barra</h2>
+      <p class="who">Personal de cocina y barra</p>
+      <p>Cada estación ve solo lo suyo, en una TV (vista de lectura) o en una pantalla táctil (para despachar).</p>
+      <ol class="steps">
+        <li>Llega la comanda con mesa, mesero, platillos, notas y modificadores.</li>
+        <li>Marca <b>En preparación</b> y después <b>Listo</b>. El mesero recibe el aviso.</li>
+      </ol>
+      <p>El semáforo compara el tiempo transcurrido con el tiempo objetivo del platillo:</p>
+      <p><span class="chip ok">A tiempo</span> <span class="chip warn">Cerca de la meta</span> <span class="chip bad">Excedido</span></p>
+      <p>Los platillos marcados “Rehacer” aparecen primero. Si la estación está en modo <b>Ambos</b> o si la pantalla se desconecta y tiene activado el respaldo, la comanda también se imprime en la impresora térmica.</p>
+    </section>
+
+    <section id="caja" data-group="Servicio">
+      <h2>Caja</h2>
+      <p class="who">Cajeros; el corte Z lo autoriza un gerente</p>
+      <h3>Apertura</h3>
+      <p>Cuenta el fondo inicial por denominación. Si la sucursal acepta dólares, puedes registrar también el fondo en USD.</p>
+      <h3>Cobrar una cuenta</h3>
+      <ol class="steps">
+        <li>Elige la cuenta en la lista: abiertas, pidieron la cuenta o todas.</li>
+        <li>Revisa el detalle: precio de cada platillo, promociones aplicadas y desglose de IVA e IEPS.</li>
+        <li>Registra el pago: efectivo en pesos, tarjeta (con referencia), dólares o una combinación. Agrega la propina (10, 15, 20 % o sin propina).</li>
+        <li>El sistema calcula el cambio, que siempre se entrega en pesos.</li>
+      </ol>
+      <div class="note"><b>Dólares</b>El tipo de cambio lo fija la sucursal en Administración → Sucursal. La caja no lo puede modificar. Si la sucursal no acepta dólares, esa opción no aparece.</div>
+      <p><b>Dividir la cuenta:</b> en partes iguales o por comensal (C1, C2…). Cada parte se cobra por separado.</p>
+      <h3 id="para-llevar-caja">Para llevar</h3>
+      <p>La pestaña <b>Para llevar</b> muestra tres columnas: En preparación, Listo para entregar y Entregado hoy, con la hora de recogida (en rojo si ya pasó).</p>
+      <ul>
+        <li><b>Avisar que está listo</b> abre WhatsApp con el mensaje al cliente.</li>
+        <li><b>Cobrar</b> lleva a la cuenta del pedido.</li>
+        <li><b>Marcar entregado</b> solo se activa cuando el pedido está pagado.</li>
+      </ul>
+      <h3>Cortes</h3>
+      <div class="tablebox"><table>
+        <thead><tr><th>Corte</th><th>Para qué</th><th>Quién</th></tr></thead>
+        <tbody>
+          <tr><td><b>Corte X</b></td><td>Revisión parcial durante el turno; la caja sigue abierta.</td><td>Cajero</td></tr>
+          <tr><td><b>Corte Z</b></td><td>Cierre del turno. Se cuenta a ciegas (sin ver lo esperado) y el sistema muestra las diferencias por forma de pago.</td><td>Gerente, o cajero con el PIN del gerente</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="admin" data-group="Administración">
+      <h2>Menú, promociones y plano</h2>
+      <p class="who">Gerente y dueño, en Administración</p>
+      <h3>Menú</h3>
+      <p>Elige un platillo de la lista o crea uno con <b>Nuevo</b>. En la ficha configuras:</p>
+      <ul>
+        <li>Nombre, categoría, descripción (sale en el comandero y en la comanda) y código interno.</li>
+        <li>Etiquetas para el menú impreso y digital: Nuevo, Picante, Vegetariano, Recomendado.</li>
+        <li>Precio con impuestos incluidos; se muestra el desglose de IVA e IEPS (26.5 %, 30 % o 53 % según la graduación).</li>
+        <li>Estaciones (la primera es la principal) y tiempo objetivo de preparación.</li>
+        <li>Grupos de modificadores, reutilizables entre platillos.</li>
+        <li>Costo de receta y margen, si el platillo tiene receta.</li>
+      </ul>
+      <p>El interruptor <b>Disponibilidad en sala</b> marca un platillo como agotado al instante en todos los celulares.</p>
+      <h3>Promociones</h3>
+      <p>Tipos: 2x1, porcentaje de descuento, precio especial y combo (precio fijo por un juego de productos). Cada regla define productos o categorías, días, horario (puede cruzar la medianoche), zonas del local y tolerancia para cuentas abiertas antes del cierre del horario. Se aplican solas; si dos coinciden en un platillo, gana la de mayor beneficio para el cliente.</p>
+      <h3 id="menu-qr">Generador de menú y QR</h3>
+      <ol class="steps">
+        <li>En <b>Generador de menú</b> elige qué categorías y platillos aparecen y en qué orden.</li>
+        <li>Ajusta el diseño: nombre, lema, dirección, teléfono, WhatsApp, tamaño (carta o media carta), una o dos columnas y color de acento. La vista previa se actualiza en vivo, en versión impresa y en celular.</li>
+        <li><b>Descargar PDF para imprimir:</b> el menú físico, con un QR al pie. No incluye los platillos agotados ese día.</li>
+        <li><b>Publicar menú digital:</b> queda en una dirección como <code>menu.tudominio/m/sucursal-centro</code>. Descarga el <b>QR</b> en PNG o en SVG para imprimirlo en las mesas.</li>
+      </ol>
+      <p>El menú digital se actualiza solo cuando cambian precios, platillos o agotados; no hay que volver a imprimir el QR.</p>
+      <h3>Mesas</h3>
+      <p>Arrastra mesas y elementos (muros, barra, puertas, estaciones de servicio) al plano. En cada mesa defines clave, capacidad, forma, rotación, mesero asignado y con qué mesas se puede unir. Pulsa <b>Guardar plano</b>. No se puede retirar una mesa con cuenta abierta.</p>
+      <h3>Estaciones y dispositivos</h3>
+      <p>Por estación: tiempo objetivo, modo de salida (solo pantalla, solo impresora o ambos) e impresión de respaldo. En dispositivos: genera códigos de vinculación y revoca equipos perdidos o dados de baja.</p>
+      <h3>Sucursal y usuarios</h3>
+      <p><b>Sucursal:</b> nombre, zona horaria, IVA y tipo de cambio. <b>Usuarios:</b> alta de personal, roles por sucursal, cambio de PIN y desactivación (quien sale del equipo ya no puede entrar, y su historial se conserva).</p>
+    </section>
+
+    <section id="inventario" data-group="Administración">
+      <h2>Inventario y compras</h2>
+      <p class="who">Almacén propone y recibe; el gerente aprueba y paga</p>
+      <h3>Insumos, recetas y conteos</h3>
+      <ul>
+        <li><b>Insumos y almacenes:</b> existencias por almacén (General, Cocina, Barra), mínimos y máximos, mermas, traspasos y producción.</li>
+        <li><b>Recetas:</b> cada venta descuenta los insumos de su receta al enviarse a la estación. La receta muestra su costo y el porcentaje sobre el precio.</li>
+        <li><b>Conteo físico:</b> el almacén captura lo contado y el gerente aprueba el ajuste.</li>
+      </ul>
+      <h3>Proveedores</h3>
+      <p>Ficha con razón social, nombre comercial, RFC, contacto, días de entrega, categorías, pedido mínimo y crédito. La <b>lista de precios</b> guarda el historial y muestra si cada precio subió o bajó. A la derecha verás las compras de 90 días, las órdenes abiertas y el saldo por pagar.</p>
+      <h3>Nueva orden de compra</h3>
+      <ol class="steps">
+        <li>Desde <b>Compras → Nueva orden de compra</b> o desde la ficha del proveedor con <b>Generar nueva compra</b>.</li>
+        <li>Elige proveedor, almacén destino y fecha esperada.</li>
+        <li>Agrega insumos de su lista de precios o usa <b>Agregar sugeridos bajo mínimo</b>. Te avisa si no llegas al pedido mínimo.</li>
+        <li>El almacén la envía a aprobación; el gerente la aprueba y la manda al proveedor por WhatsApp o correo.</li>
+      </ol>
+      <p>La pantalla <b>Compras</b> también propone órdenes automáticas con lo que está bajo mínimo, agrupadas por el proveedor con mejor precio.</p>
+      <h3>Recepción y cuentas por pagar</h3>
+      <p>En <b>Recepción</b> se recibe contra la orden (o sin orden). Puedes cargar el XML de la factura del proveedor para llenar los datos. Al recibir, sube la existencia y se actualiza el costo promedio. Lo recibido genera una cuenta por pagar con su vencimiento según los días de crédito, y se paga en <b>Cuentas por pagar</b>.</p>
+    </section>
+
+    <section id="reportes" data-group="Negocio">
+      <h2>Reportes y control</h2>
+      <p class="who">Gerente y dueño</p>
+      <ul>
+        <li><b>Inicio:</b> tablero en vivo con ventas del día, ticket promedio, mesas abiertas, comensales y tiempos de cocina.</li>
+        <li><b>Reportes → Ventas:</b> por producto, categoría, mesero, estación, forma de pago u hora.</li>
+        <li><b>Reportes → Devoluciones y cortesías:</b> por motivo y por empleado, con alerta cuando alguien se sale del promedio del equipo.</li>
+        <li><b>Reportes → Propinas:</b> por mesero y forma de pago.</li>
+        <li><b>Reportes → Tiempos de servicio:</b> promedio, p50 y p90 por estación y platillo, y porcentaje a tiempo.</li>
+        <li><b>Reportes → Sucursales:</b> solo el Dueño y solo con más de una sucursal. Comparativo lado a lado; la mejor cifra de cada columna aparece resaltada.</li>
+      </ul>
+      <p>Cada pestaña se puede <b>Exportar a Excel / CSV</b>.</p>
+      <h3>Ingeniería de menú</h3>
+      <p>Clasifica cada platillo según cuánto se vende y cuánto margen deja:</p>
+      <div class="tablebox"><table>
+        <thead><tr><th>Clase</th><th>Venta</th><th>Margen</th><th>Qué hacer</th></tr></thead>
+        <tbody>
+          <tr><td><b>Estrella</b></td><td>Alta</td><td>Alto</td><td>Mantener la receta y la porción; no subir precio.</td></tr>
+          <tr><td><b>Vaca</b></td><td>Alta</td><td>Bajo</td><td>Subir precio con cuidado o bajar costo de insumos.</td></tr>
+          <tr><td><b>Incógnita</b></td><td>Baja</td><td>Alto</td><td>Impulsar: mejor lugar en la carta, sugerirlo en mesa o hacer una promoción.</td></tr>
+          <tr><td><b>Perro</b></td><td>Baja</td><td>Bajo</td><td>Evaluar retirarlo o sustituirlo.</td></tr>
+        </tbody>
+      </table></div>
+      <p>También compara el costo teórico de las recetas contra el costo real del inventario. Si no se registraron salidas suficientes, lo indica como “Kardex incompleto” en vez de mostrar una cifra engañosa.</p>
+      <h3>Bitácora</h3>
+      <p>Registro permanente de todo lo importante: cancelaciones, devoluciones, descuentos, cambios de precio, cortes, aprobaciones y cambios de configuración, con quién lo hizo, quién lo autorizó y desde qué dispositivo. <b>No se puede borrar ni modificar.</b></p>
+    </section>
+
+    <section id="sin-internet" data-group="Negocio">
+      <h2>Sin internet y varias sucursales</h2>
+      <p class="who">Para todos</p>
+      <p>Si se cae internet, el local sigue operando normalmente con el nodo: comandas, pantallas, avisos, caja, inventario y administración desde la red del local. Lo único que se detiene mientras tanto es el acceso remoto, el menú digital actualizado y los reportes consolidados en la nube.</p>
+      <p>Cuando regresa la conexión, el nodo sube sus ventas y cambios automáticamente, en orden y sin duplicar. Si el mismo dato se cambió en el local y en la nube, prevalece el cambio más reciente, y ambos quedan en la bitácora.</p>
+      <div class="note warn"><b>Autorizaciones sin internet</b>Las aprobaciones remotas del gerente necesitan internet. Sin conexión, se autoriza en sitio con el PIN del gerente.</div>
+    </section>
+
+    <section id="faq" data-group="Ayuda">
+      <h2>Preguntas frecuentes</h2>
+      <details><summary>Un mesero olvidó su PIN</summary><p>El gerente entra a Usuarios, elige a la persona y usa “Cambiar” en su PIN.</p></details>
+      <details><summary>Perdimos un celular o una tableta</summary><p>En Estaciones y dispositivos, busca el equipo y toca Revocar. Deja de funcionar de inmediato.</p></details>
+      <details><summary>Se acabó un platillo en pleno servicio</summary><p>En Menú, apaga “Disponibilidad en sala”. Los meseros lo ven bloqueado al momento y el menú digital lo muestra como “Agotado hoy”.</p></details>
+      <details><summary>¿Cómo cambio un precio?</summary><p>En Menú, abre el platillo, cambia el precio y guarda. El cambio queda en la bitácora con el precio anterior y el nuevo, y el menú digital se actualiza solo.</p></details>
+      <details><summary>La promoción no se aplicó</summary><p>Revisa en Promociones que esté activa, que el día, el horario y la zona correspondan, y que el platillo esté incluido. Si la cuenta se abrió antes del horario, el descuento solo aplica a lo pedido dentro del horario (o de la tolerancia).</p></details>
+      <details><summary>El corte Z no cuadra</summary><p>El corte muestra la diferencia por forma de pago. El cambio entregado ya se descuenta del efectivo y los dólares se convierten con el tipo de cambio de la sucursal. Revisa en la bitácora los cobros y movimientos del turno.</p></details>
+      <details><summary>¿Puedo ver el negocio desde fuera del local?</summary><p>Sí. Entra a la dirección de Administración en la nube con tu correo y contraseña. Verás lo sincronizado hasta la última conexión del nodo.</p></details>
+      <details><summary>¿Se puede facturar (CFDI)?</summary><p>Los productos y cuentas ya guardan los datos necesarios, pero la emisión de facturas todavía no está incluida en esta versión.</p></details>
+    </section>
+
+    <section id="glosario" data-group="Ayuda">
+      <h2>Glosario</h2>
+      <dl class="gloss">
+        <dt>Comanda</dt><dd>Pedido que se envía a cocina o barra.</dd>
+        <dt>Marchar</dt><dd>Mandar a preparar un tiempo (fuerte, postre) que estaba retenido.</dd>
+        <dt>Estación</dt><dd>Área de preparación (Cocina, Barra, Parrilla…), con su pantalla o impresora.</dd>
+        <dt>KDS</dt><dd>Pantalla de cocina que reemplaza a la comanda de papel.</dd>
+        <dt>Corte X</dt><dd>Revisión parcial de la caja sin cerrarla.</dd>
+        <dt>Corte Z</dt><dd>Cierre definitivo del turno de caja.</dd>
+        <dt>IEPS</dt><dd>Impuesto especial a bebidas alcohólicas, incluido en el precio.</dd>
+        <dt>Merma</dt><dd>Insumo que se pierde (caducado, derramado) y se descuenta del inventario.</dd>
+        <dt>Kardex</dt><dd>Registro de entradas y salidas del inventario.</dd>
+        <dt>Nodo</dt><dd>Mini-PC del local que da servicio a los dispositivos aunque no haya internet.</dd>
+        <dt>PIN</dt><dd>Clave numérica personal para entrar al comandero, caja y estaciones.</dd>
+        <dt>Folio L-001</dt><dd>Número de pedido para llevar; se reinicia cada día.</dd>
+      </dl>
+    </section>
+
+    <footer>CONVIVIUM · Manual de uso. Para soporte, contacta a tu asesor de CONVIVIUM.</footer>
+  </main>
+</div>
+
+<script>
+(() => {
+  const sections = [...document.querySelectorAll("main section[id]")];
+  const toc = document.getElementById("toc");
+  let group = "";
+  let list;
+  for (const s of sections) {
+    if (s.dataset.group !== group) {
+      group = s.dataset.group;
+      const h = document.createElement("h4"); h.textContent = group; toc.appendChild(h);
+      list = document.createElement("ol"); toc.appendChild(list);
+    }
+    const li = document.createElement("li");
+    const a = document.createElement("a"); a.href = "#" + s.id; a.textContent = s.querySelector("h2").textContent; a.dataset.id = s.id;
+    li.appendChild(a); list.appendChild(li);
+  }
+  const links = [...toc.querySelectorAll("a")];
+  const nav = document.getElementById("index"), btn = document.getElementById("menuBtn");
+  btn.addEventListener("click", () => { const open = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", String(open)); });
+  links.forEach((a) => a.addEventListener("click", () => { nav.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }));
+
+  // Sección activa en el índice.
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) links.forEach((a) => a.classList.toggle("on", a.dataset.id === e.target.id));
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  sections.forEach((s) => io.observe(s));
+
+  // Buscador: filtra secciones y el índice por texto (sin acentos).
+  const norm = (t) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const text = new Map(sections.map((s) => [s.id, norm(s.textContent)]));
+  const q = document.getElementById("q"), nores = document.getElementById("nores");
+  q.addEventListener("input", () => {
+    const v = norm(q.value.trim());
+    let any = false;
+    for (const s of sections) {
+      const hit = !v || text.get(s.id).includes(v);
+      s.classList.toggle("hide", !hit);
+      links.find((a) => a.dataset.id === s.id).parentElement.classList.toggle("hide", !hit);
+      any = any || hit;
+    }
+    toc.querySelectorAll("h4").forEach((h) => { const ol = h.nextElementSibling; h.classList.toggle("hide", ![...ol.children].some((li) => !li.classList.contains("hide"))); });
+    nores.classList.toggle("hide", any);
+  });
+})();
+</script>

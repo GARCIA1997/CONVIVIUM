@@ -1,11 +1,11 @@
-# Sustituir por el dominio real. Caddy obtiene el certificado TLS automáticamente.
-api.convivium.mx {
-  reverse_proxy /v1/* api:4000
-  reverse_proxy /docs* api:4000
+# Dominios en .env (APP_DOMAIN, MENU_DOMAIN). Caddy obtiene los certificados TLS automáticamente.
+{$APP_DOMAIN} {
+  # Admin remoto (/admin/), API y documentación (/docs), sincronización de nodos (/v1/sync)
+  reverse_proxy api:4000
 }
-app.convivium.mx {
-  # Dashboard del dueño y administración remota (PWA)
-  handle_path /admin/* { root * /srv/web/admin; try_files {path} /index.html; file_server }
-  redir / /admin/
-  reverse_proxy /v1/* api:4000
+{$MENU_DOMAIN} {
+  # Menú digital público de cada sucursal (el QR apunta aquí): https://menu.dominio/m/<sucursal>
+  @menu path /m/*
+  handle @menu { reverse_proxy api:4000 }
+  handle { respond "CONVIVIUM" 404 }
 }

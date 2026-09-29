@@ -1,25 +1,27 @@
-# Imagen única de la API; el modo (edge/cloud) se elige con CONVIVIUM_MODE.
-FROM node:22-alpine AS base
+# Imagen única de CONVIVIUM: API + las 4 PWA compiladas. El modo se elige con CONVIVIUM_MODE (edge | cloud).
+# Al arrancar aplica las migraciones pendientes (AUTO_MIGRATE=true).
+FROM node:20-alpine AS deps
 RUN corepack enable
 WORKDIR /repo
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY packages ./packages
-COPY apps/api ./apps/api
-RUN pnpm install --frozen-lockfile --filter @convivium/api...
+COPY apps ./apps
+COPY docs/sitio-cliente ./docs/sitio-cliente
+RUN pnpm install --frozen-lockfile
 
-FROM base AS web
-COPY apps/mesero ./apps/mesero
-COPY apps/estacion ./apps/estacion
-COPY apps/caja ./apps/caja
-COPY apps/admin ./apps/admin
-RUN pnpm install --frozen-lockfile && NODE_ENV=production pnpm -r --filter "./apps/{mesero,estacion,caja,admin}" build
+FROM deps AS web
+RUN NODE_ENV=production pnpm -r --filter "./apps/{mesero,estacion,caja,admin}" build
 
-FROM base AS runtime
-ENV NODE_ENV=production
+FROM node:20-alpine AS runtime
+RUN corepack enable
+WORKDIR /repo
+ENV NODE_ENV=production WEB_ROOT=/srv/web PORT=4000
+COPY --from=deps /repo /repo
 COPY --from=web /repo/apps/mesero/dist /srv/web/mesero
 COPY --from=web /repo/apps/estacion/dist /srv/web/estacion
 COPY --from=web /repo/apps/caja/dist /srv/web/caja
 COPY --from=web /repo/apps/admin/dist /srv/web/admin
 WORKDIR /repo/apps/api
 EXPOSE 4000
+HEALTHCHECK --interval=15s --timeout=3s --start-period=30s --retries=5 CMD wget -qO- http://127.0.0.1:4000/health || exit 1
 CMD ["pnpm", "exec", "tsx", "src/index.ts"]

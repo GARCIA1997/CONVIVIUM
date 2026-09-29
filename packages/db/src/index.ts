@@ -11,3 +11,4 @@ export function createDb(url: string) {
 }
 export type Db = ReturnType<typeof createDb>;
 export * from "./sync.js";
+export { runMigrations } from "./migrate.js";
