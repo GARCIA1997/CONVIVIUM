@@ -43,6 +43,13 @@
       "when": 1790706981669,
       "tag": "0005_promociones",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790707741659,
+      "tag": "0006_producto_descripcion",
+      "breakpoints": true
     }
   ]
 }

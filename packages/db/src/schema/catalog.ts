@@ -30,6 +30,10 @@ export const products = pgTable("products", {
   tenantId: tenantId(),
   categoryId: uuid("category_id").notNull().references(() => categories.id),
   name: text("name").notNull(),
+  /** Aparece en el comandero y en la comanda de cocina. */
+  description: text("description"),
+  /** Código interno SKU / PLU. */
+  sku: text("sku"),
   /** Precio con impuestos incluidos, en centavos. */
   price: integer("price").notNull(),
   iepsPct: numeric("ieps_pct", { precision: 5, scale: 2 }).notNull().default("0"),

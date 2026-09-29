@@ -20,9 +20,11 @@ const plugin: ApiModule["plugin"] = async (app) => {
       db.select().from(schema.productModifierGroups),
       db.select().from(schema.productAvailability).where(eq(schema.productAvailability.branchId, branchId)),
     ]);
+    const [branch] = await db.select({ ivaPct: schema.branches.ivaPct }).from(schema.branches).where(eq(schema.branches.id, branchId));
     const groupById = new Map(groups.map((g) => [g.id, { ...g, modifiers: mods.filter((m) => m.groupId === g.id) }]));
     return {
       version: Date.now(),
+      ivaPct: branch?.ivaPct ?? 16,
       categories: cats,
       products: prods.map((p) => ({
         ...p,
@@ -41,6 +43,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     await db.insert(schema.productStations).values(stationIds.map((stationId) => ({ productId: p!.id, stationId })));
     if (modifierGroupIds.length) await db.insert(schema.productModifierGroups).values(modifierGroupIds.map((groupId) => ({ productId: p!.id, groupId })));
     await recordEvent(db, req.user, { type: "product.created", entity: "product", entityId: p!.id, data: req.body });
+    app.hub.publish(["menu"], { type: "menu.updated" });
     return reply.status(201).send({ id: p!.id });
   });
 
@@ -56,7 +59,54 @@ const plugin: ApiModule["plugin"] = async (app) => {
     await db.delete(schema.productModifierGroups).where(eq(schema.productModifierGroups.productId, req.params.id));
     if (modifierGroupIds.length) await db.insert(schema.productModifierGroups).values(modifierGroupIds.map((groupId) => ({ productId: req.params.id, groupId })));
     await recordEvent(db, req.user, { type: "product.updated", entity: "product", entityId: req.params.id, data: { before, after: req.body } });
+    app.hub.publish(["menu"], { type: "menu.updated" });
     return { ok: true };
+  });
+
+  /** E2-02 · Grupos de modificadores (reutilizables entre productos). */
+  app.get("/modifier-groups", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"] } }, async (req) => {
+    const [groups, mods, links] = await Promise.all([
+      db.select().from(schema.modifierGroups).where(eq(schema.modifierGroups.tenantId, req.user.tenantId)),
+      db.select().from(schema.modifiers),
+      db.select().from(schema.productModifierGroups),
+    ]);
+    return groups.map((g) => ({ ...g, modifiers: mods.filter((m) => m.groupId === g.id), productCount: links.filter((l) => l.groupId === g.id).length }));
+  });
+
+  const saveGroup = async (groupId: string, body: z.infer<typeof catalog.ModifierGroupUpsert>) => {
+    await db.update(schema.modifierGroups).set({ name: body.name, minSelect: body.minSelect, maxSelect: body.maxSelect }).where(eq(schema.modifierGroups.id, groupId));
+    const existing = await db.select().from(schema.modifiers).where(eq(schema.modifiers.groupId, groupId));
+    const keep = new Set(body.modifiers.map((m) => m.id).filter(Boolean));
+    for (const m of existing) if (!keep.has(m.id)) await db.delete(schema.modifiers).where(eq(schema.modifiers.id, m.id));
+    for (const m of body.modifiers) {
+      if (m.id && existing.some((e) => e.id === m.id)) await db.update(schema.modifiers).set({ name: m.name, priceDelta: m.priceDelta }).where(eq(schema.modifiers.id, m.id));
+      else await db.insert(schema.modifiers).values({ groupId, name: m.name, priceDelta: m.priceDelta });
+    }
+  };
+
+  app.post("/modifier-groups", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], body: catalog.ModifierGroupUpsert } }, async (req) => {
+    const [g] = await db.insert(schema.modifierGroups).values({ tenantId: req.user.tenantId, name: req.body.name, minSelect: req.body.minSelect, maxSelect: req.body.maxSelect }).returning();
+    await saveGroup(g!.id, req.body);
+    await recordEvent(db, req.user, { type: "modifier_group.created", entity: "modifier_group", entityId: g!.id, data: req.body });
+    app.hub.publish(["menu"], { type: "menu.updated" });
+    return { id: g!.id };
+  });
+
+  app.put("/modifier-groups/:id", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], params: z.object({ id: z.string().uuid() }), body: catalog.ModifierGroupUpsert } }, async (req) => {
+    const [g] = await db.select().from(schema.modifierGroups).where(and(eq(schema.modifierGroups.id, req.params.id), eq(schema.modifierGroups.tenantId, req.user.tenantId)));
+    if (!g) throw notFound("Grupo de modificadores");
+    await saveGroup(g.id, req.body);
+    await recordEvent(db, req.user, { type: "modifier_group.updated", entity: "modifier_group", entityId: g.id, data: req.body });
+    app.hub.publish(["menu"], { type: "menu.updated" });
+    return { ok: true };
+  });
+
+  /** E2-01 · Categorías de la carta. */
+  app.post("/categories", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], body: catalog.CategoryUpsert } }, async (req) => {
+    const existing = await db.select({ id: schema.categories.id }).from(schema.categories).where(eq(schema.categories.tenantId, req.user.tenantId));
+    const [c] = await db.insert(schema.categories).values({ tenantId: req.user.tenantId, name: req.body.name, sortOrder: existing.length + 1 }).returning();
+    await recordEvent(db, req.user, { type: "category.created", entity: "category", entityId: c!.id, data: req.body });
+    return c;
   });
 
   /** E2-07 · Marcar agotado; se refleja en meseros en tiempo real. */

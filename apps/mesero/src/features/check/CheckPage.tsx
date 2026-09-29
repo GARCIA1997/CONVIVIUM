@@ -49,6 +49,7 @@ export function CheckPage() {
   }, [client, load]);
   useRealtime(["menu", "floor"], (e) => {
     if (e.type === "product.sold_out") setMenu((m) => m && { ...m, products: m.products.map((p) => (p.id === e.productId ? { ...p, soldOut: e.soldOut } : p)) });
+    else if (e.type === "menu.updated") client.catalog.menu().then(setMenu);
     else load();
   });
 
