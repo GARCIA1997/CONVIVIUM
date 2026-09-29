@@ -12,6 +12,7 @@ import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
+import { StationsPage } from "./features/stations/StationsPage";
 import { PayablesPage } from "./features/purchasing/PayablesPage";
 import { PurchasesPage } from "./features/purchasing/PurchasesPage";
 import { ReceptionPage } from "./features/purchasing/ReceptionPage";
@@ -22,7 +23,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "aprobaciones", label: "Aprobaciones", icon: "verified", perm: "aprobacion.resolver", element: <ApprovalsPage /> },
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", design: "admin-editor-plano" },
-  { path: "estaciones", label: "Estaciones", icon: "skillet", perm: "estaciones.editar", design: "admin-estaciones" },
+  { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
   { path: "usuarios", label: "Usuarios y roles", icon: "group", perm: "usuarios.gestionar", design: "admin-usuarios-permisos" },
   { path: "inventario", label: "Insumos y almacenes", icon: "inventory_2", perm: "inventario.contar", element: <InventoryPage /> },
   { path: "recetas", label: "Recetas", icon: "menu_book", perm: "inventario.contar", element: <RecipesPage /> },

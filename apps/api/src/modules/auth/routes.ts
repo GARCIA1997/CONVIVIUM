@@ -3,6 +3,7 @@ import { and, eq, gt, isNull, schema } from "@convivium/db";
 import { permissionsOf, type Role } from "@convivium/domain";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { recordEvent } from "../../lib/audit.js";
 import type { ApiModule } from "../../lib/module.js";
 import { AppError } from "../../plugins/errors.js";
 
@@ -48,6 +49,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     if (!device) throw new AppError(401, "device_revoked", "Dispositivo revocado");
     const [user] = await db.select().from(schema.users).where(and(eq(schema.users.id, req.body.userId), eq(schema.users.active, true)));
     if (!user?.pinHash || !(await bcrypt.compare(req.body.pin, user.pinHash))) throw new AppError(401, "bad_pin", "PIN incorrecto");
+    await db.update(schema.devices).set({ lastSeenAt: new Date() }).where(eq(schema.devices.id, device.id));
     return sessionFor(user.id, device.branchId, device.tenantId, user.name, device.id);
   });
 
@@ -58,6 +60,30 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const [role] = await db.select().from(schema.userRoles).where(eq(schema.userRoles.userId, user.id));
     if (!role) throw new AppError(403, "no_branch", "Usuario sin sucursal");
     return sessionFor(user.id, role.branchId, user.tenantId, user.name);
+  });
+
+  // ---------- Dispositivos (E1-04) ----------
+
+  app.get("/devices", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["auth"] } }, async (req) => {
+    const rows = await db.select().from(schema.devices).where(eq(schema.devices.branchId, req.user.branchId));
+    return rows
+      .map((d) => ({ id: d.id, name: d.name, kind: d.kind, revoked: !!d.revokedAt, lastSeenAt: d.lastSeenAt?.toISOString() ?? null, createdAt: d.createdAt.toISOString() }))
+      .sort((a, b) => Number(a.revoked) - Number(b.revoked) || (b.lastSeenAt ?? "").localeCompare(a.lastSeenAt ?? ""));
+  });
+
+  /** Genera un código de vinculación de 6 dígitos válido 24 horas. */
+  app.post("/devices/pairing-code", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["auth"] } }, async (req) => {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 24 * 3600e3);
+    await db.insert(schema.pairingCodes).values({ code, tenantId: req.user.tenantId, branchId: req.user.branchId, expiresAt }).onConflictDoUpdate({ target: schema.pairingCodes.code, set: { expiresAt, branchId: req.user.branchId, tenantId: req.user.tenantId } });
+    return { code, expiresAt: expiresAt.toISOString() };
+  });
+
+  app.post("/devices/:id/revoke", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["auth"], params: z.object({ id: z.string().uuid() }) } }, async (req) => {
+    const [d] = await db.update(schema.devices).set({ revokedAt: new Date() }).where(and(eq(schema.devices.id, req.params.id), eq(schema.devices.branchId, req.user.branchId))).returning();
+    if (!d) throw new AppError(404, "not_found", "Dispositivo no encontrado");
+    await recordEvent(db, req.user, { type: "device.revoked", entity: "device", entityId: d.id, data: { name: d.name } });
+    return { ok: true };
   });
 
   app.get("/me", { onRequest: [app.guard()], schema: { tags: ["auth"] } }, async (req) => ({ ...req.user, permissions: [...permissionsOf(req.user.roles)] }));

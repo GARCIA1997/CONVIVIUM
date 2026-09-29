@@ -101,6 +101,20 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return st;
   });
 
+  /** E2-03 / E4-09 · Estaciones con pantallas conectadas en este momento y categorías que reciben. */
+  app.get("/stations/overview", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["catálogo"] } }, async (req) => {
+    const [stations, routes, products, cats] = await Promise.all([
+      db.select().from(schema.stations).where(eq(schema.stations.branchId, req.user.branchId)),
+      db.select().from(schema.productStations),
+      db.select({ id: schema.products.id, categoryId: schema.products.categoryId }).from(schema.products).where(eq(schema.products.tenantId, req.user.tenantId)),
+      db.select().from(schema.categories).where(eq(schema.categories.tenantId, req.user.tenantId)),
+    ]);
+    return stations.map((st) => {
+      const catIds = new Set(routes.filter((r) => r.stationId === st.id).map((r) => products.find((p) => p.id === r.productId)?.categoryId).filter(Boolean));
+      return { ...st, screensOnline: app.hub.count(`station:${st.id}`), categories: cats.filter((c) => catIds.has(c.id)).map((c) => c.name), productCount: routes.filter((r) => r.stationId === st.id).length };
+    });
+  });
+
   void inArray;
 };
 
