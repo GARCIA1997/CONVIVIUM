@@ -60,3 +60,25 @@ describe("ajustes de roles por empresa", () => {
     expect(roleEffective("dueno", { dueno: { deny: ["roles.gestionar"] } }).has("roles.gestionar")).toBe(true);
   });
 });
+
+import { classifyMenu, menuAdvice } from "../src/index.js";
+describe("ingeniería de menú", () => {
+  const base = { category: "c", price: 11600 };
+  const { items, marginThreshold } = classifyMenu([
+    { ...base, productId: "star", name: "Estrella", units: 100, netRevenue: 100 * 10000, unitCost: 2000 },
+    { ...base, productId: "cow", name: "Vaca", units: 100, netRevenue: 100 * 10000, unitCost: 3500 },
+    { ...base, productId: "puzzle", name: "Incógnita", units: 10, netRevenue: 10 * 10000, unitCost: 1500 },
+    { ...base, productId: "dog", name: "Perro", units: 10, netRevenue: 10 * 10000, unitCost: 4000 },
+    { ...base, productId: "nada", name: "Sin venta", units: 0, netRevenue: 0, unitCost: 1000 },
+  ]);
+  it("clasifica por popularidad (70 % del promedio) y margen ponderado", () => {
+    expect(Object.fromEntries(items.map((i) => [i.productId, i.class]))).toEqual({ star: "estrella", cow: "vaca", puzzle: "incognita", dog: "perro" });
+  });
+  it("sugiere subir precio a la vaca (redondeado a $5) con impacto positivo", () => {
+    const a = menuAdvice(items.find((i) => i.productId === "cow")!, marginThreshold);
+    expect(a.action).toBe("Subir precio");
+    expect(a.impact).toBeGreaterThan(0);
+    expect(a.detail).toContain("+$10");
+    expect(menuAdvice({ ...items[0]!, costPct: 45 }, marginThreshold).action).toBe("Auditar receta");
+  });
+});

@@ -9,7 +9,8 @@
     "typecheck": "tsc -p .",
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
-    "seed": "tsx src/seed.ts && tsx src/seed-inventory.ts"
+    "seed": "tsx src/seed.ts && tsx src/seed-inventory.ts",
+    "seed:ventas": "tsx src/seed-sales.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.36.4",

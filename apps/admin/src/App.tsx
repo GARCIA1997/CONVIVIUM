@@ -11,6 +11,7 @@ import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { MenuEngineeringPage } from "./features/reports/MenuEngineeringPage";
 import { PromotionsPage } from "./features/promotions/PromotionsPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
 import { FloorEditorPage } from "./features/floor/FloorEditorPage";
@@ -38,6 +39,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "recepcion", label: "Recepción", icon: "local_shipping", perm: "compras.recibir", element: <ReceptionPage /> },
   { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", element: <PayablesPage /> },
   { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", element: <ReportsPage /> },
+  { path: "ingenieria-menu", label: "Ingeniería de menú", icon: "scatter_plot", perm: "dashboard.ver", element: <MenuEngineeringPage /> },
   { path: "bitacora", label: "Bitácora", icon: "history", perm: "auditoria.ver", element: <AuditPage /> },
 ];
 

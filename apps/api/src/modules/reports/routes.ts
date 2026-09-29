@@ -1,5 +1,7 @@
 import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
+import { breakdownIncludedTaxes, classifyMenu, menuAdvice } from "@convivium/domain";
 import { lineTotal } from "../orders/mapper.js";
+import { InventoryService } from "../inventory/service.js";
 
 /** Importe de un producto sin importar su estado (para medir lo cancelado o devuelto). */
 const lineTotalRaw = (i: { unitPrice: number; quantity: number; modifiers: { priceDelta: number }[] }) => (i.unitPrice + i.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * i.quantity;
@@ -165,7 +167,64 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return { days: req.query.days, totals: { devolucion: sum("devolucion"), cancelacion: sum("cancelacion"), cortesia: sum("cortesia"), descuento: sum("descuento") }, byReason, employees, rows };
   });
   app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo); // E9-04
-  app.get("/menu-engineering", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Range } }, todo); // E9-05
+  /** E9-05 · Ingeniería de menú: popularidad vs. margen, costo teórico vs. real (kardex) y recomendaciones. */
+  app.get("/menu-engineering", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Range.extend({ days: z.coerce.number().int().min(1).max(365).default(30) }) } }, async (req) => {
+    const { db } = app;
+    const to = req.query.to ? new Date(req.query.to) : new Date();
+    const from = req.query.from ? new Date(req.query.from) : new Date(to.getTime() - req.query.days * 86_400_000);
+    const prevFrom = new Date(from.getTime() - (to.getTime() - from.getTime()));
+    const [branch] = await db.select().from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
+    const ivaFactor = 1 + (branch?.ivaPct ?? 16) / 100;
+    const sold = (a: Date, b: Date) => db
+      .select({ item: schema.orderItems })
+      .from(schema.orderItems)
+      .innerJoin(schema.checks, eq(schema.checks.id, schema.orderItems.checkId))
+      .where(and(eq(schema.orderItems.branchId, req.user.branchId), eq(schema.checks.status, "cobrada"), gte(schema.orderItems.createdAt, a), lt(schema.orderItems.createdAt, b)));
+    const [rows, prevRows, products, categories, costs, moves] = await Promise.all([
+      sold(from, to), sold(prevFrom, from),
+      db.select().from(schema.products).where(eq(schema.products.tenantId, req.user.tenantId)),
+      db.select().from(schema.categories).where(eq(schema.categories.tenantId, req.user.tenantId)),
+      new InventoryService(app).productCosts(req.user.tenantId),
+      db.select({ ingredientId: schema.stockMovements.ingredientId, quantity: schema.stockMovements.quantity, type: schema.stockMovements.type })
+        .from(schema.stockMovements)
+        .where(and(eq(schema.stockMovements.branchId, req.user.branchId), inArray(schema.stockMovements.type, ["venta", "merma", "ajuste"]), gte(schema.stockMovements.createdAt, from), lt(schema.stockMovements.createdAt, to))),
+    ]);
+    const stats = new Map<string, { units: number; gross: number }>();
+    for (const { item: i } of rows) {
+      if (i.unitPrice === 0 || i.state === "cancelado" || i.state === "devuelto") continue;
+      const s = stats.get(i.productId) ?? { units: 0, gross: 0 };
+      s.units += i.quantity; s.gross += lineTotal(i); stats.set(i.productId, s);
+    }
+    const net = (gross: number, p?: { iepsPct: string }) => breakdownIncludedTaxes(gross, { ivaPct: (branch?.ivaPct ?? 16) as 16 | 8, iepsPct: Number(p?.iepsPct ?? 0) }).base;
+    const { items, popThreshold, marginThreshold } = classifyMenu(products.filter((p) => p.active).map((p) => {
+      const s = stats.get(p.id) ?? { units: 0, gross: 0 };
+      return { productId: p.id, name: p.name, category: categories.find((c) => c.id === p.categoryId)?.name ?? "", units: s.units, netRevenue: net(s.gross, p), unitCost: costs.byProduct.get(p.id) ?? null, price: p.price };
+    }));
+    const netSales = items.reduce((n, i) => n + i.netRevenue, 0);
+    const theoretical = items.reduce((n, i) => n + (i.unitCost ?? 0) * i.units, 0);
+    // Costo real: lo que salió del kardex por venta, merma y ajustes negativos, valuado a costo promedio.
+    const real = Math.round(moves.reduce((n, m) => { const q = Number(m.quantity); return q < 0 ? n + -q * (costs.ingredientCost.get(m.ingredientId) ?? 0) : n; }, 0));
+    const prevGross = prevRows.reduce((n, { item: i }) => n + (i.unitPrice === 0 ? 0 : lineTotal(i)), 0);
+    const gross = rows.reduce((n, { item: i }) => n + (i.unitPrice === 0 ? 0 : lineTotal(i)), 0);
+    return {
+      from: from.toISOString(), to: to.toISOString(),
+      summary: {
+        grossSales: gross,
+        units: items.reduce((n, i) => n + i.units, 0),
+        growthPct: prevGross ? Math.round(((gross - prevGross) / prevGross) * 1000) / 10 : null,
+        avgMargin: marginThreshold,
+        grossMarginPct: netSales ? Math.round(((netSales - theoretical) / netSales) * 1000) / 10 : null,
+        theoreticalCostPct: netSales ? Math.round((theoretical / netSales) * 1000) / 10 : null,
+        // Si el kardex registró menos de la mitad del consumo teórico, faltan salidas: no se compara.
+        kardexIncomplete: theoretical > 0 && real < theoretical * 0.5,
+        realCostPct: netSales && real >= theoretical * 0.5 ? Math.round((real / netSales) * 1000) / 10 : null,
+        costGap: netSales && real >= theoretical * 0.5 ? real - theoretical : null,
+        withoutRecipe: items.filter((i) => i.unitCost === null).length,
+      },
+      popThreshold, marginThreshold,
+      items: items.map((i) => ({ ...i, advice: menuAdvice(i, marginThreshold, ivaFactor) })),
+    };
+  });
   app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo);
 };
 
