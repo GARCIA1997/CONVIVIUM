@@ -9,7 +9,9 @@ import { AdminHeader, AdminLayout, type Section } from "./features/layout/AdminL
 import { CountPage } from "./features/inventory/CountPage";
 import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
+import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { ReportsPage } from "./features/reports/ReportsPage";
 import { PayablesPage } from "./features/purchasing/PayablesPage";
 import { PurchasesPage } from "./features/purchasing/PurchasesPage";
 import { ReceptionPage } from "./features/purchasing/ReceptionPage";
@@ -28,8 +30,8 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "compras", label: "Compras", icon: "shopping_cart", perm: "compras.proponer_oc", element: <PurchasesPage /> },
   { path: "recepcion", label: "Recepción", icon: "local_shipping", perm: "compras.recibir", element: <ReceptionPage /> },
   { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", element: <PayablesPage /> },
-  { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", design: "admin-reportes-control" },
-  { path: "bitacora", label: "Bitácora", icon: "history", perm: "auditoria.ver", design: "admin-bitacora" },
+  { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", element: <ReportsPage /> },
+  { path: "bitacora", label: "Bitácora", icon: "history", perm: "auditoria.ver", element: <AuditPage /> },
 ];
 
 export function App() {

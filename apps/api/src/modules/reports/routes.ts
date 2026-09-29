@@ -1,5 +1,8 @@
 import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
 import { lineTotal } from "../orders/mapper.js";
+
+/** Importe de un producto sin importar su estado (para medir lo cancelado o devuelto). */
+const lineTotalRaw = (i: { unitPrice: number; quantity: number; modifiers: { priceDelta: number }[] }) => (i.unitPrice + i.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * i.quantity;
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
 import { notImplemented } from "../../plugins/errors.js";
@@ -114,7 +117,53 @@ const plugin: ApiModule["plugin"] = async (app) => {
   });
 
   app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]) }) } }, todo); // E9-02
-  app.get("/exceptions", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo); // E9-03
+  /** E9-03 · Devoluciones, cancelaciones, cortesías y descuentos por motivo y por empleado, con radar de desviación. */
+  app.get("/exceptions", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: z.object({ days: z.coerce.number().int().min(1).max(90).default(7) }) } }, async (req) => {
+    const { tenantId, branchId } = req.user;
+    const from = new Date(Date.now() - req.query.days * 864e5);
+    const [evs, discounts, reasons, users, tables] = await Promise.all([
+      app.db.select().from(schema.events).where(and(eq(schema.events.tenantId, tenantId), gte(schema.events.createdAt, from), inArray(schema.events.type, ["item.cancelled", "item.returned"]))),
+      app.db.select().from(schema.discounts).where(and(eq(schema.discounts.tenantId, tenantId), gte(schema.discounts.createdAt, from))),
+      app.db.select({ id: schema.reasons.id, label: schema.reasons.label }).from(schema.reasons).where(eq(schema.reasons.tenantId, tenantId)),
+      app.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(eq(schema.users.tenantId, tenantId)),
+      app.db.select({ id: schema.tables.id, label: schema.tables.label }).from(schema.tables).where(eq(schema.tables.branchId, branchId)),
+    ]);
+    const itemIds = evs.map((e) => e.entityId).filter((x): x is string => !!x);
+    const items = itemIds.length ? await app.db.select().from(schema.orderItems).where(inArray(schema.orderItems.id, itemIds)) : [];
+    const checkIds = [...new Set([...items.map((i) => i.checkId), ...discounts.map((d) => d.checkId)])];
+    const checks = checkIds.length ? await app.db.select({ id: schema.checks.id, tableId: schema.checks.tableId, name: schema.checks.name }).from(schema.checks).where(inArray(schema.checks.id, checkIds)) : [];
+    const nameOf = (id: string | null | undefined) => users.find((u) => u.id === id)?.name ?? null;
+    const reasonOf = (id: unknown) => reasons.find((r) => r.id === id)?.label ?? "Sin motivo";
+    const where = (checkId: string) => { const c = checks.find((x) => x.id === checkId); return tables.find((t) => t.id === c?.tableId)?.label ?? (c?.name ? `Barra · ${c.name}` : ""); };
+
+    type Row = { at: string; kind: "devolucion" | "cancelacion" | "cortesia" | "descuento"; product: string | null; where: string; amount: number; reason: string; requestedBy: string | null; authorizedBy: string | null };
+    const rows: Row[] = [];
+    for (const e of evs) {
+      const it = items.find((i) => i.id === e.entityId);
+      const d = e.data as Record<string, unknown>;
+      rows.push({ at: e.createdAt.toISOString(), kind: e.type === "item.returned" ? "devolucion" : "cancelacion", product: it?.productName ?? null, where: it ? where(it.checkId) : "", amount: it ? lineTotalRaw(it) : 0, reason: reasonOf(d.reasonId), requestedBy: nameOf(e.actorId), authorizedBy: e.authorizedBy && e.authorizedBy !== e.actorId ? nameOf(e.authorizedBy) : null });
+    }
+    for (const d of discounts)
+      rows.push({ at: d.createdAt.toISOString(), kind: d.type === "cortesia" ? "cortesia" : "descuento", product: null, where: where(d.checkId), amount: d.amount, reason: reasonOf(d.reasonId), requestedBy: nameOf(d.appliedBy), authorizedBy: nameOf(d.authorizedBy) });
+    rows.sort((a, b) => b.at.localeCompare(a.at));
+
+    const sum = (k: Row["kind"]) => ({ count: rows.filter((r) => r.kind === k).length, amount: rows.filter((r) => r.kind === k).reduce((s, r) => s + r.amount, 0) });
+    const byReason = [...rows.reduce((m, r) => m.set(r.reason, (m.get(r.reason) ?? 0) + 1), new Map<string, number>())].map(([reason, count]) => ({ reason, count, pct: rows.length ? Math.round((count / rows.length) * 100) : 0 })).sort((a, b) => b.count - a.count);
+    const emp = new Map<string, { count: number; amount: number; authorized: number }>();
+    for (const r of rows) {
+      if (!r.requestedBy) continue;
+      const cur = emp.get(r.requestedBy) ?? { count: 0, amount: 0, authorized: 0 };
+      cur.count++; cur.amount += r.amount; if (r.authorizedBy) cur.authorized++;
+      emp.set(r.requestedBy, cur);
+    }
+    const employees = [...emp].map(([name, v]) => {
+      const others = [...emp].filter(([n]) => n !== name).map(([, x]) => x.amount);
+      const avg = others.length ? others.reduce((a, b) => a + b, 0) / others.length : 0;
+      const ratio = avg ? v.amount / avg : null;
+      return { name, ...v, ratioVsOthers: ratio, alert: (ratio !== null && ratio >= 3) || v.count >= 5 };
+    }).sort((a, b) => b.amount - a.amount);
+    return { days: req.query.days, totals: { devolucion: sum("devolucion"), cancelacion: sum("cancelacion"), cortesia: sum("cortesia"), descuento: sum("descuento") }, byReason, employees, rows };
+  });
   app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo); // E9-04
   app.get("/menu-engineering", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Range } }, todo); // E9-05
   app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo);
