@@ -13,6 +13,7 @@ import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
 import { StationsPage } from "./features/stations/StationsPage";
+import { UsersPage } from "./features/users/UsersPage";
 import { PayablesPage } from "./features/purchasing/PayablesPage";
 import { PurchasesPage } from "./features/purchasing/PurchasesPage";
 import { ReceptionPage } from "./features/purchasing/ReceptionPage";
@@ -24,7 +25,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", design: "admin-editor-plano" },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
-  { path: "usuarios", label: "Usuarios y roles", icon: "group", perm: "usuarios.gestionar", design: "admin-usuarios-permisos" },
+  { path: "usuarios", label: "Usuarios y roles", icon: "group", perm: "usuarios.gestionar", element: <UsersPage /> },
   { path: "inventario", label: "Insumos y almacenes", icon: "inventory_2", perm: "inventario.contar", element: <InventoryPage /> },
   { path: "recetas", label: "Recetas", icon: "menu_book", perm: "inventario.contar", element: <RecipesPage /> },
   { path: "conteo", label: "Conteo físico", icon: "fact_check", perm: "inventario.contar", element: <CountPage /> },
