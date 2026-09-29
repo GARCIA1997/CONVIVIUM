@@ -1,5 +1,5 @@
 import type { orders } from "@convivium/contracts";
-import { and, eq, inArray, schema, type Db } from "@convivium/db";
+import { and, arrayOverlaps, eq, inArray, or, schema, type Db } from "@convivium/db";
 import { cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
 import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
@@ -123,12 +123,22 @@ export class OrdersService {
   }
 
   async openCheck(who: Principal, body: z.infer<typeof orders.OpenCheckBody>) {
+    const joined = body.kind === "mesa" ? [...new Set(body.joinTableIds ?? [])].filter((id) => id !== body.tableId) : [];
     if (body.kind === "mesa") {
+      const all = [body.tableId, ...joined];
+      if (joined.length) {
+        const [main] = await this.db.select().from(schema.tables).where(and(eq(schema.tables.id, body.tableId), eq(schema.tables.branchId, who.branchId)));
+        if (!main || joined.some((id) => !main.mergeableWith.includes(id))) throw conflict("not_mergeable", "Esas mesas no están configuradas para unirse");
+      }
       const [busy] = await this.db
         .select({ id: schema.checks.id })
         .from(schema.checks)
-        .where(and(eq(schema.checks.tableId, body.tableId), inArray(schema.checks.status, ["abierta", "pidio_cuenta"])));
-      if (busy) throw conflict("table_busy", "La mesa ya tiene una cuenta abierta");
+        .where(and(
+          eq(schema.checks.branchId, who.branchId),
+          inArray(schema.checks.status, ["abierta", "pidio_cuenta"]),
+          or(inArray(schema.checks.tableId, all), arrayOverlaps(schema.checks.joinedTableIds, all)),
+        ));
+      if (busy) throw conflict("table_busy", joined.length ? "Alguna de las mesas ya tiene una cuenta abierta" : "La mesa ya tiene una cuenta abierta");
     }
     const [check] = await this.db
       .insert(schema.checks)
@@ -137,13 +147,14 @@ export class OrdersService {
         branchId: who.branchId,
         kind: body.kind,
         tableId: body.kind === "mesa" ? body.tableId : null,
+        joinedTableIds: joined,
         guests: body.kind === "mesa" ? body.guests : null,
         name: body.kind === "barra" ? body.name : null,
         waiterId: who.userId,
       })
       .returning();
     await recordEvent(this.db, who, { type: "check.opened", entity: "check", entityId: check!.id, data: body });
-    if (body.kind === "mesa") this.app.hub.publish(["floor"], { type: "table.status", tableId: body.tableId, status: "ocupada" });
+    if (body.kind === "mesa") for (const tableId of [body.tableId, ...joined]) this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "ocupada" });
     return check!;
   }
 

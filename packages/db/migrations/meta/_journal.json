@@ -29,6 +29,13 @@
       "when": 1790659713236,
       "tag": "0003_roles_editor",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790660310282,
+      "tag": "0004_plano_completo",
+      "breakpoints": true
     }
   ]
 }

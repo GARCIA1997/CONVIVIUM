@@ -7,7 +7,7 @@ export const Course = z.enum(["entrada", "fuerte", "postre", "bebida", "sin_tiem
 
 /** Cuenta: de mesa o de barra (E3-10). */
 export const OpenCheckBody = z.union([
-  z.object({ kind: z.literal("mesa"), tableId: Id, guests: z.number().int().min(1) }),
+  z.object({ kind: z.literal("mesa"), tableId: Id, guests: z.number().int().min(1), joinTableIds: z.array(Id).max(6).optional() }),
   z.object({ kind: z.literal("barra"), name: z.string().min(1) }),
 ]);
 
