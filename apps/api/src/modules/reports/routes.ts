@@ -2,18 +2,17 @@ import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
 import { breakdownIncludedTaxes, classifyMenu, menuAdvice } from "@convivium/domain";
 import { lineTotal } from "../orders/mapper.js";
 import { InventoryService } from "../inventory/service.js";
+import { prepTimesReport, salesReport, tipsReport, type Scope } from "./analytics.js";
 
 /** Importe de un producto sin importar su estado (para medir lo cancelado o devuelto). */
 const lineTotalRaw = (i: { unitPrice: number; quantity: number; modifiers: { priceDelta: number }[] }) => (i.unitPrice + i.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * i.quantity;
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
-import { notImplemented } from "../../plugins/errors.js";
 
 const Range = z.object({ from: z.string().datetime().optional(), to: z.string().datetime().optional() });
 
 const plugin: ApiModule["plugin"] = async (app) => {
   const tags = ["reportes"];
-  const todo = async () => { throw notImplemented(); };
 
   /** E9-01 · Dashboard en vivo (día en curso) con comparativo contra el mismo día de la semana anterior. */
   app.get("/live", { onRequest: [app.guard("reportes.ver")], schema: { tags } }, async (req) => {
@@ -118,7 +117,17 @@ const plugin: ApiModule["plugin"] = async (app) => {
     };
   });
 
-  app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]) }) } }, todo); // E9-02
+  const Period = z.object({ days: z.coerce.number().int().min(1).max(365).default(7) });
+  const scopeOf = async (req: { user: { tenantId: string; branchId: string }; query: { days: number } }): Promise<Scope> => {
+    const [b] = await app.db.select({ tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
+    const from = new Date(Date.now() - req.query.days * 864e5);
+    if (req.query.days === 1) from.setHours(0, 0, 0, 0);
+    return { tenantId: req.user.tenantId, branchIds: [req.user.branchId], from, to: new Date(), timezone: b?.tz ?? "America/Mexico_City" };
+  };
+
+  /** E9-02 · Ventas por producto, categoría, mesero, estación, forma de pago u hora. */
+  app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]).default("producto") }) } }, async (req) =>
+    salesReport(app.db, await scopeOf(req), req.query.groupBy));
   /** E9-03 · Devoluciones, cancelaciones, cortesías y descuentos por motivo y por empleado, con radar de desviación. */
   app.get("/exceptions", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: z.object({ days: z.coerce.number().int().min(1).max(90).default(7) }) } }, async (req) => {
     const { tenantId, branchId } = req.user;
@@ -166,7 +175,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
     }).sort((a, b) => b.amount - a.amount);
     return { days: req.query.days, totals: { devolucion: sum("devolucion"), cancelacion: sum("cancelacion"), cortesia: sum("cortesia"), descuento: sum("descuento") }, byReason, employees, rows };
   });
-  app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo); // E9-04
+  /** E9-04 · Tiempos de preparación por estación y producto (promedio y percentiles). */
+  app.get("/prep-times", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period } }, async (req) => prepTimesReport(app.db, await scopeOf(req)));
   /** E9-05 · Ingeniería de menú: popularidad vs. margen, costo teórico vs. real (kardex) y recomendaciones. */
   app.get("/menu-engineering", { onRequest: [app.guard("dashboard.ver")], schema: { tags, querystring: Range.extend({ days: z.coerce.number().int().min(1).max(365).default(30) }) } }, async (req) => {
     const { db } = app;
@@ -225,7 +235,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
       items: items.map((i) => ({ ...i, advice: menuAdvice(i, marginThreshold, ivaFactor) })),
     };
   });
-  app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range } }, todo);
+  /** Propinas por mesero y forma de pago. */
+  app.get("/tips", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Period } }, async (req) => tipsReport(app.db, await scopeOf(req)));
 };
 
 export const reportsModule: ApiModule = { prefix: "reports", plugin };

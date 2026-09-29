@@ -144,6 +144,27 @@ describe("caja e inventario", () => {
   });
 });
 
+describe("reportes (E9-02, E9-04)", () => {
+  it("las ventas cuadran igual por producto, por forma de pago y por hora", async () => {
+    const [byProduct, byPay, byHour] = await Promise.all(["producto", "forma_pago", "hora"].map((g) => api("GET", `/reports/sales?days=1&groupBy=${g}`, gerente).then((r) => r.body)));
+    expect(byProduct.summary.checks).toBeGreaterThan(0);
+    const sum = (r: any) => r.rows.reduce((n: number, x: any) => n + x.amount, 0);
+    expect(sum(byProduct)).toBe(byProduct.summary.total);
+    expect(sum(byPay)).toBe(byProduct.summary.total); // el cambio entregado no cuenta como venta
+    expect(sum(byHour)).toBe(byProduct.summary.total);
+    expect(byPay.rows.map((r: any) => r.key)).toEqual(["efectivo_mxn"]);
+  });
+  it("tiempos de preparación con percentiles por estación", async () => {
+    const r = (await api("GET", "/reports/prep-times?days=1", gerente)).body;
+    expect(r.summary.samples).toBeGreaterThan(0);
+    expect(r.summary.p90Sec).toBeGreaterThanOrEqual(r.summary.p50Sec);
+    expect(r.byStation.length).toBeGreaterThan(0);
+  });
+  it("el mesero no ve reportes", async () => {
+    expect((await api("GET", "/reports/tips?days=1", mesero)).status).toBe(403);
+  });
+});
+
 describe("bitácora inmutable (E1-06)", () => {
   it("todo lo anterior quedó registrado y no se puede borrar", async () => {
     const r = await api("GET", "/audit?period=hoy", owner);

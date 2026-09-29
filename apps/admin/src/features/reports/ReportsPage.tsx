@@ -1,168 +1,183 @@
-/* Diseño: design/stitch/admin-reportes-control.html (Stitch). Marcado y clases originales; datos reales. E9-03, E5-06. */
+/* Diseño: design/stitch/admin-reportes-control.html (Stitch). Encabezado y pestañas originales; datos reales. E9-02, E9-03, E9-04. */
 import { client } from "@convivium/app-shell";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ExceptionsTab } from "./ExceptionsTab";
 
-interface Report {
-  days: number;
-  totals: Record<"devolucion" | "cancelacion" | "cortesia" | "descuento", { count: number; amount: number }>;
-  byReason: { reason: string; count: number; pct: number }[];
-  employees: { name: string; count: number; amount: number; authorized: number; ratioVsOthers: number | null; alert: boolean }[];
-  rows: { at: string; kind: string; product: string | null; where: string; amount: number; reason: string; requestedBy: string | null; authorizedBy: string | null }[];
-}
+type Tab = "ventas" | "devoluciones" | "propinas" | "tiempos";
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
-const initials = (n: string) => n.split(/\s+/).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
-const KIND: Record<string, { label: string; cls: string }> = {
-  devolucion: { label: "Devolución", cls: "bg-amber-50 text-amber-800 border-amber-200" },
-  cancelacion: { label: "Cancelación", cls: "bg-orange-50 text-orange-800 border-orange-200" },
-  cortesia: { label: "Cortesía", cls: "bg-emerald-50 text-convivium-olivo border-convivium-olivo/20" },
-  descuento: { label: "Descuento", cls: "bg-stone-100 text-convivium-carbon border-stone-200" },
-};
-const BAR = ["bg-convivium-terracota", "bg-convivium-dorado", "bg-convivium-arena", "bg-stone-400"];
+const mins = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
+/** Descarga filas como CSV (UTF-8 con BOM para que Excel respete acentos). */
+function downloadCsv(name: string, rows: Record<string, unknown>[]) {
+  if (!rows.length) return;
+  const cols = Object.keys(rows[0]!);
+  const esc = (v: unknown) => { const t = String(v ?? ""); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const csv = "﻿" + [cols.join(","), ...rows.map((r) => cols.map((c) => esc(r[c])).join(","))].join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = `${name}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 export function ReportsPage() {
+  const [tab, setTab] = useState<Tab>(() => (location.hash.slice(1) as Tab) || "ventas");
   const [days, setDays] = useState(7);
-  const [r, setR] = useState<Report | null>(null);
-  const [dismissed, setDismissed] = useState<string | null>(null);
-  const [focus, setFocus] = useState<string | null>(null);
-  useEffect(() => { client.request<Report>("GET", `/reports/exceptions?days=${days}`).then(setR); }, [days]);
-
-  if (!r) return null;
-  const all = Object.values(r.totals).reduce((s, t) => s + t.amount, 0) || 1;
-  const flagged = r.employees.find((e) => e.alert && e.name !== dismissed);
-  const rows = focus ? r.rows.filter((x) => x.requestedBy === focus) : r.rows;
-
-  const Card = ({ k, title, icon, iconCls, bar, sub }: { k: keyof Report["totals"]; title: string; icon: string; iconCls: string; bar: string; sub: string }) => (
-    <div className="bg-white rounded-xl p-5 border border-convivium-arena/60 shadow-sm relative overflow-hidden group hover:border-convivium-arena transition-all">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-convivium-carbon-muted">{title}</span>
-        <span className={`w-8 h-8 rounded-lg flex items-center justify-center border ${iconCls}`}><span className="material-symbols-outlined text-lg">{icon}</span></span>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="font-headline font-bold text-3xl text-convivium-carbon tracking-tight">{r.totals[k].count}</span>
-        <span className="text-sm font-semibold text-convivium-terracota-alert">· {money(r.totals[k].amount)} MXN</span>
-      </div>
-      <p className="mt-2 text-xs text-convivium-carbon-muted">{sub}</p>
-      <div className="mt-3 w-full bg-convivium-marfil-subtle rounded-full h-1.5 overflow-hidden">
-        <div className={`${bar} h-1.5 rounded-full`} style={{ width: `${(r.totals[k].amount / all) * 100}%` }} />
-      </div>
-    </div>
-  );
+  const [rows, setRows] = useState<Record<string, unknown>[]>([]);
+  const onExport = useCallback((r: Record<string, unknown>[]) => setRows(r), []);
+  useEffect(() => { history.replaceState(null, "", `#${tab}`); setRows([]); }, [tab]);
+  const TABS: [Tab, string][] = [["ventas", "Ventas"], ["devoluciones", "Devoluciones y cortesías"], ["propinas", "Propinas"], ["tiempos", "Tiempos de Servicio (SLA)"]];
 
   return (
-    <main className="flex-1 p-8 space-y-6 bg-[#F7F5F0] min-h-screen">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-convivium-arena/40 pb-4">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#F7F5F0]">
+      <header className="px-8 py-4 bg-convivium-marfil border-b border-convivium-arena/70 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-convivium-terracota">Reportes de Control</span>
-          <h1 className="font-headline text-3xl font-bold text-convivium-olivo tracking-tight mt-1">Devoluciones, cortesías y cancelaciones</h1>
+          <div className="flex items-center gap-2 text-xs text-convivium-carbon-muted"><span className="font-medium">Reportes y Cierre</span><span className="text-convivium-arena">/</span><span className="font-semibold text-convivium-olivo">{TABS.find((t) => t[0] === tab)![1]}</span></div>
+          <h2 className="font-headline font-semibold text-xl tracking-tight text-convivium-olivo mt-0.5">Reportes de la Sucursal</h2>
         </div>
-        <div className="inline-flex rounded-lg border border-convivium-arena p-0.5 bg-white text-xs">
-          {[1, 7, 30].map((d) => (
-            <button key={d} onClick={() => setDays(d)} className={days === d ? "px-3 py-1.5 rounded bg-convivium-olivo text-convivium-dorado font-semibold" : "px-3 py-1.5 rounded text-convivium-carbon-muted"}>{d === 1 ? "Hoy" : `Últimos ${d} días`}</button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-white px-1 py-1 rounded-lg border border-convivium-arena/70 shadow-sm text-xs font-medium text-convivium-carbon">
+            <span className="material-symbols-outlined text-base text-convivium-dorado px-1">calendar_today</span>
+            {[1, 7, 30].map((d) => <button key={d} onClick={() => setDays(d)} className={days === d ? "px-2.5 py-1 rounded bg-convivium-olivo text-amber-100 font-semibold" : "px-2.5 py-1 rounded text-convivium-carbon-muted hover:text-convivium-carbon"}>{d === 1 ? "Hoy" : `Últimos ${d} días`}</button>)}
+          </div>
+          <button disabled={!rows.length} onClick={() => downloadCsv(`convivium-${tab}-${days}d`, rows)} className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-convivium-olivo hover:bg-convivium-olivo-surface text-amber-100 text-xs font-medium transition-all active:scale-[0.99] shadow-sm disabled:opacity-40">
+            <span className="material-symbols-outlined text-base">table_view</span><span>Exportar Excel / CSV</span>
+          </button>
+        </div>
+      </header>
+      <div className="bg-convivium-marfil border-b border-convivium-arena/70 px-8 pt-4">
+        <nav aria-label="Pestañas de reportes" className="flex gap-8">
+          {TABS.map(([k, l]) => (
+            <button key={k} onClick={() => setTab(k)} className={tab === k ? "border-b-2 border-convivium-olivo text-convivium-olivo pb-3 font-body text-sm font-semibold flex items-center gap-2.5 transition-colors" : "text-convivium-carbon-muted hover:text-convivium-carbon pb-3 font-body text-sm font-medium transition-colors flex items-center gap-2"}>{l}</button>
           ))}
-        </div>
+        </nav>
       </div>
+      <main className="flex-1 p-8">
+        {tab === "ventas" && <SalesTab days={days} onExport={onExport} />}
+        {tab === "devoluciones" && <ExceptionsTab days={days} onExport={onExport} />}
+        {tab === "propinas" && <TipsTab days={days} onExport={onExport} />}
+        {tab === "tiempos" && <TimesTab days={days} onExport={onExport} />}
+      </main>
+    </div>
+  );
+}
 
+function Kpi({ title, value, sub, icon }: { title: string; value: string; sub?: string; icon: string }) {
+  return (
+    <div className="bg-white rounded-xl p-5 border border-convivium-arena/60 shadow-sm">
+      <div className="flex items-center justify-between mb-3"><span className="text-xs font-semibold uppercase tracking-wider text-convivium-carbon-muted">{title}</span><span className="w-8 h-8 rounded-lg flex items-center justify-center border bg-stone-100 text-convivium-carbon border-stone-200"><span className="material-symbols-outlined text-lg">{icon}</span></span></div>
+      <span className="font-headline font-bold text-3xl text-convivium-carbon tracking-tight">{value}</span>
+      {sub && <p className="mt-2 text-xs text-convivium-carbon-muted">{sub}</p>}
+    </div>
+  );
+}
+const Table = ({ head, children }: { head: string[]; children: React.ReactNode }) => (
+  <div className="bg-white rounded-xl border border-convivium-arena/60 shadow-sm overflow-hidden">
+    <table className="w-full text-left text-xs">
+      <thead><tr className="bg-convivium-marfil-subtle border-b border-convivium-arena/60 text-[11px] font-semibold uppercase tracking-wider text-convivium-carbon-muted">{head.map((h, i) => <th key={h} className={`py-3 px-4 ${i ? "text-right" : ""}`}>{h}</th>)}</tr></thead>
+      <tbody className="divide-y divide-stone-100">{children}</tbody>
+    </table>
+  </div>
+);
+const Bar = ({ pct }: { pct: number }) => <div className="w-full bg-convivium-marfil-subtle rounded-full h-1.5 overflow-hidden mt-1"><div className="bg-convivium-dorado h-1.5 rounded-full" style={{ width: `${Math.min(100, pct)}%` }} /></div>;
+
+type Exp = { days: number; onExport: (r: Record<string, unknown>[]) => void };
+
+function SalesTab({ days, onExport }: Exp) {
+  const [by, setBy] = useState("producto");
+  const [r, setR] = useState<any>(null);
+  useEffect(() => { client.request("GET", `/reports/sales?days=${days}&groupBy=${by}`).then(setR); }, [days, by]);
+  useEffect(() => { if (r) onExport(r.rows.map((x: any) => ({ [by]: x.label, importe: x.amount / 100, unidades: x.units, cuentas: x.checks, porcentaje: x.pct }))); }, [r, by, onExport]);
+  if (!r) return null;
+  const GROUPS: [string, string][] = [["producto", "Producto"], ["categoria", "Categoría"], ["mesero", "Mesero"], ["estacion", "Estación"], ["forma_pago", "Forma de pago"], ["hora", "Hora"]];
+  return (
+    <div className="space-y-6">
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card k="devolucion" title="Devoluciones" icon="assignment_return" iconCls="bg-amber-50 text-amber-800 border-amber-200/60" bar="bg-convivium-terracota" sub="Platillos regresados por el comensal" />
-        <Card k="cortesia" title="Cortesías" icon="redeem" iconCls="bg-emerald-50 text-convivium-olivo border-convivium-olivo/20" bar="bg-convivium-dorado" sub="Autorizadas por capitán o gerente" />
-        <Card k="descuento" title="Descuentos" icon="percent" iconCls="bg-stone-100 text-convivium-carbon border-stone-200" bar="bg-convivium-arena" sub="Sobre producto o cuenta" />
-        <Card k="cancelacion" title="Cancelaciones" icon="soup_kitchen" iconCls="bg-orange-50 text-orange-800 border-orange-200/70" bar="bg-orange-400" sub="Productos enviados a estación y cancelados" />
+        <Kpi title="Venta total" value={money(r.summary.total)} sub="Cuentas cobradas, impuestos incluidos" icon="payments" />
+        <Kpi title="Cuentas" value={String(r.summary.checks)} icon="receipt_long" />
+        <Kpi title="Ticket promedio" value={money(r.summary.avgTicket)} icon="avg_pace" />
+        <Kpi title="Por comensal" value={money(r.summary.perGuest)} sub={`${r.summary.guests} comensales`} icon="group" />
       </section>
+      <div className="inline-flex rounded-lg border border-convivium-arena p-0.5 bg-white text-xs">
+        {GROUPS.map(([k, l]) => <button key={k} onClick={() => setBy(k)} className={by === k ? "px-3 py-1.5 rounded bg-convivium-olivo text-convivium-dorado font-semibold" : "px-3 py-1.5 rounded text-convivium-carbon-muted"}>{l}</button>)}
+      </div>
+      <Table head={[GROUPS.find((g) => g[0] === by)![1], "Unidades", "Cuentas", "Importe", "% de la venta"]}>
+        {r.rows.map((x: any) => (
+          <tr key={x.key} className="hover:bg-convivium-marfil-subtle/50">
+            <td className="py-2.5 px-4 font-medium text-convivium-carbon">{x.label}</td>
+            <td className="py-2.5 px-4 text-right font-mono">{by === "forma_pago" ? "—" : x.units}</td>
+            <td className="py-2.5 px-4 text-right font-mono">{x.checks}</td>
+            <td className="py-2.5 px-4 text-right font-mono font-semibold">{money(x.amount)}</td>
+            <td className="py-2.5 px-4 text-right w-40"><span className="font-mono">{x.pct}%</span><Bar pct={x.pct} /></td>
+          </tr>
+        ))}
+        {!r.rows.length && <tr><td colSpan={5} className="py-6 text-center text-convivium-carbon-muted">Sin ventas cobradas en el periodo.</td></tr>}
+      </Table>
+    </div>
+  );
+}
 
-      {flagged && (
-        <section className="rounded-xl p-5 border-2 border-convivium-terracota-border bg-convivium-terracota-light flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-convivium-terracota-alert text-2xl">radar</span>
-            <div>
-              <h3 className="font-headline font-semibold text-base text-convivium-terracota-alert">Radar de Control: desviación inusual en cortesías y anulaciones</h3>
-              <p className="mt-1 text-xs text-convivium-carbon leading-relaxed">
-                <strong className="font-semibold text-convivium-terracota-alert">{flagged.name}</strong> presenta{" "}
-                <span className="underline decoration-convivium-terracota-alert font-medium">{flagged.ratioVsOthers ? `${flagged.ratioVsOthers.toFixed(1)}x sobre el promedio del equipo` : `${flagged.count} movimientos`}</span>, acumulando {money(flagged.amount)} MXN en el periodo.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
-            <button onClick={() => setDismissed(flagged.name)} className="px-3.5 py-2 rounded-lg bg-white border border-convivium-terracota-border text-convivium-terracota-alert text-xs font-semibold hover:bg-stone-50 transition-colors shadow-xs">Ignorar</button>
-            <button onClick={() => setFocus(flagged.name)} className="px-3.5 py-2 rounded-lg bg-convivium-terracota-alert text-white text-xs font-semibold hover:bg-convivium-terracota transition-colors shadow-sm flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm">visibility</span>Auditar movimientos de {flagged.name}
-            </button>
-          </div>
-        </section>
-      )}
-
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 bg-white rounded-xl p-6 border border-convivium-arena/60 shadow-sm">
-          <div className="pb-3 border-b border-convivium-marfil-subtle">
-            <h3 className="font-headline font-semibold text-base text-convivium-olivo">Distribución por Motivo</h3>
-            <p className="text-xs text-convivium-carbon-muted">{r.rows.length} movimientos en el periodo</p>
-          </div>
-          <div className="mt-4 space-y-3.5">
-            {r.byReason.map((b, i) => (
-              <div key={b.reason}>
-                <div className="flex justify-between text-xs mb-1"><span className="font-medium text-convivium-carbon">{b.reason}</span><span className="text-convivium-carbon-muted">{b.count} ({b.pct}%)</span></div>
-                <div className="h-2 w-full bg-convivium-marfil-subtle rounded-full overflow-hidden"><div className={`h-full ${BAR[i % BAR.length]} rounded-full transition-all duration-500`} style={{ width: `${b.pct}%` }} /></div>
-              </div>
-            ))}
-            {r.byReason.length === 0 && <p className="text-xs text-convivium-carbon-muted">Sin movimientos.</p>}
-          </div>
-        </div>
-
-        <div className="lg:col-span-7 bg-white rounded-xl border border-convivium-arena/70 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-convivium-marfil-subtle"><h3 className="font-headline font-semibold text-lg text-convivium-olivo">Por colaborador</h3></div>
-          <table className="w-full text-left text-xs">
-            <thead className="bg-convivium-marfil-subtle/60 text-convivium-carbon-muted uppercase tracking-wider text-[10px]">
-              <tr><th className="py-3 px-6">Colaborador</th><th className="py-3 px-6">Movimientos</th><th className="py-3 px-6">Importe</th><th className="py-3 px-6">Estado</th><th className="py-3 px-6 text-right" /></tr>
-            </thead>
-            <tbody className="divide-y divide-convivium-marfil-subtle">
-              {r.employees.map((e) => (
-                <tr key={e.name} className={e.alert ? "bg-convivium-terracota-light/50" : "hover:bg-convivium-marfil/50 transition-colors"}>
-                  <td className="py-3.5 px-6"><div className="flex items-center gap-2.5"><div className={`w-7 h-7 rounded-full text-white flex items-center justify-center font-bold text-xs ${e.alert ? "bg-convivium-terracota-alert" : "bg-convivium-arena"}`}>{initials(e.name)}</div><span className="font-semibold text-convivium-carbon">{e.name}</span></div></td>
-                  <td className="py-3.5 px-6">{e.count} <span className="text-convivium-carbon-muted">({e.authorized} autorizados)</span></td>
-                  <td className="py-3.5 px-6 font-mono font-semibold">{money(e.amount)}</td>
-                  <td className="py-3.5 px-6">
-                    {e.alert ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-convivium-terracota-alert text-white shadow-xs"><span className="material-symbols-outlined text-xs">warning</span>Alerta de Radar</span>
-                    ) : <span className="text-[11px] text-convivium-carbon-muted">Dentro de rango</span>}
-                  </td>
-                  <td className="py-3.5 px-6 text-right">
-                    <button onClick={() => setFocus(focus === e.name ? null : e.name)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-convivium-arena text-convivium-olivo font-medium hover:bg-stone-50 transition-colors">
-                      {focus === e.name ? "Quitar filtro" : "Ver desglose"}<span className="material-symbols-outlined text-sm">arrow_forward</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {r.employees.length === 0 && <p className="p-6 text-xs text-convivium-carbon-muted">Sin movimientos por colaborador.</p>}
-        </div>
+function TipsTab({ days, onExport }: Exp) {
+  const [r, setR] = useState<any>(null);
+  useEffect(() => { client.request("GET", `/reports/tips?days=${days}`).then(setR); }, [days]);
+  useEffect(() => { if (r) onExport(r.byWaiter.map((w: any) => ({ mesero: w.name, propinas: w.amount / 100, cuentas_con_propina: w.count, venta: w.sales / 100, porcentaje: w.pctOfSales }))); }, [r, onExport]);
+  if (!r) return null;
+  const METHOD: Record<string, string> = { efectivo_mxn: "Efectivo MXN", efectivo_usd: "Efectivo USD", tarjeta: "Tarjeta", transferencia: "Transferencia", vales: "Vales" };
+  return (
+    <div className="space-y-6">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Kpi title="Propinas" value={money(r.summary.total)} sub={`${r.summary.pctOfSales}% sobre la venta`} icon="volunteer_activism" />
+        <Kpi title="Cuentas con propina" value={`${r.summary.checksWithTip} / ${r.summary.checks}`} icon="receipt_long" />
+        <Kpi title="Por forma de pago" value={r.byMethod.map((m: any) => METHOD[m.method] ?? m.method).join(" · ") || "—"} sub={r.byMethod.map((m: any) => money(m.amount)).join(" · ")} icon="credit_card" />
       </section>
+      <Table head={["Mesero", "Propinas", "Cuentas", "Venta atendida", "% sobre su venta"]}>
+        {r.byWaiter.map((w: any) => (
+          <tr key={w.waiterId} className="hover:bg-convivium-marfil-subtle/50">
+            <td className="py-2.5 px-4 font-medium text-convivium-carbon">{w.name}</td>
+            <td className="py-2.5 px-4 text-right font-mono font-semibold">{money(w.amount)}</td>
+            <td className="py-2.5 px-4 text-right font-mono">{w.count}</td>
+            <td className="py-2.5 px-4 text-right font-mono">{money(w.sales)}</td>
+            <td className="py-2.5 px-4 text-right w-40"><span className="font-mono">{w.pctOfSales}%</span><Bar pct={w.pctOfSales * 5} /></td>
+          </tr>
+        ))}
+        {!r.byWaiter.length && <tr><td colSpan={5} className="py-6 text-center text-convivium-carbon-muted">Sin propinas en el periodo.</td></tr>}
+      </Table>
+    </div>
+  );
+}
 
-      <section className="bg-white rounded-xl border border-convivium-arena/70 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-convivium-marfil-subtle flex items-center justify-between">
-          <h3 className="font-headline font-semibold text-lg text-convivium-olivo">Detalle de movimientos{focus ? ` · ${focus}` : ""}</h3>
-          <span className="text-xs text-convivium-carbon-muted">{rows.length} registros</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-convivium-marfil-subtle/60 text-convivium-carbon-muted uppercase tracking-wider text-[10px]">
-              <tr><th className="py-3 px-4">Fecha</th><th className="py-3 px-4">Tipo</th><th className="py-3 px-5">Mesa / Producto</th><th className="py-3 px-5">Motivo Registrado</th><th className="py-3 px-4">Solicitó</th><th className="py-3 px-4">Autorizó</th><th className="py-3 px-4 text-right">Importe</th></tr>
-            </thead>
-            <tbody className="divide-y divide-convivium-marfil-subtle">
-              {rows.map((x, i) => (
-                <tr key={i} className="hover:bg-convivium-marfil/40">
-                  <td className="py-3 px-4 font-mono text-[11px] text-convivium-carbon-muted whitespace-nowrap">{new Date(x.at).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })}</td>
-                  <td className="py-3 px-4"><span className={`inline-flex px-2 py-0.5 rounded-md border text-[11px] font-semibold ${KIND[x.kind]?.cls}`}>{KIND[x.kind]?.label}</span></td>
-                  <td className="py-3 px-5"><span className="font-medium text-convivium-carbon">{x.where}</span>{x.product && <span className="text-convivium-carbon-muted"> · {x.product}</span>}</td>
-                  <td className="py-3 px-5">{x.reason}</td>
-                  <td className="py-3 px-4">{x.requestedBy ?? "—"}</td>
-                  <td className="py-3 px-4">{x.authorizedBy ?? "—"}</td>
-                  <td className="py-3 px-4 text-right font-mono font-semibold">{money(x.amount)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+function TimesTab({ days, onExport }: Exp) {
+  const [r, setR] = useState<any>(null);
+  useEffect(() => { client.request("GET", `/reports/prep-times?days=${days}`).then(setR); }, [days]);
+  useEffect(() => { if (r) onExport(r.byProduct.map((p: any) => ({ producto: p.name, muestras: p.samples, promedio_min: +(p.avgSec / 60).toFixed(1), p50_min: +(p.p50Sec / 60).toFixed(1), p90_min: +(p.p90Sec / 60).toFixed(1), meta_min: +(p.targetSec / 60).toFixed(1), a_tiempo_pct: p.onTimePct }))); }, [r, onExport]);
+  if (!r) return null;
+  const tone = (pct: number) => (pct >= 85 ? "text-emerald-700" : pct >= 70 ? "text-amber-700" : "text-convivium-terracota-alert");
+  const Rows = ({ list, label }: { list: any[]; label: (x: any) => string }) => (
+    <>
+      {list.map((x) => (
+        <tr key={label(x)} className="hover:bg-convivium-marfil-subtle/50">
+          <td className="py-2.5 px-4 font-medium text-convivium-carbon">{label(x)}</td>
+          <td className="py-2.5 px-4 text-right font-mono">{x.samples}</td>
+          <td className="py-2.5 px-4 text-right font-mono">{mins(x.avgSec)}</td>
+          <td className="py-2.5 px-4 text-right font-mono">{mins(x.p50Sec)}</td>
+          <td className={`py-2.5 px-4 text-right font-mono font-semibold ${x.p90Sec > x.targetSec ? "text-convivium-terracota-alert" : ""}`}>{mins(x.p90Sec)}</td>
+          <td className="py-2.5 px-4 text-right font-mono">{mins(x.targetSec)}</td>
+          <td className={`py-2.5 px-4 text-right font-mono font-semibold ${tone(x.onTimePct)}`}>{x.onTimePct}%</td>
+        </tr>
+      ))}
+    </>
+  );
+  const head = ["", "Muestras", "Promedio", "p50", "p90", "Meta", "A tiempo"];
+  return (
+    <div className="space-y-6">
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Kpi title="A tiempo" value={`${r.summary.onTimePct}%`} sub="Enviado → listo dentro de la meta" icon="timer" />
+        <Kpi title="Promedio" value={mins(r.summary.avgSec)} sub="minutos" icon="avg_pace" />
+        <Kpi title="p90" value={mins(r.summary.p90Sec)} sub="9 de cada 10 salen antes de esto" icon="speed" />
+        <Kpi title="Platillos medidos" value={String(r.summary.samples)} icon="skillet" />
       </section>
-    </main>
+      <Table head={["Estación", ...head.slice(1)]}><Rows list={r.byStation} label={(x) => x.name} /></Table>
+      <Table head={["Producto (más lentos primero)", ...head.slice(1)]}><Rows list={r.byProduct} label={(x) => x.name} /></Table>
+    </div>
   );
 }
