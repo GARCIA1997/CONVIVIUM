@@ -10,6 +10,9 @@ import { CountPage } from "./features/inventory/CountPage";
 import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { PayablesPage } from "./features/purchasing/PayablesPage";
+import { PurchasesPage } from "./features/purchasing/PurchasesPage";
+import { ReceptionPage } from "./features/purchasing/ReceptionPage";
 
 /** Secciones de administración; `perm` define quién las ve (roles jerárquicos, E1-07). */
 const SECTIONS: (Section & { design?: string })[] = [
@@ -22,8 +25,9 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "inventario", label: "Insumos y almacenes", icon: "inventory_2", perm: "inventario.contar", element: <InventoryPage /> },
   { path: "recetas", label: "Recetas", icon: "menu_book", perm: "inventario.contar", element: <RecipesPage /> },
   { path: "conteo", label: "Conteo físico", icon: "fact_check", perm: "inventario.contar", element: <CountPage /> },
-  { path: "compras", label: "Compras", icon: "shopping_cart", perm: "compras.proponer_oc", design: "admin-compras-oc" },
-  { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", design: "admin-cxp" },
+  { path: "compras", label: "Compras", icon: "shopping_cart", perm: "compras.proponer_oc", element: <PurchasesPage /> },
+  { path: "recepcion", label: "Recepción", icon: "local_shipping", perm: "compras.recibir", element: <ReceptionPage /> },
+  { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", element: <PayablesPage /> },
   { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", design: "admin-reportes-control" },
   { path: "bitacora", label: "Bitácora", icon: "history", perm: "auditoria.ver", design: "admin-bitacora" },
 ];
