@@ -41,9 +41,6 @@ importers:
       '@convivium/app-shell':
         specifier: workspace:*
         version: link:../../packages/app-shell
-      '@convivium/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
       '@convivium/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -259,9 +256,6 @@ importers:
       '@convivium/api-client':
         specifier: workspace:*
         version: link:../api-client
-      '@convivium/ui':
-        specifier: workspace:*
-        version: link:../ui
     devDependencies:
       '@types/react':
         specifier: ^18.3.12
@@ -311,13 +305,6 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.19(tsx@4.23.15)(yaml@2.9.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.3.12
-        version: 18.3.31
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
 
 packages:
 

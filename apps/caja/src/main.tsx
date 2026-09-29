@@ -1,4 +1,3 @@
-import "@convivium/ui/tokens.css";
 import "@convivium/ui/convivium.css";
 import { DeviceGate } from "@convivium/app-shell";
 import { StrictMode } from "react";

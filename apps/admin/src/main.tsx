@@ -1,4 +1,3 @@
-import "@convivium/ui/tokens.css";
 import "@convivium/ui/convivium.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

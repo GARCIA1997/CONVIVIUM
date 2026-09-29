@@ -5,8 +5,17 @@
   "type": "module",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
-  "scripts": { "typecheck": "tsc -p ." },
-  "dependencies": { "@convivium/api-client": "workspace:*", "@convivium/ui": "workspace:*" },
-  "peerDependencies": { "react": "^18.3.1" },
-  "devDependencies": { "@types/react": "^18.3.12", "react": "^18.3.1" }
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@convivium/api-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "react": "^18.3.1"
+  }
 }

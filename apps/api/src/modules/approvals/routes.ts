@@ -1,5 +1,5 @@
 import { approvals } from "@convivium/contracts";
-import { and, desc, eq, schema } from "@convivium/db";
+import { and, desc, eq, inArray, schema } from "@convivium/db";
 import { can, discountNeedsApproval, pct, type Role } from "@convivium/domain";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -42,9 +42,31 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return reply.status(201).send(a);
   });
 
-  app.get("/", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, querystring: z.object({ status: z.enum(["pendiente", "aprobada", "rechazada"]).default("pendiente") }) } }, async (req) =>
-    db.select().from(schema.approvals).where(and(eq(schema.approvals.branchId, req.user.branchId), eq(schema.approvals.status, req.query.status))).orderBy(desc(schema.approvals.createdAt)),
-  );
+  /** Solicitudes con contexto para decidir: mesa, producto, motivo, solicitante y total de la cuenta. */
+  app.get("/", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, querystring: z.object({ status: z.enum(["pendiente", "aprobada", "rechazada"]).default("pendiente") }) } }, async (req) => {
+    const rows = await db.select().from(schema.approvals).where(and(eq(schema.approvals.branchId, req.user.branchId), eq(schema.approvals.status, req.query.status))).orderBy(desc(schema.approvals.createdAt)).limit(50);
+    const out = [];
+    for (const a of rows) {
+      const check = await orders.getCheck(req.user, a.checkId).catch(() => null);
+      const item = a.itemId ? check?.items.find((i) => i.id === a.itemId) : undefined;
+      const [reason] = a.reasonId ? await db.select({ label: schema.reasons.label }).from(schema.reasons).where(eq(schema.reasons.id, a.reasonId)) : [];
+      const people = await db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, [a.requestedBy, a.resolvedBy].filter((x): x is string => !!x)));
+      out.push({
+        ...a,
+        createdAt: a.createdAt.toISOString(),
+        resolvedAt: a.resolvedAt?.toISOString() ?? null,
+        tableLabel: check?.tableLabel ?? check?.name ?? null,
+        guests: check?.guests ?? null,
+        checkTotal: check?.total ?? 0,
+        productName: item?.productName ?? null,
+        itemAmount: item ? item.unitPrice * item.quantity : null,
+        reason: reason?.label ?? a.note ?? null,
+        requestedByName: people.find((p) => p.id === a.requestedBy)?.name ?? null,
+        resolvedByName: people.find((p) => p.id === a.resolvedBy)?.name ?? null,
+      });
+    }
+    return out;
+  });
 
   /** E5-01 (remoto) y E5-02 (PIN del gerente en el dispositivo del mesero). */
   app.post("/:id/resolve", { onRequest: [app.guard()], schema: { tags, params: IdParam, body: approvals.ResolveApprovalBody } }, async (req) => {

@@ -12,6 +12,34 @@ export type CheckSummary = Infer<typeof orders.CheckSummary>;
 export type Approval = Infer<typeof approvals.Approval>;
 export type { RealtimeEvent };
 
+export type ApprovalView = Omit<Approval, "createdAt"> & {
+  createdAt: string;
+  resolvedAt: string | null;
+  tableLabel: string | null;
+  guests: number | null;
+  checkTotal: number;
+  productName: string | null;
+  itemAmount: number | null;
+  reason: string | null;
+  requestedByName: string | null;
+  resolvedByName: string | null;
+};
+
+export interface LiveDashboard {
+  salesToday: number;
+  salesLastWeek: number;
+  tickets: number;
+  avgTicket: number;
+  guests: number;
+  openChecks: number;
+  occupancy: { total: number; occupied: number; pidioCuenta: number; free: number };
+  hourly: { hour: number; total: number }[];
+  topProducts: { name: string; qty: number; amount: number }[];
+  paymentMethods: { method: string; amount: number }[];
+  prepTimes: { station: string; avgSec: number | null; targetSec: number; samples: number }[];
+  alerts: { kind: "cxp" | "insumo" | "fraude"; title: string; detail: string }[];
+}
+
 export interface CashSummary {
   sessionId: string;
   cashierName: string;
@@ -107,7 +135,7 @@ export function createClient(baseUrl = "/v1") {
       consolidated: (stationId: string) => request<{ product: string; quantity: number }[]>("GET", `/stations/${stationId}/consolidated`),
     },
     approvals: {
-      list: () => request<Approval[]>("GET", "/approvals"),
+      list: (status: "pendiente" | "aprobada" | "rechazada" = "pendiente") => request<ApprovalView[]>("GET", `/approvals?status=${status}`),
       create: (body: Record<string, unknown>) => request<Approval>("POST", "/approvals", body),
       resolve: (id: string, decision: "aprobar" | "rechazar", approver?: { approverId: string; approverPin: string }) =>
         request<{ status: string }>("POST", `/approvals/${id}/resolve`, { decision, ...approver }),
@@ -123,7 +151,7 @@ export function createClient(baseUrl = "/v1") {
       pay: (checkId: string, body: unknown) => request<{ paid: number; change: number; checkStatus: string }>("POST", `/cash/checks/${checkId}/pay`, body),
     },
     reports: {
-      live: () => request<{ salesToday: number; tickets: number; avgTicket: number; openChecks: number; guests: number }>("GET", "/reports/live"),
+      live: () => request<LiveDashboard>("GET", "/reports/live"),
     },
 
     /** Suscripción en tiempo real con reconexión automática. Devuelve función para cerrar. */
