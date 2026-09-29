@@ -1,6 +1,6 @@
 import type { Session } from "@convivium/api-client";
 import { client } from "@convivium/app-shell";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ApprovalsPage } from "./features/approvals/ApprovalsPage";
 import { LoginPage } from "./features/auth/LoginPage";
@@ -11,6 +11,7 @@ import { InventoryPage } from "./features/inventory/InventoryPage";
 import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
+import { PromotionsPage } from "./features/promotions/PromotionsPage";
 import { ReportsPage } from "./features/reports/ReportsPage";
 import { FloorEditorPage } from "./features/floor/FloorEditorPage";
 import { StationsPage } from "./features/stations/StationsPage";
@@ -25,6 +26,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "inicio", label: "Inicio", icon: "dashboard", perm: "reportes.ver", element: <DashboardPage /> },
   { path: "aprobaciones", label: "Aprobaciones", icon: "verified", perm: "aprobacion.resolver", element: <ApprovalsPage /> },
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
+  { path: "promociones", label: "Promociones", icon: "local_offer", perm: "menu.editar", element: <PromotionsPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", element: <FloorEditorPage /> },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
   { path: "usuarios", label: "Usuarios", icon: "group", perm: "usuarios.gestionar", element: <UsersPage /> },
@@ -41,6 +43,7 @@ const SECTIONS: (Section & { design?: string })[] = [
 
 export function App() {
   const [session, setSession] = useState<Session | null>(client.session);
+  useEffect(() => client.onSessionChange(setSession), []);
   if (!session) return <LoginPage onLogin={setSession} />;
   const visible = SECTIONS.filter((s) => session.permissions.includes(s.perm));
   const logout = () => { client.logout(); setSession(null); };

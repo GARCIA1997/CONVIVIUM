@@ -8,7 +8,7 @@ const CATEGORY: [RegExp, string][] = [
   [/^item\.returned$/, "devolucion"],
   [/^approval\./, "autorizacion"],
   [/^check\.reopened$/, "reapertura"],
-  [/^product\.(updated|created)$/, "catalogo"],
+  [/^(product\.(updated|created)|promotion\.)/, "catalogo"],
   [/^(stock\.|count\.|production$|ingredient\.|recipe\.)/, "inventario"],
   [/^(receipt\.|po\.|payable\.|supplier\.)/, "compras"],
   [/^cash\./, "caja"],

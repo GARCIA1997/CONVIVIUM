@@ -1,6 +1,6 @@
 import type { orders } from "@convivium/contracts";
 import { and, arrayOverlaps, eq, inArray, or, schema, type Db } from "@convivium/db";
-import { cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
+import { applyPromotions as computePromotions, cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
 import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
@@ -29,12 +29,16 @@ export class OrdersService {
     const discounts = discountRows.reduce((s, d) => s + d.amount, 0);
     const [table] = check.tableId ? await this.db.select().from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
     const [waiter] = await this.db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, check.waiterId));
+    const promoIds = [...new Set(items.map((i) => i.promotionId).filter((x): x is string => !!x))];
+    const promos = promoIds.length ? await this.db.select({ id: schema.promotions.id, name: schema.promotions.name }).from(schema.promotions).where(inArray(schema.promotions.id, promoIds)) : [];
+    const promoName = (id: string | null) => promos.find((p) => p.id === id)?.name ?? null;
     return {
       ...check,
       tableLabel: table?.label ?? null,
       waiterName: waiter?.name ?? null,
       openedAt: check.openedAt.toISOString(),
-      items: items.map(toItemDto),
+      items: items.map((i) => ({ ...toItemDto(i), promotionName: promoName(i.promotionId) })),
+      promotions: promos.map((p) => ({ name: p.name, amount: items.filter((i) => i.promotionId === p.id && lineTotal(i) >= 0 && i.state !== "cancelado" && i.state !== "devuelto").reduce((n, i) => n + i.promoDiscount, 0) })).filter((p) => p.amount > 0),
       subtotal,
       discounts,
       total: Math.max(0, subtotal - discounts),
@@ -203,6 +207,7 @@ export class OrdersService {
       );
     }
     const inserted = await this.db.insert(schema.orderItems).values(rows).returning();
+    await this.applyPromotions(checkId);
     await recordEvent(this.db, who, { type: "items.added", entity: "check", entityId: checkId, data: body });
     this.broadcastSent(inserted.filter((i) => i.state === "enviado"));
     this.stock(who, inserted.filter((i) => i.state === "enviado"), 1);
@@ -246,6 +251,7 @@ export class OrdersService {
     await recordEvent(this.db, who, { type: "item.cancelled", entity: "order_item", entityId: itemId, data: { ...body, fromState: item.state }, authorizedBy });
     // Enviado sin preparar → regresa al inventario; ya preparado → queda como merma.
     if (item.state === "enviado") this.stock(who, [item], -1);
+    await this.applyPromotions(item.checkId);
     await this.notifyItem(updated!);
     return { status: "cancelled" as const, item: toItemDto(updated!) };
   }
@@ -266,8 +272,10 @@ export class OrdersService {
         .returning();
       this.broadcastSent([redo!]);
       this.stock(who, [redo!], 1);
+      await this.applyPromotions(item.checkId);
       return { status: "remade" as const, item: toItemDto(redo!) };
     }
+    await this.applyPromotions(item.checkId);
     return { status: "removed" as const };
   }
 
@@ -280,9 +288,44 @@ export class OrdersService {
 
   async moveItems(who: Principal, body: z.infer<typeof orders.MoveItemsBody>) {
     await this.getCheck(who, body.toCheckId);
+    const from = await this.db.selectDistinct({ checkId: schema.orderItems.checkId }).from(schema.orderItems).where(inArray(schema.orderItems.id, body.itemIds));
     await this.db.update(schema.orderItems).set({ checkId: body.toCheckId }).where(and(inArray(schema.orderItems.id, body.itemIds), eq(schema.orderItems.branchId, who.branchId)));
     await recordEvent(this.db, who, { type: "items.moved", entity: "check", entityId: body.toCheckId, data: body });
+    for (const c of new Set([body.toCheckId, ...from.map((f) => f.checkId)])) await this.applyPromotions(c);
     return { ok: true };
+  }
+
+  /** E4-07 · Recalcula las promociones de la cuenta (se llama tras cualquier cambio de renglones). */
+  async applyPromotions(checkId: string) {
+    const [check] = await this.db.select().from(schema.checks).where(eq(schema.checks.id, checkId));
+    if (!check || check.status === "cobrada" || check.status === "cancelada") return;
+    const promos = await this.db.select().from(schema.promotions).where(and(eq(schema.promotions.tenantId, check.tenantId), eq(schema.promotions.status, "activa")));
+    const items = await this.db.select().from(schema.orderItems).where(eq(schema.orderItems.checkId, checkId));
+    if (!items.length) return;
+    const products = await this.db.select({ id: schema.products.id, categoryId: schema.products.categoryId, price: schema.products.price }).from(schema.products).where(inArray(schema.products.id, [...new Set(items.map((i) => i.productId))]));
+    const [branch] = await this.db.select({ tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.id, check.branchId));
+    const [table] = check.tableId ? await this.db.select({ areaId: schema.tables.areaId }).from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
+    const result = promos.length
+      ? computePromotions(
+          items.map((i) => ({
+            id: i.id,
+            productId: i.productId,
+            categoryId: products.find((p) => p.id === i.productId)?.categoryId ?? "",
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            // Solo el renglón con precio (estación principal) participa; lo cancelado/devuelto no.
+            chargeable: i.unitPrice > 0 && i.state !== "cancelado" && i.state !== "devuelto",
+            orderedAt: i.createdAt,
+          })),
+          promos.map((p) => ({ ...p, active: true })),
+          { zone: table?.areaId ?? "barra", checkOpenedAt: check.openedAt, timezone: branch?.tz ?? "America/Mexico_City" },
+        )
+      : new Map<string, { discount: number; promotionId: string | null }>();
+    for (const i of items) {
+      const r = result.get(i.id) ?? { discount: 0, promotionId: null };
+      if (r.discount !== i.promoDiscount || r.promotionId !== i.promotionId)
+        await this.db.update(schema.orderItems).set({ promoDiscount: r.discount, promotionId: r.promotionId }).where(eq(schema.orderItems.id, i.id));
+    }
   }
 
   private async getItem(who: Principal, itemId: string) {

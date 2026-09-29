@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { boolean, integer, numeric, pgEnum, pgTable, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId, updatedAt } from "./_shared";
 
@@ -94,4 +95,27 @@ export const reasons = pgTable("reasons", {
   kind: reasonKindEnum("kind").notNull(),
   label: text("label").notNull(),
   active: boolean("active").notNull().default(true),
+});
+
+export const promoKindEnum = pgEnum("promo_kind", ["dos_por_uno", "porcentaje", "precio_especial", "combo"]);
+export const promoStatusEnum = pgEnum("promo_status", ["activa", "pausada", "borrador"]);
+
+/** Reglas de promoción (E4-07). Ver motor en @convivium/domain/promotions. */
+export const promotions = pgTable("promotions", {
+  id: id(),
+  tenantId: tenantId(),
+  name: text("name").notNull(),
+  kind: promoKindEnum("kind").notNull(),
+  value: integer("value").notNull().default(0),
+  productIds: uuid("product_ids").array().notNull().default(sql`'{}'::uuid[]`),
+  categoryIds: uuid("category_ids").array().notNull().default(sql`'{}'::uuid[]`),
+  days: integer("days").array().notNull().default(sql`'{}'::int[]`),
+  startTime: text("start_time"),
+  endTime: text("end_time"),
+  /** Ids de área o "barra". */
+  zones: text("zones").array().notNull().default(sql`'{}'::text[]`),
+  toleranceMin: integer("tolerance_min").notNull().default(0),
+  status: promoStatusEnum("status").notNull().default("borrador"),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });

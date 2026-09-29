@@ -38,6 +38,9 @@ export const OrderItem = z.object({
   state: ItemState,
   unitPrice: Cents,
   priority: z.enum(["normal", "rehacer"]),
+  /** Descuento automático por promoción, ya restado del total del renglón. */
+  promoDiscount: Cents.default(0),
+  promotionName: z.string().nullable().default(null),
   createdBy: Id,
   sentAt: Timestamp.nullable(),
   readyAt: Timestamp.nullable(),
@@ -57,6 +60,8 @@ export const Check = z.object({
   subtotal: Cents,
   discounts: Cents,
   total: Cents,
+  /** Resumen de promociones aplicadas (ya incluidas en el subtotal). */
+  promotions: z.array(z.object({ name: z.string(), amount: Cents })).default([]),
   openedAt: Timestamp,
   tableLabel: z.string().nullable(),
   waiterName: z.string().nullable(),

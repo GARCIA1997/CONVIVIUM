@@ -50,6 +50,9 @@ export const orderItems = pgTable("order_items", {
   readyAt: timestamp("ready_at", { withTimezone: true }),
   deliveredAt: timestamp("delivered_at", { withTimezone: true }),
   readyBy: uuid("ready_by"),
+  /** Descuento total del renglón por promoción (centavos) y la regla que lo dio. */
+  promoDiscount: integer("promo_discount").notNull().default(0),
+  promotionId: uuid("promotion_id"),
 });
 
 export const approvalKindEnum = pgEnum("approval_kind", ["cancelacion", "devolucion_retiro", "cortesia", "descuento", "reapertura"]);
