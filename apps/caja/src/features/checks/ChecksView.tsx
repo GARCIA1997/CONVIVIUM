@@ -41,7 +41,7 @@ export function ChecksView({ onCount }: { onCount: (n: number) => void }) {
 
   const priced = check?.items.filter((i) => i.unitPrice > 0 || i.state === "cancelado") ?? [];
   const guests = [...new Set(priced.map((i) => i.guest).filter((g): g is number => !!g))].sort((a, b) => a - b);
-  const guestTotal = (g: number) => priced.filter((i) => i.guest === g && i.state !== "cancelado" && i.state !== "devuelto").reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+  const guestTotal = (g: number) => priced.filter((i) => i.guest === g && i.state !== "cancelado" && i.state !== "devuelto").reduce((s, i) => s + i.unitPrice * i.quantity - i.promoDiscount, 0);
   const taxes = check ? breakdownIncludedTaxes(check.total, { ivaPct: 16, iepsPct: 0 }) : null;
   const tip = check ? Math.round((check.total * tipPct) / 100) : 0;
   const cents = (v: string) => Math.round(Number(v || 0) * 100);
@@ -225,7 +225,15 @@ export function ChecksView({ onCount }: { onCount: (n: number) => void }) {
                           <span className="text-[10px] text-stone-400 font-mono">Comanda {hhmm(i.sentAt)} h</span>
                         </div>
                       </div>
-                      <span className={`font-mono text-xs ${hl ? "font-bold text-stone-900" : "font-semibold text-stone-800"}`}>{money(i.unitPrice * i.quantity)}</span>
+                      {i.promoDiscount > 0 ? (
+                        <span className="text-right leading-tight">
+                          <span className="block font-mono text-[10px] text-stone-400 line-through">{money(i.unitPrice * i.quantity)}</span>
+                          <span className={`block font-mono text-xs ${hl ? "font-bold text-stone-900" : "font-semibold text-emerald-800"}`}>{money(i.unitPrice * i.quantity - i.promoDiscount)}</span>
+                          <span className="block text-[9px] text-emerald-700 font-semibold uppercase tracking-wide">{i.promotionName}</span>
+                        </span>
+                      ) : (
+                        <span className={`font-mono text-xs ${hl ? "font-bold text-stone-900" : "font-semibold text-stone-800"}`}>{money(i.unitPrice * i.quantity)}</span>
+                      )}
                     </div>
                   );
                 })}

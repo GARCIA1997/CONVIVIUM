@@ -16,7 +16,7 @@ export function ReturnSheet({ item, tableLabel, onClose, onDone }: { item: Order
   const [approverId, setApproverId] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const amount = item.unitPrice * item.quantity;
+  const amount = item.unitPrice * item.quantity - item.promoDiscount;
 
   useEffect(() => { client.catalog.reasons("devolucion").then((r) => { setReasons(r); setReasonId(r[0]?.id ?? null); }); }, [client]);
   useEffect(() => { if (pinMode) client.auth.deviceUsers().then(setManagers); }, [pinMode, client]);

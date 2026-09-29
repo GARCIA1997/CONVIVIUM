@@ -59,7 +59,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
         guests: check?.guests ?? null,
         checkTotal: check?.total ?? 0,
         productName: item?.productName ?? null,
-        itemAmount: item ? item.unitPrice * item.quantity : null,
+        itemAmount: item ? item.unitPrice * item.quantity - item.promoDiscount : null,
         reason: reason?.label ?? a.note ?? null,
         requestedByName: people.find((p) => p.id === a.requestedBy)?.name ?? null,
         resolvedByName: people.find((p) => p.id === a.resolvedBy)?.name ?? null,
