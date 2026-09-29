@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#FAF8F5]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Estaciones de Producción &amp; Dispositivos Locales</title>
+<!-- Google Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            stone: {
+              850: '#1c1917',
+              900: '#1c1917',
+              950: '#0c0a09',
+            },
+            olivo: {
+              DEFAULT: '#1E2F28',
+              hover: '#283D35',
+              dark: '#16231E',
+              light: '#2F483E'
+            },
+            arena: {
+              50: '#FAF8F5',
+              100: '#F3EFE9',
+              200: '#E5DFD5',
+              300: '#DCD5C9',
+              400: '#C9B89F',
+              500: '#B8A487'
+            },
+            marfil: '#FAF8F5',
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#E6CB9E',
+              dark: '#B08855'
+            },
+            terracota: {
+              DEFAULT: '#C85A32',
+              dark: '#B84A28',
+              light: '#DF7753',
+              subtle: '#FAF0EB'
+            },
+            esmeralda: {
+              DEFAULT: '#2F855A',
+              subtle: '#F0FFF4'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Public Sans", "sans-serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom refined scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F3EFE9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #DCD5C9;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C9B89F;
+    }
+  </style>
+</head>
+<body class="h-full font-body text-stone-900 bg-[#FAF8F5] antialiased flex overflow-hidden">
+<!-- ========================================================================= -->
+<!-- 1. SIDE NAVIGATION BAR (SHARED COMPONENT: SideNavBar)                      -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 flex flex-col justify-between p-4 bg-stone-900 dark:bg-stone-950 border-r border-stone-800 dark:border-stone-900 shrink-0 select-none text-stone-300">
+<!-- Header: Wordmark & Isotipo Agave -->
+<div class="flex flex-col gap-6 pt-2 px-1">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#1E2F28] border border-[#D4AF7C]/40 flex items-center justify-center shadow-inner">
+<!-- Agave Crown Isotype Graphic in Polished Gold -->
+<svg class="w-6 h-6 text-[#D4AF7C]" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2L13.8 7.2C14.1 8 14.8 8.6 15.6 8.8L21 9.8L16.8 13.6C16.2 14.1 16 15 16.2 15.8L17.5 21.2L12.8 18.2C12.3 17.9 11.7 17.9 11.2 18.2L6.5 21.2L7.8 15.8C8 15 7.8 14.1 7.2 13.6L3 9.8L8.4 8.8C9.2 8.6 9.9 8 10.2 7.2L12 2Z" opacity="0.85"></path>
+<path d="M12 5L13.2 9L17 9.8L14 12.6L14.9 16.5L12 14.5L9.1 16.5L10 12.6L7 9.8L10.8 9L12 5Z" fill="#FAF8F5"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-headline tracking-widest uppercase text-base text-amber-200 dark:text-amber-300 font-bold leading-tight">CONVIVIUM</span>
+<span class="font-label text-[11px] tracking-wider text-stone-400 font-medium">Sucursal Polanco</span>
+</div>
+</div>
+<!-- Quick Action: Vincular Dispositivo -->
+<button class="w-full bg-[#1E2F28] hover:bg-[#283D35] text-amber-200 border border-[#D4AF7C]/30 hover:border-[#D4AF7C]/60 rounded-lg py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-medium tracking-wide transition-all duration-150 active:scale-98 shadow-sm" onclick="document.getElementById('pin-card').scrollIntoView({behavior: 'smooth'})">
+<span class="material-symbols-outlined text-amber-300" data-icon="add_link">add_link</span>
+<span>Vincular Dispositivo</span>
+</button>
+<!-- Main Navigation Menu -->
+<nav class="flex flex-col gap-1.5 mt-2">
+<!-- 1. Mesas y Salón -->
+<a class="text-stone-300 hover:text-stone-100 hover:bg-stone-800 dark:hover:bg-stone-900 rounded-lg px-3 py-2.5 flex items-center gap-3 transition-colors duration-150 text-xs font-label" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="table_restaurant">table_restaurant</span>
+<span>Mesas y Salón</span>
+</a>
+<!-- 2. Comandas Activas -->
+<a class="text-stone-300 hover:text-stone-100 hover:bg-stone-800 dark:hover:bg-stone-900 rounded-lg px-3 py-2.5 flex items-center gap-3 transition-colors duration-150 text-xs font-label" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="receipt_long">receipt_long</span>
+<span>Comandas Activas</span>
+</a>
+<!-- 3. Estaciones y KDS (Active Selection per Semantic Mapping) -->
+<a class="bg-stone-800/80 text-amber-200 font-medium rounded-lg px-3 py-2.5 flex items-center justify-between border-l-2 border-amber-300 transition-colors duration-150 text-xs font-label" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-300" data-icon="soup_kitchen">soup_kitchen</span>
+<span>Estaciones y KDS</span>
+</div>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800/60">5 Activas</span>
+</a>
+<!-- 4. Inventario Hardware -->
+<a class="text-stone-300 hover:text-stone-100 hover:bg-stone-800 dark:hover:bg-stone-900 rounded-lg px-3 py-2.5 flex items-center gap-3 transition-colors duration-150 text-xs font-label" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="print">print</span>
+<span>Inventario Hardware</span>
+</a>
+<!-- 5. Caja y Facturación -->
+<a class="text-stone-300 hover:text-stone-100 hover:bg-stone-800 dark:hover:bg-stone-900 rounded-lg px-3 py-2.5 flex items-center gap-3 transition-colors duration-150 text-xs font-label" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="point_of_sale">point_of_sale</span>
+<span>Caja y Facturación</span>
+</a>
+<!-- 6. Ajustes Globales -->
+<a class="text-stone-300 hover:text-stone-100 hover:bg-stone-800 dark:hover:bg-stone-900 rounded-lg px-3 py-2.5 flex items-center gap-3 transition-colors duration-150 text-xs font-label" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="settings">settings</span>
+<span>Ajustes Globales</span>
+</a>
+</nav>
+</div>
+<!-- Footer: Local WebSocket Node Status & Session -->
+<div class="pt-4 border-t border-stone-800/80 flex flex-col gap-2">
+<!-- Local WebSocket status pill -->
+<div class="px-3 py-2 rounded-lg bg-stone-950/60 border border-stone-800 flex items-center justify-between text-[11px]">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-stone-300 font-mono text-[10px]">WS NODO: POL-01</span>
+</div>
+<span class="text-emerald-400 font-medium text-[10px]">Sincronizado</span>
+</div>
+<!-- Soporte Técnico -->
+<a class="text-stone-400 hover:text-amber-100 hover:bg-stone-800/50 rounded-lg px-3 py-2 flex items-center gap-3 text-xs transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="help_center">help_center</span>
+<span>Soporte Técnico</span>
+</a>
+<!-- Cerrar Turno -->
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 rounded-lg px-3 py-2 flex items-center gap-3 text-xs transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-stone-400" data-icon="logout">logout</span>
+<span>Cerrar Turno</span>
+</a>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE CONTAINER (Offset by 64 = 16rem for SideNav)              -->
+<!-- ========================================================================= -->
+<div class="flex-1 flex flex-col pl-64 h-full overflow-hidden bg-[#FAF8F5]">
+<!-- ======================================================================= -->
+<!-- 2. TOP NAV / HEADER (SHARED COMPONENT: TopNavBar Inspired + Breadcrumb) -->
+<!-- ======================================================================= -->
+<header class="sticky top-0 right-0 w-full px-8 py-3.5 flex flex-col gap-2.5 bg-[#FAF8F5] border-b border-[#DCD5C9] z-30 shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<!-- Top Row: Breadcrumb, Secondary Links & Trailing Actions -->
+<div class="flex items-center justify-between">
+<!-- Breadcrumb & Product Subsystem Title -->
+<div class="flex items-center gap-2 text-xs font-label text-stone-500">
+<span class="hover:text-stone-700 cursor-pointer">Configuración</span>
+<span class="material-symbols-outlined text-stone-400 text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="hover:text-stone-700 cursor-pointer">Producción</span>
+<span class="material-symbols-outlined text-stone-400 text-sm" data-icon="chevron_right">chevron_right</span>
+<span class="text-[#1E2F28] font-semibold">Estaciones y Ruteo KDS</span>
+</div>
+<!-- Trailing System Actions & Header Controls -->
+<div class="flex items-center gap-3">
+<!-- Node Status Badge -->
+<div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#DCD5C9] shadow-xs text-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+<span class="text-stone-700 font-medium">Nodo Local CONVIVIUM:</span>
+<span class="font-mono text-stone-600 font-semibold">192.168.1.100</span>
+<span class="text-stone-400 text-[11px]">(Activo · Latencia 3ms)</span>
+</div>
+<!-- Trailing Icon Action: Refresh Status -->
+<button class="p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 border border-transparent hover:border-[#DCD5C9] transition-all" title="Refrescar estado de red">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+<!-- Trailing Icon Action: Notifications -->
+<button class="relative p-2 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 border border-transparent hover:border-[#DCD5C9] transition-all" title="Alertas de hardware">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#C85A32] rounded-full ring-2 ring-white"></span>
+</button>
+<div class="h-5 w-[1px] bg-[#DCD5C9]"></div>
+<!-- Action Button: Test routing ticket -->
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-stone-800 bg-white hover:bg-stone-50 border border-[#DCD5C9] rounded-lg shadow-2xs hover:border-[#C9B89F] transition-all active:scale-95" id="btn-test-ticket">
+<span class="material-symbols-outlined text-[#1E2F28]" data-icon="receipt">receipt</span>
+<span>Probar ruteo de ticket de prueba</span>
+</button>
+<!-- Trailing Action: Expo KDS View -->
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#1E2F28] hover:bg-[#283D35] rounded-lg transition-all active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[#D4AF7C]" data-icon="fullscreen">fullscreen</span>
+<span>Vista Expo KDS</span>
+</button>
+</div>
+</div>
+<!-- Bottom Row of Header: Main Title & Global Controls -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
+<div>
+<h1 class="font-serif text-2xl font-bold text-[#1E2F28] tracking-tight">Estaciones de Producción &amp; Dispositivos Locales</h1>
+<p class="text-xs text-stone-500 mt-0.5">Ruteo inteligente de comandas, contingencia offline y sincronización de impresoras ESC/POS y pantallas en red de cocina.</p>
+</div>
+<!-- Global Toggle: Expo KDS Master Mode -->
+<div class="flex items-center gap-3 bg-white/90 border border-[#DCD5C9] rounded-xl px-4 py-2 shadow-2xs">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="expo-kds-toggle" type="checkbox"/>
+<div class="w-10 h-5.5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</label>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Vista de expedición (Expo KDS)</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-[#FAF8F5] text-stone-700 border border-[#DCD5C9]">Maestro Activo</span>
+</div>
+<span class="text-[11px] text-stone-500 leading-tight">Agrupa comandas de salón para armado final de charolas</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ======================================================================= -->
+<!-- CONTENT CANVAS: 2 COLUMNS (Production Stations & Local Hardware Rail)   -->
+<!-- ======================================================================= -->
+<main class="flex-1 flex overflow-hidden">
+<!-- ===================================================================== -->
+<!-- COLUMN A: 5 PRODUCTION STATIONS (Scrollable Bento / Card Grid)        -->
+<!-- ===================================================================== -->
+<section class="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#1E2F28]"></span>
+<h2 class="font-serif text-lg font-bold text-[#1E2F28] tracking-tight">Estaciones de Línea Activas</h2>
+<span class="ml-2 text-xs font-medium text-stone-500 bg-white px-2 py-0.5 rounded-full border border-[#DCD5C9]">5 áreas operativas</span>
+</div>
+<!-- Secondary Filter / View helper -->
+<div class="flex items-center gap-2 text-xs text-stone-500">
+<span class="material-symbols-outlined text-stone-400" data-icon="filter_list">filter_list</span>
+<span>Modo contingencia global: <strong class="text-emerald-700 font-semibold">Listo</strong></span>
+</div>
+</div>
+<!-- LIST OF 5 CARDS -->
+<div class="space-y-5 pb-12">
+<!-- ----------------------------------------------------------------- -->
+<!-- ESTACIÓN 1: ESTACIÓN CALIENTE (Cocina Principal)                  -->
+<!-- ----------------------------------------------------------------- -->
+<article class="bg-white border border-[#DCD5C9] rounded-xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#FAF8F5]">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-[#FAF8F5] border border-[#DCD5C9] flex items-center justify-center text-[#1E2F28]">
+<span class="material-symbols-outlined text-2xl text-[#C85A32]" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h3 class="font-serif text-lg font-bold text-stone-900 tracking-tight">Estación Caliente</h3>
+<span class="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">Cocina Principal</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Sartenes, woks, sellado y terminación de proteínas.</p>
+</div>
+</div>
+<!-- SLA Target Stepper -->
+<div class="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#DCD5C9] self-start md:self-auto">
+<span class="text-[11px] font-medium text-stone-600 px-2">SLA Objetivo:</span>
+<div class="flex items-center bg-white rounded border border-[#DCD5C9]">
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-l">−</button>
+<span class="font-mono text-xs font-bold text-stone-900 px-2.5">12 min</span>
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-r">+</button>
+</div>
+</div>
+</div>
+<!-- Linked Hardware Devices -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Device 1: TV KDS 55" Cocina -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="tv">tv</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">TV KDS 55" Cocina</span>
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.112 · WebSocket OK</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+<!-- Device 2: Impresora Epson TM-T88VI -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="print">print</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Epson TM-T88VI 80 mm</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.115 · Papel 85%</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+</div>
+<!-- Output Mode Segmented Control + Fallback Switch -->
+<div class="mt-4 pt-3 border-t border-[#FAF8F5] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Segmented Tabs -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-stone-600">Modo de salida:</span>
+<div class="inline-flex rounded-lg bg-stone-100 p-1 border border-[#DCD5C9]/80 text-xs">
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo pantalla</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo impresora</button>
+<button class="px-3 py-1 rounded-md bg-[#1E2F28] text-amber-200 font-semibold shadow-xs">Ambos</button>
+</div>
+</div>
+<!-- Contingency Toggle Switch -->
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</div>
+<span class="text-xs text-stone-700">Imprimir como respaldo si la pantalla se desconecta</span>
+</label>
+</div>
+<!-- Routed Categories Pills -->
+<div class="mt-3 flex items-center gap-2 pt-2 border-t border-dashed border-[#E5DFD5]">
+<span class="text-[11px] font-medium text-stone-500">Categorías ruteadas:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Platillos fuertes</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Sartenes</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Especialidades calientes</span>
+</div>
+</div>
+</article>
+<!-- ----------------------------------------------------------------- -->
+<!-- ESTACIÓN 2: ESTACIÓN FRÍA (Cocina / Ensamble)                     -->
+<!-- ----------------------------------------------------------------- -->
+<article class="bg-white border border-[#DCD5C9] rounded-xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#FAF8F5]">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-[#FAF8F5] border border-[#DCD5C9] flex items-center justify-center text-[#1E2F28]">
+<span class="material-symbols-outlined text-2xl text-teal-700" data-icon="ac_unit">ac_unit</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h3 class="font-serif text-lg font-bold text-stone-900 tracking-tight">Estación Fría</h3>
+<span class="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">Cocina / Ensamble</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Ceviches, barras frías, carpaccios y ensaladas botánicas.</p>
+</div>
+</div>
+<!-- SLA Target Stepper -->
+<div class="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#DCD5C9] self-start md:self-auto">
+<span class="text-[11px] font-medium text-stone-600 px-2">SLA Objetivo:</span>
+<div class="flex items-center bg-white rounded border border-[#DCD5C9]">
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-l">−</button>
+<span class="font-mono text-xs font-bold text-stone-900 px-2.5">8 min</span>
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-r">+</button>
+</div>
+</div>
+</div>
+<!-- Linked Hardware Devices -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Device 1: Tablet Samsung Galaxy Tab 12" -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="tablet_mac">tablet_mac</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Samsung Galaxy Tab 12"</span>
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.114 · Táctil Despacho</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+<!-- Device 2: Impresora Bixolon -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="print">print</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Térmica 80 mm Bixolon</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.116 · Papel 40%</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+</div>
+<!-- Output Mode Segmented Control + Fallback Switch -->
+<div class="mt-4 pt-3 border-t border-[#FAF8F5] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Segmented Tabs: Solo Pantalla Selected -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-stone-600">Modo de salida:</span>
+<div class="inline-flex rounded-lg bg-stone-100 p-1 border border-[#DCD5C9]/80 text-xs">
+<button class="px-3 py-1 rounded-md bg-[#1E2F28] text-amber-200 font-semibold shadow-xs">Solo pantalla</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo impresora</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Ambos</button>
+</div>
+</div>
+<!-- Contingency Toggle Switch (Active Fallback to Impresora Caliente) -->
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</div>
+<span class="text-xs text-stone-700">Imprimir como respaldo si la pantalla se desconecta <span class="text-stone-400">(Rutea a Impresora Caliente)</span></span>
+</label>
+</div>
+<!-- Routed Categories Pills -->
+<div class="mt-3 flex items-center gap-2 pt-2 border-t border-dashed border-[#E5DFD5]">
+<span class="text-[11px] font-medium text-stone-500">Categorías ruteadas:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Ensaladas</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Entradas frías</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Aguachiles y Ceviches</span>
+</div>
+</div>
+</article>
+<!-- ----------------------------------------------------------------- -->
+<!-- ESTACIÓN 3: PARRILLA Y CARBÓN (Alerta Terracota Sin Papel)         -->
+<!-- ----------------------------------------------------------------- -->
+<article class="bg-white border-2 border-[#C85A32]/40 rounded-xl p-5 shadow-sm transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 bg-[#C85A32] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-bl-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="error">error</span>
+<span>Atención Requerida</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#FAF8F5]">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-center text-[#C85A32]">
+<span class="material-symbols-outlined text-2xl" data-icon="outdoor_grill">outdoor_grill</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h3 class="font-serif text-lg font-bold text-stone-900 tracking-tight">Parrilla y Carbón</h3>
+<span class="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">Cocina / Asador</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Cortes de res sonorense, carbón de encino y términos de carne.</p>
+</div>
+</div>
+<!-- SLA Target Stepper -->
+<div class="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#DCD5C9] self-start md:self-auto">
+<span class="text-[11px] font-medium text-stone-600 px-2">SLA Objetivo:</span>
+<div class="flex items-center bg-white rounded border border-[#DCD5C9]">
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-l">−</button>
+<span class="font-mono text-xs font-bold text-stone-900 px-2.5">16 min</span>
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-r">+</button>
+</div>
+</div>
+</div>
+<!-- Linked Hardware Devices: 1 OK, 1 TERRACOTA ALERT -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Device 1: TV KDS 43" Grilla -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="tv">tv</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">TV KDS 43" Grilla</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.118 · KDS Activo</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+<!-- Device 2: Impresora Star Micronics (ALERTA TERRACOTA: Sin Papel) -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF0EB] border border-[#C85A32]/40">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#C85A32]/10 flex items-center justify-center text-[#C85A32]">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-stone-900">Star Micronics 80 mm</span>
+<span class="w-2 h-2 rounded-full bg-[#C85A32]"></span>
+</div>
+<span class="text-[10px] text-[#C85A32] font-semibold">ALERTA TERRACOTA: "Sin papel"</span>
+</div>
+</div>
+<button class="text-[10px] font-semibold text-white bg-[#C85A32] hover:bg-[#B84A28] px-2.5 py-1 rounded shadow-2xs transition-colors" onclick="this.innerText='Rollo Detectado'; this.className='text-[10px] font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded transition-all'">
+                  Reanudar tras recargar rollo
+                </button>
+</div>
+</div>
+<!-- Output Mode Segmented Control + Fallback Switch -->
+<div class="mt-4 pt-3 border-t border-[#FAF8F5] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Segmented Tabs: Ambos Selected -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-stone-600">Modo de salida:</span>
+<div class="inline-flex rounded-lg bg-stone-100 p-1 border border-[#DCD5C9]/80 text-xs">
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo pantalla</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo impresora</button>
+<button class="px-3 py-1 rounded-md bg-[#1E2F28] text-amber-200 font-semibold shadow-xs">Ambos</button>
+</div>
+</div>
+<!-- Contingency Toggle Switch -->
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</div>
+<span class="text-xs text-stone-700">Imprimir como respaldo si la pantalla se desconecta</span>
+</label>
+</div>
+<!-- Routed Categories Pills -->
+<div class="mt-3 flex items-center gap-2 pt-2 border-t border-dashed border-[#E5DFD5]">
+<span class="text-[11px] font-medium text-stone-500">Categorías ruteadas:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Cortes de carne (Rib eye, Vacío)</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Guarniciones a las brasas</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Tuétanos</span>
+</div>
+</div>
+</article>
+<!-- ----------------------------------------------------------------- -->
+<!-- ESTACIÓN 4: POSTRES Y REPOSTERÍA (Cocina / Cava)                  -->
+<!-- ----------------------------------------------------------------- -->
+<article class="bg-white border border-[#DCD5C9] rounded-xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#FAF8F5]">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-[#FAF8F5] border border-[#DCD5C9] flex items-center justify-center text-[#1E2F28]">
+<span class="material-symbols-outlined text-2xl text-amber-700" data-icon="bakery_dining">bakery_dining</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h3 class="font-serif text-lg font-bold text-stone-900 tracking-tight">Postres y Repostería</h3>
+<span class="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">Cocina / Cava</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Dulces mexicanos contemporáneos, chocolates y barra de cafés.</p>
+</div>
+</div>
+<!-- SLA Target Stepper -->
+<div class="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#DCD5C9] self-start md:self-auto">
+<span class="text-[11px] font-medium text-stone-600 px-2">SLA Objetivo:</span>
+<div class="flex items-center bg-white rounded border border-[#DCD5C9]">
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-l">−</button>
+<span class="font-mono text-xs font-bold text-stone-900 px-2.5">6 min</span>
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-r">+</button>
+</div>
+</div>
+</div>
+<!-- Linked Hardware Devices -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Device 1: Táctil Despacho KDS 10" -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="tablet_android">tablet_android</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Táctil Despacho KDS 10"</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.121 · Android Kiosk</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+<!-- Device 2 Placeholder (No thermal printer on this station) -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-stone-50/70 border border-dashed border-[#DCD5C9]">
+<div class="flex items-center gap-3 text-stone-400">
+<span class="material-symbols-outlined" data-icon="print_disabled">print_disabled</span>
+<span class="text-xs italic">Sin impresora directa asignada (Paperless)</span>
+</div>
+<button class="text-[11px] text-stone-600 hover:text-stone-900 underline font-medium">Asignar</button>
+</div>
+</div>
+<!-- Output Mode Segmented Control + Fallback Switch -->
+<div class="mt-4 pt-3 border-t border-[#FAF8F5] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Segmented Tabs: Solo Pantalla Selected -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-stone-600">Modo de salida:</span>
+<div class="inline-flex rounded-lg bg-stone-100 p-1 border border-[#DCD5C9]/80 text-xs">
+<button class="px-3 py-1 rounded-md bg-[#1E2F28] text-amber-200 font-semibold shadow-xs">Solo pantalla</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo impresora</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Ambos</button>
+</div>
+</div>
+<!-- Contingency Toggle Switch (Desactivado per specs) -->
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<div class="relative">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</div>
+<span class="text-xs text-stone-500">Imprimir como respaldo si la pantalla se desconecta</span>
+</label>
+</div>
+<!-- Routed Categories Pills -->
+<div class="mt-3 flex items-center gap-2 pt-2 border-t border-dashed border-[#E5DFD5]">
+<span class="text-[11px] font-medium text-stone-500">Categorías ruteadas:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Repostería de autor</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Cafetería espresso</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Helados artesanales</span>
+</div>
+</div>
+</article>
+<!-- ----------------------------------------------------------------- -->
+<!-- ESTACIÓN 5: BARRA Y COCTELERÍA (Salón & Terraza)                  -->
+<!-- ----------------------------------------------------------------- -->
+<article class="bg-white border border-[#DCD5C9] rounded-xl p-5 shadow-2xs hover:shadow-xs transition-shadow">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#FAF8F5]">
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-lg bg-[#FAF8F5] border border-[#DCD5C9] flex items-center justify-center text-[#1E2F28]">
+<span class="material-symbols-outlined text-2xl text-amber-600" data-icon="local_bar">local_bar</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5">
+<h3 class="font-serif text-lg font-bold text-stone-900 tracking-tight">Barra y Coctelería</h3>
+<span class="text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">Salón &amp; Terraza</span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Destilados, agaves ceremoniales, mixología botánica y cervezas.</p>
+</div>
+</div>
+<!-- SLA Target Stepper -->
+<div class="flex items-center gap-2 bg-[#FAF8F5] p-1.5 rounded-lg border border-[#DCD5C9] self-start md:self-auto">
+<span class="text-[11px] font-medium text-stone-600 px-2">SLA Objetivo:</span>
+<div class="flex items-center bg-white rounded border border-[#DCD5C9]">
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-l">−</button>
+<span class="font-mono text-xs font-bold text-stone-900 px-2.5">4 min</span>
+<button class="px-2 py-0.5 text-stone-500 hover:text-stone-800 text-xs font-bold hover:bg-stone-100 rounded-r">+</button>
+</div>
+</div>
+</div>
+<!-- Linked Hardware Devices -->
+<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+<!-- Device 1: Pantalla Táctil Despacho Elo Touch 15" -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="desktop_windows">desktop_windows</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">All-in-One 15" Elo Touch</span>
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.130 · Barra Central</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+<!-- Device 2: Impresora Custom 80 mm Barra -->
+<div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF8F5] border border-[#E5DFD5]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-stone-700" data-icon="print">print</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Impresora Barra Custom 80 mm</span>
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+<span class="font-mono text-[10px] text-stone-500">IP: 192.168.1.135 · Papel 92%</span>
+</div>
+</div>
+<span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">En línea</span>
+</div>
+</div>
+<!-- Output Mode Segmented Control + Fallback Switch -->
+<div class="mt-4 pt-3 border-t border-[#FAF8F5] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Segmented Tabs: Ambos Selected -->
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-stone-600">Modo de salida:</span>
+<div class="inline-flex rounded-lg bg-stone-100 p-1 border border-[#DCD5C9]/80 text-xs">
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo pantalla</button>
+<button class="px-3 py-1 rounded-md text-stone-600 hover:text-stone-900 transition-colors">Solo impresora</button>
+<button class="px-3 py-1 rounded-md bg-[#1E2F28] text-amber-200 font-semibold shadow-xs">Ambos</button>
+</div>
+</div>
+<!-- Contingency Toggle Switch -->
+<label class="flex items-center gap-2.5 cursor-pointer select-none">
+<div class="relative">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#1E2F28]"></div>
+</div>
+<span class="text-xs text-stone-700">Imprimir como respaldo si la pantalla se desconecta</span>
+</label>
+</div>
+<!-- Routed Categories Pills -->
+<div class="mt-3 flex items-center gap-2 pt-2 border-t border-dashed border-[#E5DFD5]">
+<span class="text-[11px] font-medium text-stone-500">Categorías ruteadas:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Cocteles de autor</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Destilados y Mezcales</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Cervezas artesanales</span>
+<span class="text-[11px] bg-[#FAF8F5] text-stone-700 px-2 py-0.5 rounded border border-[#DCD5C9]">Sin alcohol</span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- ===================================================================== -->
+<!-- COLUMN B: RIGHT RAIL ("Dispositivos del restaurante")                 -->
+<!-- ===================================================================== -->
+<aside class="w-96 border-l border-[#DCD5C9] bg-[#FAF8F5]/70 flex flex-col h-full overflow-hidden shrink-0 shadow-[-2px_0_6px_rgba(0,0,0,0.015)]">
+<!-- Rail Header with Counter -->
+<div class="p-5 border-b border-[#DCD5C9] bg-white flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1E2F28]" data-icon="devices">devices</span>
+<h2 class="font-serif text-base font-bold text-[#1E2F28]">Dispositivos del Restaurante</h2>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 text-[11px] font-semibold text-emerald-800 bg-emerald-50 rounded-full border border-emerald-200">8 activos</span>
+<span class="px-2 py-0.5 text-[11px] font-semibold text-[#C85A32] bg-[#FAF0EB] rounded-full border border-[#C85A32]/30">1 alerta</span>
+</div>
+</div>
+<!-- Scrollable Rail Content -->
+<div class="flex-1 overflow-y-auto p-5 space-y-5">
+<!-- ----------------------------------------------------------------- -->
+<!-- PAIRING CARD: Vincular nuevo dispositivo con PIN MONOSPACE DORADO -->
+<!-- ----------------------------------------------------------------- -->
+<div class="bg-[#1E2F28] rounded-xl p-4 text-stone-100 shadow-md border border-[#D4AF7C]/30 relative overflow-hidden" id="pin-card">
+<!-- Subtle Mexican geometric accent in corner -->
+<div class="absolute -right-4 -bottom-4 w-20 h-20 opacity-10 pointer-events-none">
+<svg class="text-amber-200" fill="currentColor" viewbox="0 0 100 100">
+<polygon points="50,0 100,50 50,100 0,50"></polygon>
+</svg>
+</div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-amber-300 text-sm" data-icon="key">key</span>
+<span class="text-xs font-semibold uppercase tracking-wider text-amber-200 font-headline">Vincular nuevo dispositivo</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                PWA Local
+              </span>
+</div>
+<p class="text-xs text-stone-300 leading-relaxed">
+              Abre la PWA en el celular o tablet y captura el PIN temporal:
+            </p>
+<!-- Large Monospace Gold PIN Display -->
+<div class="mt-3 py-3 px-2 bg-stone-950/70 border border-[#D4AF7C]/40 rounded-lg flex items-center justify-center tracking-[0.35em] font-mono text-2xl font-bold text-[#D4AF7C] shadow-inner select-all">
+              4 8 2   9 1 3
+            </div>
+<!-- PIN Metadata & Actions -->
+<div class="mt-3 flex items-center justify-between text-[11px] pt-1 border-t border-stone-800">
+<span class="text-stone-400 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-amber-400" data-icon="timer">timer</span>
+                Expira en <strong class="text-stone-200 font-mono" id="pin-timer">04:32 min</strong>
+</span>
+<div class="flex items-center gap-2">
+<button class="text-stone-300 hover:text-amber-200 p-1 transition-colors" title="Copiar PIN">
+<span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+</button>
+<button class="text-stone-300 hover:text-amber-200 p-1 transition-colors" title="Regenerar PIN">
+<span class="material-symbols-outlined text-sm" data-icon="sync">sync</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------------------------------- -->
+<!-- REGISTERED DEVICES LIST (9 Items per prompt)                      -->
+<!-- ----------------------------------------------------------------- -->
+<div class="space-y-2.5">
+<span class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">Terminales y Nodos Registrados</span>
+<!-- Device 1: Mesero 01 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 01</span>
+<span class="text-[10px] text-stone-500 font-mono">(Xiaomi Salón)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-stone-700 font-medium">En comanda Mesa 4</span>
+<span>·</span>
+<span class="text-emerald-700 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]" data-icon="battery_full">battery_full</span> 88%
+                    </span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 2: Mesero 02 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 02</span>
+<span class="text-[10px] text-stone-500 font-mono">(Samsung Terraza)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-stone-700 font-medium">En comanda Mesa 9</span>
+<span>·</span>
+<span class="text-emerald-700 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]" data-icon="battery_5_bar">battery_5_bar</span> 74%
+                    </span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 3: Mesero 03 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 03</span>
+<span class="text-[10px] text-stone-500 font-mono">(Motorola Salón)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-emerald-700 font-medium">Disponible en base</span>
+<span>·</span>
+<span class="text-emerald-700 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]" data-icon="battery_charging_full">battery_charging_full</span> 100%
+                    </span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 4: Mesero 04 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="smartphone">smartphone</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 04</span>
+<span class="text-[10px] text-stone-500 font-mono">(Xiaomi Planta Alta)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-stone-700 font-medium">En comanda Mesa 12</span>
+<span>·</span>
+<span class="text-amber-700 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]" data-icon="battery_4_bar">battery_4_bar</span> 62%
+                    </span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 5: Mesero 05 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-400">
+<span class="material-symbols-outlined text-base" data-icon="bedtime">bedtime</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 05</span>
+<span class="text-[10px] text-stone-500 font-mono">(Samsung Kiosco)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-stone-500 font-medium italic">Modo descanso</span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 6: Mesero 06 -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800">
+<span class="material-symbols-outlined text-base" data-icon="point_of_sale">point_of_sale</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">Mesero 06</span>
+<span class="text-[10px] text-stone-500 font-mono">(Terminal Móvil Cobro)</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span class="text-emerald-700 font-medium">Conectada a Clip / MP</span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 7: Caja Principal 01 (Pinned workstation) -->
+<div class="bg-white border-2 border-[#1E2F28]/30 rounded-lg p-3 hover:border-[#1E2F28] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-[#1E2F28] text-amber-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-base" data-icon="desktop_mac">desktop_mac</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-stone-900">Caja Principal 01</span>
+<span class="text-[9px] bg-stone-100 text-stone-700 px-1 rounded font-mono">FIJA</span>
+</div>
+<div class="flex items-center gap-1 text-[10px] text-stone-500">
+<span>Dell All-in-One</span>
+<span>·</span>
+<span class="text-emerald-700 font-semibold">Turno Abierto</span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-semibold text-[#1E2F28] bg-stone-100 hover:bg-stone-200 px-2 py-1 rounded transition-colors">Fijar</button>
+</div>
+<!-- Device 8: TV KDS Salón Caliente -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="tv">tv</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">TV KDS Salón Caliente</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span>Android TV 55"</span>
+<span>·</span>
+<span class="text-emerald-700 font-semibold">Ruteo Activo</span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+<!-- Device 9: TV KDS Parrilla -->
+<div class="bg-white border border-[#DCD5C9] rounded-lg p-3 hover:border-[#C9B89F] transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-md bg-stone-100 flex items-center justify-center text-stone-700">
+<span class="material-symbols-outlined text-base" data-icon="tv">tv</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-stone-900">TV KDS Parrilla</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-stone-500">
+<span>Google TV 43"</span>
+<span>·</span>
+<span class="text-emerald-700 font-semibold">Ruteo Activo</span>
+</div>
+</div>
+</div>
+<button class="text-[11px] font-medium text-stone-500 hover:text-[#C85A32] hover:bg-stone-100 px-2 py-1 rounded transition-colors">Revocar</button>
+</div>
+</div>
+<!-- Bottom Operational Note -->
+<div class="p-3 bg-[#F3EFE9] border border-[#DCD5C9] rounded-lg text-[11px] text-stone-600 leading-snug">
+<div class="flex items-center gap-1 text-[#1E2F28] font-semibold mb-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="security">security</span>
+<span>Seguridad de Red Local</span>
+</div>
+            Los dispositivos se rigen por certificados SSL autogenerados en el mini-servidor local con sincronización en espejo hacia la nube de CONVIVIUM cada 5 minutos.
+          </div>
+</div>
+</aside>
+</main>
+</div>
+<!-- Toast Notification Simulator for Action "Probar ruteo" -->
+<div class="fixed bottom-6 right-6 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50 flex items-center gap-3 bg-[#1E2F28] text-white px-4 py-3 rounded-lg shadow-xl border border-[#D4AF7C]/40" id="toast">
+<span class="material-symbols-outlined text-amber-300" data-icon="check_circle">check_circle</span>
+<div class="text-xs">
+<div class="font-bold text-amber-200">Ticket de prueba enviado</div>
+<div class="text-stone-300">Imprimiendo en Caliente (Epson) y emitiendo a 5 KDS en red.</div>
+</div>
+</div>
+<!-- Micro-Interactions Script -->
+<script>
+    // Test Routing Toast Interaction
+    const btnTest = document.getElementById('btn-test-ticket');
+    const toast = document.getElementById('toast');
+
+    if (btnTest && toast) {
+      btnTest.addEventListener('click', () => {
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        setTimeout(() => {
+          toast.classList.add('translate-y-24', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 3200);
+      });
+    }
+
+    // Dynamic SLA Steppers Micro-interaction
+    document.querySelectorAll('button:has(span)').forEach(btn => {
+      // General button micro-press is handled via Tailwind active:scale-95
+    });
+  </script>
+</body></html>

@@ -3,10 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "exports": { ".": "./src/index.ts", "./tokens.css": "./src/tokens.css" },
-  "scripts": { "typecheck": "tsc -p ." },
-  "peerDependencies": { "react": "^18.3.1" },
-  "devDependencies": { "@types/react": "^18.3.12", "react": "^18.3.1" }
+  "exports": {
+    "./convivium.css": "./src/convivium.css",
+    "./tailwind.preset.cjs": "./tailwind.preset.cjs"
+  },
+  "scripts": {
+    "tokens": "node ../../scripts/stitch-tokens.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.9",
+    "tailwindcss": "^3.4.17"
+  },
+  "description": "Sistema de dise\u00f1o CONVIVIUM generado desde Stitch: hoja de estilos \u00fanica y preset de Tailwind."
 }

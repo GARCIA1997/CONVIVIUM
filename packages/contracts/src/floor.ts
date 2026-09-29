@@ -13,6 +13,11 @@ export const Table = z.object({
   y: z.number(),
   status: TableStatus,
   openCheckId: Id.nullable(),
+  guests: z.number().int().nullable(),
+  openedAt: z.string().nullable(),
+  total: z.number().int().nullable(),
+  itemCount: z.number().int().nullable(),
+  readyStation: z.string().nullable(),
 });
 export const FloorPlan = z.object({ areas: z.array(Area), tables: z.array(Table) });
 

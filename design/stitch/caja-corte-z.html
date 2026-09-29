@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#F5F2EB]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Corte Z · Cierre Definitivo de Turno</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // CONVIVIUM Design System Palette
+            verde: {
+              900: '#15221D',
+              800: '#1E2F28', // Verde Olivo Primary
+              700: '#283E35',
+              600: '#344E44',
+              100: '#E2E8E4',
+              50: '#F0F4F1'
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              light: '#FBF9F5',
+              dark: '#DDD8CB'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#E6DFD5',
+              soft: '#DDD5C7',
+              dark: '#9E886D'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#934329',
+              light: '#F5EBE6',
+              border: '#E8C5B8'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              agave: '#C5A059',
+              light: '#F5EDE0',
+              dark: '#9D7838'
+            },
+            carbon: '#1A1A1A'
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'Georgia', 'serif'],
+            headline: ['"Playfair Display"', 'Georgia', 'serif'],
+            body: ['Inter', 'sans-serif'],
+            label: ['Inter', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .font-tabular {
+      font-variant-numeric: tabular-nums;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom scroll styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #EAE6DD;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil-light text-carbon font-body antialiased flex overflow-hidden">
+<!-- ========================================================================= -->
+<!-- SIDEBAR (Component: SideNavBar from Shared Components JSON)                -->
+<!-- ========================================================================= -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-verde-800 text-marfil-light flex flex-col justify-between p-4 z-40 border-r border-verde-700/60 shadow-xl select-none shrink-0">
+<!-- Header: Logo Brand & Monogram -->
+<div>
+<div class="flex items-center gap-3 px-2 py-3 border-b border-verde-700/50 pb-5">
+<div class="w-10 h-10 rounded-lg bg-verde-900 border border-dorado-agave/60 flex items-center justify-center text-dorado font-display font-bold text-xl shadow-inner tracking-wider">
+          C
+        </div>
+<div class="leading-tight">
+<span class="block font-display font-semibold tracking-widest text-marfil-light uppercase text-base">CONVIVIUM</span>
+<span class="block text-[11px] font-body tracking-wider text-arena/80 uppercase">TPV Salón Principal</span>
+</div>
+</div>
+<!-- Action Button / CTA -->
+<div class="mt-4 px-1">
+<button class="w-full py-2.5 px-3 bg-verde-700/80 hover:bg-verde-600 text-marfil text-xs font-medium tracking-wide uppercase rounded-lg border border-verde-600/50 flex items-center justify-center gap-2 transition-colors active:scale-[0.99] shadow-sm" onclick="triggerCashDrawer()">
+<span class="material-symbols-outlined text-[18px] text-dorado">point_of_sale</span>
+<span>Abrir Cajón</span>
+</button>
+</div>
+<!-- Navigation Tabs (from Shared JSON) -->
+<nav class="mt-6 space-y-1.5 px-1 font-body">
+<!-- 1. Cuentas -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-arena/90 hover:text-marfil hover:bg-verde-700/40 font-normal transition-colors active:scale-[0.99]" href="#cuentas">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-sm">Cuentas</span>
+</a>
+<!-- 2. Caja y Cobro -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-arena/90 hover:text-marfil hover:bg-verde-700/40 font-normal transition-colors active:scale-[0.99]" href="#caja-cobro">
+<span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+<span class="text-sm">Caja y Cobro</span>
+</a>
+<!-- 3. Movimientos -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-arena/90 hover:text-marfil hover:bg-verde-700/40 font-normal transition-colors active:scale-[0.99]" href="#movimientos">
+<span class="material-symbols-outlined text-[20px]">sync_alt</span>
+<span class="text-sm">Movimientos</span>
+</a>
+<!-- 4. Corte de Turno (ACTIVE STATE) -->
+<a class="flex items-center justify-between px-4 py-3 rounded-lg bg-verde-900/90 text-dorado font-medium tracking-wide border-l-4 border-dorado-agave shadow-sm active:scale-[0.99] transition-transform" href="#corte-turno">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-dorado material-symbols-fill">calculate</span>
+<span class="text-sm font-semibold">Corte de Turno</span>
+</div>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-terracota/30 text-terracota-light border border-terracota/40 uppercase">Corte Z</span>
+</a>
+</nav>
+</div>
+<!-- Footer Controls (from Shared JSON) -->
+<div class="border-t border-verde-700/50 pt-4 px-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-verde-700/40 text-xs font-normal transition-colors" href="#configuracion">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Configuración TPV</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-terracota-border hover:text-white hover:bg-terracota/20 text-xs font-normal transition-colors" href="#logout">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+<!-- Terminal Version Tag -->
+<div class="pt-3 px-3 flex items-center justify-between text-[10px] text-arena/50 tracking-wider">
+<span>CONVIVIUM v4.8</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-dorado"></span>
+</div>
+</div>
+</aside>
+<!-- ========================================================================= -->
+<!-- MAIN WORKSPACE                                                            -->
+<!-- ========================================================================= -->
+<div class="pl-64 flex-1 flex flex-col h-screen overflow-hidden">
+<!-- Top Operational Status Bar (TopNavBar from Shared Components JSON) -->
+<header class="h-16 bg-white border-b border-arena-soft flex items-center justify-between px-8 z-30 shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+<!-- Status Items Cluster -->
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-verde-600 animate-pulse"></span>
+<span class="text-xs font-medium tracking-wide uppercase text-verde-800">Caja #1: Abierta</span>
+</div>
+<span class="text-arena text-xs">|</span>
+<div class="flex items-center gap-1.5 text-xs text-carbon/70">
+<span class="material-symbols-outlined text-[16px] text-dorado-agave">wb_twilight</span>
+<span class="font-medium">Turno Matutino</span>
+</div>
+<span class="text-arena text-xs">|</span>
+<div class="flex items-center gap-1.5 text-xs text-verde-700 bg-verde-50 px-2 py-0.5 rounded-full border border-verde-100">
+<span class="material-symbols-outlined text-[15px]">cloud_done</span>
+<span>Sincronizado Local</span>
+</div>
+</div>
+<!-- Trailing Action Cluster & User Profile -->
+<div class="flex items-center gap-4">
+<!-- Arqueo Rápido Action -->
+<button class="px-3 py-1.5 text-xs font-medium text-verde-800 hover:text-carbon bg-marfil-light hover:bg-arena-light/60 border border-arena-soft rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">receipt</span>
+<span>Arqueo Rápido</span>
+</button>
+<!-- Bloquear TPV Secondary Action -->
+<button class="px-3 py-1.5 text-xs font-medium text-carbon/70 hover:text-terracota bg-transparent hover:bg-terracota-light/30 border border-transparent rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Bloquear TPV</span>
+</button>
+<!-- Notifications -->
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-carbon/60 hover:text-carbon hover:bg-arena-light/50 transition-colors relative" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-dorado-agave rounded-full"></span>
+</button>
+<span class="h-6 w-[1px] bg-arena-soft"></span>
+<!-- Active Cashier Profile -->
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-8 h-8 rounded-full bg-verde-800 text-marfil border border-dorado flex items-center justify-center font-display font-bold text-xs shadow-sm">
+            SM
+          </div>
+<div class="leading-none text-left">
+<p class="text-xs font-semibold text-carbon">Sofía Morales</p>
+<p class="text-[10px] text-carbon/50 uppercase tracking-wider mt-0.5">Cajero Principal</p>
+</div>
+</div>
+</div>
+</header>
+<!-- CONTENT SCROLL AREA -->
+<main class="flex-1 overflow-y-auto bg-[#FBF9F5] p-8">
+<div class="max-w-[1360px] mx-auto space-y-6">
+<!-- =================================================================== -->
+<!-- HEADER MODULE: Corte Z Contextual Strip                             -->
+<!-- =================================================================== -->
+<div class="bg-white rounded-xl p-6 border border-arena-soft shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="px-2 py-0.5 bg-terracota-light border border-terracota/30 text-terracota text-[11px] font-bold tracking-wider rounded uppercase">
+                HU E6-06 / E6-07
+              </span>
+<span class="text-xs text-carbon/50 tracking-wider">· Folio Fiscal: CZ-20241028-01</span>
+</div>
+<h1 class="font-display text-2xl lg:text-3xl text-verde-900 font-bold tracking-tight">
+              Corte Z · Cierre de Turno de Caja
+            </h1>
+<p class="text-xs text-carbon/60 mt-1 max-w-xl">
+              Conciliación definitiva de ventas, arqueo ciego de valores en resguardo y deslinde formal de responsabilidades para emisión contable diaria.
+            </p>
+</div>
+<!-- Metadata Badges Strip -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Salón -->
+<div class="bg-marfil-light border border-arena-soft px-3 py-2 rounded-lg text-left">
+<span class="block text-[10px] text-carbon/50 uppercase tracking-wider font-semibold">Ubicación</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="material-symbols-outlined text-[15px] text-verde-800">storefront</span>
+<span class="text-xs font-semibold text-carbon">Caja 1 · Salón Principal</span>
+</div>
+</div>
+<!-- Cajero -->
+<div class="bg-marfil-light border border-arena-soft px-3 py-2 rounded-lg text-left">
+<span class="block text-[10px] text-carbon/50 uppercase tracking-wider font-semibold">Cajero en Turno</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-verde-600"></span>
+<span class="text-xs font-semibold text-carbon">Sofía M. (Activa)</span>
+</div>
+</div>
+<!-- Apertura -->
+<div class="bg-marfil-light border border-arena-soft px-3 py-2 rounded-lg text-left">
+<span class="block text-[10px] text-carbon/50 uppercase tracking-wider font-semibold">Apertura</span>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="material-symbols-outlined text-[15px] text-carbon/60">schedule</span>
+<span class="text-xs font-semibold text-carbon">Hoy 08:00 hrs</span>
+</div>
+</div>
+<!-- Fondo Inicial -->
+<div class="bg-verde-50 border border-verde-700/20 px-3 py-2 rounded-lg text-left">
+<span class="block text-[10px] text-verde-800 uppercase tracking-wider font-semibold">Fondo Inicial Caja</span>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[15px] text-verde-800">savings</span>
+<span class="text-xs font-bold text-verde-800 font-tabular">$1,500.00 MXN</span>
+</div>
+</div>
+<!-- Hora actual -->
+<div class="bg-dorado-light/40 border border-dorado-agave/40 px-3 py-2 rounded-lg text-left">
+<span class="block text-[10px] text-dorado-dark uppercase tracking-wider font-semibold">Cierre Fiscal</span>
+<div class="flex items-center gap-1 mt-0.5 text-dorado-dark">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+<span class="text-xs font-bold font-tabular">16:45 hrs · Matutino</span>
+</div>
+</div>
+</div>
+</div>
+<!-- =================================================================== -->
+<!-- TWO-COLUMN WORK BENCH GRID                                          -->
+<!-- =================================================================== -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- --------------------------------------------------------------- -->
+<!-- MAIN LEFT COLUMN (8 cols): CONCILIACIÓN & ARQUEO + BITÁCORA     -->
+<!-- --------------------------------------------------------------- -->
+<div class="lg:col-span-8 space-y-6">
+<!-- SECCIÓN 1: CONTEO CIEGO Y CONCILIACIÓN -->
+<div class="bg-white rounded-xl border border-arena-soft shadow-sm overflow-hidden">
+<!-- Banner explicativo de Auditoría Ciega -->
+<div class="bg-gradient-to-r from-verde-900 to-verde-800 px-5 py-3.5 flex items-center justify-between text-marfil border-b border-verde-700">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-verde-700/80 flex items-center justify-center text-dorado shrink-0">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div>
+<h3 class="text-xs font-semibold uppercase tracking-wider text-dorado">Paso de Auditoría: Arqueo a Ciegas</h3>
+<p class="text-[11px] text-marfil/80 font-normal">Los montos teóricos calculados por el sistema se concilian contra el conteo físico de gaveta ingresado.</p>
+</div>
+</div>
+<span class="text-[11px] bg-verde-700 px-2.5 py-1 rounded text-arena font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+                  Conteo Confirmado
+                </span>
+</div>
+<!-- Header & Controls -->
+<div class="px-6 py-4 border-b border-arena-light flex items-center justify-between">
+<div>
+<h2 class="font-display font-bold text-lg text-verde-900">Arqueo y Conciliación por Forma de Pago</h2>
+<p class="text-xs text-carbon/60">Valores físicos capturados en bóveda y cajón TPV frente al libro de ventas del turno.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-xs font-medium text-verde-800 hover:text-verde-900 bg-marfil-light border border-arena-soft px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors" id="toggleDenomBtn" onclick="toggleDenominations()">
+<span class="material-symbols-outlined text-[16px]" id="toggleIcon">unfold_less</span>
+<span id="toggleText">Ocultar Desglose Billetes</span>
+</button>
+</div>
+</div>
+<!-- Detailed Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs border-collapse">
+<thead>
+<tr class="bg-marfil-light/70 text-carbon/70 font-semibold border-b border-arena-soft uppercase text-[11px] tracking-wider">
+<th class="py-3 px-4">Forma de Pago</th>
+<th class="py-3 px-4">Detalle / Conteo Físico</th>
+<th class="py-3 px-4 text-right">Contado (Ciego)</th>
+<th class="py-3 px-4 text-right">Esperado Sistema</th>
+<th class="py-3 px-4 text-right">Diferencia</th>
+<th class="py-3 px-4 text-center">Estado</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-arena-light text-carbon font-normal">
+<!-- FILA 1: EFECTIVO MXN -->
+<tr class="bg-white hover:bg-marfil-light/30 transition-colors">
+<td class="py-3 px-4 align-top">
+<div class="flex items-center gap-2.5">
+<span class="p-1.5 rounded bg-verde-50 text-verde-800 border border-verde-100">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</span>
+<div>
+<span class="font-semibold text-carbon text-sm block">Efectivo MXN</span>
+<span class="text-[10px] text-carbon/50">Gaveta #1 + Fondo</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="text-[11px] text-carbon/70">Desglose de 6 billetes y 4 monedas</span>
+</td>
+<td class="py-3 px-4 text-right font-bold text-sm font-tabular text-carbon align-top">
+                        $11,390.00
+                      </td>
+<td class="py-3 px-4 text-right font-medium text-xs font-tabular text-carbon/70 align-top">
+                        $11,510.00
+                      </td>
+<td class="py-3 px-4 text-right align-top">
+<span class="inline-flex items-center gap-1 font-bold text-xs text-terracota font-tabular">
+                          -$120.00 MXN
+                        </span>
+</td>
+<td class="py-3 px-4 text-center align-top">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-terracota/10 text-terracota border border-terracota/30">
+                          Faltante
+                        </span>
+</td>
+</tr>
+<!-- SUB-TABLA DE DESGLOSE DE MONEDAS Y BILLETES (COLLAPSIBLE) -->
+<tr class="bg-[#F8F6F0]" id="denominationsBreakdown">
+<td class="p-4 border-y border-arena-soft/70" colspan="6">
+<div class="bg-white rounded-lg p-3.5 border border-arena-soft shadow-inner">
+<div class="flex items-center justify-between pb-2 mb-3 border-b border-arena-light">
+<div class="flex items-center gap-2 text-xs font-semibold text-verde-900 uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px] text-dorado-agave">account_balance_wallet</span>
+<span>Desglose de Conteo Físico por Denominación</span>
+</div>
+<span class="text-[11px] text-carbon/50">Incluye Fondo Inicial de $1,500.00</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Billetes -->
+<div class="space-y-1.5">
+<span class="text-[10px] font-bold uppercase tracking-wider text-carbon/60 block mb-1">Papel Moneda (Billetes)</span>
+<div class="grid grid-cols-3 gap-1.5 text-[11px]">
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$1,000 × 2</span>
+<span class="font-tabular font-medium text-carbon">$2,000</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$500 × 8</span>
+<span class="font-tabular font-medium text-carbon">$4,000</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$200 × 15</span>
+<span class="font-tabular font-medium text-carbon">$3,000</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$100 × 14</span>
+<span class="font-tabular font-medium text-carbon">$1,400</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$50 × 8</span>
+<span class="font-tabular font-medium text-carbon">$400</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$20 × 10</span>
+<span class="font-tabular font-medium text-carbon">$200</span>
+</div>
+</div>
+<div class="text-right text-[11px] text-carbon/70 pt-1">
+                                Subtotal Billetes: <span class="font-bold font-tabular text-verde-900">$11,000.00 MXN</span>
+</div>
+</div>
+<!-- Monedas -->
+<div class="space-y-1.5">
+<span class="text-[10px] font-bold uppercase tracking-wider text-carbon/60 block mb-1">Moneda Fraccionaria</span>
+<div class="grid grid-cols-2 gap-1.5 text-[11px]">
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$10 × 25 monedas</span>
+<span class="font-tabular font-medium text-carbon">$250</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$5 × 18 monedas</span>
+<span class="font-tabular font-medium text-carbon">$90</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$2 × 15 monedas</span>
+<span class="font-tabular font-medium text-carbon">$30</span>
+</div>
+<div class="bg-marfil-light p-1.5 rounded border border-arena-light flex justify-between">
+<span class="text-carbon/60">$1 × 20 monedas</span>
+<span class="font-tabular font-medium text-carbon">$20</span>
+</div>
+</div>
+<div class="text-right text-[11px] text-carbon/70 pt-1">
+                                Subtotal Monedas: <span class="font-bold font-tabular text-verde-900">$390.00 MXN</span>
+</div>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<!-- FILA 2: EFECTIVO USD (DIVISAS) -->
+<tr class="bg-white hover:bg-marfil-light/30 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2.5">
+<span class="p-1.5 rounded bg-dorado-light text-dorado-dark border border-dorado-agave/30">
+<span class="material-symbols-outlined text-[18px]">currency_exchange</span>
+</span>
+<div>
+<span class="font-semibold text-carbon text-sm block">Efectivo USD (Divisas)</span>
+<span class="text-[10px] text-carbon/50">T.C. Fijo Sistema: $17.20 MXN</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="font-tabular text-carbon/80">$120.00 USD en caja</span>
+</td>
+<td class="py-3 px-4 text-right font-bold text-sm font-tabular text-carbon">
+                        $2,064.00
+                      </td>
+<td class="py-3 px-4 text-right font-medium text-xs font-tabular text-carbon/70">
+                        $2,064.00
+                      </td>
+<td class="py-3 px-4 text-right font-bold text-xs text-verde-800 font-tabular">
+                        $0.00 MXN
+                      </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-verde-50 text-verde-800 border border-verde-700/30">
+                          Cuadrado
+                        </span>
+</td>
+</tr>
+<!-- FILA 3: TERMINAL BANCARIA (TARJETAS) -->
+<tr class="bg-white hover:bg-marfil-light/30 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2.5">
+<span class="p-1.5 rounded bg-blue-50 text-blue-800 border border-blue-100">
+<span class="material-symbols-outlined text-[18px]">credit_card</span>
+</span>
+<div>
+<span class="font-semibold text-carbon text-sm block">Tarjetas (TPV Bancaria)</span>
+<span class="text-[10px] text-carbon/50">Visa, Mastercard, AMEX</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="text-[11px] text-carbon/70">Cierre Lote TPV Externa #8819</span>
+</td>
+<td class="py-3 px-4 text-right font-bold text-sm font-tabular text-carbon">
+                        $16,720.00
+                      </td>
+<td class="py-3 px-4 text-right font-medium text-xs font-tabular text-carbon/70">
+                        $16,720.00
+                      </td>
+<td class="py-3 px-4 text-right font-bold text-xs text-verde-800 font-tabular">
+                        $0.00 MXN
+                      </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-verde-50 text-verde-800 border border-verde-700/30">
+                          Cuadrado
+                        </span>
+</td>
+</tr>
+<!-- FILA 4: TRANSFERENCIAS SPEI / CODI -->
+<tr class="bg-white hover:bg-marfil-light/30 transition-colors">
+<td class="py-3 px-4">
+<div class="flex items-center gap-2.5">
+<span class="p-1.5 rounded bg-purple-50 text-purple-800 border border-purple-100">
+<span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+</span>
+<div>
+<span class="font-semibold text-carbon text-sm block">Transferencias SPEI / CoDi</span>
+<span class="text-[10px] text-carbon/50">BBVA Empresas Conciliado</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<span class="text-[11px] text-carbon/70">3 Comprobantes validados banca</span>
+</td>
+<td class="py-3 px-4 text-right font-bold text-sm font-tabular text-carbon">
+                        $2,000.00
+                      </td>
+<td class="py-3 px-4 text-right font-medium text-xs font-tabular text-carbon/70">
+                        $2,000.00
+                      </td>
+<td class="py-3 px-4 text-right font-bold text-xs text-verde-800 font-tabular">
+                        $0.00 MXN
+                      </td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-verde-50 text-verde-800 border border-verde-700/30">
+                          Cuadrado
+                        </span>
+</td>
+</tr>
+</tbody>
+<!-- Totales Conciliados Footer -->
+<tfoot>
+<tr class="bg-marfil/60 border-t-2 border-arena font-semibold text-xs">
+<td class="py-3 px-4" colspan="2">
+<span class="font-display uppercase tracking-wider text-verde-900">Total Global Conciliado</span>
+</td>
+<td class="py-3 px-4 text-right font-bold font-tabular text-carbon text-sm">
+                        $32,174.00
+                      </td>
+<td class="py-3 px-4 text-right font-bold font-tabular text-carbon/80 text-sm">
+                        $32,294.00
+                      </td>
+<td class="py-3 px-4 text-right">
+<span class="px-2 py-1 rounded bg-terracota-light text-terracota font-bold text-xs font-tabular border border-terracota/30 inline-block">
+                          -$120.00 MXN
+                        </span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="text-[11px] text-terracota font-bold">Descuadre</span>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<!-- Banner de Alerta por Diferencia -->
+<div class="p-4 bg-terracota-light/50 border-t border-terracota-border flex items-start gap-3">
+<span class="material-symbols-outlined text-[20px] text-terracota shrink-0 mt-0.5">report_problem</span>
+<div class="text-xs text-carbon">
+<p class="font-semibold text-terracota-dark">Diferencia registrada en arqueo físico: -$120.00 MXN (Faltante en efectivo).</p>
+<p class="text-carbon/70 mt-0.5">
+                    El sistema registrará esta variación en la póliza contable bajo la subcuenta <em>"Quebranto de Caja / Ajuste de Arqueo"</em> y requiere ratificación gerencial con PIN.
+                  </p>
+</div>
+</div>
+</div>
+<!-- SECCIÓN 2: BITÁCORA DE FLUJO DE EFECTIVO Y MOVIMIENTOS -->
+<div class="bg-white rounded-xl border border-arena-soft shadow-sm p-6">
+<div class="flex items-center justify-between pb-4 border-b border-arena-light mb-4">
+<div>
+<h3 class="font-display font-bold text-base text-verde-900">Bitácora de Movimientos y Flujo de Efectivo</h3>
+<p class="text-xs text-carbon/60">Entradas extraordinarias, retiros de resguardo y compras menores en el turno.</p>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-carbon/50 uppercase tracking-wider block">Impacto Neto en Gaveta</span>
+<span class="font-bold text-sm font-tabular text-terracota">-$3,350.00 MXN</span>
+</div>
+</div>
+<!-- Lista cronológica de movimientos -->
+<div class="space-y-3">
+<!-- Movimiento 1 -->
+<div class="p-3.5 rounded-lg border border-arena-light bg-marfil-light/40 flex items-start justify-between gap-4 hover:border-arena transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-terracota-light text-terracota flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[17px]">arrow_outward</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-carbon">11:30 hrs · Retiro parcial de seguridad</span>
+<span class="px-1.5 py-0.2 bg-arena-light/60 text-carbon/60 text-[10px] rounded">Bolsa #4092</span>
+</div>
+<p class="text-xs text-carbon/70 mt-1">
+                        Depósito en caja fuerte central por excedente de efectivo en gaveta operativa.
+                      </p>
+<span class="text-[11px] text-verde-800 font-medium mt-1 inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">shield_person</span>
+                        Autorizó: Gerente Roberto V.
+                      </span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="text-sm font-bold font-tabular text-terracota">-$3,000.00 MXN</span>
+<span class="text-[10px] text-carbon/50 block">Egreso / Resguardo</span>
+</div>
+</div>
+<!-- Movimiento 2 -->
+<div class="p-3.5 rounded-lg border border-arena-light bg-marfil-light/40 flex items-start justify-between gap-4 hover:border-arena transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-verde-50 text-verde-700 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[17px]">arrow_downward</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-carbon">13:15 hrs · Entrada extraordinaria</span>
+<span class="px-1.5 py-0.2 bg-verde-100/60 text-verde-800 text-[10px] rounded">Morralla</span>
+</div>
+<p class="text-xs text-carbon/70 mt-1">
+                        Reposición fondo morralla y cambio de monedas ($10 y $5) solicitadas a administración.
+                      </p>
+<span class="text-[11px] text-carbon/60 mt-1 block">Recibió: Sofía M.</span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="text-sm font-bold font-tabular text-verde-800">+$500.00 MXN</span>
+<span class="text-[10px] text-carbon/50 block">Ingreso a caja</span>
+</div>
+</div>
+<!-- Movimiento 3 -->
+<div class="p-3.5 rounded-lg border border-arena-light bg-marfil-light/40 flex items-start justify-between gap-4 hover:border-arena transition-colors">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-terracota-light text-terracota flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[17px]">shopping_cart_checkout</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-carbon">14:40 hrs · Pago a proveedor en efectivo</span>
+<span class="px-1.5 py-0.2 bg-arena-light/60 text-carbon/60 text-[10px] rounded">Factura F-8812</span>
+</div>
+<p class="text-xs text-carbon/70 mt-1">
+                        Verduras del Bajío (Entrega urgente perecederos para cocina y cevichería). Vale de caja firmado.
+                      </p>
+<span class="text-[11px] text-verde-800 font-medium mt-1 inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">assignment_turned_in</span>
+                        Comprobante físico archivado
+                      </span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="text-sm font-bold font-tabular text-terracota">-$850.00 MXN</span>
+<span class="text-[10px] text-carbon/50 block">Gasto de operación</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- --------------------------------------------------------------- -->
+<!-- RIGHT COLUMN (4 cols): RESUMEN FINANCIERO Y AUTORIZACIÓN CIERRE -->
+<!-- --------------------------------------------------------------- -->
+<div class="lg:col-span-4 space-y-6">
+<!-- RESUMEN FINANCIERO DEL TURNO (Estilo Recibo Elegante CONVIVIUM) -->
+<div class="bg-white rounded-xl border border-arena-soft shadow-md overflow-hidden relative">
+<div class="h-2 bg-gradient-to-r from-dorado-agave via-verde-800 to-dorado"></div>
+<div class="p-6">
+<!-- Branding Mini Header -->
+<div class="text-center pb-4 border-b border-dashed border-arena-soft">
+<h3 class="font-display uppercase tracking-widest text-verde-900 font-bold text-sm">Resumen Financiero</h3>
+<p class="text-[11px] text-carbon/60 tracking-wider">Corte Z · Turno Matutino</p>
+<span class="inline-block mt-1 text-[10px] text-arena-dark font-mono">ID: CZ-20241028-1645</span>
+</div>
+<!-- Financial Breakdown -->
+<div class="py-4 space-y-2.5 text-xs">
+<div class="flex justify-between items-center">
+<span class="text-carbon/70">Ventas Brutas Totales</span>
+<span class="font-tabular font-semibold text-carbon text-sm">$34,840.00 MXN</span>
+</div>
+<div class="flex justify-between items-center text-terracota">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sell</span>
+                      Descuentos y Promos (2 cupones)
+                    </span>
+<span class="font-tabular font-medium">-$1,420.00 MXN</span>
+</div>
+<div class="flex justify-between items-center text-terracota">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_bar</span>
+                      Cortesías (Mesa 4 Degustación)
+                    </span>
+<span class="font-tabular font-medium">-$680.00 MXN</span>
+</div>
+<div class="pt-2 border-t border-arena-light flex justify-between items-center font-bold text-carbon">
+<span class="font-display text-xs uppercase tracking-wide text-verde-900">Ventas Netas Facturadas</span>
+<span class="font-tabular text-sm text-verde-900">$32,740.00 MXN</span>
+</div>
+</div>
+<!-- Desglose de Propinas Registradas (A Dispersar) -->
+<div class="bg-marfil-light p-3.5 rounded-lg border border-arena-soft my-3">
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-arena-light text-[11px]">
+<span class="font-semibold text-verde-900 uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-dorado-agave">volunteer_activism</span>
+                      Propinas por Mesero (T/C)
+                    </span>
+<span class="text-carbon/50 text-[10px]">A dispersar</span>
+</div>
+<div class="space-y-1.5 text-xs">
+<div class="flex justify-between items-center text-carbon/80">
+<span>Ana M. <span class="text-[10px] text-carbon/50">(Terraza)</span></span>
+<span class="font-tabular font-medium">$1,450.00 MXN</span>
+</div>
+<div class="flex justify-between items-center text-carbon/80">
+<span>Carlos R. <span class="text-[10px] text-carbon/50">(Salón Cava)</span></span>
+<span class="font-tabular font-medium">$1,120.00 MXN</span>
+</div>
+<div class="flex justify-between items-center text-carbon/80">
+<span>Marco R. <span class="text-[10px] text-carbon/50">(Planta Baja)</span></span>
+<span class="font-tabular font-medium">$980.00 MXN</span>
+</div>
+</div>
+<div class="pt-2 mt-2 border-t border-arena-light flex justify-between items-center text-xs font-semibold text-carbon">
+<span>Total Propinas Tarjeta:</span>
+<span class="font-tabular text-dorado-dark font-bold">$3,550.00 MXN</span>
+</div>
+</div>
+<!-- Total Cobrado & Alerta -->
+<div class="pt-3 border-t-2 border-dashed border-arena-soft space-y-3">
+<div class="flex justify-between items-baseline">
+<span class="font-display font-bold text-sm uppercase text-carbon">Total Cobrado en Turno:</span>
+<span class="font-display font-bold text-xl text-verde-900 font-tabular">$36,290.00</span>
+</div>
+<!-- Diferencia Terracota Box -->
+<div class="p-3 bg-terracota-light rounded-lg border border-terracota-border flex items-center justify-between">
+<div>
+<span class="text-[10px] font-bold text-terracota-dark uppercase tracking-wider block">Diferencia de Cuadre</span>
+<span class="text-xs text-terracota-dark">Requiere acta de corte</span>
+</div>
+<span class="font-bold text-base font-tabular text-terracota">-$120.00 MXN</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ÁREA DE AUTORIZACIÓN GERENCIAL Y BOTONES DE CIERRE -->
+<div class="bg-white rounded-xl border border-arena-soft shadow-sm p-6 space-y-5">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[18px] text-dorado-agave">key</span>
+<h4 class="font-display font-bold text-sm text-verde-900 uppercase tracking-wider">Autorización Gerencial</h4>
+</div>
+<p class="text-xs text-carbon/60">
+                  Ingrese el PIN de supervisión para liberar el bloqueo de caja y asentar el Corte Z definitivo en SAT.
+                </p>
+</div>
+<!-- PIN Input Widget -->
+<div class="bg-marfil-light p-3.5 rounded-lg border border-arena-soft space-y-2">
+<div class="flex justify-between items-center">
+<label class="text-xs font-medium text-carbon" for="pinGerente">PIN Supervisor / Gerente:</label>
+<span class="text-[11px] text-verde-700 font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                    Roberto V. (En línea)
+                  </span>
+</div>
+<div class="relative">
+<input class="w-full text-center tracking-[1em] text-lg font-bold bg-white border border-arena rounded-lg py-2 text-carbon focus:ring-2 focus:ring-verde-800 focus:border-verde-800" id="pinGerente" maxlength="4" placeholder="••••" type="password" value="9842"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-[18px] text-carbon/40">lock</span>
+</div>
+</div>
+<!-- Checkbox Legal / SAT -->
+<div class="flex items-start gap-2.5 text-xs text-carbon/70">
+<input checked="" class="mt-0.5 rounded text-verde-800 focus:ring-verde-800 border-arena" id="confirmSat" type="checkbox"/>
+<label class="leading-snug cursor-pointer select-none" for="confirmSat">
+                  Generar automáticamente pre-póliza de <strong>Factura Global Diaria SAT</strong> y despachar reporte vía correo cifrado a Dirección Operativa.
+                </label>
+</div>
+<!-- Action Buttons -->
+<div class="space-y-2.5 pt-2">
+<!-- Botón Corte Z (PRIMARIO PROMINENTE) -->
+<button class="w-full py-3.5 px-4 bg-verde-800 hover:bg-verde-700 active:scale-[0.99] text-white font-medium text-sm rounded-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 border-t border-dorado-agave" onclick="confirmCorteZ()" type="button">
+<span class="material-symbols-outlined text-[20px] text-dorado">lock_reset</span>
+<span class="font-semibold tracking-wide">Cerrar Caja Definitivo (Corte Z)</span>
+</button>
+<!-- Botón Corte X (SECUNDARIO ARENA) -->
+<button class="w-full py-2.5 px-4 bg-marfil hover:bg-arena-light text-carbon font-medium text-xs rounded-lg border border-arena hover:border-arena-dark transition-colors flex items-center justify-center gap-2 active:scale-[0.99]" onclick="printCorteX()" type="button">
+<span class="material-symbols-outlined text-[18px] text-verde-800">print</span>
+<span>Imprimir Corte X (Parcial Informativo)</span>
+</button>
+</div>
+<!-- Security notice -->
+<p class="text-[11px] text-center text-carbon/50 pt-1">
+<span class="material-symbols-outlined text-[13px] align-middle text-amber-600">info</span>
+                Esta acción es irreversible y reiniciará los contadores de la terminal.
+              </p>
+</div>
+<!-- MODAL / TARJETA DE CONFIRMACIÓN AUTOMÁTICA EMISIÓN SAT -->
+<div class="bg-verde-50 rounded-xl border border-verde-700/20 p-4">
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-full bg-verde-700 text-marfil flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">mark_email_read</span>
+</div>
+<div class="text-xs">
+<span class="font-semibold text-verde-900 block">Distribución Automática Programada</span>
+<p class="text-carbon/70 mt-0.5">
+                    Al confirmar el Corte Z, el expediente contable se enviará a:
+                  </p>
+<div class="mt-1.5 font-mono text-[10px] text-verde-800 bg-white/70 p-1.5 rounded border border-verde-700/10 space-y-0.5">
+<div>• direccion@convivium.mx</div>
+<div>• despacho.fiscal@asociados.mx</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- ========================================================================= -->
+<!-- MODAL DE CONFIRMACIÓN FORMAL DE CORTE Z (INTERACTION)                      -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 bg-carbon/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="corteZModal">
+<div class="bg-white rounded-2xl max-w-md w-full border border-arena-soft shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div class="bg-verde-900 p-6 text-marfil text-center relative border-b border-verde-700">
+<div class="w-14 h-14 bg-verde-800 border-2 border-dorado-agave rounded-full mx-auto flex items-center justify-center text-dorado mb-3 shadow-inner">
+<span class="material-symbols-outlined text-[30px]">lock</span>
+</div>
+<h3 class="font-display font-bold text-xl text-marfil tracking-wide">Confirmar Cierre Fiscal Z</h3>
+<p class="text-xs text-arena/80 mt-1">Terminal de Cobro: Caja #1 · Salón Principal</p>
+</div>
+<div class="p-6 space-y-4">
+<div class="bg-marfil-light p-3.5 rounded-lg border border-arena-soft text-xs space-y-2">
+<div class="flex justify-between">
+<span class="text-carbon/70">Total Cobrado Declarado:</span>
+<span class="font-bold font-tabular text-carbon">$36,290.00 MXN</span>
+</div>
+<div class="flex justify-between text-terracota">
+<span>Diferencia Faltante:</span>
+<span class="font-bold font-tabular">-$120.00 MXN</span>
+</div>
+<div class="flex justify-between border-t border-arena-light pt-1.5 font-semibold text-verde-900">
+<span>Responsable del Turno:</span>
+<span>Sofía Morales (Cajera)</span>
+</div>
+</div>
+<p class="text-xs text-carbon/70 leading-relaxed text-center">
+          Al confirmar, la gaveta se bloqueará y se emitirá el ticket Z de cierre fiscal con timbrado SAT correspondiente.
+        </p>
+<div class="flex gap-3 pt-2">
+<button class="w-1/2 py-2.5 px-4 bg-marfil hover:bg-arena-light text-carbon font-medium text-xs rounded-lg border border-arena transition-colors" onclick="closeModal()" type="button">
+            Cancelar / Revisar
+          </button>
+<button class="w-1/2 py-2.5 px-4 bg-verde-800 hover:bg-verde-700 text-marfil font-semibold text-xs rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5" onclick="executeFinalClose()" type="button">
+<span class="material-symbols-outlined text-[16px] text-dorado">verified</span>
+<span>Confirmar y Sellar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- TOAST NOTIFICATION CONTAINER -->
+<div class="fixed bottom-6 right-6 bg-verde-900 text-marfil px-4 py-3 rounded-xl border border-dorado-agave shadow-2xl flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-4 z-50" id="toastNotification">
+<span class="material-symbols-outlined text-dorado text-[22px]" id="toastIcon">check_circle</span>
+<div>
+<p class="text-xs font-semibold text-marfil" id="toastTitle">Operación Exitosa</p>
+<p class="text-[11px] text-arena" id="toastMessage">El comando fue ejecutado en el TPV.</p>
+</div>
+</div>
+<!-- INTERACTION LOGIC (VANILLA JS) -->
+<script>
+    // Toggle breakdown of physical coins and bills
+    function toggleDenominations() {
+      const breakdown = document.getElementById('denominationsBreakdown');
+      const toggleText = document.getElementById('toggleText');
+      const toggleIcon = document.getElementById('toggleIcon');
+
+      if (breakdown.classList.contains('hidden')) {
+        breakdown.classList.remove('hidden');
+        toggleText.textContent = 'Ocultar Desglose Billetes';
+        toggleIcon.textContent = 'unfold_less';
+      } else {
+        breakdown.classList.add('hidden');
+        toggleText.textContent = 'Ver Desglose Billetes';
+        toggleIcon.textContent = 'unfold_more';
+      }
+    }
+
+    // Modal Handlers
+    function confirmCorteZ() {
+      const pin = document.getElementById('pinGerente').value;
+      if (pin.length < 4) {
+        showToast('PIN Inválido', 'Debe ingresar el PIN gerencial de 4 dígitos para autorizar el Corte Z.', 'error');
+        return;
+      }
+      document.getElementById('corteZModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('corteZModal').classList.add('hidden');
+    }
+
+    function executeFinalClose() {
+      closeModal();
+      showToast('Corte Z Realizado', 'Turno cerrado con éxito. Imprimiendo póliza fiscal y enviando correos.', 'verified');
+    }
+
+    function printCorteX() {
+      showToast('Imprimiendo Corte X', 'Enviando resumen parcial de turno a la impresora térmica EPSON T20.', 'print');
+    }
+
+    function triggerCashDrawer() {
+      showToast('Cajón Abierto', 'Apertura manual registrada en bitácora de auditoría.', 'point_of_sale');
+    }
+
+    // Lightweight Toast System
+    function showToast(title, message, iconName = 'check_circle') {
+      const toast = document.getElementById('toastNotification');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      toastIcon.textContent = iconName;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
+    }
+  </script>
+</body></html>

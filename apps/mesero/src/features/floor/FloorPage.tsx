@@ -1,76 +1,229 @@
+/* Diseño: design/stitch/mesero-plano-mesas.html (Stitch). Marcado y clases originales; datos reales. E3-01, E3-10. */
 import type { FloorPlan } from "@convivium/api-client";
 import { useRealtime, useSession } from "@convivium/app-shell";
-import { Button, tableStatusStyle } from "@convivium/ui";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MeseroLayout } from "../layout/MeseroLayout";
 
-/** E3-01 · Plano de mesas con estado por color; E3-10 · cuentas de barra. */
+type Table = FloorPlan["tables"][number];
+
+const SHAPE: Record<string, string> = { redonda: "Redonda", cuadrada: "Cuadrada", rectangular: "Rectangular", periquera: "Periquera" };
+const mxn = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(c / 100);
+function since(iso: string | null) {
+  if (!iso) return "";
+  const m = Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / 60000));
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+
 export function FloorPage() {
   const { client } = useSession();
   const nav = useNavigate();
   const [plan, setPlan] = useState<FloorPlan | null>(null);
   const [areaId, setAreaId] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<{ kind: "mesa"; table: FloorPlan["tables"][number] } | { kind: "barra" } | null>(null);
+  const [sheet, setSheet] = useState<{ kind: "mesa"; table: Table } | { kind: "barra" } | null>(null);
+
   const load = useCallback(() => client.floor.get().then((p) => { setPlan(p); setAreaId((a) => a ?? p.areas[0]?.id ?? null); }), [client]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); const t = setInterval(load, 60_000); return () => clearInterval(t); }, [load]);
   useRealtime(["floor"], () => load());
 
-  if (!plan) return <p style={{ padding: 16 }}>Cargando plano…</p>;
-
-  const openTable = (t: FloorPlan["tables"][number]) => (t.openCheckId ? nav(`/cuenta/${t.openCheckId}`) : setSheet({ kind: "mesa", table: t }));
+  const openTable = (t: Table) => (t.openCheckId ? nav(`/cuenta/${t.openCheckId}`) : setSheet({ kind: "mesa", table: t }));
   const confirmTable = async (tableId: string, guests: number) => nav(`/cuenta/${(await client.orders.open({ kind: "mesa", tableId, guests })).id}`);
   const confirmBar = async (name: string) => nav(`/cuenta/${(await client.orders.open({ kind: "barra", name })).id}`);
 
+  const tables = plan?.tables.filter((t) => t.areaId === areaId) ?? [];
+  const count = (s: string) => plan?.tables.filter((t) => t.status === s).length ?? 0;
+
+  const tabs = (
+    <nav aria-label="Áreas de Restaurante" className="flex items-center gap-2 mt-3 pt-2 border-t border-[#C9B89F]/20">
+      {plan?.areas.map((a) =>
+        a.id === areaId ? (
+          <button key={a.id} className="flex-1 py-1.5 text-center text-xs font-medium tracking-wider uppercase transition-all relative text-[#D4AF7C] bg-[#14201B]/80 rounded-md border border-[#D4AF7C]/40">
+            {a.name}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#D4AF7C] rounded-full" />
+          </button>
+        ) : (
+          <button key={a.id} onClick={() => setAreaId(a.id)} className="flex-1 py-1.5 text-center text-xs font-normal tracking-wider uppercase text-[#C9B89F] hover:text-[#EAE6DD] transition-all rounded-md">
+            {a.name}
+          </button>
+        ),
+      )}
+    </nav>
+  );
+
   return (
-    <main style={{ padding: 16 }}>
-      <nav style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        {plan.areas.map((a) => (
-          <button key={a.id} className={`cv-btn ${a.id === areaId ? "cv-btn--primary" : "cv-btn--ghost"}`} onClick={() => setAreaId(a.id)}>{a.name}</button>
-        ))}
-      </nav>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16, fontSize: 12 }}>
-        {Object.values(tableStatusStyle).map((s) => (
-          <span key={s.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <i style={{ width: 12, height: 12, borderRadius: 3, background: s.bg, border: "1px solid var(--border)" }} />{s.label}
-          </span>
-        ))}
+    <MeseroLayout subheader={tabs}>
+      <section aria-label="Estados de Mesa" className="px-3.5 py-2.5 bg-[#EAE6DD] border-b border-[#C9B89F]/30 flex items-center justify-between overflow-x-auto custom-scrollbar gap-2">
+        <div className="flex items-center gap-1.5 bg-[#F5F3EF] px-2.5 py-1 rounded border border-[#C9B89F] shadow-xs flex-shrink-0">
+          <span className="w-2 h-2 rounded-full bg-stone-400" />
+          <span className="text-[11px] font-medium text-[#1A1A1A]">Libre ({count("libre")})</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#1E2F28] px-2.5 py-1 rounded text-[#EAE6DD] flex-shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="text-[11px] font-medium">Ocupada ({count("ocupada")})</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#D4AF7C] px-2.5 py-1 rounded text-[#1E2F28] flex-shrink-0">
+          <span className="material-symbols-outlined text-[13px] animate-bounce">notifications_active</span>
+          <span className="text-[11px] font-semibold">Listo ({count("listo_por_entregar")})</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#B45A3C] px-2.5 py-1 rounded text-white flex-shrink-0">
+          <span className="material-symbols-outlined text-[13px]">receipt_long</span>
+          <span className="text-[11px] font-semibold">Cuenta ({count("pidio_cuenta")})</span>
+        </div>
+      </section>
+
+      <main className="flex-1 px-3 py-2 overflow-y-auto custom-scrollbar">
+        {!plan && <p className="text-xs text-stone-500 p-4">Cargando plano…</p>}
+        <div className="grid grid-cols-2 gap-2.5">
+          {tables.map((t) => <TableCard key={t.id} t={t} onClick={() => openTable(t)} />)}
+        </div>
+      </main>
+
+      <div className="fixed bottom-[74px] right-[calc(50%-195px+14px)] max-md:right-4 z-40">
+        <button onClick={() => setSheet({ kind: "barra" })} className="bg-[#1E2F28] text-[#D4AF7C] border border-[#D4AF7C]/40 shadow-lg px-3.5 py-2.5 rounded-full flex items-center gap-2 hover:bg-[#14201B] active:scale-95 transition-all text-xs font-medium tracking-wide">
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span>Cuenta de barra</span>
+        </button>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", gap: 12 }}>
-        {plan.tables.filter((t) => t.areaId === areaId).map((t) => {
-          const s = tableStatusStyle[t.status]!;
-          return (
-            <button key={t.id} onClick={() => openTable(t)}
-              style={{ aspectRatio: "1", borderRadius: t.shape === "redonda" ? "50%" : "var(--radius)", background: s.bg, color: s.fg, border: "1px solid var(--border)", fontWeight: 700, fontSize: 18, cursor: "pointer" }}>
-              {t.label}
-              <div style={{ fontSize: 11, fontWeight: 400 }}>{t.capacity} pax</div>
-            </button>
-          );
-        })}
-      </div>
-      <button className="cv-btn cv-btn--primary" style={{ position: "fixed", right: 16, bottom: 16 }} onClick={() => setSheet({ kind: "barra" })}>+ Cuenta de barra</button>
-      {sheet?.kind === "mesa" && <GuestsSheet label={sheet.table.label} max={sheet.table.capacity + 4} onCancel={() => setSheet(null)} onConfirm={(g) => confirmTable(sheet.table.id, g)} />}
+
+      {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} onCancel={() => setSheet(null)} onConfirm={(g) => confirmTable(sheet.table.id, g)} />}
       {sheet?.kind === "barra" && <BarSheet onCancel={() => setSheet(null)} onConfirm={confirmBar} />}
-    </main>
+    </MeseroLayout>
   );
 }
 
-function Sheet({ title, children, onCancel }: { title: string; children: React.ReactNode; onCancel: () => void }) {
+function TableCard({ t, onClick }: { t: Table; onClick: () => void }) {
+  const shape = SHAPE[t.shape] ?? "";
+  if (t.status === "libre")
+    return (
+      <article onClick={onClick} className="bg-[#F5F3EF] text-[#1A1A1A] rounded-lg p-3 border border-[#C9B89F] shadow-2xs flex flex-col justify-between h-[122px] relative active:bg-[#EAE6DD] transition-all cursor-pointer">
+        <div className="flex justify-between items-start">
+          <div className="flex items-baseline gap-1">
+            <span className="font-display text-lg font-bold tracking-tight text-[#1E2F28]">{t.label}</span>
+            <span className="text-[10px] text-stone-500">· {shape}</span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[11px] text-stone-600">
+            <span className="material-symbols-outlined text-[13px]">group</span>
+            {t.capacity}
+          </span>
+        </div>
+        <div className="my-auto text-center py-1">
+          <span className="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
+          <span>Montada</span>
+          <span className="font-medium text-[#1E2F28]">Abrir +</span>
+        </div>
+      </article>
+    );
+
+  if (t.status === "pidio_cuenta")
+    return (
+      <article onClick={onClick} className="bg-[#B45A3C] text-white rounded-lg p-3 border border-[#B45A3C] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+        <div className="flex justify-between items-start">
+          <div className="flex items-baseline gap-1">
+            <span className="font-display text-lg font-bold tracking-tight text-white">{t.label}</span>
+            <span className="text-[10px] text-orange-200">· {shape}</span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[11px] text-orange-100">
+            <span className="material-symbols-outlined text-[13px]">group</span>
+            {t.guests}
+          </span>
+        </div>
+        <div className="my-auto flex items-center justify-between bg-black/15 px-2 py-1 rounded">
+          <div className="flex items-center gap-1">
+            <span className="material-symbols-outlined text-[16px] text-white">receipt</span>
+            <span className="text-xs font-semibold">Pidió cuenta</span>
+          </div>
+          <span className="text-[11px] font-bold text-orange-200">{mxn(t.total ?? 0)}</span>
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-orange-100 border-t border-white/20 pt-1.5">
+          <span className="flex items-center gap-0.5">
+            <span className="material-symbols-outlined text-[11px]">timer</span>
+            {since(t.openedAt)}
+          </span>
+          <span className="font-bold underline text-white">Ver cuenta</span>
+        </div>
+      </article>
+    );
+
+  if (t.status === "listo_por_entregar")
+    return (
+      <article onClick={onClick} className="bg-[#D4AF7C] text-[#1E2F28] rounded-lg p-3 border-2 border-[#1E2F28]/30 shadow-md flex flex-col justify-between h-[122px] relative pulse-ready active:scale-[0.99] transition-all cursor-pointer">
+        <div className="flex justify-between items-start">
+          <div className="flex items-baseline gap-1">
+            <span className="font-display text-lg font-bold tracking-tight text-[#1E2F28]">{t.label}</span>
+            <span className="text-[10px] text-[#1E2F28]/70">· {shape}</span>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1E2F28]">
+            <span className="material-symbols-outlined text-[13px]">group</span>
+            {t.guests}
+          </span>
+        </div>
+        <div className="my-auto flex items-center gap-1.5 bg-[#1E2F28]/10 px-2 py-1 rounded">
+          <span className="material-symbols-outlined text-[18px] text-[#B45A3C] animate-pulse">notifications_active</span>
+          <div className="leading-none">
+            <span className="text-[11px] font-bold text-[#1E2F28] block">¡Platillo Listo!</span>
+            <span className="text-[9px] text-[#1E2F28]/80 font-medium">{t.readyStation}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-[#1E2F28]/90 border-t border-[#1E2F28]/20 pt-1.5 font-medium">
+          <span className="flex items-center gap-0.5">
+            <span className="material-symbols-outlined text-[11px]">schedule</span>
+            {since(t.openedAt)}
+          </span>
+          <span className="font-bold uppercase tracking-wider text-[9px] bg-[#1E2F28] text-[#D4AF7C] px-1.5 py-0.5 rounded">Llevar</span>
+        </div>
+      </article>
+    );
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", display: "flex", alignItems: "flex-end", zIndex: 20 }} onClick={onCancel}>
-      <div className="cv-card" style={{ width: "100%", borderRadius: "16px 16px 0 0" }} onClick={(e) => e.stopPropagation()}>
-        <h3 style={{ marginBottom: 12 }}>{title}</h3>
+    <article onClick={onClick} className="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-3 border border-[#1E2F28] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+      <div className="flex justify-between items-start">
+        <div className="flex items-baseline gap-1">
+          <span className="font-display text-lg font-bold tracking-tight text-[#EAE6DD]">{t.label}</span>
+          <span className="text-[10px] text-[#C9B89F]">· {shape}</span>
+        </div>
+        <span className="inline-flex items-center gap-1 text-[11px] text-[#C9B89F]">
+          <span className="material-symbols-outlined text-[13px]">group</span>
+          {t.guests}
+        </span>
+      </div>
+      <div className="my-auto">
+        <span className="text-xs font-semibold text-[#D4AF7C] block">{mxn(t.total ?? 0)} MXN</span>
+        <p className="text-[11px] text-[#EAE6DD]/80">{t.itemCount} {t.itemCount === 1 ? "platillo" : "platillos"} en mesa</p>
+      </div>
+      <div className="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
+        <span className="flex items-center gap-0.5">
+          <span className="material-symbols-outlined text-[11px]">schedule</span>
+          {since(t.openedAt)}
+        </span>
+        <span className="font-medium text-[#D4AF7C]/90">Activa</span>
+      </div>
+    </article>
+  );
+}
+
+/* Hojas inferiores: sin pantalla propia en Stitch; usan la paleta y componentes del plano. */
+function Sheet({ title, onCancel, children }: { title: string; onCancel: () => void; children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end justify-center" onClick={onCancel}>
+      <div className="w-full max-w-[414px] bg-[#F5F3EF] rounded-t-2xl p-4 pb-6 border-t border-[#C9B89F]" onClick={(e) => e.stopPropagation()}>
+        <div className="w-10 h-1 rounded-full bg-[#C9B89F] mx-auto mb-3" />
+        <h3 className="font-display text-lg font-bold text-[#1E2F28] mb-3">{title}</h3>
         {children}
       </div>
     </div>
   );
 }
 
-function GuestsSheet({ label, max, onCancel, onConfirm }: { label: string; max: number; onCancel: () => void; onConfirm: (guests: number) => void }) {
+function GuestsSheet({ table, onCancel, onConfirm }: { table: Table; onCancel: () => void; onConfirm: (guests: number) => void }) {
   return (
-    <Sheet title={`Abrir ${label} · comensales`} onCancel={onCancel}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-        {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
-          <Button key={n} variant="ghost" style={{ minHeight: 56, fontSize: 20 }} onClick={() => onConfirm(n)}>{n}</Button>
+    <Sheet title={`Abrir ${table.label} · comensales`} onCancel={onCancel}>
+      <div className="grid grid-cols-4 gap-2">
+        {Array.from({ length: table.capacity + 4 }, (_, i) => i + 1).map((n) => (
+          <button key={n} onClick={() => onConfirm(n)} className="h-14 rounded-lg bg-white border border-[#C9B89F] text-[#1E2F28] font-display text-xl font-bold active:bg-[#1E2F28] active:text-[#D4AF7C] transition-colors">
+            {n}
+          </button>
         ))}
       </div>
     </Sheet>
@@ -81,9 +234,10 @@ function BarSheet({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: (n
   const [name, setName] = useState("");
   return (
     <Sheet title="Nueva cuenta de barra" onCancel={onCancel}>
-      <input autoFocus placeholder="Nombre o pulsera" value={name} onChange={(e) => setName(e.target.value)}
-        style={{ width: "100%", height: 48, padding: "0 12px", borderRadius: 8, border: "1px solid var(--border)" }} />
-      <Button style={{ width: "100%", marginTop: 12 }} disabled={!name.trim()} onClick={() => onConfirm(name.trim())}>Abrir cuenta</Button>
+      <input autoFocus placeholder="Nombre o pulsera" value={name} onChange={(e) => setName(e.target.value)} className="w-full h-12 rounded-lg border-[#C9B89F] bg-white text-sm focus:ring-[#D4AF7C] focus:border-[#D4AF7C]" />
+      <button disabled={!name.trim()} onClick={() => onConfirm(name.trim())} className="mt-3 w-full h-12 rounded-lg bg-[#1E2F28] text-[#D4AF7C] font-semibold tracking-wide disabled:opacity-40">
+        Abrir cuenta
+      </button>
     </Sheet>
   );
 }

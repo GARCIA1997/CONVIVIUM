@@ -1,4 +1,5 @@
-import { and, eq, gte, schema, sql } from "@convivium/db";
+import { and, eq, gte, inArray, lt, lte, schema, sql } from "@convivium/db";
+import { lineTotal } from "../orders/mapper.js";
 import { z } from "zod";
 import type { ApiModule } from "../../lib/module.js";
 import { notImplemented } from "../../plugins/errors.js";
@@ -9,22 +10,107 @@ const plugin: ApiModule["plugin"] = async (app) => {
   const tags = ["reportes"];
   const todo = async () => { throw notImplemented(); };
 
-  /** E9-01 · Dashboard en vivo (día en curso). */
+  /** E9-01 · Dashboard en vivo (día en curso) con comparativo contra el mismo día de la semana anterior. */
   app.get("/live", { onRequest: [app.guard("reportes.ver")], schema: { tags } }, async (req) => {
+    const { branchId, tenantId } = req.user;
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-    const [sales] = await app.db
-      .select({ total: sql<number>`coalesce(sum(${schema.payments.amount}),0)::int`, tickets: sql<number>`count(distinct ${schema.payments.checkId})::int` })
-      .from(schema.payments)
-      .innerJoin(schema.checks, eq(schema.checks.id, schema.payments.checkId))
-      .where(and(eq(schema.checks.branchId, req.user.branchId), gte(schema.payments.createdAt, start)));
-    const [open] = await app.db
-      .select({ count: sql<number>`count(*)::int`, guests: sql<number>`coalesce(sum(${schema.checks.guests}),0)::int` })
-      .from(schema.checks)
-      .where(and(eq(schema.checks.branchId, req.user.branchId), eq(schema.checks.status, "abierta")));
-    const total = sales?.total ?? 0;
-    const tickets = sales?.tickets ?? 0;
-    return { salesToday: total, tickets, avgTicket: tickets ? Math.round(total / tickets) : 0, openChecks: open?.count ?? 0, guests: open?.guests ?? 0 };
+    const now = new Date();
+    const weekAgo = (d: Date) => new Date(d.getTime() - 7 * 864e5);
+
+    const paysFor = (from: Date, to: Date) =>
+      app.db
+        .select({ amount: schema.payments.amount, method: schema.payments.method, rate: schema.payments.exchangeRate, checkId: schema.payments.checkId, at: schema.payments.createdAt })
+        .from(schema.payments)
+        .innerJoin(schema.checks, eq(schema.checks.id, schema.payments.checkId))
+        .where(and(eq(schema.checks.branchId, branchId), gte(schema.payments.createdAt, from), lt(schema.payments.createdAt, to)));
+    const toMxn = (p: { amount: number; method: string; rate: number | null }) => (p.method === "efectivo_usd" ? Math.round((p.amount * (p.rate ?? 0)) / 100) : p.amount);
+
+    const [today, lastWeek, checksToday, tables, openChecks, itemsToday, stations] = await Promise.all([
+      paysFor(start, now),
+      paysFor(weekAgo(start), weekAgo(now)),
+      app.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, branchId), gte(schema.checks.openedAt, start))),
+      app.db.select({ id: schema.tables.id }).from(schema.tables).where(and(eq(schema.tables.branchId, branchId), eq(schema.tables.active, true))),
+      app.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, branchId), inArray(schema.checks.status, ["abierta", "pidio_cuenta"]))),
+      app.db.select().from(schema.orderItems).where(and(eq(schema.orderItems.branchId, branchId), gte(schema.orderItems.createdAt, start))),
+      app.db.select().from(schema.stations).where(eq(schema.stations.branchId, branchId)),
+    ]);
+
+    const salesToday = today.reduce((s, p) => s + toMxn(p), 0);
+    const salesLastWeek = lastWeek.reduce((s, p) => s + toMxn(p), 0);
+    const tickets = new Set(today.map((p) => p.checkId)).size;
+    const guests = checksToday.reduce((s, c) => s + (c.guests ?? 0), 0);
+
+    const hourly = Array.from({ length: 24 }, (_, h) => ({ hour: h, total: 0 }));
+    for (const p of today) hourly[p.at.getHours()]!.total += toMxn(p);
+
+    const products = new Map<string, { qty: number; amount: number }>();
+    for (const i of itemsToday) {
+      if (i.unitPrice === 0 || i.state === "cancelado" || i.state === "devuelto") continue;
+      const cur = products.get(i.productName) ?? { qty: 0, amount: 0 };
+      cur.qty += i.quantity;
+      cur.amount += lineTotal(i);
+      products.set(i.productName, cur);
+    }
+    const topProducts = [...products].map(([name, v]) => ({ name, ...v })).sort((a, b) => b.amount - a.amount).slice(0, 5);
+
+    const methods = new Map<string, number>();
+    for (const p of today) methods.set(p.method, (methods.get(p.method) ?? 0) + toMxn(p));
+
+    const hourAgo = new Date(now.getTime() - 3600e3);
+    const prepTimes = stations.map((st) => {
+      const done = itemsToday.filter((i) => i.stationId === st.id && i.readyAt && i.sentAt && i.readyAt >= hourAgo);
+      const avgSec = done.length ? Math.round(done.reduce((s, i) => s + (i.readyAt!.getTime() - i.sentAt!.getTime()) / 1000, 0) / done.length) : null;
+      return { station: st.name, avgSec, targetSec: st.defaultTargetSec, samples: done.length };
+    });
+
+    const pidio = openChecks.filter((c) => c.status === "pidio_cuenta");
+    const occupied = new Set(openChecks.map((c) => c.tableId).filter(Boolean)).size;
+
+    // Alertas operativas
+    const alerts: { kind: "cxp" | "insumo" | "fraude"; title: string; detail: string }[] = [];
+    const soon = new Date(now.getTime() + 2 * 864e5).toISOString().slice(0, 10);
+    const payables = await app.db
+      .select({ amount: schema.payables.balance, due: schema.payables.dueAt, supplier: schema.suppliers.name })
+      .from(schema.payables)
+      .innerJoin(schema.suppliers, eq(schema.suppliers.id, schema.payables.supplierId))
+      .where(and(eq(schema.payables.tenantId, tenantId), inArray(schema.payables.status, ["pendiente", "parcial"]), lte(schema.payables.dueAt, soon)));
+    if (payables.length)
+      alerts.push({ kind: "cxp", title: `${payables.length} cuenta(s) por pagar vencen pronto`, detail: payables.map((p) => `${p.supplier}: $${(p.amount / 100).toLocaleString("es-MX")}`).join(" · ") });
+    const low = await app.db
+      .select({ name: schema.ingredients.name, min: schema.ingredients.minStock, qty: sql<string>`coalesce(sum(${schema.stock.quantity}),0)`, unit: schema.ingredients.useUnit })
+      .from(schema.ingredients)
+      .leftJoin(schema.stock, eq(schema.stock.ingredientId, schema.ingredients.id))
+      .where(and(eq(schema.ingredients.tenantId, tenantId), eq(schema.ingredients.critical, true)))
+      .groupBy(schema.ingredients.id);
+    for (const l of low.filter((l) => Number(l.qty) < Number(l.min)))
+      alerts.push({ kind: "insumo", title: "Insumo crítico bajo mínimo", detail: `${l.name}: ${Number(l.qty)} ${l.unit} (mínimo ${Number(l.min)})` });
+    const courtesies = await app.db
+      .select({ by: schema.discounts.appliedBy, n: sql<number>`count(*)::int`, total: sql<number>`sum(${schema.discounts.amount})::int` })
+      .from(schema.discounts)
+      .where(and(eq(schema.discounts.tenantId, tenantId), gte(schema.discounts.createdAt, start)))
+      .groupBy(schema.discounts.appliedBy);
+    const flagged = courtesies.filter((c) => c.n >= 3);
+    if (flagged.length) {
+      const names = await app.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, flagged.map((f) => f.by)));
+      for (const f of flagged)
+        alerts.push({ kind: "fraude", title: "Desvío de cortesías detectado", detail: `${names.find((n) => n.id === f.by)?.name ?? ""}: ${f.n} cortesías/descuentos hoy ($${(f.total / 100).toLocaleString("es-MX")})` });
+    }
+
+    return {
+      salesToday,
+      salesLastWeek,
+      tickets,
+      avgTicket: tickets ? Math.round(salesToday / tickets) : 0,
+      guests,
+      openChecks: openChecks.length,
+      occupancy: { total: tables.length, occupied, pidioCuenta: pidio.length, free: Math.max(0, tables.length - occupied) },
+      hourly,
+      topProducts,
+      paymentMethods: [...methods].map(([method, amount]) => ({ method, amount })),
+      prepTimes,
+      alerts,
+    };
   });
 
   app.get("/sales", { onRequest: [app.guard("reportes.ver")], schema: { tags, querystring: Range.extend({ groupBy: z.enum(["producto", "categoria", "mesero", "estacion", "forma_pago", "hora"]) }) } }, todo); // E9-02

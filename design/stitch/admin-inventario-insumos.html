@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Inventario: Insumos y Almacenes</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // CONVIVIUM Custom Palette Tokens
+            olivo: {
+              DEFAULT: '#1E2F28',
+              hover: '#283E35',
+              dark: '#16231E'
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              canvas: '#F7F5F0'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#E1D9CB',
+              border: '#D8CEBF'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#EAD5B5',
+              muted: '#B08E5F'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#9E4A30',
+              soft: '#F8EAE4',
+              border: '#E8C5B8'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              muted: '#4A4844',
+              soft: '#736F68'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Elegant subtle scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #EAE6DD;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B08E5F;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil-canvas text-carbon font-body antialiased flex overflow-hidden">
+<!-- ============================================================ -->
+<!-- 1. BARRA LATERAL (SideNavBar from JSON & Design System)       -->
+<!-- ============================================================ -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col z-30 bg-neutral-900 border-r border-neutral-800 shadow-none text-neutral-400 select-none">
+<!-- Header Brand Monogram -->
+<div class="p-5 pb-4 border-b border-neutral-800/80">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-[#283E35] border border-dorado/40 flex items-center justify-center text-dorado font-headline text-2xl font-bold tracking-tight shadow-sm">
+          C
+        </div>
+<div>
+<h1 class="font-headline tracking-widest text-lg font-bold text-neutral-100 uppercase">CONVIVIUM</h1>
+<p class="text-[10px] text-dorado tracking-wider uppercase font-medium">Donde todo sucede en la mesa</p>
+</div>
+</div>
+<!-- CTA Nuevo Insumo -->
+<button class="mt-5 w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-gradient-to-r from-dorado to-[#B08E5F] text-neutral-950 font-label font-semibold text-xs tracking-wider uppercase shadow hover:brightness-105 active:scale-[0.99] transition-all" onclick="toggleDrawer(true)">
+<span class="material-symbols-outlined text-sm font-bold">add</span>
+        Nuevo Insumo
+      </button>
+</div>
+<!-- Navigation Tabs Cluster -->
+<nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+<div class="text-[10px] font-semibold tracking-widest text-neutral-500 uppercase px-3 mb-2">Hospitalidad &amp; Control</div>
+<!-- Active Tab: Almacén e Inventario (Semantic Hierarchy Match) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-neutral-800/80 text-amber-200 font-medium active:scale-[0.99] transition-transform group" href="#">
+<span class="material-symbols-outlined text-amber-200 fill text-lg">inventory_2</span>
+<span class="font-body text-sm text-neutral-100 flex-1">Almacén e Inventario</span>
+<span class="w-1.5 h-1.5 rounded-full bg-dorado"></span>
+</a>
+<!-- Inactive Tabs strictly following JSON strings & icons -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors active:scale-[0.99] group" href="#">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-200 text-lg">shopping_cart</span>
+<span class="font-body text-sm">Compras</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors active:scale-[0.99] group" href="#">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-200 text-lg">restaurant_menu</span>
+<span class="font-body text-sm">Menú</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors active:scale-[0.99] group" href="#">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-200 text-lg">menu_book</span>
+<span class="font-body text-sm">Recetas</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors active:scale-[0.99] group" href="#">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-200 text-lg">bar_chart</span>
+<span class="font-body text-sm">Reportes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors active:scale-[0.99] group" href="#">
+<span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-200 text-lg">settings</span>
+<span class="font-body text-sm">Configuración</span>
+</a>
+<div class="pt-4 border-t border-neutral-800/60 mt-4">
+<!-- Live Node Telemetry Indicator -->
+<div class="mx-2 p-2.5 rounded-lg bg-neutral-950/60 border border-neutral-800 text-[11px] flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-neutral-300 font-mono">Nodo Central CDMX</span>
+</div>
+<span class="text-dorado text-[10px] font-mono">v4.8</span>
+</div>
+</div>
+</nav>
+<!-- Footer Cluster from JSON -->
+<div class="p-3 border-t border-neutral-800 bg-neutral-950/40 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40 transition-colors text-xs" href="#">
+<span class="material-symbols-outlined text-base">help_outline</span>
+<span>Soporte</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-400 hover:text-terracota-light hover:bg-terracota/10 transition-colors text-xs" href="#">
+<span class="material-symbols-outlined text-base">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- ============================================================ -->
+<!-- MAIN APPLICATION SHELL & CANVAS                              -->
+<!-- ============================================================ -->
+<div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden bg-marfil-canvas">
+<!-- ============================================================ -->
+<!-- 2. BARRA SUPERIOR (TopNavBar from JSON & Design System)       -->
+<!-- ============================================================ -->
+<header class="sticky top-0 z-20 w-full bg-[#EAE6DD]/95 backdrop-blur border-b border-arena-border shadow-none px-8 py-3 flex items-center justify-between">
+<!-- Left side: Breadcrumb & Search Bar -->
+<div class="flex items-center gap-6">
+<div>
+<div class="flex items-center gap-1.5 text-xs text-carbon-soft font-label">
+<span>Inventario</span>
+<span class="text-arena">/</span>
+<span class="text-carbon font-semibold">Insumos y Almacenes</span>
+</div>
+<h2 class="font-headline text-lg font-bold tracking-tight text-carbon">Barra &amp; Cava Principal</h2>
+</div>
+<!-- Search Bar with Command K -->
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-carbon-soft text-lg">search</span>
+<input class="w-full bg-white/70 border border-arena-border rounded-lg pl-9 pr-12 py-1.5 text-xs text-carbon placeholder:text-carbon-soft/60 focus:bg-white focus:outline-none focus:ring-1 focus:ring-olivo focus:border-olivo transition-all" placeholder="Buscar por insumo, SKU o licor..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-medium text-carbon-soft bg-arena/30 px-1.5 py-0.5 rounded border border-arena/40">⌘K</span>
+</div>
+</div>
+<!-- Center & Right: Segmented Store Switcher & Trailing Actions from JSON -->
+<div class="flex items-center gap-4">
+<!-- Segmented Control for Stores from JSON navigation_links -->
+<div class="bg-marfil border border-arena-border rounded-lg p-1 flex items-center gap-1 shadow-inner">
+<button class="px-3 py-1 text-xs font-label rounded text-carbon-soft hover:text-carbon transition-colors">
+            Almacén General <span class="ml-1 text-[10px] opacity-75 font-mono">(412)</span>
+</button>
+<button class="px-3 py-1 text-xs font-label rounded text-carbon-soft hover:text-carbon transition-colors">
+            Cocina Caliente/Fría <span class="ml-1 text-[10px] opacity-75 font-mono">(128)</span>
+</button>
+<!-- Active Pill -->
+<button class="px-3 py-1 text-xs font-label rounded bg-white text-olivo font-semibold shadow-sm border border-arena/30 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-olivo"></span>
+            Barra y Cava <span class="text-[10px] text-carbon-soft font-mono">(84)</span>
+</button>
+</div>
+<div class="h-6 w-px bg-arena-border"></div>
+<!-- Trailing Primary & Secondary Actions from JSON -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-arena-border bg-white/80 hover:bg-white text-carbon font-label text-xs font-medium hover:border-carbon-soft/40 shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-sm text-olivo">swap_horiz</span>
+            Traspaso entre almacenes
+          </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-arena-border bg-white/80 hover:bg-white text-carbon font-label text-xs font-medium hover:border-carbon-soft/40 shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-sm text-olivo">tune</span>
+            Ajuste de Kardex
+          </button>
+<button class="p-1.5 rounded-lg border border-arena-border bg-white/80 hover:bg-white text-carbon-soft hover:text-carbon transition-all" title="Exportar reporte">
+<span class="material-symbols-outlined text-base">file_download</span>
+</button>
+<button class="relative p-1.5 rounded-lg border border-arena-border bg-white/80 hover:bg-white text-carbon-soft hover:text-carbon transition-all" title="Notificaciones operativas">
+<span class="material-symbols-outlined text-base">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+</div>
+<!-- Inventory Supervisor Avatar from JSON -->
+<div class="flex items-center gap-2 pl-2 border-l border-arena-border">
+<img class="w-8 h-8 rounded-full border border-arena object-cover shadow-sm" data-alt="Close up portrait photograph of an experienced Mexican hospitality bar and inventory manager in a clean linen kitchen shirt standing in a warm dimly lit premium restaurant cellar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYx5fHgjSFuWXa3k_R-8kJThfXvB2D0axY47DUvWBNjU9ucFKsuewFTxGRdjrNXyJxKZGhm13DaNFKlHnFXqVylj32f64NsNEbE2TqJneKmAA2TcCXyjXN0y2ItO4LCV0GQXtNYRellVitzpZ0Y5iU8I-qVGy-ksPB5feRtLDF8QS-c7bdYObMypl51i4F3Q1l5Xckhop4W05va5lABWy8mfQyz-c6HTly7Opn8qwTEtd7s9Kg_tmciQfDnkH3b0ouPl-hoMzhNYah"/>
+<div class="text-left hidden xl:block">
+<p class="text-xs font-semibold text-carbon leading-none">Mateo V.</p>
+<p class="text-[10px] text-carbon-soft leading-tight mt-0.5">Jefe de Cava</p>
+</div>
+</div>
+</div>
+</header>
+<!-- ============================================================ -->
+<!-- 3. CONTENEDOR PRINCIPAL: BENTO METRICS + TABLA CRÍTICA       -->
+<!-- ============================================================ -->
+<main class="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+<!-- Executive High-Level KPI Strip -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<!-- Valor en Libros -->
+<div class="bg-white/80 backdrop-blur border border-arena-border rounded-xl p-4 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-[11px] font-label font-medium uppercase tracking-wider text-carbon-soft">Valor Total Barra &amp; Cava</span>
+<div class="text-2xl font-headline font-bold text-carbon mt-1">$184,320<span class="text-xs font-body font-normal text-carbon-soft ml-1">MXN</span></div>
+<div class="flex items-center gap-1 text-[11px] text-emerald-800 font-medium mt-1">
+<span class="material-symbols-outlined text-sm font-bold">trending_up</span>
+<span>+3.2% vs cierre mes anterior</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-olivo/10 text-olivo flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">payments</span>
+</div>
+</div>
+<!-- Insumos Bajo Mínimo (Alerta Crítica) -->
+<div class="bg-terracota-soft border border-terracota-border rounded-xl p-4 shadow-sm flex items-center justify-between relative overflow-hidden">
+<div class="absolute -right-2 -bottom-2 opacity-10 text-terracota">
+<span class="material-symbols-outlined text-7xl font-bold">warning</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-terracota animate-pulse"></span>
+<span class="text-[11px] font-label font-bold uppercase tracking-wider text-terracota-dark">Bajo Mínimo Crítico</span>
+</div>
+<div class="text-2xl font-headline font-bold text-terracota-dark mt-1">3 Insumos</div>
+<p class="text-[11px] text-terracota font-medium mt-1">6 recetas con riesgo de bloqueo</p>
+</div>
+<button class="relative z-10 px-2.5 py-1 text-xs rounded bg-terracota text-white font-medium hover:bg-terracota-dark transition-colors shadow">
+            Reorden
+          </button>
+</div>
+<!-- Insumos en Riesgo o Lote Próximo -->
+<div class="bg-white/80 backdrop-blur border border-arena-border rounded-xl p-4 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-[11px] font-label font-medium uppercase tracking-wider text-carbon-soft">Insumos Registrados</span>
+<div class="text-2xl font-headline font-bold text-carbon mt-1">84 SKUs</div>
+<p class="text-[11px] text-carbon-soft mt-1">14 marcados como críticos</p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-arena/20 text-carbon flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">liquor</span>
+</div>
+</div>
+<!-- Rotación Cava & Merma -->
+<div class="bg-white/80 backdrop-blur border border-arena-border rounded-xl p-4 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-[11px] font-label font-medium uppercase tracking-wider text-carbon-soft">Merma Controlada Acum.</span>
+<div class="text-2xl font-headline font-bold text-carbon mt-1">1.84%</div>
+<p class="text-[11px] text-emerald-800 font-medium mt-1">Por debajo del umbral máx. (2.5%)</p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-dorado/20 text-olivo flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">analytics</span>
+</div>
+</div>
+</section>
+<!-- Tabla Section & Filters -->
+<section class="bg-white border border-arena-border rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Filter Toolbar -->
+<div class="p-4 border-b border-arena-border bg-[#FAF9F5] flex flex-wrap items-center justify-between gap-3">
+<!-- Category Chips -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+<button class="px-3 py-1.5 rounded-lg bg-olivo text-dorado text-xs font-medium shadow-sm flex items-center gap-1.5">
+<span>Todos los Insumos</span>
+<span class="bg-olivo-hover text-[10px] px-1.5 py-0.2 rounded-full text-white">84</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg bg-white border border-terracota-border text-terracota-dark text-xs font-medium hover:bg-terracota-soft transition-colors flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-terracota"></span>
+<span>Bajo Mínimo</span>
+<span class="bg-terracota/20 text-[10px] px-1.5 py-0.2 rounded-full font-bold">3</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg bg-white border border-arena-border text-carbon-muted text-xs font-medium hover:border-carbon-soft/50 transition-colors">
+              Destilados &amp; Tequilas (32)
+            </button>
+<button class="px-3 py-1.5 rounded-lg bg-white border border-arena-border text-carbon-muted text-xs font-medium hover:border-carbon-soft/50 transition-colors">
+              Cítricos &amp; Coctelería Fresca (16)
+            </button>
+<button class="px-3 py-1.5 rounded-lg bg-white border border-arena-border text-carbon-muted text-xs font-medium hover:border-carbon-soft/50 transition-colors">
+              Jarabes &amp; Bitters (18)
+            </button>
+</div>
+<!-- Secondary Display Tools -->
+<div class="flex items-center gap-2">
+<span class="text-xs text-carbon-soft">Ordenar por:</span>
+<select class="text-xs bg-white border border-arena-border rounded-lg py-1 px-2.5 text-carbon focus:outline-none focus:ring-1 focus:ring-olivo">
+<option>Estado de Stock (Urgentes primero)</option>
+<option>Mayor Valor en Libros ($)</option>
+<option>Nombre Alfabético</option>
+<option>Mayor Rotación</option>
+</select>
+</div>
+</div>
+<!-- Full Inventory Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-arena-border bg-[#F5F2EA] text-[11px] font-label font-bold text-carbon-muted uppercase tracking-wider">
+<th class="py-3 px-4 w-10 text-center">
+<input class="rounded border-arena text-olivo focus:ring-olivo" type="checkbox"/>
+</th>
+<th class="py-3 px-4">Insumo / SKU</th>
+<th class="py-3 px-4">Categoría</th>
+<th class="py-3 px-4">Factor de Conversión</th>
+<th class="py-3 px-4 w-44">Existencia y Nivel</th>
+<th class="py-3 px-4">Mín / Máx</th>
+<th class="py-3 px-4">PMP (Costo Prom.)</th>
+<th class="py-3 px-4 text-center">Crítico KDS</th>
+<th class="py-3 px-4 text-center">Caducidad</th>
+<th class="py-3 px-4 text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-arena-border/70 text-xs">
+<!-- ============================================================ -->
+<!-- FILA 1: ALERTA CRÍTICA (Terracota) - Limón con semilla persa -->
+<!-- ============================================================ -->
+<tr class="bg-terracota-soft/60 hover:bg-terracota-soft transition-colors border-l-4 border-l-terracota">
+<td class="py-3.5 px-4 text-center">
+<input class="rounded border-terracota text-terracota focus:ring-terracota" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-carbon text-sm flex items-center gap-1.5">
+<span>Limón con semilla (persa)</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-terracota text-white uppercase tracking-wider">
+                      ¡Bajo Mínimo!
+                    </span>
+</div>
+<div class="text-[11px] text-terracota-dark font-mono flex items-center gap-2 mt-0.5">
+<span>SKU: LIM-VER-01</span>
+<span>•</span>
+<span class="font-sans font-medium text-terracota">Afecta: Margaritas, Ceviches, Guacamole (6 recetas)</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#E7D6CE] text-terracota-dark border border-terracota-border">
+                    Cítricos &amp; Frescos
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-mono text-carbon font-medium">1 Caja (18 kg) → 18,000 g</div>
+<div class="text-[10px] text-carbon-soft">Porción cóctel: 30 ml jugo (~45g)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-bold text-terracota-dark text-sm">2.1 kg</span>
+<span class="text-[10px] font-mono text-terracota font-semibold">11.6% Stock</span>
+</div>
+<!-- Stock Progress Bar in Red/Terracota -->
+<div class="w-full bg-white rounded-full h-2 overflow-hidden border border-terracota-border">
+<div class="bg-terracota h-full rounded-full transition-all duration-300" style="width: 11.6%;"></div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="text-terracota-dark font-semibold">Min: 8.0 kg</div>
+<div class="text-carbon-soft text-[10px]">Máx: 25.0 kg</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="font-semibold text-carbon">$38.00 MXN</div>
+<div class="text-[10px] text-carbon-soft">por kg ($0.038/g)</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<!-- Active Critical Switch Terracota -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-terracota peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+<div class="text-[9px] text-terracota font-bold uppercase mt-0.5">Bloquea Receta</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-terracota-dark">
+<span class="material-symbols-outlined text-xs">schedule</span> 4 días
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right whitespace-nowrap">
+<button class="px-2.5 py-1 text-xs rounded bg-terracota text-white font-medium hover:bg-terracota-dark transition-colors inline-flex items-center gap-1 shadow-sm mr-1">
+<span class="material-symbols-outlined text-xs">add_shopping_cart</span>
+                    Pedir
+                  </button>
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-base">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- ============================================================ -->
+<!-- FILA 2: SELECCIONADA / DRAWER ABIERTO - Tequila blanco 100% Agave -->
+<!-- ============================================================ -->
+<tr class="bg-[#F0EBE0] border-l-4 border-l-dorado hover:bg-[#EAE4D7] cursor-pointer transition-colors" onclick="toggleDrawer(true)">
+<td class="py-3.5 px-4 text-center">
+<input class="rounded border-arena text-olivo focus:ring-olivo" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-carbon text-sm flex items-center gap-2">
+<span class="text-olivo font-bold">Tequila blanco 100% Agave</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold bg-dorado/30 text-olivo border border-dorado/50">
+                      Editando en Ficha
+                    </span>
+</div>
+<div class="text-[11px] text-carbon-soft font-mono flex items-center gap-2 mt-0.5">
+<span>SKU: TEQ-BLA-750</span>
+<span>•</span>
+<span>Cava Sección B-04</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-dorado/20 text-carbon border border-arena">
+                    Licores &amp; Destilados
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-mono text-carbon font-medium">1 Botella (750 ml) → 750 ml</div>
+<div class="text-[10px] text-carbon-soft">16.6 copas estándar (45 ml)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-bold text-olivo text-sm">18 botellas <span class="text-xs font-normal text-carbon-soft">(13,500 ml)</span></span>
+<span class="text-[10px] font-mono text-carbon-soft">60%</span>
+</div>
+<!-- Stock Progress Bar Normal / Good -->
+<div class="w-full bg-arena/30 rounded-full h-2 overflow-hidden">
+<div class="bg-olivo h-full rounded-full transition-all duration-300" style="width: 60%;"></div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="text-carbon font-semibold">Min: 6 bot</div>
+<div class="text-carbon-soft text-[10px]">Máx: 30 bot</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="font-semibold text-carbon">$265.00 MXN</div>
+<div class="text-[10px] text-carbon-soft">$0.353 MXN / ml</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-olivo peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+<div class="text-[9px] text-carbon-soft uppercase mt-0.5">Activo</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="text-carbon-soft text-xs">— No perecedero</span>
+</td>
+<td class="py-3.5 px-4 text-right whitespace-nowrap">
+<button class="p-1 rounded text-olivo hover:bg-olivo/10 transition-colors" onclick="toggleDrawer(true)" title="Abrir detalles">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+</button>
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5" title="Ver kardex">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- ============================================================ -->
+<!-- FILA 3: Carne Rib Eye Choice                                 -->
+<!-- ============================================================ -->
+<tr class="hover:bg-[#FAF9F5] transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="rounded border-arena text-olivo focus:ring-olivo" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-carbon text-sm">Carne Rib Eye Choice High Quality</div>
+<div class="text-[11px] text-carbon-soft font-mono flex items-center gap-2 mt-0.5">
+<span>SKU: CRN-RIB-09</span>
+<span>•</span>
+<span>Cámara Fría Barra &amp; Grill</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-arena/20 text-carbon border border-arena">
+                    Cortes &amp; Carnes
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-mono text-carbon font-medium">1 Pieza (4.5 kg) → 4,500 g</div>
+<div class="text-[10px] text-carbon-soft">Corte estándar: 350 g (Merma 4%)</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-bold text-carbon text-sm">18.0 kg <span class="text-xs font-normal text-carbon-soft">(4 piezas)</span></span>
+<span class="text-[10px] font-mono text-carbon-soft">45%</span>
+</div>
+<div class="w-full bg-arena/30 rounded-full h-2 overflow-hidden">
+<div class="bg-olivo h-full rounded-full transition-all duration-300" style="width: 45%;"></div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="text-carbon font-semibold">Min: 12.0 kg</div>
+<div class="text-carbon-soft text-[10px]">Máx: 40.0 kg</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="font-semibold text-carbon">$495.00 MXN</div>
+<div class="text-[10px] text-carbon-soft">por kg ($0.495/g)</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-olivo peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+<div class="text-[9px] text-carbon-soft uppercase mt-0.5">Activo</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800">
+<span class="material-symbols-outlined text-xs">verified</span> Lote Vigente
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right whitespace-nowrap">
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+</button>
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- ============================================================ -->
+<!-- FILA 4: Jarabe de tamarindo artesanal                        -->
+<!-- ============================================================ -->
+<tr class="hover:bg-[#FAF9F5] transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="rounded border-arena text-olivo focus:ring-olivo" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-carbon text-sm">Jarabe de tamarindo artesanal casa</div>
+<div class="text-[11px] text-carbon-soft font-mono flex items-center gap-2 mt-0.5">
+<span>SKU: JAR-TAM-02</span>
+<span>•</span>
+<span>Producción propia cocina</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-900 border border-amber-200">
+                    Subreceta / Jarabes
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-mono text-carbon font-medium">1 Contenedor (2 L) → 2,000 ml</div>
+<div class="text-[10px] text-carbon-soft">Dosis coctel: 20 ml</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-bold text-carbon text-sm">3.4 Litros</span>
+<span class="text-[10px] font-mono text-carbon-soft">34%</span>
+</div>
+<div class="w-full bg-arena/30 rounded-full h-2 overflow-hidden">
+<div class="bg-amber-600 h-full rounded-full transition-all duration-300" style="width: 34%;"></div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="text-carbon font-semibold">Min: 2.0 L</div>
+<div class="text-carbon-soft text-[10px]">Máx: 10.0 L</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="font-semibold text-carbon">$82.00 MXN</div>
+<div class="text-[10px] text-carbon-soft">por Litro ($0.082/ml)</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+<div class="text-[9px] text-carbon-soft uppercase mt-0.5">Opcional</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-carbon-soft">
+<span class="material-symbols-outlined text-xs">event</span> Cad. 12 días
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right whitespace-nowrap">
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+</button>
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+<!-- ============================================================ -->
+<!-- FILA 5: Queso Provolone Ahumado                              -->
+<!-- ============================================================ -->
+<tr class="hover:bg-[#FAF9F5] transition-colors">
+<td class="py-3.5 px-4 text-center">
+<input class="rounded border-arena text-olivo focus:ring-olivo" type="checkbox"/>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-semibold text-carbon text-sm">Queso Provolone Ahumado D.O.P.</div>
+<div class="text-[11px] text-carbon-soft font-mono flex items-center gap-2 mt-0.5">
+<span>SKU: LAC-PRO-03</span>
+<span>•</span>
+<span>Refrigerador de Tapas &amp; Vinos</span>
+</div>
+</td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-arena/20 text-carbon border border-arena">
+                    Lácteos &amp; Quesos
+                  </span>
+</td>
+<td class="py-3.5 px-4">
+<div class="font-mono text-carbon font-medium">1 Rueda (3 kg) → 3,000 g</div>
+<div class="text-[10px] text-carbon-soft">Porción tabla: 120 g</div>
+</td>
+<td class="py-3.5 px-4">
+<div class="flex items-baseline justify-between mb-1">
+<span class="font-bold text-carbon text-sm">7.2 kg <span class="text-xs font-normal text-carbon-soft">(2.4 ruedas)</span></span>
+<span class="text-[10px] font-mono text-carbon-soft">80%</span>
+</div>
+<div class="w-full bg-arena/30 rounded-full h-2 overflow-hidden">
+<div class="bg-olivo h-full rounded-full transition-all duration-300" style="width: 80%;"></div>
+</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="text-carbon font-semibold">Min: 3.0 kg</div>
+<div class="text-carbon-soft text-[10px]">Máx: 9.0 kg</div>
+</td>
+<td class="py-3.5 px-4 font-mono">
+<div class="font-semibold text-carbon">$340.00 MXN</div>
+<div class="text-[10px] text-carbon-soft">por kg ($0.340/g)</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-8 h-4 bg-olivo peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div>
+</label>
+<div class="text-[9px] text-carbon-soft uppercase mt-0.5">Activo</div>
+</td>
+<td class="py-3.5 px-4 text-center">
+<span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800">
+<span class="material-symbols-outlined text-xs">verified</span> Lote Fresco
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right whitespace-nowrap">
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+</button>
+<button class="p-1 rounded text-carbon-soft hover:text-carbon hover:bg-black/5">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination & Operational Status -->
+<div class="p-4 border-t border-arena-border bg-[#FAF9F5] flex items-center justify-between text-xs text-carbon-soft">
+<div class="flex items-center gap-2">
+<span>Mostrando <strong>1 - 5</strong> de <strong>84 insumos</strong> en Barra y Cava</span>
+<span class="text-arena">•</span>
+<span class="inline-flex items-center gap-1 text-emerald-800 font-medium">
+<span class="material-symbols-outlined text-sm">cloud_done</span> Sincronizado en tiempo real
+            </span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2.5 py-1 rounded border border-arena-border bg-white text-carbon-soft hover:text-carbon disabled:opacity-50">Anterior</button>
+<button class="px-2.5 py-1 rounded bg-olivo text-dorado font-bold">1</button>
+<button class="px-2.5 py-1 rounded border border-arena-border bg-white text-carbon hover:bg-arena/10">2</button>
+<button class="px-2.5 py-1 rounded border border-arena-border bg-white text-carbon hover:bg-arena/10">3</button>
+<span class="px-1 text-carbon-soft">...</span>
+<button class="px-2.5 py-1 rounded border border-arena-border bg-white text-carbon hover:bg-arena/10">17</button>
+<button class="px-2.5 py-1 rounded border border-arena-border bg-white text-carbon-soft hover:text-carbon">Siguiente</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- ============================================================ -->
+<!-- 4. DRAWER / PANEL LATERAL DERECHO DESPLEGADO                 -->
+<!-- Ficha de Insumo: 'Tequila blanco 100% Agave'                 -->
+<!-- ============================================================ -->
+<div class="fixed inset-y-0 right-0 w-[490px] bg-white border-l border-arena-border shadow-2xl z-40 flex flex-col transform transition-transform duration-300 ease-in-out" id="insumoDrawer">
+<!-- Drawer Header -->
+<div class="p-5 border-b border-arena-border bg-[#FAF9F5] flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-dorado/20 text-olivo border border-dorado/40">
+            SKU: TEQ-BLA-750
+          </span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Estatus: Activo
+          </span>
+</div>
+<h3 class="font-headline text-xl font-bold text-carbon">Tequila blanco 100% Agave</h3>
+<p class="text-xs text-carbon-soft mt-0.5">Destilado base para coctelería y servicio por copeo premium</p>
+</div>
+<button class="p-1.5 rounded-lg text-carbon-soft hover:text-carbon hover:bg-arena/20 transition-colors" onclick="toggleDrawer(false)">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<!-- Drawer Body (Scrollable Details) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6">
+<!-- Sección 1: Unidades y Factor de Conversión -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h4 class="font-headline text-sm font-bold text-carbon uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-olivo text-base">scale</span>
+            1. Unidades y Factor de Conversión
+          </h4>
+<span class="text-[11px] text-dorado-muted font-mono font-medium">HU E7-01</span>
+</div>
+<div class="grid grid-cols-2 gap-3 p-3.5 bg-marfil-canvas rounded-xl border border-arena-border text-xs">
+<div>
+<span class="text-carbon-soft text-[11px] block">Unidad de Compra</span>
+<strong class="text-carbon font-semibold text-sm">Botella Vidrio (750 ml)</strong>
+</div>
+<div>
+<span class="text-carbon-soft text-[11px] block">Unidad de Receta / KDS</span>
+<strong class="text-olivo font-semibold text-sm">Mililitro (ml)</strong>
+</div>
+<div class="col-span-2 pt-2 border-t border-arena/40 flex items-center justify-between text-[11px]">
+<span class="text-carbon-soft">Equivalencia calculada:</span>
+<span class="font-mono font-bold text-carbon">1 Botella = 750 ml ≈ 16.6 copas (45 ml)</span>
+</div>
+<div class="col-span-2 flex items-center justify-between text-[11px] bg-white p-2 rounded border border-arena/30">
+<span class="text-carbon-soft flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-dorado">water_drop</span> Merma de servicio (goteo):
+            </span>
+<span class="font-mono font-semibold text-carbon">2.0% (15 ml / botella)</span>
+</div>
+</div>
+</section>
+<!-- Sección 2: Proveedores y Precios Pactados -->
+<section class="space-y-3">
+<h4 class="font-headline text-sm font-bold text-carbon uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-olivo text-base">local_shipping</span>
+          2. Proveedores &amp; Precios Pactados
+        </h4>
+<div class="space-y-2">
+<!-- Proveedor Principal -->
+<div class="p-3 bg-white border border-olivo/40 rounded-xl shadow-xs relative">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-dorado text-sm fill">verified</span>
+<span class="font-semibold text-xs text-carbon">Distribuidora La Europea S.A.</span>
+</div>
+<span class="px-2 py-0.2 rounded-full text-[10px] bg-olivo/10 text-olivo font-medium">Principal</span>
+</div>
+<div class="flex items-center justify-between text-xs mt-2">
+<span class="text-carbon-soft">Precio pactado:</span>
+<span class="font-mono font-bold text-olivo text-sm">$265.00 MXN</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-carbon-soft mt-1 border-t border-arena/20 pt-1">
+<span>Vigencia hasta: 30 Nov 2025</span>
+<span>Lead time de entrega: <strong>24 hrs</strong></span>
+</div>
+</div>
+<!-- Proveedor Secundario -->
+<div class="p-3 bg-marfil-canvas border border-arena-border rounded-xl text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-medium text-carbon">Vinos y Licores San Juan</span>
+<span class="text-[10px] text-carbon-soft font-mono">Respaldo</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<span class="text-carbon-soft text-[11px]">Precio de lista:</span>
+<span class="font-mono font-semibold text-carbon">$278.00 MXN</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Sección 3: Historial y Evolución del Costo PMP (Mini Sparkline SVG) -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<h4 class="font-headline text-sm font-bold text-carbon uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-olivo text-base">monitoring</span>
+            3. Evolución del Costo PMP (6 Meses)
+          </h4>
+<span class="text-xs font-mono font-bold text-terracota">+4.2%</span>
+</div>
+<div class="p-4 bg-marfil-canvas rounded-xl border border-arena-border">
+<div class="flex items-baseline justify-between mb-3">
+<div>
+<span class="text-[10px] text-carbon-soft uppercase tracking-wider">Costo actual por mililitro</span>
+<div class="font-mono text-lg font-bold text-carbon mt-0.5">$0.3533 <span class="text-xs font-normal text-carbon-soft">MXN / ml</span></div>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-carbon-soft uppercase tracking-wider">Costo última compra</span>
+<div class="font-mono text-sm font-semibold text-olivo">$265.00 MXN / bot</div>
+</div>
+</div>
+<!-- Sparkline Chart Component -->
+<div class="relative w-full h-24 pt-2">
+<svg class="w-full h-full overflow-visible" viewbox="0 0 360 80">
+<defs>
+<lineargradient id="costGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#D4AF7C" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#D4AF7C" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid reference lines -->
+<line opacity="0.6" stroke="#D8CEBF" stroke-dasharray="2 2" stroke-width="0.8" x1="0" x2="360" y1="20" y2="20"></line>
+<line opacity="0.6" stroke="#D8CEBF" stroke-dasharray="2 2" stroke-width="0.8" x1="0" x2="360" y1="50" y2="50"></line>
+<!-- Filled Area -->
+<polygon fill="url(#costGradient)" points="10,65 80,48 150,54 220,32 290,26 350,18 350,75 10,75"></polygon>
+<!-- Line Chart -->
+<polyline fill="none" points="10,65 80,48 150,54 220,32 290,26 350,18" stroke="#1E2F28" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></polyline>
+<!-- Data Points with tooltips / values -->
+<circle cx="10" cy="65" fill="#EAE6DD" r="3.5" stroke="#1E2F28" stroke-width="2"></circle>
+<text fill="#736F68" font-family="Inter" font-size="8" text-anchor="middle" x="10" y="78">May $240</text>
+<circle cx="80" cy="48" fill="#EAE6DD" r="3.5" stroke="#1E2F28" stroke-width="2"></circle>
+<circle cx="150" cy="54" fill="#EAE6DD" r="3.5" stroke="#1E2F28" stroke-width="2"></circle>
+<circle cx="220" cy="32" fill="#EAE6DD" r="3.5" stroke="#1E2F28" stroke-width="2"></circle>
+<circle cx="290" cy="26" fill="#EAE6DD" r="3.5" stroke="#1E2F28" stroke-width="2"></circle>
+<circle cx="350" cy="18" fill="#D4AF7C" r="4.5" stroke="#1E2F28" stroke-width="2"></circle>
+<text fill="#1E2F28" font-family="Inter" font-size="9" font-weight="bold" x="330" y="12">$265</text>
+</svg>
+</div>
+<div class="text-[10px] text-center text-carbon-soft mt-1">Evolución mensual ponderada (Mayo — Octubre 2025)</div>
+</div>
+</section>
+<!-- Sección 4: Configuración de Almacén y Stock -->
+<section class="space-y-3">
+<h4 class="font-headline text-sm font-bold text-carbon uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-olivo text-base">tune</span>
+          4. Umbrales de Stock &amp; Protección KDS
+        </h4>
+<div class="p-3.5 bg-marfil-canvas rounded-xl border border-arena-border space-y-3">
+<div class="grid grid-cols-2 gap-3 text-xs">
+<div>
+<label class="text-[11px] text-carbon-soft block mb-1">Mínimo de Seguridad (Alerta)</label>
+<input class="w-full bg-white border border-arena-border rounded p-1.5 font-mono text-carbon font-semibold focus:ring-1 focus:ring-olivo" type="number" value="6"/>
+<span class="text-[10px] text-carbon-soft">botellas (4,500 ml)</span>
+</div>
+<div>
+<label class="text-[11px] text-carbon-soft block mb-1">Punto Máximo (Capacidad)</label>
+<input class="w-full bg-white border border-arena-border rounded p-1.5 font-mono text-carbon font-semibold focus:ring-1 focus:ring-olivo" type="number" value="30"/>
+<span class="text-[10px] text-carbon-soft">botellas en cava</span>
+</div>
+</div>
+<!-- Interactive Critical Switch Notice -->
+<div class="p-3 bg-white rounded-lg border border-arena-border flex items-start gap-3">
+<label class="relative inline-flex items-center cursor-pointer mt-0.5">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-olivo peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+<div>
+<span class="text-xs font-semibold text-carbon block">Insumo Crítico para Servicio</span>
+<p class="text-[11px] text-carbon-soft leading-snug mt-0.5">
+                Si el stock llega a 0 ml, el sistema bloqueará automáticamente en comanderos y KDS platillos vinculados como: <span class="text-olivo font-medium">Margarita de Autor, Paloma Ahumada, Tequila Derecho</span>.
+              </p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Drawer Footer Actions -->
+<div class="p-4 border-t border-arena-border bg-[#FAF9F5] flex items-center justify-between gap-3">
+<button class="px-4 py-2 rounded-lg border border-arena-border bg-white text-carbon hover:bg-arena/20 text-xs font-semibold transition-all">
+        Ver Kardex Completo
+      </button>
+<div class="flex items-center gap-2">
+<button class="px-3 py-2 rounded-lg text-carbon-soft hover:text-carbon text-xs font-medium" onclick="toggleDrawer(false)">
+          Cancelar
+        </button>
+<button class="px-5 py-2 rounded-lg bg-olivo text-dorado hover:bg-olivo-hover font-label text-xs font-bold tracking-wider uppercase shadow-md active:scale-95 transition-all" onclick="toggleDrawer(false)">
+          Guardar Cambios
+        </button>
+</div>
+</div>
+</div>
+<!-- Background overlay for drawer -->
+<div class="fixed inset-0 bg-carbon/20 backdrop-blur-[1px] z-30 transition-opacity duration-300 pointer-events-auto" id="drawerBackdrop" onclick="toggleDrawer(false)"></div>
+<!-- Script for drawer interactivity -->
+<script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('insumoDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.remove('translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+      } else {
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      }
+    }
+  </script>
+</body></html>

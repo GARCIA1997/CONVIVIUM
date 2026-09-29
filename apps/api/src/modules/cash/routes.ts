@@ -3,7 +3,10 @@ import { and, eq, isNull, schema } from "@convivium/db";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
 import type { ApiModule } from "../../lib/module.js";
-import { AppError, conflict, notImplemented } from "../../plugins/errors.js";
+import { can, type Role } from "@convivium/domain";
+import bcrypt from "bcryptjs";
+import { AppError, conflict, forbidden } from "../../plugins/errors.js";
+import { CashService } from "./service.js";
 import { OrdersService } from "../orders/service.js";
 
 const IdParam = z.object({ id: z.string().uuid() });
@@ -11,6 +14,7 @@ const IdParam = z.object({ id: z.string().uuid() });
 const plugin: ApiModule["plugin"] = async (app) => {
   const { db } = app;
   const orders = new OrdersService(app);
+  const svc = new CashService(app);
   const tags = ["caja"];
 
   const currentSession = async (branchId: string, cashierId: string) =>
@@ -43,20 +47,65 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const prev = await db.select().from(schema.payments).where(eq(schema.payments.checkId, check.id));
     const toMxn = (p: { method: string; amount: number; exchangeRate?: number | null }) =>
       p.method === "efectivo_usd" ? Math.round((p.amount * (p.exchangeRate ?? 0)) / 100) : p.amount;
-    await db.insert(schema.payments).values(req.body.payments.map((p) => ({ ...p, tenantId: req.user.tenantId, checkId: check.id, cashSessionId: s.id })));
+    const prevPaid = prev.reduce((sum, p) => sum + toMxn(p), 0);
+    const tendered = req.body.payments.reduce((sum, p) => sum + toMxn(p), 0);
+    const change = Math.max(0, prevPaid + tendered - check.total);
+    // El cambio se entrega en efectivo MXN: se descuenta del efectivo recibido para que el corte cuadre.
+    let toReturn = change;
+    const payments = req.body.payments.map((p) => {
+      if (p.method !== "efectivo_mxn" || toReturn === 0) return p;
+      const take = Math.min(toReturn, p.amount);
+      toReturn -= take;
+      return { ...p, amount: p.amount - take };
+    });
+    if (toReturn > 0) throw new AppError(400, "change_without_cash", "El cambio solo puede entregarse en efectivo MXN");
+    const rows = payments.filter((p) => p.amount > 0);
+    if (rows.length) await db.insert(schema.payments).values(rows.map((p) => ({ ...p, tenantId: req.user.tenantId, checkId: check.id, cashSessionId: s.id })));
     if (req.body.tip) await db.insert(schema.tips).values({ ...req.body.tip, tenantId: req.user.tenantId, checkId: check.id, waiterId: check.waiterId });
-    const paid = [...prev, ...req.body.payments].reduce((sum, p) => sum + toMxn(p), 0);
+    const paid = prevPaid + tendered;
     const settled = paid >= check.total;
     if (settled) await db.update(schema.checks).set({ status: "cobrada", closedAt: new Date() }).where(eq(schema.checks.id, check.id));
     await recordEvent(db, req.user, { type: "check.payment", entity: "check", entityId: check.id, data: req.body });
     if (settled && check.tableId) app.hub.publish(["floor"], { type: "table.status", tableId: check.tableId, status: "libre" });
-    return { paid, change: Math.max(0, paid - check.total), checkStatus: settled ? "cobrada" : check.status };
+    return { paid, change, checkStatus: settled ? "cobrada" : check.status };
   });
 
-  // Definidos en el contrato, pendientes de implementar:
-  app.post("/checks/:id/split", { onRequest: [app.guard("caja.cobrar")], schema: { tags, params: IdParam, body: cash.SplitBody } }, async () => { throw notImplemented(); }); // E6-03
-  app.post("/sessions/current/counts", { onRequest: [app.guard("caja.corte_x")], schema: { tags, body: cash.CashCountBody } }, async () => { throw notImplemented(); }); // E6-07
-  app.post("/checks/:id/reopen", { onRequest: [app.guard("cuenta.reabrir")], schema: { tags, params: IdParam } }, async () => { throw notImplemented(); }); // E6-08
+  /** E6-03 · Dividir cuenta. */
+  app.post("/checks/:id/split", { onRequest: [app.guard("caja.cobrar")], schema: { tags, params: IdParam, body: cash.SplitBody } }, async (req) =>
+    svc.split(req.user, req.params.id, req.body),
+  );
+
+  app.get("/sessions/current/summary", { onRequest: [app.guard("caja.corte_x")], schema: { tags } }, async (req) => svc.summary(req.user));
+
+  /** E6-07 · Corte X / Z. El Z exige permiso de gerente: propio o autorizado en sitio con su PIN. */
+  app.post("/sessions/current/counts", { onRequest: [app.guard("caja.corte_x")], schema: { tags, body: cash.CashCountBody } }, async (req) => {
+    if (req.body.kind === "Z" && !can(req.user.roles, "caja.corte_z")) {
+      if (!req.body.approverPin) throw forbidden("El corte Z requiere autorización de gerente");
+      const approver = await findApproverByPin(req.user.branchId, req.body.approverPin);
+      if (!approver) throw new AppError(401, "bad_pin", "PIN de gerente incorrecto");
+      return svc.count(req.user, req.body, approver);
+    }
+    return svc.count(req.user, req.body);
+  });
+
+  /** Busca en la sucursal un usuario con permiso de corte Z cuyo PIN coincida. */
+  async function findApproverByPin(branchId: string, pin: string) {
+    const rows = await db
+      .select({ id: schema.users.id, pinHash: schema.users.pinHash, role: schema.userRoles.role })
+      .from(schema.users)
+      .innerJoin(schema.userRoles, eq(schema.userRoles.userId, schema.users.id))
+      .where(and(eq(schema.userRoles.branchId, branchId), eq(schema.users.active, true)));
+    for (const r of rows) {
+      if (!can([r.role as Role], "caja.corte_z") || !r.pinHash) continue;
+      if (await bcrypt.compare(pin, r.pinHash)) return r.id;
+    }
+    return null;
+  }
+
+  /** E6-08 · Reabrir cuenta cobrada. */
+  app.post("/checks/:id/reopen", { onRequest: [app.guard("cuenta.reabrir")], schema: { tags, params: IdParam, body: z.object({ reason: z.string().min(3) }) } }, async (req) =>
+    svc.reopen(req.user, req.params.id, req.body.reason),
+  );
 };
 
 export const cashModule: ApiModule = { prefix: "cash", plugin };

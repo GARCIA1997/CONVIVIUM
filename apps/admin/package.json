@@ -12,7 +12,6 @@
   "dependencies": {
     "@convivium/api-client": "workspace:*",
     "@convivium/app-shell": "workspace:*",
-    "@convivium/domain": "workspace:*",
     "@convivium/ui": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

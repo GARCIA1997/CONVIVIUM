@@ -14,6 +14,12 @@ class Hub {
     this.subs.get(channel)!.add(ws);
     ws.on("close", () => this.subs.get(channel)?.delete(ws));
   }
+  /** Dispositivos conectados a un canal (p. ej. pantallas de una estación). */
+  count(channel: string) {
+    let n = 0;
+    for (const ws of this.subs.get(channel) ?? []) if (ws.readyState === ws.OPEN) n++;
+    return n;
+  }
   publish(channels: Channel[], event: RealtimeEvent) {
     const msg = JSON.stringify(event);
     const sent = new Set<WebSocket>();

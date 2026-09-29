@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Mesa 4 Devolución</title>
+<!-- Google Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // CONVIVIUM Brand Tokens
+            olivo: {
+              DEFAULT: '#1E2F28',
+              surface: '#293D35',
+              dark: '#14211C',
+              light: '#374D43'
+            },
+            marfil: {
+              DEFAULT: '#EAE6DD',
+              sheet: '#FAF8F5',
+              pure: '#F5F2EB'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#E5DCce',
+              muted: '#B09E83'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#93442C',
+              soft: '#F8EDE9'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#E8CA9D',
+              dark: '#B08852'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              light: '#2D2D2D',
+              muted: '#525252'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 9999px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stone-900 text-carbon font-body antialiased min-h-screen relative overflow-x-hidden selection:bg-dorado selection:text-olivo">
+<!-- ========================================== -->
+<!-- 1. BACKGROUND CANVAS (Escena Mesa 4 desenfocada) -->
+<!-- ========================================== -->
+<div class="fixed inset-0 z-0 bg-stone-950 overflow-hidden select-none pointer-events-none">
+<!-- Ambient image mimicking the cocktail / bar counter atmosphere -->
+<img class="w-full h-full object-cover opacity-25 filter blur-md scale-105" data-alt="Warm atmospheric close-up of a dimly lit artisanal Mexican restaurant bar counter with stone texture, terracotta cocktail glassware, bottles of mezcal on wooden shelves in the soft bokeh background, warm candle light and amber reflections, editorial hospitality photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnFEFM0rGIu_ZytjA4OUThmNh34BmmYhb20xvQLrdt7GwV_KnJ4rwRH3ReI7RNgYZ9syDGUbAWyOQAtxgoWEeV1LRetQH7s0CuULUhQb5kRlTxEtQK9BEdlBZ89VUP2Ef7h8RnGW412tWMCIsV3c6-vfO1cHjlLhR_KJlTfhknxypFBq0iunZGYG7g9qlYAlRZuJggpENQfCaVhx0BH-Rk1GHXDQtMXxEagTjXuT0jYEjv0oXRrU-g0rD9R0gQ6xQ7DHPwzDILJ8j3"/>
+<!-- Darkened gradient vignette overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black via-stone-950/80 to-black/70"></div>
+<!-- Background Mock: Active Table Context behind the modal -->
+<div class="absolute top-16 left-1/2 -translate-x-1/2 w-full max-w-md px-6 text-stone-300 opacity-60">
+<div class="flex items-center justify-between border-b border-stone-800 pb-3">
+<div>
+<span class="text-[10px] tracking-widest uppercase text-dorado font-medium">Terraza Exterior</span>
+<h2 class="font-headline text-2xl text-stone-100">Mesa 4 — 4 comensales</h2>
+</div>
+<span class="px-2.5 py-1 bg-emerald-950/70 text-emerald-300 border border-emerald-800/60 rounded-full text-xs font-medium">
+          Cuenta Abierta
+        </span>
+</div>
+<div class="mt-4 space-y-2 text-xs text-stone-400">
+<div class="flex justify-between py-1 border-b border-stone-850">
+<span>1x Mezcalita Ahumada Oaxaqueña</span>
+<span class="text-stone-200">$210 MXN</span>
+</div>
+<div class="flex justify-between py-1 border-b border-stone-850">
+<span>1x Tlayuda de Cecina y Tasajo</span>
+<span class="text-stone-200">$340 MXN</span>
+</div>
+<div class="flex justify-between py-1 text-dorado font-medium">
+<span>1x Rib eye 400 g (Comensal 2)</span>
+<span>$620 MXN</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- SHARED COMPONENT: TopAppBar (Docked Top)    -->
+<!-- ========================================== -->
+<header class="fixed top-0 left-0 right-0 z-40 bg-stone-900/90 backdrop-blur-md border-b border-stone-800 shadow-sm">
+<div class="flex justify-between items-center w-full px-4 py-3 max-w-md mx-auto">
+<button aria-label="Cerrar modal" class="p-1 rounded-full text-stone-400 hover:text-stone-200 transition-colors duration-150 active:scale-95 transition-transform duration-100 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[22px]">close</span>
+</button>
+<div class="text-center">
+<span class="block font-sans text-xs tracking-wider uppercase text-amber-200 font-medium">Servicio en Sala</span>
+<h1 class="font-serif tracking-wide text-stone-100 text-sm font-semibold">Mesa 4 — Devolución</h1>
+</div>
+<button aria-label="Ayuda del sistema" class="p-1 rounded-full text-stone-400 hover:text-stone-200 transition-colors duration-150 active:scale-95 transition-transform duration-100 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+</header>
+<!-- ======================================================== -->
+<!-- 2. MAIN BOTTOM SHEET CONTAINER (Hoja modal interactiva)  -->
+<!-- ======================================================== -->
+<main class="relative z-30 pt-14 pb-16 min-h-screen flex flex-col justify-end items-center px-0 sm:px-4">
+<!-- Bottom Sheet Container -->
+<section class="w-full max-w-md bg-marfil-sheet rounded-t-3xl shadow-2xl border-t border-arena-light overflow-hidden transition-all duration-300">
+<!-- Grabber / Drag Pill Handle -->
+<div class="w-full pt-3 pb-2 flex justify-center items-center cursor-grab active:cursor-grabbing">
+<span class="w-12 h-1.5 bg-arena/70 rounded-full block"></span>
+</div>
+<!-- Sheet Header -->
+<div class="px-5 pt-1 pb-4 border-b border-arena/30 flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-terracota/10 text-terracota border border-terracota/20">
+              Incidencia de cocina
+            </span>
+<span class="text-xs text-carbon-muted">Comanda #8041</span>
+</div>
+<h2 class="font-headline text-2xl font-bold text-olivo tracking-tight">Devolución de Platillo</h2>
+<p class="font-body text-xs text-carbon-muted mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-dorado-dark">chair</span>
+            Mesa 4 • Comensal 2 (Terraza)
+          </p>
+</div>
+<button aria-label="Cerrar modal de devolución" class="w-8 h-8 rounded-full bg-arena/20 text-carbon hover:bg-arena/40 flex items-center justify-center transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<!-- Modal Body (Scrollable content) -->
+<div class="px-5 py-4 space-y-5 max-h-[636px] overflow-y-auto">
+<!-- ============================================== -->
+<!-- Tarjeta del Platillo Entregado                 -->
+<!-- ============================================== -->
+<article class="p-3.5 bg-marfil-pure rounded-xl border border-arena/60 shadow-sm relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-dorado/10 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-olivo text-dorado">
+                  Cocina Caliente • Estación 01
+                </span>
+<span class="text-[11px] text-stone-500 font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px] text-terracota">timer</span> 
+                  Hace 6 min
+                </span>
+</div>
+<h3 class="font-headline text-lg font-bold text-olivo tracking-wide">Rib eye 400 g</h3>
+<p class="text-xs text-carbon-muted">
+                Término original ordenado: <span class="font-semibold text-carbon">3/4</span> • Guarnición: Papas al romero
+              </p>
+</div>
+<div class="text-right flex-shrink-0">
+<span class="text-xs text-stone-500 block leading-none">Importe</span>
+<span class="font-body text-base font-bold text-olivo tracking-tight">$620 MXN</span>
+</div>
+</div>
+</article>
+<!-- ============================================== -->
+<!-- PASO 1: Motivo de la Devolución                -->
+<!-- ============================================== -->
+<section aria-labelledby="motivo-label">
+<div class="flex items-center justify-between mb-2.5">
+<label class="font-label text-xs uppercase tracking-wider font-bold text-olivo flex items-center gap-1.5" id="motivo-label">
+<span class="w-4 h-4 rounded-full bg-olivo text-marfil text-[10px] flex items-center justify-center font-bold">1</span>
+              Motivo de la Devolución
+            </label>
+<span class="text-[11px] text-terracota font-medium">Requerido *</span>
+</div>
+<!-- Touch Chips Matrix -->
+<div class="grid grid-cols-2 gap-2 text-xs" role="radiogroup">
+<!-- Chip: Frío -->
+<button aria-checked="false" class="px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]" role="radio" type="button">
+<span class="font-medium">Frío</span>
+<span class="w-3.5 h-3.5 rounded-full border border-arena"></span>
+</button>
+<!-- Chip: Mal término (ACTIVO / SELECCIONADO) -->
+<button aria-checked="true" class="px-3 py-2.5 rounded-lg border-2 border-olivo bg-olivo/5 text-olivo text-left flex items-center justify-between shadow-xs transition-all ring-1 ring-dorado/50 font-semibold" role="radio" type="button">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-olivo material-symbols-fill">check_circle</span>
+                Mal término
+              </span>
+<span class="text-[10px] font-bold text-dorado-dark uppercase tracking-wider">Activo</span>
+</button>
+<!-- Chip: Equivocado -->
+<button aria-checked="false" class="px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]" role="radio" type="button">
+<span class="font-medium">Equivocado</span>
+<span class="w-3.5 h-3.5 rounded-full border border-arena"></span>
+</button>
+<!-- Chip: Objeto extraño -->
+<button aria-checked="false" class="px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]" role="radio" type="button">
+<span class="font-medium">Objeto extraño</span>
+<span class="w-3.5 h-3.5 rounded-full border border-arena"></span>
+</button>
+<!-- Chip: Cliente cambió de opinión -->
+<button aria-checked="false" class="px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]" role="radio" type="button">
+<span class="font-medium truncate">Cambió opinión</span>
+<span class="w-3.5 h-3.5 rounded-full border border-arena"></span>
+</button>
+<!-- Chip: Otro -->
+<button aria-checked="false" class="px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]" role="radio" type="button">
+<span class="font-medium">Otro motivo</span>
+<span class="w-3.5 h-3.5 rounded-full border border-arena"></span>
+</button>
+</div>
+<!-- Note input for Chef -->
+<div class="mt-2.5">
+<label class="block text-[11px] font-medium text-carbon-muted mb-1" for="chef-notes">
+              Nota / Instrucción precisa para Cocina:
+            </label>
+<div class="relative">
+<input class="w-full text-xs text-carbon bg-white border border-arena rounded-lg px-3 py-2.5 focus:outline-none focus:border-olivo focus:ring-1 focus:ring-olivo transition shadow-inner font-body" id="chef-notes" type="text" value="Comensal solicita término medio real, carne suave y jugosa."/>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-stone-400 text-sm pointer-events-none">edit_note</span>
+</div>
+<p class="text-[10px] text-dorado-dark mt-1 italic">
+              “Solicitado término medio, salió cocido de más.”
+            </p>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- PASO 2: Acción a Realizar (Dos tarjetas)       -->
+<!-- ============================================== -->
+<section aria-labelledby="accion-label">
+<div class="flex items-center justify-between mb-2.5">
+<label class="font-label text-xs uppercase tracking-wider font-bold text-olivo flex items-center gap-1.5" id="accion-label">
+<span class="w-4 h-4 rounded-full bg-olivo text-marfil text-[10px] flex items-center justify-center font-bold">2</span>
+              Acción a Realizar en Sistema
+            </label>
+</div>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Opción A: Rehacer platillo (Seleccionada por defecto) -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border-2 border-olivo bg-olivo text-marfil-sheet shadow-sm cursor-pointer transition transform active:scale-[0.99]">
+<input checked="" class="mt-1 text-dorado focus:ring-dorado h-4 w-4 border-arena bg-olivo-surface" name="recovery_action" type="radio" value="remake"/>
+<div class="flex-1">
+<div class="flex items-center justify-between gap-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-dorado text-lg">replay</span>
+<span class="font-headline font-bold text-sm tracking-wide text-white">Rehacer platillo</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-dorado text-olivo-dark">
+                    PRIORIDAD REHACER EN KDS
+                  </span>
+</div>
+<p class="text-[11px] text-stone-300 mt-1 leading-relaxed">
+                  Vuelve a comanda en cocina sin costo extra para el cliente. Genera orden prioritaria inmediata en estación de parrilla.
+                </p>
+</div>
+</label>
+<!-- Opción B: Retirar de cuenta -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border border-arena/70 bg-white hover:bg-stone-50 text-carbon shadow-sm cursor-pointer transition transform active:scale-[0.99]">
+<input class="mt-1 text-terracota focus:ring-terracota h-4 w-4 border-arena" name="recovery_action" type="radio" value="remove"/>
+<div class="flex-1">
+<div class="flex items-center justify-between gap-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-terracota text-lg">lock</span>
+<span class="font-headline font-bold text-sm tracking-wide text-carbon">Retirar de cuenta</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-terracota-soft text-terracota border border-terracota/20">
+                    REQUIERE GERENCIA
+                  </span>
+</div>
+<p class="text-[11px] text-carbon-muted mt-1 leading-relaxed">
+                  Descuenta <span class="font-semibold text-carbon">$620 MXN</span> del folio de Mesa 4. El cliente no deseará esperar otro tiempo.
+                </p>
+</div>
+</label>
+</div>
+</section>
+<!-- ============================================== -->
+<!-- AVISO DE IMPACTO Y MERMA (Kardex)              -->
+<!-- ============================================== -->
+<aside class="p-3 rounded-lg bg-amber-50 border border-amber-200/80 flex items-start gap-2.5 text-stone-800">
+<span class="material-symbols-outlined text-amber-700 text-lg flex-shrink-0 mt-0.5">scale</span>
+<div class="text-[11px] leading-snug">
+<span class="font-bold text-stone-900 block mb-0.5">Impacto en inventario (Kardex Bar &amp; Grill)</span>
+            Se registrará merma operativa de <strong class="text-terracota font-bold">$210 MXN</strong> en Kardex (Costo teórico del insumo Rib Eye Choice 400g).
+          </div>
+</aside>
+<!-- ============================================== -->
+<!-- PIE DE ACCIÓN / VÍAS DE AUTORIZACIÓN           -->
+<!-- ============================================== -->
+<div class="pt-2 space-y-2.5">
+<!-- Botón Primario: Notificación Remota Gerente -->
+<button class="w-full py-3.5 px-4 bg-olivo hover:bg-olivo-surface text-marfil rounded-xl font-body font-semibold text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98] border border-dorado/30" type="button">
+<span class="material-symbols-outlined text-dorado text-base">send_to_mobile</span>
+<span>Solicitar aprobación remota</span>
+<span class="text-[10px] text-dorado-light bg-olivo-dark px-1.5 py-0.5 rounded font-normal normal-case ml-1">SLA 60s</span>
+</button>
+<!-- Botón Secundario: PIN Presencial In Situ -->
+<button class="w-full py-3 px-4 bg-transparent hover:bg-arena/20 text-olivo border border-arena rounded-xl font-body font-semibold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-base text-olivo">pin</span>
+<span>Autorizar con PIN de gerente aquí</span>
+</button>
+</div>
+</div> <!-- /Modal Body -->
+<!-- Safe Area Spacer for Bottom Mobile Browsers -->
+<div class="h-4 bg-marfil-sheet"></div>
+</section>
+</main>
+<!-- ======================================================== -->
+<!-- SHARED COMPONENT: BottomNavBar                           -->
+<!-- ======================================================== -->
+<!-- Contextual check: On this modal bottom-sheet subjourney, we include the shell as requested, docked at the bottom -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-stone-800 bg-stone-900 shadow-lg">
+<!-- Item 1: Mesas -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-amber-100 transition-colors duration-150 active:scale-95 transition-transform duration-100 py-1" href="#mesas">
+<span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+<span class="font-sans text-[11px] font-medium tracking-tight mt-0.5">Mesas</span>
+</a>
+<!-- Item 2: Comanda (ACTIVE - Currently resolving a ticket order incident) -->
+<a class="flex flex-col items-center justify-center text-amber-200 font-semibold active:scale-95 transition-transform duration-100 py-1" href="#comanda">
+<span class="material-symbols-outlined text-[20px] material-symbols-fill">receipt_long</span>
+<span class="font-sans text-[11px] font-medium tracking-tight mt-0.5">Comanda</span>
+</a>
+<!-- Item 3: Cocina -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-amber-100 transition-colors duration-150 active:scale-95 transition-transform duration-100 py-1" href="#cocina">
+<span class="material-symbols-outlined text-[20px]">skillet</span>
+<span class="font-sans text-[11px] font-medium tracking-tight mt-0.5">Cocina</span>
+</a>
+<!-- Item 4: Ajustes -->
+<a class="flex flex-col items-center justify-center text-stone-400 hover:text-amber-100 transition-colors duration-150 active:scale-95 transition-transform duration-100 py-1" href="#ajustes">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span class="font-sans text-[11px] font-medium tracking-tight mt-0.5">Ajustes</span>
+</a>
+</nav>
+<!-- Interactive script for tactile chip selection -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const radioChips = document.querySelectorAll('[role="radio"]');
+      radioChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          radioChips.forEach(c => {
+            c.setAttribute('aria-checked', 'false');
+            c.className = "px-3 py-2.5 rounded-lg border border-arena bg-white/70 text-carbon hover:bg-white text-left flex items-center justify-between transition-all active:scale-[0.98]";
+            const indicator = c.querySelector('span:last-child');
+            if (indicator) {
+              indicator.className = "w-3.5 h-3.5 rounded-full border border-arena";
+              indicator.textContent = "";
+            }
+          });
+          
+          chip.setAttribute('aria-checked', 'true');
+          chip.className = "px-3 py-2.5 rounded-lg border-2 border-olivo bg-olivo/5 text-olivo text-left flex items-center justify-between shadow-xs transition-all ring-1 ring-dorado/50 font-semibold";
+          const indicator = chip.querySelector('span:last-child');
+          if (indicator) {
+            indicator.className = "text-[10px] font-bold text-dorado-dark uppercase tracking-wider";
+            indicator.textContent = "Activo";
+          }
+        });
+      });
+    });
+  </script>
+</body></html>

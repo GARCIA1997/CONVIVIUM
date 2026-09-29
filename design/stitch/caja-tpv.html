@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM - Terminal Punto de Venta</title>
+<!-- Google Fonts: Playfair Display for Mexican hospitality editorial touch + Inter for crisp POS numbers -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              light: '#283E35',
+              dark: '#14201B'
+            },
+            marfil: {
+              DEFAULT: '#F4F1EA',
+              light: '#FAF8F5',
+              card: '#FCFBF9'
+            },
+            arena: {
+              DEFAULT: '#E3DDD2',
+              dark: '#C9B89F'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#EAD7BD',
+              dark: '#B88E56'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              light: '#F8ECE8',
+              hover: '#9E4B30'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              muted: '#5A5854'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-serif-cormorant {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom scrollbar for high-density restaurant touchscreens */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4F1EA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8D2C5;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C9B89F;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil font-body text-carbon antialiased overflow-hidden select-none">
+<div class="flex h-screen w-screen overflow-hidden">
+<!-- ========================================================================= -->
+<!-- 1. SIDEBAR IZQUIERDA (Estilo Verde Olivo #1E2F28, Docking permanente)     -->
+<!-- ========================================================================= -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-stone-900 flex flex-col justify-between border-r border-stone-800 shadow-xl z-30 transition-all">
+<div class="p-4 flex flex-col h-full justify-between">
+<!-- Brand & Context Header -->
+<div>
+<div class="flex items-center gap-3 px-2 pt-1 pb-4 border-b border-stone-800">
+<div class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center border border-amber-300/40 text-amber-200 font-serif-cormorant text-xl font-bold shadow-inner">
+              C
+            </div>
+<div class="flex flex-col">
+<span class="font-headline tracking-widest text-base font-bold text-stone-100 uppercase">CONVIVIUM</span>
+<span class="text-[10px] text-stone-400 font-light italic truncate tracking-wide">Donde todo sucede en la mesa.</span>
+</div>
+</div>
+<!-- Station Tag -->
+<div class="mt-4 px-2 py-1.5 rounded bg-stone-800/80 border border-stone-700/60 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[11px] font-medium tracking-wider uppercase text-stone-300">CAJA CENTRAL · 01</span>
+</div>
+<span class="text-[10px] text-amber-200/90 font-mono font-medium">TURNO #3</span>
+</div>
+<!-- Main Navigation (Shared Components JSON execution) -->
+<nav class="mt-6 flex flex-col gap-1.5">
+<!-- Tab 1: Cuentas (ACTIVE) -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-stone-800 text-amber-200 font-medium active:scale-[0.98] transition-transform duration-100 group shadow-sm" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-200">receipt_long</span>
+<span class="text-xs tracking-wide">Cuentas</span>
+</div>
+<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-200/20 text-amber-200 border border-amber-200/40">4</span>
+</a>
+<!-- Tab 2: Caja y Cobro -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#">
+<span class="material-symbols-outlined text-stone-400">point_of_sale</span>
+<span class="text-xs tracking-wide">Caja y Cobro</span>
+</a>
+<!-- Tab 3: Movimientos -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#">
+<span class="material-symbols-outlined text-stone-400">sync_alt</span>
+<span class="text-xs tracking-wide">Movimientos</span>
+</a>
+<!-- Tab 4: Corte de Turno -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#">
+<span class="material-symbols-outlined text-stone-400">calculate</span>
+<span class="text-xs tracking-wide">Corte de Turno</span>
+</a>
+</nav>
+<!-- Quick Action CTA -->
+<div class="mt-6 px-1">
+<button class="w-full py-2 px-3 bg-stone-800/90 hover:bg-stone-700/80 text-amber-200 text-xs font-medium rounded-lg border border-amber-300/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Nueva Venta</span>
+</button>
+</div>
+</div>
+<!-- Sidebar Footer & Cashier Info -->
+<div class="pt-4 border-t border-stone-800 space-y-3">
+<div class="flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-xs font-semibold text-stone-300">
+              LG
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="text-xs font-medium text-stone-200 truncate">Luis G.</span>
+<span class="text-[10px] text-stone-400 truncate">Capitán / Cajero</span>
+</div>
+<div class="ml-auto flex items-center text-emerald-400" title="En línea / Sincronizado localmente">
+<span class="material-symbols-outlined text-sm">cloud_done</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-1.5 pt-1">
+<button class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded bg-stone-800/60 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-[11px] transition-colors" title="Ajustes de terminal">
+<span class="material-symbols-outlined text-sm">settings</span>
+<span>Ajustes</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded bg-stone-800/60 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-[11px] transition-colors" title="Bloquear pantalla / Cerrar Sesión">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span>Cerrar Sesión</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Workspace Canvas (Offset by sidebar width 16rem = 256px) -->
+<div class="flex-1 flex flex-col pl-64 h-screen overflow-hidden">
+<!-- Top Utility App Bar (Shared Component TopNavBar) -->
+<header class="h-14 bg-stone-100 flex items-center justify-between px-6 border-b border-arena/70 shadow-sm shrink-0">
+<div class="flex items-center gap-4">
+<span class="font-headline font-semibold text-xs uppercase tracking-wider text-stone-800">
+            CONVIVIUM POS
+          </span>
+<div class="h-4 w-px bg-arena"></div>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+<input class="w-full bg-white/80 border border-arena rounded-lg pl-8 pr-3 py-1.5 text-xs text-carbon placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-all font-body" placeholder="Buscar mesa, comensal o mesero..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 bg-stone-200/50 p-1 rounded-lg border border-arena/40">
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors" title="Sincronizar">
+<span class="material-symbols-outlined text-sm">sync</span>
+</button>
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors relative" title="Notificaciones">
+<span class="material-symbols-outlined text-sm">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-terracota"></span>
+</button>
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors" title="Tiempo de Turno">
+<span class="material-symbols-outlined text-sm">lock_clock</span>
+</button>
+</div>
+<div class="h-4 w-px bg-arena"></div>
+<button class="px-3 py-1.5 rounded-lg border border-arena bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm text-stone-500">account_balance_wallet</span>
+<span>Fondo de Caja</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs font-medium flex items-center gap-1.5 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-sm">point_of_sale</span>
+<span>Cerrar Turno</span>
+</button>
+</div>
+</header>
+<!-- 3-Column Working Grid -->
+<main class="flex-1 grid grid-cols-12 overflow-hidden bg-marfil">
+<!-- ========================================================================= -->
+<!-- 2. COLUMNA IZQUIERDA (3 Cols): Cuentas Abiertas y Filtros                  -->
+<!-- ========================================================================= -->
+<section class="col-span-3 border-r border-arena flex flex-col h-full bg-marfil-light/60">
+<!-- Column Header with Stats -->
+<div class="p-4 border-b border-arena/80 bg-marfil-card/80 backdrop-blur">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xs font-bold uppercase tracking-wider text-stone-600 font-headline">Cuentas Activas</h2>
+<span class="text-xs font-semibold text-stone-800 font-mono">$4,320.00 MXN</span>
+</div>
+<!-- Filter Pills -->
+<div class="flex gap-1.5 pt-1">
+<button class="px-2.5 py-1 rounded-md text-[11px] font-medium bg-stone-900 text-amber-200 shadow-xs">
+                Todas (4)
+              </button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-medium bg-white hover:bg-stone-100 text-terracota border border-terracota/20 transition-colors">
+                Por cobrar (1)
+              </button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-medium bg-white hover:bg-stone-100 text-stone-600 border border-arena transition-colors">
+                En consumo (3)
+              </button>
+</div>
+</div>
+<!-- Accounts Scrollable List -->
+<div class="flex-1 overflow-y-auto p-3 space-y-2.5">
+<!-- Mesa 7 (ACTIVE & SELECTED - Pidiendo cuenta) -->
+<div class="relative p-3.5 rounded-xl bg-white border-2 border-terracota shadow-md cursor-pointer transition-all hover:translate-y-[-1px]">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-serif-cormorant text-lg font-bold text-stone-900 leading-tight">Mesa 7</span>
+<span class="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-terracota-light text-terracota font-headline font-semibold">
+                      Pidió cuenta
+                    </span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Terraza Jardín · 4 Comensales</p>
+</div>
+<div class="text-right">
+<span class="font-mono text-base font-bold text-stone-900">$1,180.00</span>
+<span class="block text-[10px] text-stone-400 font-mono">01:15 h</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-arena/50 flex items-center justify-between text-[11px] text-stone-600">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs text-stone-400">person</span>
+<span>Carlos Ramos</span>
+</div>
+<span class="inline-flex items-center gap-1 text-emerald-700 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  En revisión
+                </span>
+</div>
+</div>
+<!-- Mesa 2 -->
+<div class="p-3.5 rounded-xl bg-white/80 border border-arena hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-serif-cormorant text-base font-semibold text-stone-800">Mesa 2</span>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
+                      En postre
+                    </span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Salón Cava · 2 Comensales</p>
+</div>
+<div class="text-right">
+<span class="font-mono text-sm font-semibold text-stone-800">$840.00</span>
+<span class="block text-[10px] text-stone-400 font-mono">00:48 h</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-arena/40 flex items-center justify-between text-[11px] text-stone-500">
+<span class="truncate">Marco R.</span>
+<span class="text-[10px]">Copa + Digestivos</span>
+</div>
+</div>
+<!-- Barra Roberto (Tab #14) -->
+<div class="p-3.5 rounded-xl bg-white/80 border border-arena hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-serif-cormorant text-base font-semibold text-stone-800">Barra · Roberto</span>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100/80 text-amber-800 font-mono text-[10px]">
+                      #14
+                    </span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Mostrador directo · 1 Comensal</p>
+</div>
+<div class="text-right">
+<span class="font-mono text-sm font-semibold text-stone-800">$560.00</span>
+<span class="block text-[10px] text-stone-400 font-mono">00:25 h</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-arena/40 flex items-center justify-between text-[11px] text-stone-500">
+<span class="truncate">Bartender Elena</span>
+<span class="text-[10px]">2x Mezcal Tobalá</span>
+</div>
+</div>
+<!-- Mesa 12 -->
+<div class="p-3.5 rounded-xl bg-white/80 border border-arena hover:border-stone-400 transition-all cursor-pointer">
+<div class="flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-serif-cormorant text-base font-semibold text-stone-800">Mesa 12</span>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      Plato fuerte
+                    </span>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Salón Principal · 6 Comensales</p>
+</div>
+<div class="text-right">
+<span class="font-mono text-sm font-semibold text-stone-800">$1,740.00</span>
+<span class="block text-[10px] text-stone-400 font-mono">01:40 h</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2 border-t border-arena/40 flex items-center justify-between text-[11px] text-stone-500">
+<span class="truncate">Luis G.</span>
+<span class="text-[10px]">Cortes de carne</span>
+</div>
+</div>
+</div>
+<!-- Bottom Summary Strip -->
+<div class="p-3 border-t border-arena bg-stone-100/70 text-center">
+<span class="text-[11px] text-stone-500">Última comanda enviada hace 4 min</span>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- 3. COLUMNA CENTRAL (5 Cols): Detalle Mesa 7 & División de Cuenta           -->
+<!-- ========================================================================= -->
+<section class="col-span-5 border-r border-arena flex flex-col h-full bg-white/70 overflow-hidden">
+<!-- Mesa 7 Header Banner -->
+<div class="p-4 border-b border-arena bg-marfil-card/60">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="font-serif-cormorant text-2xl font-bold text-stone-900 tracking-tight">Mesa 7</h1>
+<span class="px-2 py-0.5 rounded-md bg-stone-200/80 text-stone-700 text-xs font-medium">Terraza Jardín</span>
+<span class="text-xs text-stone-400">·</span>
+<span class="text-xs text-stone-600 font-medium">4 Comensales</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-stone-500 mt-1">
+<span>Mesero: <strong class="text-stone-700 font-medium">Carlos Ramos</strong></span>
+<span>·</span>
+<span>Apertura: <strong class="text-stone-700 font-medium">14:15 h (01:15 transcurrido)</strong></span>
+</div>
+</div>
+<!-- Quick Table Actions -->
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg border border-arena bg-white hover:bg-stone-50 text-stone-700 transition-colors shadow-xs" title="Transferir mesa">
+<span class="material-symbols-outlined text-sm">move_down</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-arena bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-sm text-stone-600">receipt</span>
+<span>Pre-cuenta</span>
+</button>
+</div>
+</div>
+<!-- Segmented Bill Split Mode Tabs -->
+<div class="mt-4 pt-3 border-t border-arena/60">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-semibold uppercase tracking-wider text-stone-500 font-headline">Modo de cobro</span>
+<div class="inline-flex p-0.5 rounded-lg bg-stone-100 border border-arena">
+<button class="px-2.5 py-1 text-xs text-stone-600 hover:text-stone-900 rounded-md transition-all">Cuenta completa</button>
+<button class="px-2.5 py-1 text-xs text-stone-600 hover:text-stone-900 rounded-md transition-all">Partes iguales</button>
+<button class="px-2.5 py-1 text-xs text-stone-600 hover:text-stone-900 rounded-md transition-all">Por producto</button>
+<button class="px-2.5 py-1 text-xs font-semibold bg-stone-900 text-amber-200 rounded-md shadow-xs transition-all">Por comensal</button>
+</div>
+</div>
+<!-- Comensales (C1 - C4) Horizontal Selectors -->
+<div class="grid grid-cols-4 gap-2 mt-3">
+<div class="p-2 rounded-lg border border-arena bg-marfil/50 hover:bg-marfil cursor-pointer transition-all">
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-stone-700">C1</span>
+<span class="font-mono text-stone-800 text-[11px]">$320</span>
+</div>
+<span class="text-[10px] text-stone-400 block truncate mt-0.5">2 productos</span>
+</div>
+<div class="p-2 rounded-lg border-2 border-stone-800 bg-white shadow-xs cursor-pointer transition-all relative">
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-stone-900">C2</span>
+<span class="font-mono font-bold text-stone-900 text-[11px]">$395</span>
+</div>
+<span class="text-[10px] text-terracota font-medium block truncate mt-0.5">Seleccionado</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-white"></span>
+</div>
+<div class="p-2 rounded-lg border border-arena bg-marfil/50 hover:bg-marfil cursor-pointer transition-all">
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-stone-700">C3</span>
+<span class="font-mono text-stone-800 text-[11px]">$265</span>
+</div>
+<span class="text-[10px] text-stone-400 block truncate mt-0.5">1 producto</span>
+</div>
+<div class="p-2 rounded-lg border border-arena bg-marfil/50 hover:bg-marfil cursor-pointer transition-all">
+<div class="flex justify-between items-center text-xs">
+<span class="font-bold text-stone-700">C4</span>
+<span class="font-mono text-stone-800 text-[11px]">$200</span>
+</div>
+<span class="text-[10px] text-stone-400 block truncate mt-0.5">1 producto</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Items Ordered (Table Order Breakdown) -->
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<div class="flex items-center justify-between text-xs text-stone-400 pb-1 border-b border-arena/40 uppercase tracking-wider font-semibold">
+<span>Detalle de productos registrados</span>
+<span>Subtotal</span>
+</div>
+<!-- Item 1 (Comensal 1) -->
+<div class="flex items-start justify-between py-2 border-b border-arena/30 group">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-semibold text-stone-500 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-semibold text-stone-800">Hamburguesa Convivium (220g)</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-100 text-stone-500 font-mono">C1</span>
+</div>
+<p class="text-[11px] text-stone-500 italic">Término 3/4 · Queso provolone ahumado · Sin cebolla</p>
+<span class="text-[10px] text-stone-400 font-mono">Comanda 14:18 h</span>
+</div>
+</div>
+<span class="font-mono text-xs font-semibold text-stone-800">$260.00</span>
+</div>
+<!-- Item 2 (Comensal 1) -->
+<div class="flex items-start justify-between py-2 border-b border-arena/30">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-semibold text-stone-500 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-semibold text-stone-800">Agua Fresca de Guayaba &amp; Albahaca</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-100 text-stone-500 font-mono">C1</span>
+</div>
+<span class="text-[10px] text-stone-400 font-mono">Comanda 14:19 h</span>
+</div>
+</div>
+<span class="font-mono text-xs font-semibold text-stone-800">$60.00</span>
+</div>
+<!-- Item 3 (Comensal 2 - Destacado) -->
+<div class="flex items-start justify-between py-2.5 px-2 -mx-2 rounded-lg bg-amber-50/60 border border-amber-200/50">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-bold text-stone-800 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-bold text-stone-900">Tacos de Rib Eye con Tuétano (3 pzas)</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-900 text-amber-200 font-mono font-bold">C2</span>
+</div>
+<p class="text-[11px] text-stone-600 italic">Tortilla maíz criollo hecho a mano · Salsa tatemada aparte</p>
+<span class="text-[10px] text-stone-400 font-mono">Comanda 14:22 h</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-stone-900">$310.00</span>
+</div>
+<!-- Item 4 (Comensal 2) -->
+<div class="flex items-start justify-between py-2.5 px-2 -mx-2 rounded-lg bg-amber-50/60 border border-amber-200/50">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-bold text-stone-800 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-bold text-stone-900">Cerveza Artesanal Charro 355ml</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-900 text-amber-200 font-mono font-bold">C2</span>
+</div>
+<p class="text-[11px] text-stone-600 italic">Vaso helado con limón</p>
+<span class="text-[10px] text-stone-400 font-mono">Comanda 14:24 h</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-stone-900">$85.00</span>
+</div>
+<!-- Item 5 (Comensal 3) -->
+<div class="flex items-start justify-between py-2 border-b border-arena/30">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-semibold text-stone-500 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-semibold text-stone-800">Enchiladas Suizas de Pato Confitado</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-100 text-stone-500 font-mono">C3</span>
+</div>
+<p class="text-[11px] text-stone-500 italic">Gratinado con queso de cuadro Chiapas</p>
+</div>
+</div>
+<span class="font-mono text-xs font-semibold text-stone-800">$265.00</span>
+</div>
+<!-- Item 6 (Comensal 4) -->
+<div class="flex items-start justify-between py-2 border-b border-arena/30">
+<div class="flex items-start gap-2.5">
+<span class="text-xs font-mono font-semibold text-stone-500 w-5 pt-0.5">1x</span>
+<div>
+<div class="flex items-center gap-2">
+<p class="text-xs font-semibold text-stone-800">Mezcalita Jamaica &amp; Sal de Gusano</p>
+<span class="text-[10px] px-1.5 rounded bg-stone-100 text-stone-500 font-mono">C4</span>
+</div>
+<p class="text-[11px] text-stone-500 italic">Mezcal Espadín joven 45°</p>
+</div>
+</div>
+<span class="font-mono text-xs font-semibold text-stone-800">$200.00</span>
+</div>
+</div>
+<!-- Financial Breakdown Summary Box -->
+<div class="p-4 bg-marfil-light border-t border-arena space-y-2">
+<div class="flex justify-between text-xs text-stone-600">
+<span>Subtotal sin impuestos</span>
+<span class="font-mono">$1,051.72 MXN</span>
+</div>
+<div class="flex justify-between text-xs text-stone-600">
+<span>IVA (16% Incluido en precios)</span>
+<span class="font-mono text-stone-500">$168.28 MXN</span>
+</div>
+<!-- Discount Applied -->
+<div class="flex justify-between items-center text-xs py-1 px-2 rounded bg-terracota-light/70 border border-terracota/20 text-terracota">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs">local_offer</span>
+<span>Cortesía postre degustación (Autorizó Gerente Luis G.)</span>
+</div>
+<span class="font-mono font-semibold">-$40.00 MXN</span>
+</div>
+<div class="pt-2 border-t border-arena/70 flex justify-between items-baseline">
+<div>
+<span class="font-serif-cormorant text-base font-bold text-stone-900 block leading-tight">Total Cuenta Mesa</span>
+<span class="text-[10px] text-stone-400">Total a liquidar (4 Comensales)</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-2xl font-bold text-stone-900 tracking-tight">$1,180.00</span>
+<span class="text-xs font-medium text-stone-500 block">MXN</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- 4. COLUMNA DERECHA (4 Cols): Panel de Cobro Multimoneda & Pago Mixto       -->
+<!-- ========================================================================= -->
+<section class="col-span-4 flex flex-col h-full bg-white overflow-y-auto">
+<div class="p-5 flex flex-col h-full justify-between space-y-4">
+<div class="space-y-4">
+<!-- Section Header -->
+<div class="flex items-center justify-between pb-3 border-b border-arena">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-700">payments</span>
+<h2 class="font-serif-cormorant text-lg font-bold text-stone-900">Liquidación &amp; Cobro</h2>
+</div>
+<span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                  Listo para cobrar
+                </span>
+</div>
+<!-- Tip Selector Module (Propina Sugerida) -->
+<div>
+<div class="flex items-center justify-between mb-2">
+<label class="text-xs font-semibold text-stone-700 uppercase tracking-wider font-headline">Propina Sugerida</label>
+<span class="text-xs text-stone-500 font-mono">+$177.00 (15%)</span>
+</div>
+<div class="grid grid-cols-5 gap-1.5">
+<button class="py-2 px-1 rounded-lg border border-arena bg-white hover:bg-stone-50 text-center transition-colors">
+<span class="block text-xs font-semibold text-stone-700">10%</span>
+<span class="block text-[10px] font-mono text-stone-400">$118</span>
+</button>
+<!-- 15% SELECTED -->
+<button class="py-2 px-1 rounded-lg border-2 border-stone-800 bg-stone-900 text-amber-200 text-center shadow-xs">
+<span class="block text-xs font-bold">15%</span>
+<span class="block text-[10px] font-mono opacity-90">$177</span>
+</button>
+<button class="py-2 px-1 rounded-lg border border-arena bg-white hover:bg-stone-50 text-center transition-colors">
+<span class="block text-xs font-semibold text-stone-700">20%</span>
+<span class="block text-[10px] font-mono text-stone-400">$236</span>
+</button>
+<button class="py-2 px-1 rounded-lg border border-arena bg-white hover:bg-stone-50 text-center transition-colors">
+<span class="block text-xs font-medium text-stone-700">Otro</span>
+<span class="block text-[10px] text-stone-400">%</span>
+</button>
+<button class="py-2 px-1 rounded-lg border border-arena bg-white hover:bg-stone-50 text-center transition-colors">
+<span class="block text-xs font-medium text-stone-500">Sin</span>
+<span class="block text-[10px] text-stone-400">$0</span>
+</button>
+</div>
+</div>
+<!-- Mixed Payment Tender Form -->
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-semibold text-stone-700 uppercase tracking-wider font-headline">Métodos de Pago Combinado</label>
+<span class="text-[11px] text-stone-500">Asignar montos</span>
+</div>
+<!-- Row 1: Efectivo MXN -->
+<div class="p-3 rounded-xl border border-arena bg-marfil-card/80 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-600 text-lg">local_atm</span>
+<span class="text-xs font-semibold text-stone-800">Efectivo MXN</span>
+</div>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-stone-200 text-stone-600 font-mono">Billetes / Monedas</span>
+</div>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-stone-400">$</span>
+<input class="w-full pl-7 pr-12 py-2 rounded-lg border border-arena bg-white font-mono text-sm font-bold text-stone-900 text-right focus:outline-none focus:ring-1 focus:ring-stone-400" type="text" value="500.00"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-stone-400">MXN</span>
+</div>
+</div>
+<!-- Row 2: Tarjeta Bancaria (Terminal Externa) -->
+<div class="p-3 rounded-xl border-2 border-stone-800 bg-white space-y-2.5 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-900 text-lg">credit_card</span>
+<span class="text-xs font-bold text-stone-900">Tarjeta Bancaria</span>
+</div>
+<!-- Type Selector -->
+<div class="inline-flex p-0.5 rounded bg-stone-100 border border-arena">
+<button class="px-2 py-0.5 text-[10px] font-bold bg-white text-stone-900 rounded shadow-xs">Crédito</button>
+<button class="px-2 py-0.5 text-[10px] text-stone-500 hover:text-stone-800 rounded">Débito</button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-2">
+<div class="col-span-6 relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-stone-400">$</span>
+<input class="w-full pl-6 pr-8 py-1.5 rounded-lg border border-arena bg-stone-50 font-mono text-xs font-bold text-stone-900 text-right focus:outline-none focus:ring-1 focus:ring-stone-400" type="text" value="600.00"/>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[10px] text-stone-400">MXN</span>
+</div>
+<div class="col-span-6">
+<input class="w-full px-2.5 py-1.5 rounded-lg border border-arena bg-white font-mono text-xs text-stone-700 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" placeholder="No. Auth / Ref #8392" type="text" value="AUTH-49201"/>
+</div>
+</div>
+</div>
+<!-- Row 3: Efectivo USD / Divisa -->
+<div class="p-3 rounded-xl border border-arena bg-marfil-card/80 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-stone-600 text-lg">currency_exchange</span>
+<span class="text-xs font-semibold text-stone-800">Dólares USD (Efectivo)</span>
+</div>
+<span class="text-[10px] font-mono text-stone-500 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+                      T.C. $17.20 MXN
+                    </span>
+</div>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-stone-400">$</span>
+<input class="w-full pl-7 pr-12 py-1.5 rounded-lg border border-arena bg-white font-mono text-xs text-stone-700 text-right placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400" placeholder="0.00 USD (Equiv. $0.00 MXN)" type="text"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-stone-400">USD</span>
+</div>
+</div>
+</div>
+<!-- Payment Math & Cambio Breakdown Box -->
+<div class="p-3.5 rounded-xl bg-stone-100 border border-arena/80 space-y-2">
+<div class="flex justify-between text-xs text-stone-600">
+<span>Cuenta + Propina (15%):</span>
+<span class="font-mono font-semibold text-stone-800">$1,357.00 MXN</span>
+</div>
+<div class="flex justify-between text-xs text-stone-600">
+<span>Total Ingresado en Terminal:</span>
+<span class="font-mono font-semibold text-stone-800">$1,500.00 MXN</span>
+</div>
+<!-- Large Change Display (Cambio / Vuelto) -->
+<div class="pt-2 border-t border-arena flex items-center justify-between bg-stone-900 -mx-3.5 -mb-3.5 p-3 rounded-b-xl text-amber-200">
+<div>
+<span class="text-[11px] uppercase tracking-wider font-semibold text-amber-200/80 block">Cambio a Entregar</span>
+<span class="text-[10px] text-stone-400">Efectivo en caja</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-2xl font-bold tracking-tight text-amber-200">$143.00</span>
+<span class="text-[10px] font-mono text-amber-300/80 block">MXN</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Action Buttons & Regulatory Footer -->
+<div class="space-y-2.5 pt-2">
+<button class="w-full py-3.5 px-4 bg-stone-900 hover:bg-stone-800 text-amber-200 rounded-xl font-headline font-semibold text-sm tracking-wide uppercase flex items-center justify-center gap-2 shadow-lg border border-amber-300/40 active:scale-[0.99] transition-all">
+<span class="material-symbols-outlined text-lg">print</span>
+<span>Registrar cobro y emitir ticket</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 border border-arena bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span>Factura CFDI 4.0</span>
+</button>
+<button class="py-2 px-3 border border-arena bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span>Duplicar ticket</span>
+</button>
+</div>
+<!-- Mandatory Operational Notice -->
+<p class="text-[10px] text-stone-500 text-center leading-relaxed pt-1">
+<span class="material-symbols-outlined text-xs align-text-top text-stone-400 mr-0.5">info</span>
+                El cobro con tarjeta se realiza en la terminal externa y se valida con el número de autorización.
+              </p>
+</div>
+</div>
+</section>
+</main>
+</div>
+</div>
+</body></html>

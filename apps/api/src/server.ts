@@ -9,9 +9,17 @@ import authPlugin from "./plugins/auth.js";
 import dbPlugin from "./plugins/db.js";
 import errorsPlugin from "./plugins/errors.js";
 import realtimePlugin from "./plugins/realtime.js";
+import webPlugin from "./plugins/web.js";
+import { startSyncWorker } from "./lib/sync-worker.js";
 
 export async function buildServer() {
-  const app = Fastify({ logger: { level: process.env.LOG_LEVEL ?? "info" } }).withTypeProvider<ZodTypeProvider>();
+  const app = Fastify({
+    logger: {
+      level: process.env.LOG_LEVEL ?? "info",
+      // Nunca registrar tokens: el WebSocket los recibe en la query.
+      serializers: { req: (req) => ({ method: req.method, url: req.url.replace(/token=[^&]+/, "token=[redactado]") }) },
+    },
+  }).withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
@@ -38,6 +46,8 @@ export async function buildServer() {
     if (mod.mode && mod.mode !== (isEdge ? "edge" : "cloud")) continue;
     await app.register(mod.plugin, { prefix: `/v1/${mod.prefix}` });
   }
+  await app.register(webPlugin);
+  if (isEdge) startSyncWorker(app);
   return app;
 }
 

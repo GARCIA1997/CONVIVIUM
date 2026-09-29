@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>CONVIVIUM - Vista Mesero</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: '#1E2F28',
+              marfil: '#EAE6DD',
+              marfilBg: '#F5F3EF',
+              arena: '#C9B89F',
+              terracota: '#B45A3C',
+              carbon: '#1A1A1A',
+              dorado: '#D4AF7C'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Pulso refinado para listo por entregar */
+    @keyframes subtle-pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(212, 175, 124, 0.45);
+      }
+      50% {
+        box-shadow: 0 0 0 7px rgba(212, 175, 124, 0);
+      }
+    }
+    .pulse-ready {
+      animation: subtle-pulse 2.2s infinite ease-in-out;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#1A1A1A] flex justify-center items-start min-h-screen font-body antialiased selection:bg-[#D4AF7C] selection:text-[#1E2F28] p-0 md:py-6">
+<!-- Mobile PWA Canvas Container (Max 414px, Mobile First optimized for 390px) -->
+<div class="w-full max-w-[414px] min-h-screen md:min-h-[852px] bg-[#F5F3EF] flex flex-col relative shadow-2xl overflow-hidden md:rounded-3xl border border-[#C9B89F]/30 pb-20">
+<!-- TopAppBar conforme a la especificación Shared Components JSON -->
+<header class="fixed top-0 max-w-[414px] w-full z-50 flex justify-between items-center px-4 h-12 text-[#EAE6DD] bg-[#1E2F28] border-b border-[#C9B89F]/20">
+<div class="flex items-center gap-1.5 text-xs text-[#C9B89F]">
+<span class="material-symbols-outlined text-[17px] text-[#D4AF7C]" data-icon="wifi">wifi</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="font-label text-[11px] tracking-wide text-[#EAE6DD]/80">En línea</span>
+</div>
+<!-- Headline / Monograma Brand -->
+<div class="flex items-center gap-1.5">
+<span class="font-display tracking-[0.2em] font-semibold text-[#EAE6DD] text-base uppercase">CONVIVIUM</span>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="Notificaciones" class="relative p-1.5 text-[#EAE6DD] hover:bg-[#1E2F28]/80 transition-colors rounded-full">
+<span class="material-symbols-outlined text-[19px] text-[#C9B89F]" data-icon="notifications">notifications</span>
+<span class="absolute top-0.5 right-0.5 w-4 h-4 bg-[#B45A3C] text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[#1E2F28]">2</span>
+</button>
+<span class="material-symbols-outlined text-[18px] text-[#D4AF7C]/90" data-icon="lock_clock">lock_clock</span>
+</div>
+</header>
+<!-- Contextual Shift & Waiter Meta Header (Verde Olivo Extended Top Surface) -->
+<div class="bg-[#1E2F28] pt-14 pb-3 px-4 text-[#EAE6DD] shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-display text-sm tracking-wide text-[#D4AF7C] italic">Servicio de Sala</p>
+<h1 class="text-base font-medium tracking-tight text-[#EAE6DD] flex items-center gap-2">
+<span>Hola, Ana</span>
+<span class="text-xs font-normal text-[#C9B89F]/80">· Turno comida</span>
+</h1>
+</div>
+<div class="text-right">
+<span class="text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-[#14201B] text-[#D4AF7C] border border-[#D4AF7C]/30 font-medium">Piso 1</span>
+<p class="text-[10px] text-[#C9B89F]/70 mt-0.5">12 Mesas asignadas</p>
+</div>
+</div>
+<!-- Área Tabs Selector: Salón, Terraza, Barra -->
+<nav aria-label="Áreas de Restaurante" class="flex items-center gap-2 mt-3 pt-2 border-t border-[#C9B89F]/20">
+<button class="flex-1 py-1.5 text-center text-xs font-medium tracking-wider uppercase transition-all relative text-[#D4AF7C] bg-[#14201B]/80 rounded-md border border-[#D4AF7C]/40">
+          Salón
+          <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-[#D4AF7C] rounded-full"></span>
+</button>
+<button class="flex-1 py-1.5 text-center text-xs font-normal tracking-wider uppercase text-[#C9B89F] hover:text-[#EAE6DD] transition-all rounded-md">
+          Terraza
+        </button>
+<button class="flex-1 py-1.5 text-center text-xs font-normal tracking-wider uppercase text-[#C9B89F] hover:text-[#EAE6DD] transition-all rounded-md">
+          Barra
+        </button>
+</nav>
+</div>
+<!-- Leyenda / Chips de Estado del Salón -->
+<section aria-label="Estados de Mesa" class="px-3.5 py-2.5 bg-[#EAE6DD] border-b border-[#C9B89F]/30 flex items-center justify-between overflow-x-auto custom-scrollbar gap-2">
+<div class="flex items-center gap-1.5 bg-[#F5F3EF] px-2.5 py-1 rounded border border-[#C9B89F] shadow-xs flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-stone-400"></span>
+<span class="text-[11px] font-medium text-[#1A1A1A]">Libre (4)</span>
+</div>
+<div class="flex items-center gap-1.5 bg-[#1E2F28] px-2.5 py-1 rounded text-[#EAE6DD] flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span class="text-[11px] font-medium">Ocupada (4)</span>
+</div>
+<div class="flex items-center gap-1.5 bg-[#D4AF7C] px-2.5 py-1 rounded text-[#1E2F28] flex-shrink-0">
+<span class="material-symbols-outlined text-[13px] animate-bounce" data-icon="notifications_active">notifications_active</span>
+<span class="text-[11px] font-semibold">Listo (2)</span>
+</div>
+<div class="flex items-center gap-1.5 bg-[#B45A3C] px-2.5 py-1 rounded text-white flex-shrink-0">
+<span class="material-symbols-outlined text-[13px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-[11px] font-semibold">Cuenta (2)</span>
+</div>
+</section>
+<!-- Banner Flotante Interactivo de Cocina (Toast Notificación Caliente) -->
+<div class="mx-3 mt-2.5 mb-1 bg-white border border-[#D4AF7C] rounded-lg p-2.5 shadow-md flex items-center justify-between gap-2.5 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#D4AF7C]"></div>
+<div class="flex items-center gap-2 pl-1.5">
+<div class="w-8 h-8 rounded-full bg-[#D4AF7C]/20 text-[#1E2F28] flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px] text-[#B45A3C]" data-icon="soup_kitchen">soup_kitchen</span>
+</div>
+<div class="leading-tight">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-[#1E2F28] bg-[#EAE6DD] px-1.5 py-0.5 rounded">Mesa 4</span>
+<span class="text-[10px] text-[#B45A3C] font-semibold uppercase tracking-wider">Cocina Caliente</span>
+</div>
+<p class="text-[12px] font-medium text-[#1A1A1A] mt-0.5">2 Tacos al pastor listos para servir</p>
+</div>
+</div>
+<button class="bg-[#1E2F28] hover:bg-[#14201B] active:scale-95 text-[#D4AF7C] text-[11px] font-semibold px-2.5 py-1.5 rounded flex items-center gap-1 transition-transform flex-shrink-0 shadow-xs" onclick="this.closest('div').style.display='none'">
+<span class="material-symbols-outlined text-[14px]" data-icon="done_all">done_all</span>
+<span>Entregado</span>
+</button>
+</div>
+<!-- Contenedor del Plano Visual Interactivo de Mesas (Grid M1 a M12) -->
+<main class="flex-1 px-3 py-2 overflow-y-auto custom-scrollbar">
+<div class="grid grid-cols-2 gap-2.5">
+<!-- MESA 1: Ocupada (Verde Olivo) -->
+<article class="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-3 border border-[#1E2F28] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#EAE6DD]">M1</span>
+<span class="text-[10px] text-[#C9B89F]">· Cuadrada</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-[#C9B89F]">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>4
+            </span>
+</div>
+<div class="my-auto">
+<span class="text-xs font-semibold text-[#D4AF7C] block">$1,420 MXN</span>
+<p class="text-[11px] text-[#EAE6DD]/80">4 platillos en mesa</p>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>45 min</span>
+<span class="font-medium text-[#D4AF7C]/90">Activa</span>
+</div>
+</article>
+<!-- MESA 2: Libre (Marfil borde arena) -->
+<article class="bg-[#F5F3EF] text-[#1A1A1A] rounded-lg p-3 border border-[#C9B89F] shadow-2xs flex flex-col justify-between h-[122px] relative active:bg-[#EAE6DD] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M2</span>
+<span class="text-[10px] text-stone-500">· Redonda</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-stone-600">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>2
+            </span>
+</div>
+<div class="my-auto text-center py-1">
+<span class="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
+<span>Mesa limpia</span>
+<span class="font-medium text-[#1E2F28]">Abrir +</span>
+</div>
+</article>
+<!-- MESA 3: Pidió cuenta (Terracota) -->
+<article class="bg-[#B45A3C] text-white rounded-lg p-3 border border-[#B45A3C] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-white">M3</span>
+<span class="text-[10px] text-orange-200">· Rectangular</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-orange-100">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>6
+            </span>
+</div>
+<div class="my-auto flex items-center justify-between bg-black/15 px-2 py-1 rounded">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-white" data-icon="receipt">receipt</span>
+<span class="text-xs font-semibold">Pidió cuenta</span>
+</div>
+<span class="text-[11px] font-bold text-orange-200">$2,890</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-orange-100 border-t border-white/20 pt-1.5">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="timer">timer</span>1h 10m</span>
+<span class="font-bold underline text-white">Cobrar</span>
+</div>
+</article>
+<!-- MESA 4: Listo por entregar (Dorado con Pulso Activo) -->
+<article class="bg-[#D4AF7C] text-[#1E2F28] rounded-lg p-3 border-2 border-[#1E2F28]/30 shadow-md flex flex-col justify-between h-[122px] relative pulse-ready active:scale-[0.99] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M4</span>
+<span class="text-[10px] text-[#1E2F28]/70">· Cuadrada</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1E2F28]">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>4
+            </span>
+</div>
+<div class="my-auto flex items-center gap-1.5 bg-[#1E2F28]/10 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[18px] text-[#B45A3C] animate-pulse" data-icon="notifications_active">notifications_active</span>
+<div class="leading-none">
+<span class="text-[11px] font-bold text-[#1E2F28] block">¡Platillo Listo!</span>
+<span class="text-[9px] text-[#1E2F28]/80 font-medium">Cocina Caliente</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#1E2F28]/90 border-t border-[#1E2F28]/20 pt-1.5 font-medium">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>30 min</span>
+<span class="font-bold uppercase tracking-wider text-[9px] bg-[#1E2F28] text-[#D4AF7C] px-1.5 py-0.5 rounded">Llevar</span>
+</div>
+</article>
+<!-- MESA 5: Ocupada (Verde Olivo) -->
+<article class="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-3 border border-[#1E2F28] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#EAE6DD]">M5</span>
+<span class="text-[10px] text-[#C9B89F]">· Redonda</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-[#C9B89F]">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>2
+            </span>
+</div>
+<div class="my-auto">
+<span class="text-xs font-semibold text-[#D4AF7C] block">$680 MXN</span>
+<p class="text-[11px] text-[#EAE6DD]/70">Bebidas servidas</p>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>15 min</span>
+<span class="text-emerald-400 font-medium">En orden</span>
+</div>
+</article>
+<!-- MESA 6: Libre (Marfil borde arena) -->
+<article class="bg-[#F5F3EF] text-[#1A1A1A] rounded-lg p-3 border border-[#C9B89F] shadow-2xs flex flex-col justify-between h-[122px] relative active:bg-[#EAE6DD] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M6</span>
+<span class="text-[10px] text-stone-500">· Cuadrada</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-stone-600">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>4
+            </span>
+</div>
+<div class="my-auto text-center py-1">
+<span class="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
+<span>Montada</span>
+<span class="font-medium text-[#1E2F28]">Abrir +</span>
+</div>
+</article>
+<!-- MESA 7: Ocupada (Verde Olivo, Mesa Grande 8 pax) -->
+<article class="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-3 border border-[#1E2F28] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#EAE6DD]">M7</span>
+<span class="text-[10px] text-[#C9B89F]">· Imperial</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-[#D4AF7C] font-semibold">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>8
+            </span>
+</div>
+<div class="my-auto">
+<span class="text-xs font-semibold text-[#D4AF7C] block">$4,250 MXN</span>
+<p class="text-[10px] text-[#EAE6DD]/70">Tiempos principales</p>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
+<span class="flex items-center gap-0.5 text-amber-300"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>1h 35m</span>
+<span class="text-xs text-[#EAE6DD]">Sobremesa</span>
+</div>
+</article>
+<!-- MESA 8: Listo por entregar (Dorado - Bebidas de Barra) -->
+<article class="bg-[#D4AF7C] text-[#1E2F28] rounded-lg p-3 border-2 border-[#1E2F28]/30 shadow-md flex flex-col justify-between h-[122px] relative pulse-ready active:scale-[0.99] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M8</span>
+<span class="text-[10px] text-[#1E2F28]/70">· Redonda</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1E2F28]">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>2
+            </span>
+</div>
+<div class="my-auto flex items-center gap-1.5 bg-[#1E2F28]/10 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[17px] text-[#1E2F28]" data-icon="local_bar">local_bar</span>
+<div class="leading-none">
+<span class="text-[11px] font-bold text-[#1E2F28] block">Coctelería lista</span>
+<span class="text-[9px] text-[#1E2F28]/80 font-medium">2 Mezcalitas en barra</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#1E2F28]/90 border-t border-[#1E2F28]/20 pt-1.5 font-medium">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>50 min</span>
+<span class="font-bold uppercase tracking-wider text-[9px] bg-[#1E2F28] text-[#D4AF7C] px-1.5 py-0.5 rounded">Retirar</span>
+</div>
+</article>
+<!-- MESA 9: Libre (Marfil borde arena) -->
+<article class="bg-[#F5F3EF] text-[#1A1A1A] rounded-lg p-3 border border-[#C9B89F] shadow-2xs flex flex-col justify-between h-[122px] relative active:bg-[#EAE6DD] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M9</span>
+<span class="text-[10px] text-stone-500">· Redonda</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-stone-600">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>2
+            </span>
+</div>
+<div class="my-auto text-center py-1">
+<span class="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
+<span>Lista</span>
+<span class="font-medium text-[#1E2F28]">Abrir +</span>
+</div>
+</article>
+<!-- MESA 10: Pidió cuenta (Terracota) -->
+<article class="bg-[#B45A3C] text-white rounded-lg p-3 border border-[#B45A3C] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-white">M10</span>
+<span class="text-[10px] text-orange-200">· Cuadrada</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-orange-100">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>3
+            </span>
+</div>
+<div class="my-auto flex items-center justify-between bg-black/15 px-2 py-1 rounded">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-white" data-icon="receipt">receipt</span>
+<span class="text-xs font-semibold">Cuenta lista</span>
+</div>
+<span class="text-[11px] font-bold text-orange-200">$1,150</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-orange-100 border-t border-white/20 pt-1.5">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="timer">timer</span>55 min</span>
+<span class="font-bold underline text-white">Cobrar TPV</span>
+</div>
+</article>
+<!-- MESA 11: Ocupada (Verde Olivo) -->
+<article class="bg-[#1E2F28] text-[#EAE6DD] rounded-lg p-3 border border-[#1E2F28] shadow-sm flex flex-col justify-between h-[122px] relative active:opacity-90 transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#EAE6DD]">M11</span>
+<span class="text-[10px] text-[#C9B89F]">· Cuadrada</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-[#C9B89F]">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>4
+            </span>
+</div>
+<div class="my-auto">
+<span class="text-xs font-semibold text-[#D4AF7C] block">$1,890 MXN</span>
+<p class="text-[11px] text-[#EAE6DD]/70">Entradas servidas</p>
+</div>
+<div class="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
+<span class="flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]" data-icon="schedule">schedule</span>22 min</span>
+<span class="text-emerald-400 font-medium">A tiempo</span>
+</div>
+</article>
+<!-- MESA 12: Libre (Marfil borde arena) -->
+<article class="bg-[#F5F3EF] text-[#1A1A1A] rounded-lg p-3 border border-[#C9B89F] shadow-2xs flex flex-col justify-between h-[122px] relative active:bg-[#EAE6DD] transition-all cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-lg font-bold tracking-tight text-[#1E2F28]">M12</span>
+<span class="text-[10px] text-stone-500">· Rectangular</span>
+</div>
+<span class="inline-flex items-center gap-1 text-[11px] text-stone-600">
+<span class="material-symbols-outlined text-[13px]" data-icon="group">group</span>6
+            </span>
+</div>
+<div class="my-auto text-center py-1">
+<span class="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
+<span>Para grupo</span>
+<span class="font-medium text-[#1E2F28]">Abrir +</span>
+</div>
+</article>
+</div>
+</main>
+<!-- FAB: + Cuenta de barra (Flotante contextual superior a la barra fija) -->
+<div class="fixed bottom-[74px] right-[calc(50%-195px+14px)] max-md:right-4 z-40">
+<button class="bg-[#1E2F28] text-[#D4AF7C] border border-[#D4AF7C]/40 shadow-lg px-3.5 py-2.5 rounded-full flex items-center gap-2 hover:bg-[#14201B] active:scale-95 transition-all text-xs font-medium tracking-wide">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+<span>Cuenta de barra</span>
+</button>
+</div>
+<!-- Barra de Navegación Inferior Fija (BottomNavBar Nativa Docked) -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 max-w-[414px] w-full z-50 bg-[#1E2F28] h-[64px] px-3 flex items-center justify-around text-[#C9B89F] shadow-[0_-4px_12px_rgba(0,0,0,0.15)]">
+<!-- Tab 1: Mesas (Activa - Plano de Sala) -->
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#D4AF7C] font-medium transition-colors">
+<span class="material-symbols-outlined text-[22px]" data-icon="table_restaurant" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<span class="text-[10px] font-medium tracking-tight mt-0.5">Mesas</span>
+</button>
+<!-- Tab 2: Comandas -->
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#C9B89F] opacity-75 hover:opacity-100 transition-opacity relative">
+<span class="material-symbols-outlined text-[22px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] tracking-tight mt-0.5">Comandas</span>
+<span class="absolute top-1 right-[26%] w-2 h-2 bg-[#D4AF7C] rounded-full"></span>
+</button>
+<!-- Tab 3: Avisos -->
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#C9B89F] opacity-75 hover:opacity-100 transition-opacity relative">
+<span class="material-symbols-outlined text-[22px]" data-icon="notifications">notifications</span>
+<span class="text-[10px] tracking-tight mt-0.5">Avisos</span>
+<span class="absolute top-0.5 right-[24%] bg-[#B45A3C] text-white text-[9px] font-bold px-1 rounded-full leading-tight">2</span>
+</button>
+<!-- Tab 4: Perfil -->
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#C9B89F] opacity-75 hover:opacity-100 transition-opacity">
+<div class="w-6 h-6 rounded-full border border-[#D4AF7C]/60 bg-[#14201B] text-[#D4AF7C] flex items-center justify-center text-[10px] font-bold">
+          AN
+        </div>
+<span class="text-[10px] tracking-tight mt-0.5">Ana M.</span>
+</button>
+</nav>
+</div>
+</body></html>

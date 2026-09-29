@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM | Dashboard en vivo del Dueño</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              50: '#F4F7F5',
+              100: '#E2EBE5',
+              800: '#263D34',
+              900: '#1E2F28',
+              950: '#14201B'
+            },
+            marfil: {
+              DEFAULT: '#F7F5F0',
+              light: '#FBF9F5',
+              dark: '#ECE8DF'
+            },
+            arena: {
+              DEFAULT: '#C9B89F',
+              light: '#DFD5C5',
+              muted: '#ECE5DB'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              dark: '#9E4A2F',
+              soft: '#C85A32',
+              light: '#FBECE8'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#EAD7BD',
+              dark: '#A37E4C'
+            },
+            carbon: '#1A1A1A'
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "Georgia", "serif"],
+            body: ["Inter", "system-ui", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#F7F5F0] text-neutral-800 font-body antialiased min-h-screen flex selection:bg-amber-200/50">
+<!-- SIDEBAR IZQUIERDA (Shared Component Anchored: Verde Olivo profundo) -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col justify-between bg-neutral-900 border-r border-amber-900/30 shadow-sm z-30 select-none">
+<!-- Header Sidebar -->
+<div class="px-5 pt-6 pb-4">
+<div class="flex items-center gap-3.5 mb-2">
+<div class="w-10 h-10 rounded-full border border-amber-300/40 flex items-center justify-center bg-amber-900/20 text-amber-200 shadow-inner">
+<span class="font-display text-xl font-bold tracking-wider">C</span>
+</div>
+<div>
+<div class="font-headline tracking-widest text-base font-bold uppercase text-amber-100 flex items-center gap-2">
+            CONVIVIUM
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans tracking-normal font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-500/30">
+              En vivo
+            </span>
+</div>
+<p class="text-[11px] text-neutral-400 font-normal tracking-wide">Donde todo sucede en la mesa</p>
+</div>
+</div>
+<div class="mt-3 px-2.5 py-1.5 rounded bg-neutral-800/40 border border-neutral-800 flex items-center justify-between text-xs text-neutral-400">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-amber-300/80">location_on</span>
+          Sucursal Centro
+        </span>
+<span class="text-[10px] text-amber-200/60 font-mono">Paseo Reforma</span>
+</div>
+</div>
+<!-- Navegación Primaria -->
+<nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
+<!-- 1. Inicio (Activo) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-amber-200 bg-amber-900/20 font-semibold cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined fill text-amber-200 text-xl">dashboard</span>
+<span class="text-sm font-medium">Inicio</span>
+</a>
+<!-- 2. Mesas -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">table_restaurant</span>
+<span class="text-sm font-medium">Mesas</span>
+</a>
+<!-- 3. Comandas -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">receipt_long</span>
+<span class="text-sm font-medium">Comandas</span>
+</a>
+<!-- 4. Cocina -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">skillet</span>
+<span class="text-sm font-medium">Cocina</span>
+</a>
+<!-- 5. Inventario -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">inventory_2</span>
+<span class="text-sm font-medium">Inventario</span>
+</a>
+<!-- 6. Compras -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">shopping_cart</span>
+<span class="text-sm font-medium">Compras</span>
+</a>
+<!-- 7. Reportes -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">bar_chart</span>
+<span class="text-sm font-medium">Reportes</span>
+</a>
+<!-- 8. Configuración -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-neutral-300 hover:text-neutral-100 hover:bg-neutral-800/50 cursor-pointer select-none transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</nav>
+<!-- Footer Sidebar -->
+<div class="px-3 py-4 border-t border-neutral-800 space-y-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800/40 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">help_outline</span>
+<span>Soporte Convivium</span>
+</a>
+<div class="pt-2 flex items-center justify-between px-2">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-neutral-800 border border-amber-300/30 flex items-center justify-center text-xs font-semibold text-amber-200">
+            RV
+          </div>
+<div class="truncate">
+<p class="text-xs font-medium text-neutral-200 truncate">Don Roberto V.</p>
+<p class="text-[10px] text-neutral-400 truncate">Propietario</p>
+</div>
+</div>
+<button class="text-neutral-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-neutral-800/50 transition-colors" title="Cerrar sesión">
+<span class="material-symbols-outlined text-lg">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- CONTENIDO PRINCIPAL (Canvas con offset de sidebar) -->
+<div class="ml-64 flex-1 flex flex-col min-h-screen">
+<!-- TOPBAR SUPERIOR (Shared Component Anchored con estética refinada) -->
+<header class="sticky top-0 z-20 bg-[#F7F5F0]/95 backdrop-blur-md border-b border-[#C9B89F]/40 px-8 py-3.5 flex items-center justify-between">
+<!-- Lado Izquierdo: Sucursal Selector + Status en vivo -->
+<div class="flex items-center gap-5">
+<div class="relative group">
+<button class="flex items-center gap-2.5 text-left bg-white/80 hover:bg-white border border-[#C9B89F]/60 px-3.5 py-1.5 rounded-lg shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-[#1E2F28] text-lg">storefront</span>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-neutral-900 tracking-tight">Sucursal Centro</span>
+<span class="material-symbols-outlined text-neutral-500 text-sm">expand_more</span>
+</div>
+<p class="text-[10px] text-neutral-500 font-normal">Paseo de la Reforma #220</p>
+</div>
+</button>
+</div>
+<!-- Indicador Pulsante en Vivo -->
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium shadow-xs">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span>En vivo · <span class="font-normal text-emerald-700">Actualizado hace 12s</span></span>
+</div>
+</div>
+<!-- Lado Derecho: Rango Fecha, Corte Rápido, Notificaciones & Profile -->
+<div class="flex items-center gap-3">
+<!-- Selector rápido de fecha -->
+<div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-[#C9B89F]/50 rounded-lg text-xs font-medium text-neutral-700 shadow-sm">
+<span class="material-symbols-outlined text-neutral-500 text-base">calendar_today</span>
+<span>Hoy, Jueves 24 Octubre</span>
+</div>
+<!-- Botón Corte Rápido -->
+<button class="flex items-center gap-1.5 bg-white hover:bg-stone-50 text-neutral-800 border border-[#C9B89F] hover:border-neutral-500 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition-colors shadow-sm">
+<span class="material-symbols-outlined text-base text-amber-700">receipt</span>
+<span>Exportar Corte Rápido</span>
+</button>
+<!-- Botón Nueva Orden (Direct Primary CTA) -->
+<button class="flex items-center gap-1.5 bg-[#1E2F28] hover:bg-[#263D34] text-white text-xs font-medium px-3.5 py-1.5 rounded-lg transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Nueva Orden</span>
+</button>
+<div class="h-5 w-px bg-[#C9B89F]/50 mx-1"></div>
+<!-- Notificaciones -->
+<button class="relative p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-stone-200/50 transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+<!-- Avatar Don Roberto -->
+<div class="flex items-center gap-2.5 pl-1.5">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-[#C9B89F] shadow-sm bg-neutral-200">
+<img class="w-full h-full object-cover" data-alt="Distinguished Mexican restaurant owner with subtle graying hair, wearing a fine linen shirt in a warm restaurant interior. The lighting is gentle daylight mixed with warm ambient brass sconces, capturing a sophisticated hospitable atmosphere with rich tones of deep green and polished timber." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZZEoVMZeEGaXwRZwKQKPaHql3MY3VI4-wdRgWuKyX7RtRK0qBnKZeKRji1sGSr9AGWrEMlg18y3NVkVwhBXQvweVOEEsmv3yQFTu8m_WhTxhrF6WpYK87FigYF-Pxl1D0V81oyMzf4L5Yw5qBDxpEJSAqdrqn7MWn9E3HO89l0TDf-42hfx0uzw2u0bWaWN3mXeop1Z7UzUzYRsYvIKLWDsXnwdchv7K7mzoOOpulk7VXhn1x6Yy3tMDzW0TBEhQYTZH9K9PyrGW5"/>
+</div>
+<div class="hidden lg:block leading-tight">
+<span class="text-xs font-semibold text-neutral-900 block">Don Roberto V.</span>
+<span class="text-[10px] text-neutral-500 block">Propietario</span>
+</div>
+</div>
+</div>
+</header>
+<!-- CUERPO PRINCIPAL DEL DASHBOARD -->
+<main class="flex-1 p-8 space-y-6">
+<!-- ENCABEZADO DE SECCIÓN CON ESTILO EDITORIAL -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#C9B89F]/30 pb-4">
+<div>
+<span class="text-[11px] font-bold uppercase tracking-[0.2em] text-[#B45A3C]">Monitoreo Operativo en Tiempo Real</span>
+<h1 class="font-display text-3xl font-semibold text-neutral-900 mt-0.5 tracking-tight">
+            Resumen General de Operaciones
+          </h1>
+<p class="text-xs text-neutral-600 mt-1 font-normal">
+            Corte parcial del turno almuerzo-cena. Comparativa contra el jueves anterior al mismo horario (21:40 hrs).
+          </p>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="text-neutral-500 font-medium">Turno en curso:</span>
+<span class="px-2.5 py-1 bg-[#1E2F28]/10 text-[#1E2F28] font-semibold rounded-md border border-[#1E2F28]/20">
+            Noche / Cena (19:00 - Cierre)
+          </span>
+</div>
+</div>
+<!-- SECCIÓN 1: KPI CARDS EN TIEMPO REAL (Grid de 4) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Card 1: Ventas Hoy -->
+<div class="bg-white/90 border border-[#C9B89F]/60 rounded-xl p-5 shadow-xs hover:border-[#1E2F28]/40 transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-semibold text-neutral-500 tracking-wide uppercase">Ventas hoy</span>
+<span class="inline-flex items-center text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] mr-0.5">trending_up</span>
+              +12.5%
+            </span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-display text-3xl font-bold text-neutral-900 tracking-tight">$24,580</span>
+<span class="text-xs font-medium text-neutral-500">MXN</span>
+</div>
+<div class="mt-3 pt-3 border-t border-neutral-100 flex flex-col gap-1">
+<div class="flex justify-between text-[11px] text-neutral-600">
+<span>Meta del día: $28,000 MXN</span>
+<span class="font-semibold text-neutral-800">87.8%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28] h-1.5 rounded-full" style="width: 87.8%"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Ticket Promedio -->
+<div class="bg-white/90 border border-[#C9B89F]/60 rounded-xl p-5 shadow-xs hover:border-[#1E2F28]/40 transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-semibold text-neutral-500 tracking-wide uppercase">Ticket promedio</span>
+<span class="inline-flex items-center text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] mr-0.5">north_east</span>
+              +4.2%
+            </span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-display text-3xl font-bold text-neutral-900 tracking-tight">$412</span>
+<span class="text-xs font-medium text-neutral-500">MXN / comensal</span>
+</div>
+<div class="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-600">
+<span>Alimentos: <strong class="text-neutral-800 font-semibold">$275</strong></span>
+<span class="text-[#C9B89F]">•</span>
+<span>Bebidas: <strong class="text-neutral-800 font-semibold">$137</strong></span>
+</div>
+</div>
+<!-- Card 3: Comensales & Rotación -->
+<div class="bg-white/90 border border-[#C9B89F]/60 rounded-xl p-5 shadow-xs hover:border-[#1E2F28]/40 transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-semibold text-neutral-500 tracking-wide uppercase">Comensales</span>
+<span class="inline-flex items-center text-[11px] font-medium text-neutral-600 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
+              16 mesas totales
+            </span>
+</div>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display text-3xl font-bold text-neutral-900 tracking-tight">118</span>
+<span class="text-xs font-medium text-neutral-500">personas hoy</span>
+</div>
+<div class="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px]">
+<span class="text-neutral-600">Rotación de salón:</span>
+<span class="font-semibold text-neutral-800 bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200/60">
+              1.8 vueltas/mesa
+            </span>
+</div>
+</div>
+<!-- Card 4: Ocupación de Mesas -->
+<div class="bg-white/90 border border-[#C9B89F]/60 rounded-xl p-5 shadow-xs hover:border-[#1E2F28]/40 transition-all">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-semibold text-neutral-500 tracking-wide uppercase">Ocupación de Mesas</span>
+<span class="text-xs font-bold text-[#1E2F28]">75% (12/16)</span>
+</div>
+<!-- Barra visual multicromática segmentada -->
+<div class="h-2 w-full flex rounded-full overflow-hidden bg-stone-200 my-2.5">
+<div class="bg-[#1E2F28]" style="width: 75%" title="12 Ocupadas"></div>
+<div class="bg-[#B45A3C]" style="width: 6.25%" title="1 Cuenta Pedida"></div>
+<div class="bg-stone-300" style="width: 18.75%" title="3 Libres"></div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-[10.5px]">
+<span class="flex items-center gap-1 text-neutral-700">
+<span class="w-2 h-2 rounded-full bg-[#1E2F28]"></span>
+              12 ocupadas
+            </span>
+<span class="flex items-center gap-1 text-neutral-500">
+<span class="w-2 h-2 rounded-full bg-stone-300"></span>
+              3 libres
+            </span>
+<span class="flex items-center gap-1 font-semibold text-terracota">
+<span class="w-2 h-2 rounded-full bg-[#B45A3C] animate-pulse"></span>
+              1 cuenta ($2,890)
+            </span>
+</div>
+</div>
+</div>
+<!-- SECCIÓN 2: GRID PRINCIPAL (Columna Izquierda 65% + Columna Derecha 35%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- COLUMNA IZQUIERDA / CENTRAL (Ancho 65% ~ col-span-8) -->
+<div class="lg:col-span-8 space-y-6">
+<!-- 2.a Curva de Ventas por Hora -->
+<div class="bg-white rounded-xl border border-[#C9B89F]/60 p-6 shadow-xs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+<div>
+<h2 class="font-display text-lg font-bold text-neutral-900">Curva de Ventas por Hora</h2>
+<p class="text-xs text-neutral-500">Evolución horaria del servicio (13:00 - 22:00 hrs) vs Jueves anterior</p>
+</div>
+<!-- Leyendas -->
+<div class="flex items-center gap-4 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-[#1E2F28]"></span>
+<span class="font-medium text-neutral-700">Hoy acumulado</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-0.5 border-t-2 border-dashed border-[#D4AF7C]"></span>
+<span class="text-neutral-500">Promedio Jueves ant.</span>
+</div>
+</div>
+</div>
+<!-- Gráfico SVG Elegante Lineal + Área Degradada -->
+<div class="w-full h-56 relative pt-2">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 680 180">
+<defs>
+<lineargradient id="olivoGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#1E2F28" stop-opacity="0.30"></stop>
+<stop offset="100%" stop-color="#1E2F28" stop-opacity="0.01"></stop>
+</lineargradient>
+</defs>
+<!-- Grid horizontal sutil -->
+<line stroke="#ECE8DF" stroke-dasharray="3,3" stroke-width="1" x1="0" x2="680" y1="20" y2="20"></line>
+<line stroke="#ECE8DF" stroke-dasharray="3,3" stroke-width="1" x1="0" x2="680" y1="65" y2="65"></line>
+<line stroke="#ECE8DF" stroke-dasharray="3,3" stroke-width="1" x1="0" x2="680" y1="110" y2="110"></line>
+<line stroke="#ECE8DF" stroke-width="1" x1="0" x2="680" y1="155" y2="155"></line>
+<!-- Línea Jueves Anterior (Punteada Beige/Dorada) -->
+<!-- 13h: 150, 14h: 110, 15h: 80, 16h: 120, 17h: 140, 18h: 135, 19h: 90, 20h: 50, 21h: 40, 22h: 70 -->
+<path d="M 0,152 Q 75,115 150,85 T 300,135 T 450,75 T 600,45 T 680,68" fill="none" stroke="#C9B89F" stroke-dasharray="4,4" stroke-width="2"></path>
+<!-- Área Relleno Hoy (Verde Olivo degradado) -->
+<path d="M 0,155 L 0,145 Q 75,95 150,60 T 300,120 T 450,60 T 600,28 T 680,40 L 680,155 Z" fill="url(#olivoGradient)"></path>
+<!-- Línea Continua Hoy (Verde Olivo #1E2F28) -->
+<path d="M 0,145 Q 75,95 150,60 T 300,120 T 450,60 T 600,28 T 680,40" fill="none" stroke="#1E2F28" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Marcadores de pico -->
+<!-- Pico Comida 15:00 -->
+<circle cx="150" cy="60" fill="#1E2F28" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle>
+<!-- Pico Cena 21:00 -->
+<circle cx="600" cy="28" fill="#B45A3C" r="5" stroke="#FFFFFF" stroke-width="2"></circle>
+</svg>
+<!-- Anotación Pico de Cena -->
+<div class="absolute top-1 right-[11%] bg-[#1E2F28] text-white px-2 py-0.5 rounded shadow text-[10px] font-medium flex items-center gap-1 pointer-events-none">
+<span class="text-amber-300 font-bold">$4,850/h</span> (Pico Cena)
+              </div>
+</div>
+<!-- Eje X de Horas -->
+<div class="flex justify-between text-[11px] text-neutral-400 font-mono mt-2 pt-2 border-t border-neutral-100 px-1">
+<span>13:00</span>
+<span>14:00</span>
+<span>15:00</span>
+<span>16:00</span>
+<span>17:00</span>
+<span>18:00</span>
+<span>19:00</span>
+<span>20:00</span>
+<span class="text-[#1E2F28] font-bold">21:00 (Actual)</span>
+<span>22:00</span>
+</div>
+</div>
+<!-- 2.b y 2.c: Subgrid para Top Productos y Tiempos de Preparación -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- 2.b Top Productos del Turno -->
+<div class="bg-white rounded-xl border border-[#C9B89F]/60 p-5 shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<h3 class="font-display text-base font-bold text-neutral-900">Top Productos del Turno</h3>
+<span class="text-[11px] text-neutral-500 font-medium">Volumen &amp; Ventas</span>
+</div>
+<div class="space-y-3.5 mt-2">
+<!-- Item 1 -->
+<div class="space-y-1">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-neutral-800">
+<span class="text-amber-800 font-bold mr-1">1.</span> Rib Eye 400g
+                      </span>
+<span class="font-semibold text-neutral-900">18 uds · <span class="font-mono text-neutral-700">$11,160</span></span>
+</div>
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28] h-1.5 rounded-full" style="width: 82%"></div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="space-y-1">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-neutral-800">
+<span class="text-amber-800 font-bold mr-1">2.</span> Mezcalita Jamaica
+                      </span>
+<span class="font-semibold text-neutral-900">32 uds · <span class="font-mono text-neutral-700">$6,400</span></span>
+</div>
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28]/85 h-1.5 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="space-y-1">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-neutral-800">
+<span class="text-neutral-500 font-bold mr-1">3.</span> Hamburguesa Convivium
+                      </span>
+<span class="font-semibold text-neutral-900">24 uds · <span class="font-mono text-neutral-700">$5,880</span></span>
+</div>
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28]/70 h-1.5 rounded-full" style="width: 58%"></div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="space-y-1">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-neutral-800">
+<span class="text-neutral-500 font-bold mr-1">4.</span> Tacos de Rib Eye
+                      </span>
+<span class="font-semibold text-neutral-900">16 uds · <span class="font-mono text-neutral-700">$4,960</span></span>
+</div>
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28]/60 h-1.5 rounded-full" style="width: 48%"></div>
+</div>
+</div>
+<!-- Item 5 -->
+<div class="space-y-1">
+<div class="flex justify-between text-xs">
+<span class="font-medium text-neutral-800">
+<span class="text-neutral-500 font-bold mr-1">5.</span> Carajillo Licor 43
+                      </span>
+<span class="font-semibold text-neutral-900">21 uds · <span class="font-mono text-neutral-700">$3,570</span></span>
+</div>
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-[#1E2F28]/45 h-1.5 rounded-full" style="width: 38%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500">
+<span>Total 5 ítems: $31,970 MXN</span>
+<a class="text-amber-800 hover:underline font-semibold flex items-center gap-0.5" href="#">
+                  Ver carta completa <span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- 2.c Tiempos de Preparación por Estación (SLA Cocina) -->
+<div class="bg-white rounded-xl border border-[#C9B89F]/60 p-5 shadow-xs flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-1">
+<h3 class="font-display text-base font-bold text-neutral-900">SLA &amp; Tiempos Cocina</h3>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Turno fluido
+                  </span>
+</div>
+<p class="text-[11px] text-neutral-500 mb-3">Promedio de entrega por estación en últimos 60 min.</p>
+<div class="space-y-2.5">
+<!-- Estación 1: Cocina Caliente -->
+<div class="p-2.5 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+<div>
+<p class="text-xs font-semibold text-neutral-800">Cocina Caliente</p>
+<p class="text-[10px] text-neutral-500">Objetivo &lt; 16 min</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-bold text-emerald-800">14m 12s</span>
+<span class="text-[10px] block text-emerald-700">En tiempo</span>
+</div>
+</div>
+<!-- Estación 2: Barra de Coctelería -->
+<div class="p-2.5 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+<div>
+<p class="text-xs font-semibold text-neutral-800">Barra de Coctelería</p>
+<p class="text-[10px] text-neutral-500">Objetivo &lt; 6 min</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-bold text-emerald-800">4m 18s</span>
+<span class="text-[10px] block text-emerald-700">Rápido</span>
+</div>
+</div>
+<!-- Estación 3: Postres y Cava -->
+<div class="p-2.5 rounded-lg bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+<div>
+<p class="text-xs font-semibold text-neutral-800">Postres y Cava</p>
+<p class="text-[10px] text-neutral-500">Objetivo &lt; 8 min</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-bold text-emerald-800">6m 45s</span>
+<span class="text-[10px] block text-emerald-700">Óptimo</span>
+</div>
+</div>
+<!-- Estación 4: Parrilla (Atención / Amarillo) -->
+<div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-300/80 flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse"></span>
+<div>
+<p class="text-xs font-semibold text-neutral-900">Parrilla &amp; Cortes</p>
+<p class="text-[10px] text-amber-800">Objetivo &lt; 15 min</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-bold text-amber-900">18m 30s</span>
+<span class="text-[10px] block text-amber-700 font-semibold">+3m 30s demorado</span>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-2 text-[11px] text-neutral-500 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-xs text-neutral-400">info</span>
+<span>Parrilla reporta 4 comandas simultáneas en cocción térmica alta.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- COLUMNA DERECHA (Ancho 35% ~ col-span-4) -->
+<div class="lg:col-span-4 space-y-6">
+<!-- 2.a Alertas Operativas y Críticas -->
+<div class="bg-white rounded-xl border border-[#C9B89F]/60 p-5 shadow-xs">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-terracota text-xl">warning</span>
+<h3 class="font-display text-base font-bold text-neutral-900">Alertas Operativas</h3>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px]">
+                3 activas
+              </span>
+</div>
+<p class="text-[11px] text-neutral-500 mb-3">Requieren atención del administrador o chef ejecutivo.</p>
+<div class="space-y-3">
+<!-- Alerta 1: Cuentas por pagar vencen mañana (Terracota / Rojo suave) -->
+<div class="p-3.5 rounded-lg bg-terracota-light/60 border border-terracota/30 space-y-1.5">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-terracota text-base mt-0.5">account_balance_wallet</span>
+<div class="text-xs">
+<p class="font-semibold text-neutral-900">2 cuentas por pagar vencen mañana</p>
+<p class="text-neutral-700 text-[11px] mt-0.5 leading-snug">
+                      • <strong>Prov. Carnes San Juan:</strong> $14,200 MXN<br/>
+                      • <strong>Lácteos del Bajío:</strong> $3,850 MXN
+                    </p>
+</div>
+</div>
+<div class="flex justify-end pt-1">
+<a class="text-[11px] font-semibold text-terracota-dark hover:underline" href="#">
+                    Programar pago →
+                  </a>
+</div>
+</div>
+<!-- Alerta 2: Insumo crítico bajo mínimo (Ámbar / Naranja) -->
+<div class="p-3.5 rounded-lg bg-amber-50/80 border border-amber-300 space-y-1.5">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-amber-700 text-base mt-0.5">inventory</span>
+<div class="text-xs">
+<p class="font-semibold text-neutral-900">Insumo crítico bajo mínimo</p>
+<p class="text-neutral-700 text-[11px] mt-0.5">
+<strong>Limón con semilla:</strong> Stock actual 2.1 kg (Mínimo requerido: 8.0 kg para coctelería).
+                    </p>
+</div>
+</div>
+<div class="flex justify-end pt-1">
+<a class="text-[11px] font-semibold text-amber-900 hover:underline" href="#">
+                    Crear orden de compra express →
+                  </a>
+</div>
+</div>
+<!-- Alerta 3: Auditoría y Cortesías (Alerta de control) -->
+<div class="p-3.5 rounded-lg bg-stone-50 border border-stone-200 space-y-2">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-neutral-700 text-base mt-0.5">security</span>
+<div class="text-xs">
+<p class="font-semibold text-neutral-900">Desvío de cortesías detectado</p>
+<p class="text-neutral-600 text-[11px] mt-0.5">
+                      3 cortesías aplicadas por empleado <strong>Marco R.</strong> superan el umbral habitual ($680 MXN acumulados).
+                    </p>
+</div>
+</div>
+<div class="pt-1 flex items-center justify-between">
+<span class="text-[10px] text-neutral-400">Mesa 4 &amp; Terraza B</span>
+<button class="px-2.5 py-1 bg-white hover:bg-neutral-100 border border-neutral-300 rounded text-[11px] font-medium text-neutral-800 shadow-2xs transition-colors">
+                    Revisar detalle
+                  </button>
+</div>
+</div>
+</div>
+</div>
+<!-- 2.b Desglose de Formas de Pago -->
+<div class="bg-white rounded-xl border border-[#C9B89F]/60 p-5 shadow-xs">
+<div class="flex items-center justify-between mb-3">
+<div>
+<h3 class="font-display text-base font-bold text-neutral-900">Formas de Pago</h3>
+<p class="text-[11px] text-neutral-500">Conciliación de ingresos de caja</p>
+</div>
+<span class="material-symbols-outlined text-neutral-400 text-xl">payments</span>
+</div>
+<!-- Mini Tabla Refinada -->
+<div class="divide-y divide-neutral-100 text-xs">
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#1E2F28]"></span>
+<span class="text-neutral-700 font-medium">Tarjeta Bancaria</span>
+</div>
+<div class="text-right">
+<span class="font-semibold text-neutral-900 font-mono">$16,720 MXN</span>
+<span class="text-[10px] text-neutral-400 block">68.0%</span>
+</div>
+</div>
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#D4AF7C]"></span>
+<span class="text-neutral-700 font-medium">Efectivo en Caja</span>
+</div>
+<div class="text-right">
+<span class="font-semibold text-neutral-900 font-mono">$5,860 MXN</span>
+<span class="text-[10px] text-neutral-400 block">23.8%</span>
+</div>
+</div>
+<div class="py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-neutral-400"></span>
+<span class="text-neutral-700 font-medium">Transferencia SPEI / QR</span>
+</div>
+<div class="text-right">
+<span class="font-semibold text-neutral-900 font-mono">$2,000 MXN</span>
+<span class="text-[10px] text-neutral-400 block">8.2%</span>
+</div>
+</div>
+</div>
+<!-- Indicador Propina Acumulada en Terminal -->
+<div class="mt-4 p-3 bg-stone-50 rounded-lg border border-[#C9B89F]/40 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#B45A3C] text-lg">volunteer_activism</span>
+<div>
+<p class="text-xs font-semibold text-neutral-800">Propinas en Terminal</p>
+<p class="text-[10px] text-neutral-500">Para reparto de brigada</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-display text-sm font-bold text-neutral-900">$3,140</span>
+<span class="text-[10px] text-neutral-500 block">12.8% prom.</span>
+</div>
+</div>
+</div>
+<!-- Banner de estado del Servidor / POS PWA -->
+<div class="bg-[#1E2F28] text-neutral-200 rounded-xl p-4 shadow-sm flex items-center justify-between text-xs">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-amber-200">
+<span class="material-symbols-outlined text-base">wifi</span>
+</div>
+<div>
+<p class="font-medium text-white">Sincronización Local Activa</p>
+<p class="text-[10px] text-neutral-400">Modo offline respaldado en nodo local</p>
+</div>
+</div>
+<span class="text-[11px] font-mono text-emerald-400 font-medium">99.9% Up</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

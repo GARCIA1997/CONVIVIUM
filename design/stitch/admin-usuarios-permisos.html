@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+
+<html lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Administración: Roles, Permisos y Topes</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            convivium: {
+              olivo: '#1E2F28',
+              'olivo-dark': '#15211C',
+              'olivo-light': '#2A3F37',
+              marfil: '#F8F6F0',
+              'marfil-card': '#FFFFFF',
+              arena: '#E6E0D4',
+              'arena-dark': '#C9B89F',
+              terracota: '#B85D3B',
+              'terracota-light': '#FDF3F0',
+              dorado: '#C5A059',
+              'dorado-light': '#F7F2E9',
+              carbon: '#1A1A1A',
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+            headline: ['"Playfair Display"', 'Georgia', 'serif'],
+            body: ['"Inter"', 'sans-serif'],
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Estilización fina de scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F8F6F0;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D9D2C5;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C5A059;
+    }
+  </style>
+</head>
+<body class="bg-[#F8F6F0] text-convivium-carbon font-sans antialiased min-h-screen flex selection:bg-convivium-dorado selection:text-white">
+<!-- ========================================================= -->
+<!-- 1. SIDEBAR FIJO (Shared Component: SideNavBar)           -->
+<!-- ========================================================= -->
+<aside class="w-64 h-screen fixed left-0 top-0 flex flex-col justify-between bg-convivium-olivo text-stone-200 z-40 border-r border-[#15211C] select-none">
+<!-- Header del Sidebar / Brand Monogram -->
+<div class="p-6 border-b border-white/10">
+<div class="flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-full border border-convivium-dorado/50 bg-gradient-to-br from-[#2D453C] to-[#15211C] flex items-center justify-center shadow-inner">
+<span class="font-serif text-xl font-bold tracking-wider text-convivium-dorado">C</span>
+</div>
+<div>
+<h1 class="font-serif text-base tracking-widest text-amber-200 uppercase font-semibold leading-tight">CONVIVIUM</h1>
+<p class="font-serif italic text-[11px] text-stone-300 tracking-wide mt-0.5 opacity-80">Donde todo sucede en la mesa</p>
+</div>
+</div>
+<div class="mt-4 px-2.5 py-1 rounded bg-black/25 border border-white/5 flex items-center justify-between text-[11px] text-stone-300">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Sucursal Polanco V3
+        </span>
+<span class="text-convivium-dorado font-mono text-[10px]">T-VESP</span>
+</div>
+</div>
+<!-- Navegación Primaria (Shared Components Labels & Icons) -->
+<nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-3 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined text-[19px]">table_restaurant</span>
+<span>Salón y Mesas</span>
+</a>
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-3 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined text-[19px]">point_of_sale</span>
+<span>Punto de Venta</span>
+</a>
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-3 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined text-[19px]">soup_kitchen</span>
+<span>KDS Cocina</span>
+</a>
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-3 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined text-[19px]">liquor</span>
+<span>Inventario y Cava</span>
+</a>
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-3 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined text-[19px]">analytics</span>
+<span>Reportes y Cierres</span>
+</a>
+<!-- Ítem Activo: Configuracion (HU E1-02/E1-05 Administración) -->
+<a class="text-amber-200 bg-stone-800/60 border-l-2 border-amber-300 font-medium px-4 py-3 flex items-center gap-3 transition-all duration-150 text-xs tracking-wider uppercase rounded-r-lg shadow-sm" href="#">
+<span class="material-symbols-outlined text-[19px] text-convivium-dorado">admin_panel_settings</span>
+<span class="font-semibold text-convivium-dorado tracking-wide">Configuración</span>
+</a>
+</nav>
+<!-- Footer del Sidebar -->
+<div class="p-3 border-t border-white/10 space-y-1">
+<a class="text-stone-400 hover:text-stone-200 hover:bg-stone-800/30 px-4 py-2.5 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase rounded-lg" href="#">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span>Soporte</span>
+</a>
+<a class="text-stone-400 hover:text-rose-300 hover:bg-rose-950/20 px-4 py-2.5 flex items-center gap-3 transition-colors text-xs tracking-wider uppercase rounded-lg" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Cerrar sesión</span>
+</a>
+<!-- Quick Session Badge -->
+<div class="mt-3 pt-3 border-t border-white/5 px-3 py-2 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-convivium-dorado/20 border border-convivium-dorado/40 text-convivium-dorado font-serif flex items-center justify-center text-xs font-bold">
+          DG
+        </div>
+<div class="overflow-hidden">
+<p class="text-xs font-medium text-stone-200 truncate">Donato Garza</p>
+<p class="text-[10px] text-convivium-dorado uppercase tracking-wider font-mono truncate">Gerente General</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- ========================================================= -->
+<!-- 2. WORKSPACE CENTRAL (Desplazado con ml-64)               -->
+<!-- ========================================================= -->
+<div class="ml-64 flex-1 flex flex-col min-w-0 bg-[#F8F6F0]">
+<!-- TOP NAVBAR (Shared Component adaptado al context) -->
+<header class="h-16 sticky top-0 z-30 bg-[#F8F6F0]/95 backdrop-blur border-b border-convivium-arena px-8 flex items-center justify-between">
+<!-- Lado Izquierdo: Breadcrumb & Título de Módulo -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-xs text-stone-500 uppercase tracking-widest font-mono">
+<span class="hover:text-stone-800 cursor-pointer">ADMINISTRACIÓN</span>
+<span class="text-stone-400">/</span>
+<span class="text-convivium-olivo font-semibold">ROLES Y FACULTADES</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-convivium-dorado/15 text-stone-800 border border-convivium-dorado/40">
+<span class="w-1.5 h-1.5 rounded-full bg-convivium-dorado"></span> Sucursal Centro · Matriz V3.2
+        </span>
+</div>
+<!-- Navegación Secundaria en Header (Pestañas) -->
+<nav class="flex items-center space-x-6 h-full">
+<a class="text-stone-500 hover:text-stone-800 font-medium py-4 px-2 text-sm flex items-center gap-2 transition-colors border-b-2 border-transparent" href="#">
+<span>Usuarios</span>
+<span class="px-1.5 py-0.5 text-[11px] font-mono rounded bg-stone-200 text-stone-700 font-semibold">14</span>
+</a>
+<a class="border-b-2 border-convivium-olivo text-convivium-olivo font-semibold py-4 px-2 text-sm flex items-center gap-1.5" href="#">
+<span class="material-symbols-outlined text-[18px] text-convivium-dorado">shield_person</span>
+<span>Roles y permisos</span>
+</a>
+<a class="text-stone-500 hover:text-stone-800 font-medium py-4 px-2 text-sm transition-colors border-b-2 border-transparent flex items-center gap-1.5" href="#">
+<span>Topes de autorización</span>
+<span class="w-2 h-2 rounded-full bg-convivium-terracota"></span>
+</a>
+</nav>
+<!-- Botones de Acción Global -->
+<div class="flex items-center gap-3">
+<button class="px-3 py-1.5 rounded-md border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium tracking-wide flex items-center gap-1.5 shadow-sm transition">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span>Historial</span>
+</button>
+<button class="px-3 py-1.5 rounded-md border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium tracking-wide flex items-center gap-1.5 shadow-sm transition">
+<span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+<span>Exportar PDF</span>
+</button>
+<button class="px-4 py-1.5 rounded-md bg-convivium-olivo hover:bg-convivium-olivo-light text-convivium-marfil text-xs font-semibold tracking-wider uppercase flex items-center gap-2 shadow-sm transition border border-convivium-dorado/40">
+<span class="material-symbols-outlined text-[17px] text-convivium-dorado">save</span>
+<span>Guardar cambios</span>
+</button>
+</div>
+</header>
+<!-- ========================================================= -->
+<!-- 3. CUERPO PRINCIPAL A 2 COLUMNAS (340px Izq | Flex-1 Der) -->
+<!-- ========================================================= -->
+<main class="flex-1 p-6 lg:p-8 flex gap-6 overflow-hidden">
+<!-- ========================================================= -->
+<!-- COLUMNA IZQUIERDA: DIRECTORIO DE USUARIOS (30% / ~340px)   -->
+<!-- ========================================================= -->
+<section class="w-80 xl:w-96 flex flex-col bg-white rounded-xl border border-convivium-arena shadow-sm overflow-hidden flex-shrink-0">
+<!-- Header de la sección de Usuarios -->
+<div class="p-4 border-b border-convivium-arena bg-[#FAF8F5]">
+<div class="flex items-center justify-between mb-3">
+<div>
+<h2 class="font-serif text-lg font-bold text-convivium-carbon">Personal en Turno</h2>
+<p class="text-xs text-stone-500 font-mono">14 colaboradores · 4 turnos activos</p>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-convivium-olivo hover:bg-convivium-olivo-light text-convivium-dorado text-xs font-semibold flex items-center gap-1 shadow-sm transition">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+<span>Nuevo</span>
+</button>
+</div>
+<!-- Buscador y filtro -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 bg-white border border-convivium-arena rounded-lg text-xs placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-convivium-dorado focus:border-convivium-dorado transition" placeholder="Buscar por nombre, rol o PIN..." type="text"/>
+</div>
+</div>
+<!-- Lista de Usuarios Scrollable -->
+<div class="flex-1 overflow-y-auto divide-y divide-stone-100 p-2 space-y-1">
+<!-- Card 1: Gerente General -->
+<div class="p-3 rounded-lg hover:bg-stone-50 transition border border-transparent hover:border-convivium-arena/60 group">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-convivium-olivo text-convivium-dorado font-serif font-bold text-sm flex items-center justify-center">
+                    RV
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Roberto Valenzuela</h3>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-amber-100/70 text-amber-900 rounded font-mono">Gerente General</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-mono">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-stone-400">key</span>
+<span>PIN: • • • •</span>
+<button class="text-[10px] text-convivium-dorado hover:underline ml-1 font-sans font-medium">Cambiar</button>
+</div>
+<span class="inline-flex items-center gap-1 text-emerald-700 font-sans font-medium text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> En turno (Caja 1)
+              </span>
+</div>
+</div>
+<!-- Card 2: Capitana -->
+<div class="p-3 rounded-lg bg-[#FAF8F4]/70 border border-convivium-dorado/30 transition">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-[#3B2C24] text-amber-200 font-serif font-bold text-sm flex items-center justify-center">
+                    AM
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Ana Martínez</h3>
+<span class="px-1.5 py-0.2 rounded text-[9px] bg-convivium-dorado text-white font-mono uppercase tracking-wider font-semibold">Perfil activo</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-stone-200/80 text-stone-800 rounded font-mono">Capitán Terraza</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-200/60 flex items-center justify-between text-[11px] text-stone-600 font-mono">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-stone-400">key</span>
+<span>PIN: • • • •</span>
+<button class="text-[10px] text-convivium-dorado hover:underline ml-1 font-sans font-medium">Cambiar</button>
+</div>
+<span class="inline-flex items-center gap-1 text-emerald-700 font-sans font-medium text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Zona Terraza
+              </span>
+</div>
+</div>
+<!-- Card 3: Mesero Líder -->
+<div class="p-3 rounded-lg hover:bg-stone-50 transition border border-transparent hover:border-convivium-arena/60">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-stone-100 text-stone-700 font-serif font-bold text-sm flex items-center justify-center border border-stone-200">
+                    LG
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Luis González</h3>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-stone-100 text-stone-700 rounded font-mono">Mesero Salón B</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-mono">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-stone-400">lock</span>
+<span>PIN: • • • •</span>
+<button class="text-[10px] text-convivium-dorado hover:underline ml-1 font-sans font-medium">Cambiar</button>
+</div>
+<span class="text-stone-400 font-sans text-[11px]">Comandero #04</span>
+</div>
+</div>
+<!-- Card 4: Cajero -->
+<div class="p-3 rounded-lg hover:bg-stone-50 transition border border-transparent hover:border-convivium-arena/60">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-stone-100 text-stone-700 font-serif font-bold text-sm flex items-center justify-center border border-stone-200">
+                    CR
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Carlos Ramos</h3>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-stone-100 text-stone-700 rounded font-mono">Cajero Principal</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-mono">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-stone-400">key</span>
+<span>PIN: • • • •</span>
+<button class="text-[10px] text-convivium-dorado hover:underline ml-1 font-sans font-medium">Cambiar</button>
+</div>
+<span class="text-emerald-700 font-sans font-medium text-[11px]">Caja TPV 01</span>
+</div>
+</div>
+<!-- Card 5: Chef Ejecutivo (KDS) -->
+<div class="p-3 rounded-lg hover:bg-stone-50 transition border border-transparent hover:border-convivium-arena/60">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-stone-800 text-convivium-dorado font-serif font-bold text-sm flex items-center justify-center">
+                    EV
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Chef Eduardo V.</h3>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-orange-100/60 text-convivium-terracota rounded font-mono">Jefe de Cocina</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-500 font-mono">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-stone-400">key</span>
+<span>PIN: • • • •</span>
+<button class="text-[10px] text-convivium-dorado hover:underline ml-1 font-sans font-medium">Cambiar</button>
+</div>
+<span class="text-stone-500 font-sans text-[11px]">KDS Pantalla 1</span>
+</div>
+</div>
+<!-- Card 6: Bartender Líder -->
+<div class="p-3 rounded-lg hover:bg-stone-50 transition border border-transparent hover:border-convivium-arena/60 opacity-80">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-stone-100 text-stone-700 font-serif font-bold text-sm flex items-center justify-center border border-stone-200">
+                    EM
+                  </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-stone-300 border-2 border-white rounded-full"></span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-stone-900 leading-tight">Elena Morales</h3>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="text-[10px] font-semibold tracking-wide px-2 py-0.5 bg-stone-100 text-stone-600 rounded font-mono">Mixología / Barra</span>
+</div>
+</div>
+</div>
+<button class="text-stone-400 hover:text-stone-700 p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="mt-2.5 pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400 font-mono">
+<span>PIN: • • • •</span>
+<span class="font-sans text-[10px] text-stone-400">Inicia 18:00 hrs</span>
+</div>
+</div>
+</div>
+<!-- Footer Columna Usuarios -->
+<div class="p-3 bg-stone-50 border-t border-convivium-arena text-center">
+<button class="text-xs text-convivium-olivo hover:text-convivium-olivo-light font-medium tracking-wide flex items-center justify-center gap-1.5 w-full">
+<span>Ver los 8 colaboradores restantes</span>
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</button>
+</div>
+</section>
+<!-- ========================================================= -->
+<!-- COLUMNA DERECHA: MATRIZ Y TOPES OPERATIVOS (Flex-1)        -->
+<!-- ========================================================= -->
+<section class="flex-1 flex flex-col gap-6 overflow-y-auto pr-1">
+<!-- ======================================================= -->
+<!-- A. CARD: MATRIZ GRANULAR DE FACULTADES OPERATIVAS       -->
+<!-- ======================================================= -->
+<div class="bg-white rounded-xl border border-convivium-arena shadow-sm overflow-hidden">
+<!-- Encabezado de la Matriz -->
+<div class="p-5 border-b border-convivium-arena flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-white via-white to-[#FBF9F5]">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-serif text-xl font-bold text-convivium-carbon">Matriz Granular de Facultades Operativas</h2>
+<span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-convivium-olivo/10 text-convivium-olivo font-mono">HU E1-02</span>
+</div>
+<p class="text-xs text-stone-500 mt-1 max-w-2xl">
+                Define el nivel de autonomía y candados para operaciones sensibles en TPV, KDS y Comandero móvil. Las restricciones marcadas con candado exigen token o PIN de supervisión.
+              </p>
+</div>
+<!-- Leyenda Rápida -->
+<div class="flex items-center gap-3 bg-stone-50 px-3.5 py-2 rounded-lg border border-stone-200 text-xs">
+<span class="flex items-center gap-1 text-convivium-olivo font-medium">
+<span class="material-symbols-outlined text-[16px] text-emerald-700">check_circle</span> Permitido
+              </span>
+<span class="text-stone-300">|</span>
+<span class="flex items-center gap-1 text-convivium-terracota font-medium">
+<span class="material-symbols-outlined text-[16px] text-convivium-terracota">lock</span> Requiere PIN Gerente
+              </span>
+<span class="text-stone-300">|</span>
+<span class="flex items-center gap-1 text-stone-400">
+<span class="material-symbols-outlined text-[16px]">remove</span> No aplica
+              </span>
+</div>
+</div>
+<!-- Filtros de Módulo -->
+<div class="px-5 py-2.5 bg-[#FAF8F5] border-b border-convivium-arena flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mr-2 font-mono">Filtrar:</span>
+<button class="px-2.5 py-1 rounded text-xs font-semibold bg-convivium-olivo text-white shadow-xs">Todos (11)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-stone-600 hover:bg-stone-200/70 transition">Comandas y Cocina (4)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-stone-600 hover:bg-stone-200/70 transition">Caja y Cobro (4)</button>
+<button class="px-2.5 py-1 rounded text-xs font-medium text-stone-600 hover:bg-stone-200/70 transition">Administración (3)</button>
+</div>
+<span class="text-[11px] text-stone-400 font-mono italic">Modo de edición en tiempo real</span>
+</div>
+<!-- Tabla Matriz con las 11 facultades y 8 roles exactos -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-stone-100/70 border-b border-convivium-arena text-[11px] font-semibold text-stone-600 uppercase tracking-wider">
+<th class="py-3 px-4 w-72 sticky left-0 bg-stone-100/90 backdrop-blur z-10">Facultad / Operación Operativa</th>
+<th class="py-3 px-2 text-center text-convivium-olivo font-bold">Dueño</th>
+<th class="py-3 px-2 text-center text-convivium-olivo font-bold">Gerente</th>
+<th class="py-3 px-2 text-center text-stone-700">Capitán</th>
+<th class="py-3 px-2 text-center text-stone-700 bg-amber-50/50">Mesero</th>
+<th class="py-3 px-2 text-center text-stone-700">Cajero</th>
+<th class="py-3 px-2 text-center text-stone-700">Cocina</th>
+<th class="py-3 px-2 text-center text-stone-700">Barra</th>
+<th class="py-3 px-2 text-center text-stone-700">Almacén</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-stone-200 text-xs">
+<!-- 1. Abrir mesa -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white group-hover:bg-amber-50/20 border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">table_restaurant</span>
+<span>Abrir mesa y asignar comensal</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 bg-amber-50/40"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 2. Cancelar producto no enviado -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">remove_shopping_cart</span>
+<span>Cancelar producto no enviado a comanda</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 bg-amber-50/40"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 3. Cancelar producto enviado a cocina/barra -->
+<tr class="bg-convivium-terracota-light/30 hover:bg-convivium-terracota-light/60 transition-colors">
+<td class="py-3 px-4 font-semibold text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-convivium-terracota">soup_kitchen</span>
+<span>Cancelar producto enviado a cocina/barra</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<!-- Mesero: Requiere autorización terracota -->
+<td class="text-center py-2 bg-amber-50/40">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<!-- Cajero: Requiere autorización -->
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 4. Cancelar producto preparado / merma -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">delete_forever</span>
+<span>Cancelar producto preparado / registrar merma</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 bg-amber-50/40">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 5. Devolución / retirar de cuenta -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">assignment_return</span>
+<span>Devolución / retirar de cuenta precerrada</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 bg-amber-50/40">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 6. Cortesía a comensal -->
+<tr class="bg-amber-50/20 hover:bg-amber-50/40 transition-colors">
+<td class="py-3 px-4 font-semibold text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-convivium-dorado">redeem</span>
+<span>Cortesía a comensal (Casa / Relaciones)</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-900 border border-amber-300">
+                      Con tope
+                    </span>
+</td>
+<td class="text-center py-2 bg-amber-50/40">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 7. Aplicar descuento -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-semibold text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-convivium-dorado">percent</span>
+<span>Aplicar porcentaje o monto de descuento</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-900 border border-amber-300">
+                      Con tope
+                    </span>
+</td>
+<td class="text-center py-2 bg-amber-50/40">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 8. Reabrir cuenta cerrada -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">restart_alt</span>
+<span>Reabrir cuenta ya liquidada</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 bg-amber-50/40 text-stone-300">—</td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 9. Ejecutar Corte Z -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">receipt_long</span>
+<span>Ejecutar Corte Z / Cierre fiscal de caja</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-convivium-terracota/10 text-convivium-terracota border border-convivium-terracota/30 cursor-pointer">
+<span class="material-symbols-outlined text-[13px]">lock</span> PIN
+                    </span>
+</td>
+<td class="text-center py-2 bg-amber-50/40 text-stone-300">—</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 10. Editar menú y precios -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">restaurant_menu</span>
+<span>Editar menú, recetas e importes de venta</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 bg-amber-50/40 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+<!-- 11. Ver reportes financieros -->
+<tr class="hover:bg-amber-50/20 transition-colors">
+<td class="py-3 px-4 font-medium text-stone-900 sticky left-0 bg-white border-r border-stone-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[17px] text-stone-400">payments</span>
+<span>Ver reportes financieros y utilidad de turno</span>
+</div>
+</td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2"><span class="material-symbols-outlined text-emerald-700 text-[18px]">check_circle</span></td>
+<td class="text-center py-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-stone-100 text-stone-700 border border-stone-200">Parcial</span>
+</td>
+<td class="text-center py-2 bg-amber-50/40 text-stone-300">—</td>
+<td class="text-center py-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-stone-100 text-stone-700 border border-stone-200">Parcial</span>
+</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+<td class="text-center py-2 text-stone-300">—</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Matriz Footer Notifier -->
+<div class="p-3 bg-stone-50 border-t border-convivium-arena flex items-center justify-between text-xs text-stone-500">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-stone-400 text-[16px]">touch_app</span>
+              Haz clic en cualquier celda para alternar el nivel de autorización (Permitido / PIN / Bloqueado).
+            </span>
+<button class="text-convivium-olivo font-semibold hover:underline flex items-center gap-1">
+              Restablecer a valores por omisión <span class="material-symbols-outlined text-[14px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- ======================================================= -->
+<!-- B. TARJETA DESTACADA: PANEL DE TOPES (HU E1-05)         -->
+<!-- ======================================================= -->
+<div class="bg-white rounded-xl border border-convivium-arena shadow-sm p-6 relative overflow-hidden">
+<!-- Accent decorativo de fondo -->
+<div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-convivium-dorado/5 blur-2xl pointer-events-none"></div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-5">
+<div>
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-200">HU E1-05</span>
+<h3 class="font-serif text-lg font-bold text-convivium-carbon">Topes de Autorización, Cortesías y Descuentos</h3>
+</div>
+<p class="text-xs text-stone-500 mt-0.5">Control presupuestal autónomo por rol para agilizar servicio sin descuidar el costo operativo.</p>
+</div>
+<div class="text-right">
+<span class="text-[11px] text-stone-400 font-mono">Bolsa Diaria de Hospitalidad:</span>
+<p class="text-sm font-bold text-convivium-olivo font-mono">$6,200.00 MXN / día</p>
+</div>
+</div>
+<!-- Grid de 3 Tarjetas de Topes por Rol -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Card 1: Mesero (Cero Autonomía) -->
+<div class="p-4 rounded-lg bg-[#FAF8F5] border border-stone-200 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-stone-800 uppercase tracking-wide">Rol: Mesero</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-stone-200 text-stone-600 font-semibold">Candado 100%</span>
+</div>
+<div class="space-y-2 mt-3 text-xs">
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Tope de descuento:</span>
+<span class="font-mono font-bold text-stone-800">0% (Sin autonomía)</span>
+</div>
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Límite cortesías:</span>
+<span class="font-mono font-bold text-stone-800">$0.00 MXN</span>
+</div>
+<div class="flex justify-between pb-1">
+<span class="text-stone-500">Mecanismo:</span>
+<span class="font-semibold text-convivium-terracota">Token Capitán/Gerente</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-2 border-t border-stone-200 text-[11px] text-stone-500 italic">
+                Cualquier bonificación exige autorización presencial o remota en comandero.
+              </div>
+</div>
+<!-- Card 2: Capitán (Tope Acotado) -->
+<div class="p-4 rounded-lg bg-white border-2 border-convivium-dorado/50 shadow-sm flex flex-col justify-between relative">
+<span class="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-convivium-dorado text-white uppercase tracking-wider">
+                Operación Diaria
+              </span>
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-convivium-carbon uppercase tracking-wide">Rol: Capitán</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-900 font-semibold">Moderado</span>
+</div>
+<div class="space-y-2 mt-3 text-xs">
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Tope de descuento:</span>
+<span class="font-mono font-bold text-stone-900">Hasta 10% (máx $300/mesa)</span>
+</div>
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Límite diario cortesías:</span>
+<span class="font-mono font-bold text-stone-900">$1,200.00 MXN</span>
+</div>
+<div class="flex justify-between pb-1">
+<span class="text-stone-500">Consumo hoy:</span>
+<span class="font-mono font-semibold text-convivium-olivo">$450.00 MXN (37%)</span>
+</div>
+</div>
+<!-- Barra de consumo diario -->
+<div class="mt-3">
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-convivium-dorado h-1.5 rounded-full" style="width: 37.5%"></div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-2 border-t border-stone-100 text-[11px] text-stone-500">
+                Permite resolver quejas o atención a mesas VIP sin interrumpir a Gerencia.
+              </div>
+</div>
+<!-- Card 3: Gerente (Autonomía Completa) -->
+<div class="p-4 rounded-lg bg-[#FAF8F5] border border-stone-200 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-stone-800 uppercase tracking-wide">Rol: Gerente</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-100 text-emerald-800 font-semibold">Plena</span>
+</div>
+<div class="space-y-2 mt-3 text-xs">
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Tope de descuento:</span>
+<span class="font-mono font-bold text-stone-900">Ilimitado (100%)</span>
+</div>
+<div class="flex justify-between pb-1.5 border-b border-stone-200/60">
+<span class="text-stone-500">Fondo de hospitalidad:</span>
+<span class="font-mono font-bold text-stone-900">$5,000.00 MXN / turno</span>
+</div>
+<div class="flex justify-between pb-1">
+<span class="text-stone-500">Consumo hoy:</span>
+<span class="font-mono font-semibold text-stone-700">$1,850.00 MXN</span>
+</div>
+</div>
+<!-- Barra de consumo diario -->
+<div class="mt-3">
+<div class="w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
+<div class="bg-convivium-olivo h-1.5 rounded-full" style="width: 37%"></div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-2 border-t border-stone-200 text-[11px] text-stone-500">
+                Requiere registrar justificación en bitácora contable al cierre de turno.
+              </div>
+</div>
+</div>
+<!-- Banner Informativo Regla de Negocio Crítica -->
+<div class="mt-5 p-3.5 rounded-lg bg-gradient-to-r from-convivium-dorado/15 via-[#F9F5EC] to-transparent border border-convivium-dorado/40 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-convivium-dorado text-white flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</div>
+<div>
+<h4 class="text-xs font-bold text-stone-900">Protocolo de Escalación Inmediata</h4>
+<p class="text-xs text-stone-600">
+                  Todo descuento superior al 10% o cortesía mayor a $400 MXN notifica instantáneamente vía push al PWA del Gerente en turno para su confirmación remota por biometría/PIN.
+                </p>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded bg-white hover:bg-stone-50 border border-convivium-arena text-xs font-medium text-stone-700 shadow-xs flex-shrink-0 transition">
+              Configurar umbrales
+            </button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Microinteracción simple en JavaScript vanilla para alternar iconos al hacer clic en la matriz -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Indicador de interactividad en celdas de matriz
+      const cells = document.querySelectorAll('tbody td');
+      cells.forEach(td => {
+        if (!td.classList.contains('sticky') && td.textContent.trim() !== '') {
+          td.classList.add('cursor-pointer');
+          td.setAttribute('title', 'Clic para cambiar facultad');
+        }
+      });
+    });
+  </script>
+</body></html>

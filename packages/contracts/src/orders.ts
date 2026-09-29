@@ -58,6 +58,22 @@ export const Check = z.object({
   discounts: Cents,
   total: Cents,
   openedAt: Timestamp,
+  tableLabel: z.string().nullable(),
+  waiterName: z.string().nullable(),
+});
+
+/** Resumen para listas de cuentas abiertas (caja). */
+export const CheckSummary = z.object({
+  id: Id,
+  kind: z.enum(["mesa", "barra"]),
+  status: z.enum(["abierta", "pidio_cuenta", "cobrada", "cancelada"]),
+  tableLabel: z.string().nullable(),
+  name: z.string().nullable(),
+  guests: z.number().int().nullable(),
+  waiterName: z.string().nullable(),
+  total: Cents,
+  itemCount: z.number().int(),
+  openedAt: Timestamp,
 });
 
 export const FireCourseBody = z.object({ course: Course });

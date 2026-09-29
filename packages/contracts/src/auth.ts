@@ -8,7 +8,7 @@ export const Role = z.enum(ROLES);
 export const PairDeviceBody = z.object({
   code: z.string().regex(/^\d{6}$/),
   name: z.string().min(1).max(60),
-  kind: z.enum(["mesero", "kds_tv", "estacion_tactil", "caja", "admin"]),
+  kind: z.enum(["mesero", "kds_tv", "estacion_tactil", "caja", "admin", "nodo"]),
 });
 export const PairDeviceResponse = z.object({ deviceId: Id, deviceToken: z.string(), branchId: Id });
 

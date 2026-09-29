@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es-MX" class="h-full bg-[#141715]">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terminal Táctil Cocina · Estación Parrilla · CONVIVIUM</title>
+  <!-- Google Fonts: Playfair Display + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet"/>
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@200..700,0..1&display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              carbon: "#1A1A1A",
+              darkbg: "#141715",
+              olivo: "#1E2F28",
+              olivolight: "#283E34",
+              marfil: "#EAE6DD",
+              arena: "#C9B89F",
+              terracota: "#B45A3C",
+              terracotadark: "#8D3E24",
+              dorado: "#D4AF7C",
+              doradolight: "#E6C697"
+            }
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Touch optimization for kitchen environment (greasy fingers, thick aprons/gloves) */
+    .touch-target-xl {
+      min-height: 64px;
+      min-width: 64px;
+    }
+    /* Custom dark industrial scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #141715;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A3C33;
+      border-radius: 6px;
+      border: 2px solid #141715;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #D4AF7C;
+    }
+    @keyframes pulseSlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-pulse-slow {
+      animation: pulseSlow 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#141715] text-[#EAE6DD] font-body flex flex-col overflow-hidden select-none antialiased">
+
+  <!-- ============================================================== -->
+  <!-- 1. TOP OPERATIONAL HEADER (Tablet 15" High Contrast & Ergonomic)-->
+  <!-- ============================================================== -->
+  <header class="h-20 bg-[#1A1A1A] border-b-2 border-[#C9B89F]/20 px-6 flex items-center justify-between z-30 shrink-0">
+    <!-- Left: Brand mark & Station Title -->
+    <div class="flex items-center gap-5">
+      <div class="w-12 h-12 rounded-xl bg-[#1E2F28] border-2 border-[#D4AF7C]/40 flex items-center justify-center text-[#D4AF7C] shadow-lg">
+        <span class="material-symbols-outlined fill-1 text-2xl text-[#D4AF7C]">skillet</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="font-headline text-xl lg:text-2xl font-bold tracking-wider text-[#EAE6DD] uppercase">COCINA</span>
+          <span class="text-[#D4AF7C] text-lg font-bold">·</span>
+          <span class="font-headline text-xl lg:text-2xl font-bold tracking-wide text-[#D4AF7C]">Estación Parrilla</span>
+          <span class="bg-[#1E2F28] text-[#D4AF7C] border border-[#D4AF7C]/30 text-xs px-2.5 py-0.5 rounded-full font-mono font-bold ml-1">KDS T-02</span>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-[#EAE6DD]/70 mt-0.5 font-medium">
+          <span class="flex items-center gap-1.5 text-emerald-400">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Servidor local activo (WebSocket 0ms)</span>
+          </span>
+          <span>•</span>
+          <span class="text-[#C9B89F]">Chef Parrillero: Roberto Valenzuela</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Operational Tabs (Extra Large for Touch Navigation) -->
+    <div class="flex items-center bg-[#141715] p-1.5 rounded-xl border border-[#C9B89F]/20">
+      <!-- Tab 1: En curso (Active) -->
+      <button class="flex items-center gap-3 px-6 py-3 rounded-lg bg-[#1E2F28] border border-[#D4AF7C]/40 text-[#D4AF7C] font-bold text-sm tracking-wide shadow-md transition-all active:scale-98">
+        <span class="material-symbols-outlined fill-1 text-xl">pending_actions</span>
+        <span class="text-base">En curso</span>
+        <span class="w-7 h-7 rounded-full bg-[#D4AF7C] text-[#1A1A1A] font-black text-xs flex items-center justify-center font-mono">5</span>
+      </button>
+
+      <!-- Tab 2: Despachadas del turno -->
+      <button class="flex items-center gap-2.5 px-6 py-3 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-white/5 font-semibold text-sm tracking-wide transition-all active:scale-98">
+        <span class="material-symbols-outlined text-xl">task_alt</span>
+        <span class="text-base">Despachadas del turno</span>
+        <span class="text-xs text-[#C9B89F] font-mono font-bold bg-white/10 px-2 py-0.5 rounded-full">34</span>
+      </button>
+    </div>
+
+    <!-- Right: Quick Safety & Undo Buttons -->
+    <div class="flex items-center gap-3">
+      <!-- Botón Deshacer Comanda (8s safety window) -->
+      <button class="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-[#283E34] hover:bg-[#344E42] border-2 border-[#D4AF7C]/50 text-[#EAE6DD] font-bold text-sm tracking-wide shadow-lg active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-xl text-[#D4AF7C]">undo</span>
+        <span>Deshacer comanda</span>
+        <span class="bg-[#1A1A1A] text-[#D4AF7C] text-xs font-mono font-black px-2 py-0.5 rounded-md border border-[#D4AF7C]/30">8s</span>
+      </button>
+
+      <!-- Alarm / Sound Toggle -->
+      <button class="w-14 h-14 rounded-xl bg-[#1E2F28] border border-[#C9B89F]/30 hover:border-[#D4AF7C] text-[#D4AF7C] flex items-center justify-center active:scale-95 transition-all" title="Sonido de KDS activo">
+        <span class="material-symbols-outlined text-2xl">volume_up</span>
+      </button>
+
+      <!-- Digital Clock -->
+      <div class="pl-2 border-l border-[#C9B89F]/20 text-right font-mono">
+        <div class="text-2xl font-black text-[#EAE6DD] tracking-wider leading-none">14:38<span class="text-sm font-medium text-[#D4AF7C]"> :12</span></div>
+        <div class="text-[10px] text-[#C9B89F] tracking-widest font-sans font-bold uppercase mt-1">Turno Comida</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN SPLIT CANVAS: TICKETS COLUMN + RECIPE DRAWER (15" LAYOUT)-->
+  <!-- ============================================================== -->
+  <main class="flex-1 flex overflow-hidden bg-[#141715]">
+
+    <!-- ============================================================ -->
+    <!-- LEFT / CENTER: ORDERS QUEUE (CAROUSEL / GRID COLUMNS)        -->
+    <!-- ============================================================ -->
+    <section class="flex-1 overflow-y-auto p-4 lg:p-5 flex flex-col gap-4">
+      
+      <!-- Operational Metric Banner -->
+      <div class="flex items-center justify-between bg-[#1A1A1A] px-4 py-2.5 rounded-xl border border-[#C9B89F]/20 text-xs shrink-0">
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1.5 font-bold text-[#EAE6DD]">
+            <span class="material-symbols-outlined text-lg text-[#D4AF7C]">timer</span>
+            <span>SLA Objetivo Parrilla: <strong class="text-[#D4AF7C] font-mono">12 min</strong></span>
+          </span>
+          <span class="text-[#C9B89F]/40">•</span>
+          <span class="text-[#C9B89F]">Promedio en últimos 30 min: <strong class="text-emerald-400 font-mono">10m 45s</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-1 rounded bg-[#B45A3C]/20 border border-[#B45A3C]/40 text-[#B45A3C] font-bold text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-[#B45A3C] animate-ping"></span>
+            1 Rehecho Crítico
+          </span>
+          <span class="px-2.5 py-1 rounded bg-[#1E2F28] border border-[#D4AF7C]/30 text-[#D4AF7C] font-semibold text-[11px]">
+            4 Comandas Regulares
+          </span>
+        </div>
+      </div>
+
+      <!-- CARDS HORIZONTAL/GRID WORKSPACE -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-start">
+
+        <!-- ======================================================== -->
+        <!-- TARJETA 1: MESA 4 — REHACER (COLOR TERRACOTA / MÁXIMA PRIORIDAD) -->
+        <!-- ======================================================== -->
+        <article class="bg-[#1A1A1A] rounded-2xl border-3 border-[#B45A3C] shadow-2xl flex flex-col overflow-hidden relative group">
+          <!-- Banner Terracota de REHACER -->
+          <div class="bg-[#B45A3C] px-4 py-2.5 flex items-center justify-between text-[#EAE6DD]">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined fill-1 text-2xl text-white animate-pulse">priority_high</span>
+              <span class="font-black text-sm lg:text-base tracking-wider uppercase">¡REHACER URGENTE!</span>
+            </div>
+            <span class="bg-black/30 text-white font-mono text-xs px-2.5 py-1 rounded-md font-bold uppercase tracking-wider border border-white/20">
+              Incidencia de Salón
+            </span>
+          </div>
+
+          <!-- Header de Comanda -->
+          <div class="p-4 bg-[#231A18] border-b border-[#B45A3C]/30 flex items-center justify-between">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-headline text-3xl font-black text-white">Mesa 4</span>
+                <span class="text-xs font-mono text-[#C9B89F]">#0841</span>
+              </div>
+              <div class="text-xs text-[#C9B89F] mt-0.5 flex items-center gap-2">
+                <span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-sm">badge</span> Mesera: Ana M.</span>
+                <span>•</span>
+                <span class="text-[#EAE6DD]/70">Terraza Jardín</span>
+              </div>
+            </div>
+            <!-- Timer Alert Box -->
+            <div class="text-right bg-[#B45A3C]/30 border border-[#B45A3C] px-3.5 py-1.5 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-[#EAE6DD]/80">Demora Total</div>
+              <div class="font-mono text-2xl font-black text-white leading-none mt-0.5">20:18</div>
+            </div>
+          </div>
+
+          <!-- Contenido del Producto a Rehacer -->
+          <div class="p-4 bg-[#1A1A1A] flex-1 space-y-4">
+            <!-- Item Detail Box -->
+            <div class="p-3.5 rounded-xl bg-[#281A16] border-2 border-[#B45A3C]/60 flex flex-col gap-3">
+              <div class="flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#B45A3C] text-white flex items-center justify-center font-black text-base shrink-0 font-mono">
+                    1x
+                  </div>
+                  <div>
+                    <h3 class="font-headline text-xl font-bold text-white leading-tight">Rib Eye 400 g</h3>
+                    <div class="inline-flex items-center gap-1.5 bg-[#B45A3C] text-white text-xs font-black px-2.5 py-1 rounded-md uppercase tracking-wider mt-1 shadow-sm">
+                      ★ Término Medio (3/4 descartado)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Motivo específico de devolución -->
+              <div class="p-2.5 rounded-lg bg-black/40 border border-[#B45A3C]/40 text-xs text-[#EAE6DD]/90">
+                <div class="flex items-center gap-1 text-[#D4AF7C] font-bold text-[11px] uppercase tracking-wide mb-1">
+                  <span class="material-symbols-outlined text-sm text-[#B45A3C]">assignment_late</span>
+                  <span>Motivo reporte comensal:</span>
+                </div>
+                <p class="italic text-white">"Llegó tres cuartos / duro al centro. Comensal exige término medio real y jugo abundante."</p>
+                <div class="mt-1 text-[11px] text-[#C9B89F]">Guarnición: Papas rústicas al romero con sal de Colima.</div>
+              </div>
+
+              <!-- Botón gigante de Despacho Individual -->
+              <button class="w-full touch-target-xl py-3.5 px-4 rounded-xl bg-[#B45A3C] hover:bg-[#c96444] text-white font-extrabold text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all">
+                <span class="material-symbols-outlined fill-1 text-2xl">done_all</span>
+                <span>Listo Rib Eye (Rehecho)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Footer: Botón Gigante "Toda la comanda lista" -->
+          <div class="p-4 bg-[#231A18] border-t border-[#B45A3C]/30">
+            <button class="w-full touch-target-xl py-4 rounded-xl bg-gradient-to-r from-[#B45A3C] to-[#8D3E24] hover:from-[#c56342] hover:to-[#9f4528] text-white font-black text-base tracking-widest uppercase flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
+              <span class="material-symbols-outlined fill-1 text-2xl">check_circle</span>
+              <span>Toda la comanda lista</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- ======================================================== -->
+        <!-- TARJETA 2: MESA 7 — HAMBURGUESA CONVIVIUM (VERDE OLIVO / SELECCIONADA CON RECETA) -->
+        <!-- ======================================================== -->
+        <article class="bg-[#1E2F28] rounded-2xl border-3 border-[#D4AF7C] shadow-2xl flex flex-col overflow-hidden relative ring-4 ring-[#D4AF7C]/20">
+          <!-- Selection Badge -->
+          <div class="bg-[#D4AF7C] px-4 py-1.5 flex items-center justify-between text-[#1A1A1A]">
+            <span class="font-extrabold text-xs tracking-wider uppercase flex items-center gap-1.5">
+              <span class="material-symbols-outlined fill-1 text-base text-[#1E2F28]">menu_book</span>
+              <span>Viendo Receta en Pantalla Derecha</span>
+            </span>
+            <span class="font-mono text-xs font-bold bg-[#1E2F28] text-[#D4AF7C] px-2 py-0.5 rounded">Activa</span>
+          </div>
+
+          <!-- Header de Comanda -->
+          <div class="p-4 bg-[#172520] border-b border-[#C9B89F]/20 flex items-center justify-between">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-headline text-3xl font-black text-[#EAE6DD]">Mesa 7</span>
+                <span class="text-xs font-mono text-[#D4AF7C]">#0847</span>
+              </div>
+              <div class="text-xs text-[#C9B89F] mt-0.5 flex items-center gap-2">
+                <span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-sm">badge</span> Mesero: Carlos R.</span>
+                <span>•</span>
+                <span class="text-[#EAE6DD]/70">Terraza Jardín</span>
+              </div>
+            </div>
+            <!-- Timer Regular -->
+            <div class="text-right bg-[#141715] border border-[#D4AF7C]/40 px-3.5 py-1.5 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-[#C9B89F]">Tiempo en Fuego</div>
+              <div class="font-mono text-2xl font-black text-[#D4AF7C] leading-none mt-0.5">07:42</div>
+            </div>
+          </div>
+
+          <!-- Contenido de Comanda -->
+          <div class="p-4 space-y-3.5 flex-1">
+            <!-- Item 1: Hamburguesa Convivium (Clickeable / Activo) -->
+            <div class="p-3.5 rounded-xl bg-[#283E34] border-2 border-[#D4AF7C] shadow-md flex flex-col gap-3 relative cursor-pointer">
+              <div class="flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#D4AF7C] text-[#1E2F28] flex items-center justify-center font-black text-lg shrink-0 font-mono">
+                    2x
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-headline text-xl font-bold text-[#EAE6DD] leading-tight">Hamburguesa Convivium</h3>
+                      <span class="material-symbols-outlined text-sm text-[#D4AF7C]">info</span>
+                    </div>
+                    <!-- Modificadores Obligatorios -->
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                      <span class="bg-[#1E2F28] border border-[#D4AF7C]/50 text-[#D4AF7C] text-xs font-bold px-2 py-0.5 rounded">
+                        ★ Término Medio (Rosado y jugoso)
+                      </span>
+                      <span class="bg-[#B45A3C]/20 border border-[#B45A3C] text-[#fca5a5] text-xs font-bold px-2 py-0.5 rounded">
+                        ✕ SIN CEBOLLA
+                      </span>
+                      <span class="bg-black/30 border border-[#C9B89F]/30 text-[#EAE6DD] text-xs font-medium px-2 py-0.5 rounded">
+                        + Extra Queso Provolone Ahumado
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-[11px] text-[#C9B89F] bg-[#141715]/40 p-2 rounded-lg flex items-center justify-between">
+                <span>Comensales: C1 y C2 (Separados en plato rústico)</span>
+                <span class="font-mono font-bold text-[#D4AF7C]">Mesa al 50%</span>
+              </div>
+
+              <!-- Botón gigante de Despacho Individual -->
+              <button class="w-full touch-target-xl py-3.5 px-4 rounded-xl bg-[#D4AF7C] hover:bg-[#e4be8c] text-[#1E2F28] font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-lg active:scale-98 transition-all">
+                <span class="material-symbols-outlined fill-1 text-2xl text-[#1E2F28]">done_all</span>
+                <span>Listo 2x Hamburguesas</span>
+              </button>
+            </div>
+
+            <!-- Item 2: Papas Trufadas Acompañamiento -->
+            <div class="p-3 rounded-xl bg-[#172520] border border-[#C9B89F]/20 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-md bg-[#C9B89F]/20 text-[#D4AF7C] flex items-center justify-center font-bold text-xs font-mono">
+                  1x
+                </div>
+                <div>
+                  <div class="text-sm font-bold text-[#EAE6DD]">Papas Trufadas Artesanales</div>
+                  <div class="text-[11px] text-[#C9B89F]">Con mayonesa de ajo negro confitado</div>
+                </div>
+              </div>
+              <button class="px-3 py-2 rounded-lg bg-[#283E34] hover:bg-[#324f42] text-[#D4AF7C] text-xs font-bold uppercase tracking-wider flex items-center gap-1 active:scale-95">
+                <span class="material-symbols-outlined text-base">check</span>
+                <span>Listo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Footer: Botón Gigante "Toda la comanda lista" -->
+          <div class="p-4 bg-[#172520] border-t border-[#C9B89F]/20">
+            <button class="w-full touch-target-xl py-4 rounded-xl bg-gradient-to-r from-[#D4AF7C] to-[#C9B89F] hover:from-[#e0bc87] hover:to-[#d8c8b0] text-[#1E2F28] font-black text-base tracking-widest uppercase flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
+              <span class="material-symbols-outlined fill-1 text-2xl text-[#1E2F28]">check_circle</span>
+              <span>Toda la comanda lista</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- ======================================================== -->
+        <!-- TARJETA 3: MESA 12 — ARRACHERA (VERDE OLIVO / TERCER TICKET) -->
+        <!-- ======================================================== -->
+        <article class="bg-[#1E2F28] rounded-2xl border-2 border-[#C9B89F]/30 shadow-xl flex flex-col overflow-hidden relative">
+          <!-- Header de Comanda -->
+          <div class="p-4 bg-[#172520] border-b border-[#C9B89F]/20 flex items-center justify-between">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span class="font-headline text-3xl font-black text-[#EAE6DD]">Mesa 12</span>
+                <span class="text-xs font-mono text-[#D4AF7C]">#0851</span>
+              </div>
+              <div class="text-xs text-[#C9B89F] mt-0.5 flex items-center gap-2">
+                <span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-sm">badge</span> Capitán: Luis G.</span>
+                <span>•</span>
+                <span class="text-[#EAE6DD]/70">Salón Cava</span>
+              </div>
+            </div>
+            <!-- Timer Regular -->
+            <div class="text-right bg-[#141715] border border-[#C9B89F]/30 px-3.5 py-1.5 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-[#C9B89F]">Tiempo en Fuego</div>
+              <div class="font-mono text-2xl font-black text-[#EAE6DD] leading-none mt-0.5">04:15</div>
+            </div>
+          </div>
+
+          <!-- Contenido de Comanda -->
+          <div class="p-4 space-y-3.5 flex-1">
+            <!-- Item Detail Box -->
+            <div class="p-3.5 rounded-xl bg-[#283E34] border border-[#C9B89F]/30 flex flex-col gap-3">
+              <div class="flex items-start justify-between">
+                <div class="flex items-start gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-[#1E2F28] border border-[#D4AF7C]/40 text-[#D4AF7C] flex items-center justify-center font-black text-base shrink-0 font-mono">
+                    1x
+                  </div>
+                  <div>
+                    <h3 class="font-headline text-xl font-bold text-[#EAE6DD] leading-tight">Arrachera Norteña 350 g</h3>
+                    <div class="inline-flex items-center gap-1.5 bg-[#141715] text-[#D4AF7C] border border-[#D4AF7C]/40 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wider mt-1">
+                      ★ Tres Cuartos (Sellado intenso)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Especificaciones -->
+              <div class="p-2.5 rounded-lg bg-[#141715]/50 border border-[#C9B89F]/20 text-xs text-[#EAE6DD]/80 space-y-1">
+                <div class="text-[11px] text-[#C9B89F]">• Con cebollitas cambray asadas y chiles toreados</div>
+                <div class="text-[11px] text-[#C9B89F]">• Tortillas hechas a mano (3 piezas maíz criollo)</div>
+                <div class="text-[11px] text-[#D4AF7C] font-semibold italic mt-1">Nota: Servir en comal de hierro fundido muy caliente.</div>
+              </div>
+
+              <!-- Botón gigante de Despacho Individual -->
+              <button class="w-full touch-target-xl py-3.5 px-4 rounded-xl bg-[#1E2F28] hover:bg-[#253931] border-2 border-[#D4AF7C] text-[#D4AF7C] font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all">
+                <span class="material-symbols-outlined fill-1 text-2xl text-[#D4AF7C]">done_all</span>
+                <span>Listo Arrachera</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Footer: Botón Gigante "Toda la comanda lista" -->
+          <div class="p-4 bg-[#172520] border-t border-[#C9B89F]/20">
+            <button class="w-full touch-target-xl py-4 rounded-xl bg-[#283E34] hover:bg-[#314c40] border-2 border-[#C9B89F]/50 text-[#EAE6DD] font-black text-base tracking-widest uppercase flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all">
+              <span class="material-symbols-outlined fill-1 text-2xl text-[#D4AF7C]">check_circle</span>
+              <span>Toda la comanda lista</span>
+            </button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- RIGHT: DEDICATED RECIPE DRAWER / PANEL (Tablet 15" Ergonomics)-->
+    <!-- Opened upon selecting "Hamburguesa Convivium"                -->
+    <!-- ============================================================ -->
+    <aside class="w-[430px] lg:w-[460px] bg-[#1A1A1A] border-l-2 border-[#D4AF7C]/40 flex flex-col z-20 shrink-0 shadow-2xl">
+      
+      <!-- Drawer Header -->
+      <div class="p-4 bg-[#1E2F28] border-b border-[#D4AF7C]/30 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined fill-1 text-[#D4AF7C] text-2xl">menu_book</span>
+          <div>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest text-[#D4AF7C] block">Ficha Técnica Estandarizada</span>
+            <h2 class="font-headline text-lg font-bold text-[#EAE6DD] leading-none">Hamburguesa Convivium</h2>
+          </div>
+        </div>
+        <!-- Close / Minimize Recipe Button -->
+        <button class="w-10 h-10 rounded-lg bg-black/40 hover:bg-black/70 text-[#C9B89F] hover:text-white flex items-center justify-center transition-colors" title="Ocultar ficha técnica">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <!-- Drawer Content Scrollable -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
+
+        <!-- Food Photograph Card with Specs Overlay -->
+        <div class="rounded-xl overflow-hidden border-2 border-[#D4AF7C]/40 bg-[#141715] shadow-lg relative group">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY1La5rQHY19BCNRsoINsK7yFoyezHFQoUXWlfBbv9t1jXvsQbvDXTMsmy_hIY_Xz18u5YXWyfMICgkqNbW_8_URpU8mtgG-lHIo0JbD2DAX9B7KbUgRqVq9MWNOyU-1fTou1DOWkTL46c47Te8Xg-ez-ToYjBCRAZLCz7qVodj2JmHDrCd2kfK_8E3JverCk7AdtKZNj0Mpn0JMa9SoS-Wj-RjOESvlylpCOTGowyyMn8-fwIdtc6BmK0a7kOp6UGIRQ202oJs_KX" alt="Hamburguesa Convivium artesanal con queso derretido y cebolla caramelizada" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-[#141715] via-black/30 to-transparent flex flex-col justify-end p-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="bg-[#1E2F28]/90 backdrop-blur-sm text-[#D4AF7C] px-2.5 py-1 rounded-md font-mono font-bold border border-[#D4AF7C]/40">
+                SLA Fuego: 12 min
+              </span>
+              <span class="bg-black/80 backdrop-blur-sm text-[#EAE6DD] px-2.5 py-1 rounded-md font-mono font-semibold">
+                Temp. Interna: 60°C (Medio)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Quick Bar: Rendimiento & Estación -->
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-[#1E2F28] p-2.5 rounded-lg border border-[#C9B89F]/20">
+            <span class="text-[10px] text-[#C9B89F] uppercase block">Porción</span>
+            <span class="font-mono font-black text-sm text-[#EAE6DD]">1 Pieza</span>
+          </div>
+          <div class="bg-[#1E2F28] p-2.5 rounded-lg border border-[#C9B89F]/20">
+            <span class="text-[10px] text-[#C9B89F] uppercase block">Objetivo Parrilla</span>
+            <span class="font-mono font-black text-sm text-[#D4AF7C]">12 min</span>
+          </div>
+          <div class="bg-[#1E2F28] p-2.5 rounded-lg border border-[#C9B89F]/20">
+            <span class="text-[10px] text-[#C9B89F] uppercase block">Plancha</span>
+            <span class="font-mono font-black text-sm text-[#EAE6DD]">220 °C</span>
+          </div>
+        </div>
+
+        <!-- Bloque 1: Cantidades Exactas de Insumos (Gramajes) -->
+        <div class="bg-[#141715] p-3.5 rounded-xl border border-[#C9B89F]/25 space-y-2.5">
+          <div class="flex items-center justify-between border-b border-[#C9B89F]/15 pb-2">
+            <span class="font-headline font-bold text-sm text-[#D4AF7C] uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base">scale</span>
+              <span>Ingredientes y Gramajes</span>
+            </span>
+            <span class="text-[10px] font-mono text-[#C9B89F] bg-white/5 px-2 py-0.5 rounded">Báscula #1</span>
+          </div>
+
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1E2F28]/60 border border-[#C9B89F]/15">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+                <span class="font-semibold text-[#EAE6DD]">Carne blend de res (Sirloin / Rib Eye)</span>
+              </div>
+              <span class="font-mono font-extrabold text-[#D4AF7C] text-sm bg-black/40 px-2 py-0.5 rounded">180 g</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1E2F28]/60 border border-[#C9B89F]/15">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+                <span class="font-semibold text-[#EAE6DD]">Queso provolone ahumado artesanal</span>
+              </div>
+              <span class="font-mono font-extrabold text-[#D4AF7C] text-sm bg-black/40 px-2 py-0.5 rounded">30 g</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1E2F28]/60 border border-[#C9B89F]/15">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+                <span class="font-semibold text-[#EAE6DD]">Pan brioche con mantequilla artesanal</span>
+              </div>
+              <span class="font-mono font-extrabold text-[#D4AF7C] text-sm bg-black/40 px-2 py-0.5 rounded">1 pza</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1E2F28]/60 border border-[#C9B89F]/15">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+                <span class="font-semibold text-[#EAE6DD]">Salsa de la casa (reducción de chiles tatemados)</span>
+              </div>
+              <span class="font-mono font-extrabold text-[#D4AF7C] text-sm bg-black/40 px-2 py-0.5 rounded">20 ml</span>
+            </div>
+
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#1E2F28]/60 border border-[#C9B89F]/15">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-semibold text-[#EAE6DD]">Arugula fresca de invernadero</span>
+              </div>
+              <span class="font-mono font-extrabold text-[#D4AF7C] text-sm bg-black/40 px-2 py-0.5 rounded">15 g</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 2: Procedimiento Operativo en 5 Pasos -->
+        <div class="bg-[#141715] p-3.5 rounded-xl border border-[#C9B89F]/25 space-y-3">
+          <div class="flex items-center justify-between border-b border-[#C9B89F]/15 pb-2">
+            <span class="font-headline font-bold text-sm text-[#D4AF7C] uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base">format_list_numbered</span>
+              <span>Procedimiento en 5 Pasos</span>
+            </span>
+            <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
+              V4.2 Certificado
+            </span>
+          </div>
+
+          <ol class="space-y-2.5 text-xs text-[#EAE6DD]/90">
+            <!-- Paso 1 -->
+            <li class="flex items-start gap-2.5 p-2 rounded-lg bg-[#1E2F28]/40 border border-[#C9B89F]/10">
+              <span class="w-5 h-5 rounded-full bg-[#D4AF7C] text-[#1E2F28] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">1</span>
+              <div>
+                <strong class="text-white block font-semibold">Tostado de Pan Brioche (45 seg):</strong>
+                <span>Untar 5 g de mantequilla clarificada en cada tapa y dorar a fuego medio hasta lograr caramelo dorado uniforme.</span>
+              </div>
+            </li>
+
+            <!-- Paso 2 -->
+            <li class="flex items-start gap-2.5 p-2 rounded-lg bg-[#1E2F28]/40 border border-[#C9B89F]/10">
+              <span class="w-5 h-5 rounded-full bg-[#D4AF7C] text-[#1E2F28] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">2</span>
+              <div>
+                <strong class="text-white block font-semibold">Sellado en Plancha Alta (4 min):</strong>
+                <span>Colocar la bola de 180 g sobre plancha a 220°C con sal gruesa y pimienta negra. Smash controlado a 1.5 cm de grosor.</span>
+              </div>
+            </li>
+
+            <!-- Paso 3 -->
+            <li class="flex items-start gap-2.5 p-2 rounded-lg bg-[#1E2F28]/40 border border-[#C9B89F]/10">
+              <span class="w-5 h-5 rounded-full bg-[#D4AF7C] text-[#1E2F28] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">3</span>
+              <div>
+                <strong class="text-white block font-semibold">Fundido con Campana (3 min):</strong>
+                <span>Voltear carne una sola vez, colocar 30 g de provolone ahumado, añadir 10 ml de agua a un costado y tapar con campana inox.</span>
+              </div>
+            </li>
+
+            <!-- Paso 4 -->
+            <li class="flex items-start gap-2.5 p-2 rounded-lg bg-[#1E2F28]/40 border border-[#C9B89F]/10">
+              <span class="w-5 h-5 rounded-full bg-[#D4AF7C] text-[#1E2F28] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">4</span>
+              <div>
+                <strong class="text-white block font-semibold">Aplicación de Salsa y Arugula:</strong>
+                <span>Distribuir los 20 ml de salsa de la casa sobre la base del pan caliente. Montar cama de 15 g de arugula (respetar omisión de cebolla si se pide).</span>
+              </div>
+            </li>
+
+            <!-- Paso 5 -->
+            <li class="flex items-start gap-2.5 p-2 rounded-lg bg-[#1E2F28]/40 border border-[#C9B89F]/10">
+              <span class="w-5 h-5 rounded-full bg-[#D4AF7C] text-[#1E2F28] font-black text-xs flex items-center justify-center shrink-0 mt-0.5 font-mono">5</span>
+              <div>
+                <strong class="text-white block font-semibold">Montaje Final y Despacho:</strong>
+                <span>Colocar la proteína fundida, coronar con pan superior, atravesar con pincho Convivium y enviar de inmediato a campana térmica.</span>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Alerta de Inocuidad y Alérgenos -->
+        <div class="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-200">
+          <span class="material-symbols-outlined text-lg text-amber-400 shrink-0">sanitizer</span>
+          <div>
+            <span class="font-bold uppercase tracking-wider block text-[11px] text-amber-300">Control de Inocuidad</span>
+            <span>Uso estricto de guantes de nitrilo para ensamble en mesa fría. Cambio obligatorio cada 2 horas o post-manejo de carne cruda.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer Actions -->
+      <div class="p-4 bg-[#1E2F28] border-t border-[#D4AF7C]/30 flex items-center justify-between gap-3">
+        <button class="px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[#C9B89F] font-semibold text-xs transition-colors flex items-center gap-1.5 active:scale-95">
+          <span class="material-symbols-outlined text-base">print</span>
+          <span>Reimprimir comanda</span>
+        </button>
+        <button class="flex-1 touch-target-xl py-3 px-4 rounded-xl bg-[#D4AF7C] hover:bg-[#e4be8c] text-[#1E2F28] font-black text-xs tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+          <span class="material-symbols-outlined fill-1 text-lg text-[#1E2F28]">check_circle</span>
+          <span>Confirmar Producto Listo</span>
+        </button>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 3. FOOTER QUICK ACTION STATUS DOCK (KDS HARDWARE BAR)         -->
+  <!-- ============================================================== -->
+  <footer class="h-14 bg-[#1A1A1A] border-t border-[#C9B89F]/20 px-6 flex items-center justify-between text-xs z-30 shrink-0 font-medium">
+    <div class="flex items-center gap-6">
+      <span class="flex items-center gap-2 text-[#EAE6DD]">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        <span>Pantalla táctil calibrada (sensibilidad guantes: <strong>ALTA</strong>)</span>
+      </span>
+      <span class="text-[#C9B89F]/40">•</span>
+      <span class="text-[#C9B89F]">3 órdenes listas para entrega en charola caliente</span>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141715] border border-[#C9B89F]/30 text-[#D4AF7C] hover:border-[#D4AF7C] font-semibold active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-base">notifications_active</span>
+        <span>Llamar a todos los meseros</span>
+      </button>
+      <div class="h-5 w-px bg-[#C9B89F]/30"></div>
+      <span class="font-mono text-[#C9B89F] text-[11px]">CONVIVIUM KitchenOS v4.2.8</span>
+    </div>
+  </footer>
+
+</body>
+</html>

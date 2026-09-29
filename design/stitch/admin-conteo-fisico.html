@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Conteo Físico Diario · CONVIVIUM</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: '#1E2F28',
+              marfil: '#FAF8F5',
+              marfilDark: '#F3EFE9',
+              arena: '#C9B89F',
+              dorado: '#D4AF7C',
+              terracota: '#C85A32',
+              terracotaBg: '#FAF0EB',
+              carbon: '#1A1A1A',
+              esmeralda: '#2F855A',
+              esmeraldaBg: '#F0FFF4'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Mobile-first ergonomic touch styling */
+    body {
+      background-color: #FAF8F5;
+      color: #1A1A1A;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input[type=range] {
+      accent-color: #1E2F28;
+    }
+    /* Bottle liquid simulation */
+    .bottle-glass {
+      border: 2px solid #1E2F28;
+      border-radius: 6px 6px 12px 12px;
+      position: relative;
+      background: #FAF8F5;
+      overflow: hidden;
+    }
+    .bottle-neck {
+      width: 14px;
+      height: 16px;
+      background: #FAF8F5;
+      border: 2px solid #1E2F28;
+      border-bottom: none;
+      border-radius: 3px 3px 0 0;
+      margin: 0 auto;
+    }
+    .liquid-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, #D4AF7C 0%, #C49F6C 100%);
+      transition: height 0.25s ease-out;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-brand-marfil min-h-screen text-brand-carbon antialiased selection:bg-brand-dorado/30 pb-36">
+<!-- Mobile Viewport Container strictly capped for mobile ergonomics -->
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative shadow-2xl bg-brand-marfil">
+<!-- TopAppBar (Derived strictly from Shared Components JSON & Brand Tokens) -->
+<header class="bg-[#1E2F28] text-[#EAE6DD] flex justify-between items-center w-full px-4 py-3 sticky top-0 z-40 shadow-sm border-b border-[#C9B89F]/20">
+<div class="flex items-center gap-3">
+<button aria-label="Volver" class="p-1.5 -ml-1.5 rounded-full text-[#EAE6DD]/80 hover:text-[#D4AF7C] active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-xl leading-none">arrow_back</span>
+</button>
+<div>
+<div class="font-headline text-xs uppercase tracking-widest text-[#D4AF7C] font-semibold">CONVIVIUM</div>
+<h1 class="font-headline text-base font-bold text-[#EAE6DD] tracking-tight leading-tight">Conteo diario · Almacén Barra</h1>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="Escanear código de barra" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#FAF8F5]/10 hover:bg-[#D4AF7C]/20 text-[#D4AF7C] active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-2xl">barcode_scanner</span>
+</button>
+</div>
+</header>
+<!-- Sub-header: Progress Banner & Context Info -->
+<div class="bg-[#1E2F28] px-4 pb-4 pt-1 text-[#EAE6DD] border-b border-brand-arena/20">
+<div class="flex items-center justify-between text-xs mb-2">
+<div class="flex items-center gap-1.5 font-medium">
+<span class="inline-block w-2 h-2 rounded-full bg-brand-dorado animate-pulse"></span>
+<span>14 de 32 insumos (44%)</span>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-brand-dorado/20 text-brand-dorado border border-brand-dorado/40 tracking-wide">
+          En captura · Turno cierre
+        </span>
+</div>
+<!-- Stylized Progress bar -->
+<div class="w-full bg-[#1A1A1A]/60 rounded-full h-1.5 overflow-hidden p-0.5">
+<div class="bg-gradient-to-r from-brand-dorado to-[#E5C396] h-full rounded-full transition-all duration-500 ease-out" style="width: 44%"></div>
+</div>
+<div class="flex justify-between items-center mt-2.5 text-[11px] text-[#EAE6DD]/70 font-mono">
+<span>Fecha: 27 sep 2024 · 02:40 AM</span>
+<span class="text-brand-dorado font-sans font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">person</span> R. Sandoval
+        </span>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 px-3.5 py-4 space-y-4">
+<!-- Section: Search & Barcode Quick Scan Bar -->
+<section class="space-y-2.5">
+<div class="flex items-center gap-2">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-carbon/40 text-lg">search</span>
+<input class="w-full pl-9 pr-3 py-2 text-sm bg-white rounded-lg border border-brand-arena/60 focus:border-brand-olivo focus:ring-1 focus:ring-brand-olivo outline-none text-brand-carbon placeholder:text-brand-carbon/40 font-body shadow-xs" placeholder="Buscar insumo por nombre o SKU..." type="text" value="Tequila blanco"/>
+<button class="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-carbon/30 hover:text-brand-carbon" type="button">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<button class="h-9 px-3 bg-brand-olivo text-brand-marfil rounded-lg flex items-center justify-center gap-1 shadow-sm active:scale-95 transition-transform text-xs font-medium" title="Lector de cámara" type="button">
+<span class="material-symbols-outlined text-base text-brand-dorado">photo_camera</span>
+<span class="hidden sm:inline">Cámara</span>
+</button>
+</div>
+<!-- Filter Chips Carousel -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+<button class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap bg-brand-olivo text-brand-marfil shadow-sm border border-brand-olivo flex items-center gap-1.5" type="button">
+<span>Todos</span>
+<span class="bg-brand-dorado/30 text-brand-dorado px-1.5 py-0.2 rounded-full text-[10px] font-bold">32</span>
+</button>
+<button class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap bg-white text-brand-carbon/80 border border-brand-arena/70 hover:border-brand-olivo flex items-center gap-1.5" type="button">
+<span>Pendientes</span>
+<span class="bg-brand-marfilDark px-1.5 py-0.2 rounded-full text-[10px] font-bold text-brand-carbon/60">18</span>
+</button>
+<button class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap bg-brand-terracotaBg text-brand-terracota border border-brand-terracota/30 flex items-center gap-1.5" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-terracota"></span>
+<span>Con diferencia</span>
+<span class="bg-brand-terracota text-white px-1.5 py-0.2 rounded-full text-[10px] font-bold">3</span>
+</button>
+<button class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap bg-white text-brand-esmeralda border border-brand-esmeralda/30 flex items-center gap-1.5" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-brand-esmeralda"></span>
+<span>Conformes</span>
+<span class="bg-brand-esmeraldaBg text-brand-esmeralda px-1.5 py-0.2 rounded-full text-[10px] font-bold">11</span>
+</button>
+</div>
+</section>
+<!-- Section 3: Ficha Principal Expandida — Tequila blanco 750 ml -->
+<section class="bg-white rounded-xl border-2 border-brand-dorado/60 shadow-md p-4 relative overflow-hidden transition-all">
+<!-- Accent indicator strip -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-olivo via-brand-dorado to-brand-olivo"></div>
+<!-- Product Header -->
+<div class="flex items-start justify-between gap-2 pt-1 pb-3 border-b border-brand-arena/20">
+<div class="space-y-0.5">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-brand-olivo/10 text-brand-olivo text-[10px] font-bold rounded tracking-wider uppercase">Insumo Clave #15</span>
+<span class="text-[11px] text-brand-carbon/50 font-mono">SKU: TEQ-750</span>
+</div>
+<h2 class="font-display text-xl font-bold text-brand-carbon tracking-tight leading-snug">
+              Tequila blanco 750 ml
+            </h2>
+<p class="text-xs text-brand-carbon/60 flex items-center gap-1 font-medium pt-0.5">
+<span class="material-symbols-outlined text-[15px] text-brand-dorado">shelves</span>
+              Cava barra baja - repisa 2
+            </p>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-brand-carbon/40 hover:bg-brand-marfil transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">info</span>
+</button>
+</div>
+<!-- Dual Counting Engine -->
+<div class="mt-4 grid grid-cols-12 gap-3.5 items-stretch">
+<!-- a) Botellas Cerradas Touch Stepper -->
+<div class="col-span-7 bg-brand-marfil rounded-lg p-3 border border-brand-arena/40 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-xs font-bold text-brand-olivo uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-brand-olivo">lock</span>
+                Cerradas
+              </span>
+<span class="text-[10px] text-brand-carbon/50">Selladas</span>
+</div>
+<div class="flex items-center justify-between gap-1 py-1">
+<button class="w-10 h-10 rounded-lg bg-white border border-brand-arena/60 text-brand-carbon font-bold text-lg flex items-center justify-center active:scale-90 active:bg-brand-marfil transition-transform shadow-xs" id="btn-dec-closed" type="button">
+                −
+              </button>
+<div class="text-center px-2">
+<span class="font-display text-2xl font-bold text-brand-carbon tracking-tight" id="val-closed">2</span>
+<span class="block text-[10px] text-brand-carbon/60 uppercase font-semibold">botellas</span>
+</div>
+<button class="w-10 h-10 rounded-lg bg-brand-olivo text-brand-marfil font-bold text-lg flex items-center justify-center active:scale-90 transition-transform shadow-xs" id="btn-inc-closed" type="button">
+                +
+              </button>
+</div>
+<div class="text-[10px] text-center text-brand-carbon/50 mt-1">
+              1 btl = 750 ml
+            </div>
+</div>
+<!-- b) Botella abierta con visualizador de nivel líquido & calibrador -->
+<div class="col-span-5 bg-brand-marfil rounded-lg p-3 border border-brand-arena/40 flex flex-col justify-between items-center text-center">
+<div class="w-full flex items-center justify-between mb-1">
+<span class="text-xs font-bold text-brand-olivo uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-brand-dorado">liquor</span>
+                Abierta
+              </span>
+<span class="text-[10px] font-semibold text-brand-dorado" id="label-open-pct">40%</span>
+</div>
+<!-- Graphic Bottle Level Gauge -->
+<div class="py-1 flex items-center justify-center gap-2">
+<div class="flex flex-col items-center">
+<div class="bottle-neck"></div>
+<div class="bottle-glass w-10 h-16">
+<div class="liquid-fill" id="visual-bottle-liquid" style="height: 40%;"></div>
+<!-- Calibration markers -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none py-1 opacity-40">
+<div class="w-2 border-b border-brand-carbon ml-auto"></div>
+<div class="w-3 border-b border-brand-carbon ml-auto"></div>
+<div class="w-2 border-b border-brand-carbon ml-auto"></div>
+</div>
+</div>
+</div>
+<div class="text-left leading-tight">
+<div class="font-display text-lg font-bold text-brand-carbon" id="val-open-dec">0.4</div>
+<span class="text-[9px] text-brand-carbon/60 uppercase font-medium">btl (300ml)</span>
+</div>
+</div>
+<!-- Interactive quick increments -->
+<div class="w-full flex justify-between gap-1 mt-1">
+<button class="text-[10px] font-medium px-1.5 py-0.5 bg-white border border-brand-arena/40 rounded hover:bg-brand-dorado/20" onclick="setLiquidLevel(0.25)" type="button">¼</button>
+<button class="text-[10px] font-bold px-1.5 py-0.5 bg-brand-olivo text-brand-marfil rounded shadow-xs" onclick="setLiquidLevel(0.40)" type="button">40%</button>
+<button class="text-[10px] font-medium px-1.5 py-0.5 bg-white border border-brand-arena/40 rounded hover:bg-brand-dorado/20" onclick="setLiquidLevel(0.50)" type="button">½</button>
+<button class="text-[10px] font-medium px-1.5 py-0.5 bg-white border border-brand-arena/40 rounded hover:bg-brand-dorado/20" onclick="setLiquidLevel(0.75)" type="button">¾</button>
+</div>
+</div>
+</div>
+<!-- Touch slider for fine-tuning liquid level -->
+<div class="mt-3 bg-brand-marfilDark/60 p-2.5 rounded-lg border border-brand-arena/30">
+<div class="flex justify-between text-[11px] font-medium text-brand-carbon/70 mb-1">
+<span>Ajuste fino de botella en uso:</span>
+<span class="font-mono text-brand-olivo font-bold" id="slider-readout">0.40 btl (40%)</span>
+</div>
+<input class="w-full h-2 bg-brand-arena/50 rounded-lg cursor-pointer" id="liquid-slider" max="1" min="0" step="0.05" type="range" value="0.4"/>
+<div class="flex justify-between text-[9px] text-brand-carbon/40 px-1 mt-1">
+<span>0 (Vacía)</span>
+<span>0.25</span>
+<span>0.50</span>
+<span>0.75</span>
+<span>1.0 (Llena)</span>
+</div>
+</div>
+<!-- Comparative Kardex & Discrepancy Card -->
+<div class="mt-3.5 pt-3 border-t border-brand-arena/30 space-y-2.5">
+<div class="flex items-center justify-between bg-brand-marfil p-2.5 rounded-lg border border-brand-arena/30">
+<div>
+<span class="text-[10px] text-brand-carbon/50 uppercase tracking-wider font-semibold block">Total Físico Contado</span>
+<div class="flex items-baseline gap-1">
+<span class="font-display text-xl font-bold text-brand-olivo" id="total-counted">2.4</span>
+<span class="text-xs text-brand-carbon/60 font-medium">botellas</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] text-brand-carbon/50 uppercase tracking-wider font-semibold block">Teórico en Sistema (Kardex)</span>
+<div class="flex items-baseline justify-end gap-1">
+<span class="font-display text-xl font-bold text-brand-carbon">2.9</span>
+<span class="text-xs text-brand-carbon/60 font-medium">btl</span>
+</div>
+</div>
+</div>
+<!-- Terracotta Discrepancy Alert Badge -->
+<div class="bg-brand-terracotaBg border-l-4 border-brand-terracota p-3 rounded-r-lg space-y-1">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-brand-terracota flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">warning</span>
+                Diferencia: -0.5 botellas (-$145.00 MXN)
+              </span>
+<span class="px-1.5 py-0.5 bg-brand-terracota text-white text-[9px] font-bold uppercase rounded">Faltante</span>
+</div>
+<p class="text-[11px] text-brand-carbon/75 leading-tight flex items-center gap-1 pt-0.5">
+<span class="font-semibold text-brand-terracota">Causa sugerida:</span> 
+              Posible merma / derrame en coctelería
+            </p>
+<div class="pt-1.5 flex items-center gap-2">
+<button class="text-[11px] font-semibold text-brand-olivo underline decoration-brand-dorado hover:text-brand-carbon flex items-center gap-0.5" type="button">
+<span class="material-symbols-outlined text-xs">edit_note</span> Registrar observación o merma
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Lista de otros insumos de barra (Resumen colapsado y estados de conformidad) -->
+<section class="space-y-2 pt-1">
+<div class="flex items-center justify-between px-1">
+<h3 class="font-headline text-xs font-bold uppercase tracking-wider text-brand-carbon/60">
+            Otros insumos en Cava Barra (3)
+          </h3>
+<span class="text-[11px] text-brand-olivo font-medium hover:underline cursor-pointer">Ver todos (32)</span>
+</div>
+<div class="space-y-2">
+<!-- Item 1: Mezcal Espadín (Conforme) -->
+<div class="bg-white p-3 rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-between active:bg-brand-marfil transition-colors">
+<div class="space-y-0.5 pr-2">
+<div class="flex items-center gap-2">
+<h4 class="font-medium text-sm text-brand-carbon">Mezcal Espadín 750 ml</h4>
+<span class="text-[10px] text-brand-carbon/40 font-mono">MEZ-ESP</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-brand-carbon/70">
+<span>Contado: <b class="text-brand-carbon font-semibold">4.0</b></span>
+<span class="text-brand-arena">•</span>
+<span>Teórico: <b class="text-brand-carbon/70 font-normal">4.0</b></span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-esmeraldaBg text-brand-esmeralda border border-brand-esmeralda/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs leading-none">check_circle</span>
+                Conforme (100% OK)
+              </span>
+<span class="text-[10px] text-brand-carbon/40">Sin desvío</span>
+</div>
+</div>
+<!-- Item 2: Ginebra London Dry (Conforme con fracción) -->
+<div class="bg-white p-3 rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-between active:bg-brand-marfil transition-colors">
+<div class="space-y-0.5 pr-2">
+<div class="flex items-center gap-2">
+<h4 class="font-medium text-sm text-brand-carbon">Ginebra London Dry 750 ml</h4>
+<span class="text-[10px] text-brand-carbon/40 font-mono">GIN-LON</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-brand-carbon/70">
+<span>Contado: <b class="text-brand-carbon font-semibold">1.8</b></span>
+<span class="text-brand-arena">•</span>
+<span>Teórico: <b class="text-brand-carbon/70 font-normal">1.8</b></span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-esmeraldaBg text-brand-esmeralda border border-brand-esmeralda/20 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs leading-none">check_circle</span>
+                Conforme (100% OK)
+              </span>
+<span class="text-[10px] text-brand-carbon/40">Sin desvío</span>
+</div>
+</div>
+<!-- Item 3: Triple Sec (Diferencia Menor) -->
+<div class="bg-white p-3 rounded-lg border border-brand-terracota/30 shadow-xs flex items-center justify-between active:bg-brand-terracotaBg/20 transition-colors">
+<div class="space-y-0.5 pr-2">
+<div class="flex items-center gap-2">
+<h4 class="font-medium text-sm text-brand-carbon">Licor de Naranja (Triple Sec) 700 ml</h4>
+<span class="text-[10px] text-brand-carbon/40 font-mono">LIC-TRI</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-brand-carbon/70">
+<span>Contado: <b class="text-brand-terracota font-bold">1.3</b></span>
+<span class="text-brand-arena">•</span>
+<span>Teórico: <b class="text-brand-carbon/70 font-normal">1.5</b></span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-terracotaBg text-brand-terracota border border-brand-terracota/30 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs leading-none">priority_high</span>
+                Diff: -0.2 btl
+              </span>
+<span class="text-[10px] text-brand-terracota font-semibold">-$48.00 MXN</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Ergonomic Touch Numeric Keypad Drawer (Mobile-friendly for cellar work) -->
+<section class="bg-brand-marfilDark rounded-xl p-3.5 border border-brand-arena/50 shadow-inner">
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-brand-arena/30">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-brand-olivo">dialpad</span>
+<span class="text-xs font-bold text-brand-olivo uppercase tracking-wider">Teclado de captura rápida</span>
+</div>
+<span class="text-[10px] text-brand-carbon/60 font-medium bg-white px-2 py-0.5 rounded border border-brand-arena/40">Campo activo: Cerradas</span>
+</div>
+<!-- 4x3 Ergonomic Numeric Keypad Layout -->
+<div class="grid grid-cols-4 gap-2">
+<!-- Row 1 -->
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">1</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">2</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">3</button>
+<button class="h-11 bg-brand-arena/20 hover:bg-brand-arena/30 active:bg-brand-arena/50 text-brand-carbon rounded-lg border border-brand-arena/40 flex items-center justify-center transition-transform active:scale-95" title="Borrar último dígito" type="button">
+<span class="material-symbols-outlined text-xl">backspace</span>
+</button>
+<!-- Row 2 -->
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">4</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">5</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">6</button>
+<button class="h-11 bg-brand-arena/20 hover:bg-brand-arena/30 text-brand-carbon/70 text-xs font-bold rounded-lg border border-brand-arena/40 flex items-center justify-center active:scale-95" title="Limpiar valor" type="button">C</button>
+<!-- Row 3 -->
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">7</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">8</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">9</button>
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-bold text-lg rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">.</button>
+<!-- Row 4: 0 and Big Confirmation Action -->
+<button class="h-11 bg-white hover:bg-brand-marfil active:bg-brand-arena/40 text-brand-carbon font-semibold text-base rounded-lg border border-brand-arena/40 shadow-xs flex items-center justify-center transition-transform active:scale-95" type="button">0</button>
+<button class="col-span-3 h-11 bg-brand-olivo hover:bg-[#253931] active:scale-[0.98] text-brand-marfil font-semibold text-xs rounded-lg border border-brand-dorado/40 shadow-sm flex items-center justify-center gap-1.5 transition-all" type="button">
+<span>Confirmar y Siguiente Insumo</span>
+<span class="material-symbols-outlined text-base text-brand-dorado">arrow_forward</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Section 6: Sticky Bottom Action Panel & Balance Summary -->
+<div class="fixed bottom-14 left-0 right-0 max-w-md mx-auto z-40 px-3 pb-1 pointer-events-none">
+<div class="bg-white/95 backdrop-blur-md rounded-xl p-3 border border-brand-arena/50 shadow-xl pointer-events-auto space-y-2">
+<!-- Discrepancy Balance Bar -->
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-brand-terracota">trending_down</span>
+<span class="font-medium text-brand-carbon/70">Diferencia total valorizada:</span>
+</div>
+<span class="font-bold text-sm text-brand-terracota font-mono bg-brand-terracotaBg px-2 py-0.5 rounded border border-brand-terracota/30">
+            -$312.00 MXN
+          </span>
+</div>
+<!-- Action Buttons Pair -->
+<div class="grid grid-cols-12 gap-2 pt-0.5">
+<button class="col-span-4 h-10 px-2 rounded-lg bg-brand-marfil border border-brand-arena text-brand-carbon hover:bg-brand-arena/20 active:scale-95 transition-all text-xs font-semibold flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-sm text-brand-carbon/60">bookmark</span>
+<span>Borrador</span>
+</button>
+<button class="col-span-8 h-10 px-3 rounded-lg bg-brand-olivo text-brand-marfil border border-brand-dorado/60 shadow-md active:scale-95 transition-all text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#16221d]" type="button">
+<span class="material-symbols-outlined text-base text-brand-dorado">verified</span>
+<span>Finalizar conteo</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Mandatory from Shared Components JSON & Semantic Shell Logic) -->
+<!-- Destination 0 'Inventario' is strictly marked active as this is the physical stock counting flow -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-[#C9B89F]/20 bg-[#1E2F28] max-w-md mx-auto right-0">
+<!-- Tab 1: Inventario (Active) -->
+<a class="flex flex-col items-center justify-center text-[#D4AF7C] font-bold py-1" href="#inventario">
+<span class="material-symbols-outlined text-xl leading-none">inventory_2</span>
+<span class="font-label text-xs font-medium tracking-normal mt-0.5">Inventario</span>
+</a>
+<!-- Tab 2: Kardex -->
+<a class="flex flex-col items-center justify-center text-[#EAE6DD]/60 hover:text-[#EAE6DD] py-1 transition-colors" href="#kardex">
+<span class="material-symbols-outlined text-xl leading-none">fact_check</span>
+<span class="font-label text-xs font-medium tracking-normal mt-0.5">Kardex</span>
+</a>
+<!-- Tab 3: Movimientos -->
+<a class="flex flex-col items-center justify-center text-[#EAE6DD]/60 hover:text-[#EAE6DD] py-1 transition-colors" href="#movimientos">
+<span class="material-symbols-outlined text-xl leading-none">swap_horiz</span>
+<span class="font-label text-xs font-medium tracking-normal mt-0.5">Movimientos</span>
+</a>
+<!-- Tab 4: Ajustes -->
+<a class="flex flex-col items-center justify-center text-[#EAE6DD]/60 hover:text-[#EAE6DD] py-1 transition-colors" href="#ajustes">
+<span class="material-symbols-outlined text-xl leading-none">tune</span>
+<span class="font-label text-xs font-medium tracking-normal mt-0.5">Ajustes</span>
+</a>
+</nav>
+</div>
+<!-- Micro-interactions Script for dynamic calculation and tactile feedback -->
+<script>
+    let closedBottles = 2;
+    let openFraction = 0.4;
+    const theoretical = 2.9;
+    const unitPrice = 290.00; // MXN per bottle
+
+    const valClosedEl = document.getElementById('val-closed');
+    const valOpenDecEl = document.getElementById('val-open-dec');
+    const labelOpenPctEl = document.getElementById('label-open-pct');
+    const totalCountedEl = document.getElementById('total-counted');
+    const visualLiquidEl = document.getElementById('visual-bottle-liquid');
+    const liquidSliderEl = document.getElementById('liquid-slider');
+    const sliderReadoutEl = document.getElementById('slider-readout');
+
+    function updateTotal() {
+      const total = Number((closedBottles + openFraction).toFixed(2));
+      valClosedEl.textContent = closedBottles;
+      valOpenDecEl.textContent = openFraction.toFixed(1);
+      labelOpenPctEl.textContent = Math.round(openFraction * 100) + '%';
+      totalCountedEl.textContent = total.toFixed(1);
+      visualLiquidEl.style.height = (openFraction * 100) + '%';
+      sliderReadoutEl.textContent = openFraction.toFixed(2) + ' btl (' + Math.round(openFraction * 100) + '%)';
+    }
+
+    document.getElementById('btn-inc-closed').addEventListener('click', () => {
+      closedBottles += 1;
+      updateTotal();
+    });
+
+    document.getElementById('btn-dec-closed').addEventListener('click', () => {
+      if (closedBottles > 0) {
+        closedBottles -= 1;
+        updateTotal();
+      }
+    });
+
+    function setLiquidLevel(val) {
+      openFraction = parseFloat(val);
+      liquidSliderEl.value = val;
+      updateTotal();
+    }
+
+    liquidSliderEl.addEventListener('input', (e) => {
+      openFraction = parseFloat(e.target.value);
+      updateTotal();
+    });
+  </script>
+</body></html>

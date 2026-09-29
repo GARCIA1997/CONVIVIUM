@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#F5F1E8]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>CONVIVIUM — Aprobaciones Remotas</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            marfil: "#F5F1E8",
+            "marfil-light": "#FBF9F4",
+            olivo: "#1E2F28",
+            "olivo-light": "#2A3F36",
+            arena: "#C9B89F",
+            "arena-subtle": "#E4DDD1",
+            terracota: "#B45A3C",
+            "terracota-dark": "#9C3D25",
+            dorado: "#D4AF7C",
+            carbon: "#1A1A1A"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .serif-display {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .glass-card {
+      backdrop-filter: blur(8px);
+      background-color: rgba(251, 249, 244, 0.88);
+    }
+    @keyframes subtle-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.96); }
+    }
+    .pulse-beacon {
+      animation: subtle-pulse 2.2s infinite ease-in-out;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full font-body text-carbon antialiased bg-[#F5F1E8] flex justify-center">
+<!-- Mobile Viewport Shell (Max Width Mobile Container) -->
+<div class="w-full max-w-md bg-[#FBF9F4] min-h-screen flex flex-col relative shadow-2xl border-x border-[#C9B89F]/30 pb-28">
+<!-- Top Status Bar & Brand Header -->
+<header class="sticky top-0 z-40 bg-[#FBF9F4]/95 backdrop-blur-md border-b border-[#C9B89F]/40 px-4 pt-3 pb-3">
+<!-- Network & Operational Breadcrumb -->
+<div class="flex items-center justify-between text-xs mb-2">
+<div class="flex items-center gap-1.5 font-medium tracking-wide text-[#1E2F28]/80">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="text-[11px] uppercase tracking-wider font-semibold">En línea</span>
+<span class="text-[#C9B89F]">•</span>
+<span class="text-[11px] text-[#1E2F28]/70">Sucursal Centro</span>
+</div>
+<!-- Manager Persona Pill -->
+<div class="flex items-center gap-2 bg-[#EAE6DD] px-2.5 py-1 rounded-full border border-[#C9B89F]/50">
+<span class="text-[11px] font-medium text-[#1E2F28]">Gerente: <strong class="font-semibold">Roberto V.</strong></span>
+<div class="w-5 h-5 rounded-full bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center text-[10px] font-serif font-bold">
+            RV
+          </div>
+</div>
+</div>
+<!-- App Bar Primary Hierarchy -->
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-baseline gap-2.5">
+<h1 class="serif-display text-2xl font-bold text-[#1E2F28] tracking-tight">
+            Aprobaciones
+          </h1>
+<div class="inline-flex items-center gap-1 bg-[#B45A3C]/10 border border-[#B45A3C]/30 text-[#B45A3C] px-2 py-0.5 rounded-full text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45A3C] pulse-beacon"></span>
+<span>3 pendientes</span>
+</div>
+</div>
+<button aria-label="Historial rápido" class="w-9 h-9 flex items-center justify-center rounded-lg border border-[#C9B89F]/60 text-[#1E2F28] active:scale-95 transition-transform bg-[#F5F1E8]">
+<span class="material-symbols-outlined text-[20px]" data-icon="sync">sync</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-4 pt-4 space-y-5">
+<!-- Urgent Notification Banner -->
+<div class="bg-[#1E2F28] text-[#FBF9F4] rounded-lg p-3 px-3.5 flex items-center justify-between shadow-sm border border-[#1E2F28]">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[#D4AF7C] text-xl" data-icon="timer">timer</span>
+<p class="text-xs leading-snug">
+<span class="font-medium text-[#D4AF7C]">SLA de cocina:</span> Tiempo promedio de resolución <span class="font-semibold text-white">42 seg</span>
+</p>
+</div>
+<span class="text-[10px] uppercase font-bold tracking-widest text-[#D4AF7C] bg-white/10 px-2 py-0.5 rounded">Prioridad 1</span>
+</div>
+<!-- HERO CARD: Alta Urgencia -->
+<section aria-labelledby="hero-approval-title" class="relative">
+<div class="flex items-center justify-between mb-1.5 px-0.5">
+<span class="text-[11px] font-bold uppercase tracking-wider text-[#B45A3C] flex items-center gap-1">
+<span class="material-symbols-outlined text-sm font-bold" data-icon="priority_high">priority_high</span>
+            Urgencia Inmediata
+          </span>
+<span class="text-[11px] text-[#1A1A1A]/60 font-medium">Hace 30 s</span>
+</div>
+<div class="bg-[#FBF9F4] rounded-xl border-2 border-[#B45A3C]/40 shadow-md p-4 relative overflow-hidden">
+<!-- Top Tag & Table Info -->
+<div class="flex items-start justify-between border-b border-[#C9B89F]/30 pb-3">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#B45A3C]/10 text-[#9C3D25] text-[11px] font-semibold tracking-wide uppercase mb-1">
+<span class="material-symbols-outlined text-xs" data-icon="assignment_return">assignment_return</span>
+                Retirar de cuenta · Devolución
+              </div>
+<h2 class="serif-display text-2xl font-bold text-[#1E2F28] mt-1" id="hero-approval-title">
+                Mesa 4
+              </h2>
+</div>
+<div class="text-right">
+<span class="text-xs text-[#1A1A1A]/60 font-medium block">Zona Terraza</span>
+<span class="inline-block mt-0.5 text-xs font-semibold px-2 py-0.5 rounded-full bg-[#C9B89F]/20 text-[#1E2F28]">
+                4 comensales
+              </span>
+</div>
+</div>
+<!-- Product Details & Reason -->
+<div class="py-3.5 space-y-2.5">
+<div class="flex items-baseline justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#B45A3C] text-lg" data-icon="restaurant">restaurant</span>
+<span class="font-bold text-[#1A1A1A] text-base">Rib eye 400 g</span>
+</div>
+<span class="serif-display font-bold text-lg text-[#1E2F28]">$620 <span class="text-xs font-sans font-medium text-[#1A1A1A]/70">MXN</span></span>
+</div>
+<!-- Reason Box -->
+<div class="bg-[#EAE6DD]/70 rounded-lg p-2.5 border border-[#C9B89F]/40 text-xs">
+<div class="text-[#1A1A1A]/60 font-medium mb-0.5">Motivo reportado:</div>
+<div class="font-medium text-[#1A1A1A] leading-relaxed flex items-start gap-1">
+<span class="material-symbols-outlined text-[#B45A3C] text-sm mt-0.5" data-icon="error">error</span>
+<span>Término incorrecto (solicitado medio, salió bien cocido).</span>
+</div>
+<div class="mt-2 pt-2 border-t border-[#C9B89F]/30 flex justify-between items-center text-[11px] text-[#1A1A1A]/70">
+<span>Solicita: <strong class="text-[#1E2F28]">Ana M. (Mesera)</strong></span>
+<span class="font-mono text-[10px] bg-white/60 px-1.5 py-0.5 rounded">Comanda #8041</span>
+</div>
+</div>
+<!-- Financial Impact Box -->
+<div class="flex items-center justify-between bg-[#B45A3C]/5 border border-[#B45A3C]/30 rounded-lg px-3 py-2 text-xs">
+<div class="flex items-center gap-1.5 text-[#9C3D25] font-medium">
+<span class="material-symbols-outlined text-base" data-icon="trending_down">trending_down</span>
+<span>Impacto en costo operativo:</span>
+</div>
+<span class="font-bold text-[#9C3D25] tracking-tight bg-white px-2 py-0.5 rounded border border-[#B45A3C]/20">
+                Merma: $210 MXN
+              </span>
+</div>
+</div>
+<!-- Hero Action Buttons -->
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<button class="h-12 flex items-center justify-center gap-1.5 rounded-lg border-2 border-[#B45A3C] bg-[#B45A3C]/10 text-[#9C3D25] font-semibold text-sm active:scale-98 active:bg-[#B45A3C]/20 transition-all shadow-sm">
+<span class="material-symbols-outlined text-xl" data-icon="close">close</span>
+<span>Rechazar</span>
+</button>
+<button class="h-12 flex items-center justify-center gap-1.5 rounded-lg bg-[#1E2F28] text-[#FBF9F4] font-semibold text-sm active:scale-98 active:bg-[#2A3F36] transition-all shadow-md">
+<span class="material-symbols-outlined text-xl text-[#D4AF7C]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[#FBF9F4]">Aprobar retiro</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION: Otras Pendientes (Compact Cards) -->
+<section aria-labelledby="other-pending-title" class="space-y-2.5">
+<div class="flex items-center justify-between pt-1">
+<h2 class="text-xs font-bold uppercase tracking-wider text-[#1E2F28]/80 flex items-center gap-1.5" id="other-pending-title">
+<span class="w-2 h-2 rounded-full bg-[#D4AF7C]"></span>
+            Otras pendientes (2)
+          </h2>
+<span class="text-[11px] text-[#1E2F28]/60 font-medium">Mesa &amp; Cuenta</span>
+</div>
+<!-- Compact Card 1: Descuento 15% -->
+<article class="bg-[#FBF9F4] rounded-lg border border-[#C9B89F]/60 p-3.5 shadow-sm space-y-2.5">
+<div class="flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-[#D4AF7C]/20 text-[#8C6D37] text-[10px] font-bold uppercase tracking-wider">
+                  Descuento 15%
+                </span>
+<span class="text-[10px] text-[#B45A3C] font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[13px]" data-icon="warning">warning</span>
+                  Excede tope (máx 10%)
+                </span>
+</div>
+<h3 class="serif-display text-lg font-bold text-[#1E2F28]">
+                Mesa 9
+              </h3>
+</div>
+<div class="text-right">
+<div class="text-xs text-[#1A1A1A]/60">Cuenta actual</div>
+<div class="serif-display font-bold text-[#1E2F28] text-base">$3,450 <span class="text-[10px] font-sans font-medium text-[#1A1A1A]/60">MXN</span></div>
+</div>
+</div>
+<p class="text-xs text-[#1A1A1A]/80 leading-relaxed bg-[#EAE6DD]/50 p-2 rounded border border-[#C9B89F]/30">
+            Atenuación por espera prolongada en plato fuerte.
+            <span class="block mt-1 text-[11px] text-[#1A1A1A]/60">
+              Solicitó: <strong>Luis G. (Capitán)</strong> · Hace 4 min
+            </span>
+</p>
+<div class="flex items-center justify-between pt-1">
+<span class="text-xs font-semibold text-[#1E2F28]">
+              Descuento sugerido: <span class="text-[#B45A3C]">-$517.50 MXN</span>
+</span>
+<div class="flex items-center gap-2">
+<button aria-label="Rechazar descuento" class="px-3 py-1.5 rounded-md border border-[#B45A3C] text-[#B45A3C] text-xs font-semibold bg-white active:scale-95 transition-transform flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+                Rechazar
+              </button>
+<button aria-label="Aprobar descuento" class="px-3.5 py-1.5 rounded-md bg-[#1E2F28] text-[#FBF9F4] text-xs font-semibold active:scale-95 transition-transform flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-[#D4AF7C]" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+                Aprobar
+              </button>
+</div>
+</div>
+</article>
+<!-- Compact Card 2: Cancelación Coctelería -->
+<article class="bg-[#FBF9F4] rounded-lg border border-[#C9B89F]/60 p-3.5 shadow-sm space-y-2.5">
+<div class="flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="flex items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-[#C9B89F]/25 text-[#1E2F28] text-[10px] font-bold uppercase tracking-wider">
+                  Cancelación · Bar
+                </span>
+<span class="text-[10px] text-[#1A1A1A]/50">Hace 8 min</span>
+</div>
+<h3 class="serif-display text-lg font-bold text-[#1E2F28]">
+                Mesa 2
+              </h3>
+</div>
+<div class="text-right">
+<span class="text-xs text-[#1A1A1A]/60">Monto total</span>
+<div class="serif-display font-bold text-[#1E2F28] text-base">$370 <span class="text-[10px] font-sans font-medium text-[#1A1A1A]/60">MXN</span></div>
+</div>
+</div>
+<div class="text-xs text-[#1A1A1A]/80 leading-relaxed bg-[#EAE6DD]/50 p-2 rounded border border-[#C9B89F]/30 flex items-start justify-between">
+<div>
+<div class="font-medium text-[#1E2F28]">2x Mezcalita de Jamaica</div>
+<div class="text-[11px] text-[#B45A3C] mt-0.5">Cliente canceló por demora en barra.</div>
+</div>
+<span class="text-[10px] font-mono bg-white px-1.5 py-0.5 rounded border border-[#C9B89F]/40 text-[#1A1A1A]/70">Coctelería</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="text-[11px] text-[#1A1A1A]/60">
+              Solicitó: <strong>Carlos R. (Mesero)</strong>
+</span>
+<div class="flex items-center gap-2">
+<button aria-label="Rechazar cancelación" class="px-3 py-1.5 rounded-md border border-[#B45A3C] text-[#B45A3C] text-xs font-semibold bg-white active:scale-95 transition-transform flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+                Rechazar
+              </button>
+<button aria-label="Aprobar cancelación" class="px-3.5 py-1.5 rounded-md bg-[#1E2F28] text-[#FBF9F4] text-xs font-semibold active:scale-95 transition-transform flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-[#D4AF7C]" data-icon="check" style="font-variation-settings: 'FILL' 1;">check</span>
+                Aprobar
+              </button>
+</div>
+</div>
+</article>
+</section>
+<!-- SECTION: Resueltas Hoy (Audit Log Style) -->
+<section aria-labelledby="history-title" class="pt-2">
+<div class="flex items-center justify-between mb-2">
+<h2 class="text-xs font-bold uppercase tracking-wider text-[#1E2F28]/70 flex items-center gap-1.5" id="history-title">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]/60" data-icon="history">history</span>
+            Resueltas hoy (14)
+          </h2>
+<button class="text-xs text-[#1E2F28] font-medium hover:underline flex items-center">
+            Ver todas
+            <span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="bg-[#FBF9F4] rounded-lg border border-[#C9B89F]/50 divide-y divide-[#C9B89F]/30 text-xs">
+<!-- History Item 1 -->
+<div class="p-3 flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="font-medium text-[#1A1A1A] flex items-center gap-1.5">
+<span>Descuento 10% cortesía</span>
+<span class="text-[#C9B89F]">•</span>
+<span class="font-semibold text-[#1E2F28]">Mesa 7</span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/60 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                Aprobado por Roberto V. (Tú) · 14:15
+              </p>
+</div>
+<div class="text-right">
+<span class="font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">
+                $180 MXN
+              </span>
+</div>
+</div>
+<!-- History Item 2 -->
+<div class="p-3 flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="font-medium text-[#1A1A1A] flex items-center gap-1.5">
+<span>Cancelación de entrada</span>
+<span class="text-[#C9B89F]">•</span>
+<span class="font-semibold text-[#1E2F28]">Mesa 11</span>
+</div>
+<p class="text-[11px] text-[#9C3D25] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#B45A3C]"></span>
+                Rechazado por Roberto V. · 13:40
+              </p>
+<div class="text-[10px] text-[#1A1A1A]/50 italic pl-2.5">
+                "Platillo ya había sido despachado a comensal"
+              </div>
+</div>
+<div class="text-right">
+<span class="font-medium text-[#9C3D25] bg-[#B45A3C]/10 px-2 py-0.5 rounded text-[11px] border border-[#B45A3C]/20">
+                Bloqueado
+              </span>
+</div>
+</div>
+<!-- History Item 3 -->
+<div class="p-3 flex items-start justify-between">
+<div class="space-y-0.5">
+<div class="font-medium text-[#1A1A1A] flex items-center gap-1.5">
+<span>Cortesía digestivo de la casa</span>
+<span class="text-[#C9B89F]">•</span>
+<span class="font-semibold text-[#1E2F28]">Mesa 3</span>
+</div>
+<p class="text-[11px] text-[#1A1A1A]/60 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                Aprobado por Roberto V. · 12:20
+              </p>
+</div>
+<div class="text-right">
+<span class="font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded text-[11px] border border-emerald-200">
+                $120 MXN
+              </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Operational Tip Note -->
+<div class="p-3 rounded-lg bg-[#EAE6DD]/40 border border-[#C9B89F]/40 flex items-center gap-2.5 text-xs text-[#1E2F28]/70">
+<span class="material-symbols-outlined text-[#D4AF7C] text-lg" data-icon="tips_and_updates">tips_and_updates</span>
+<span>Las aprobaciones superiores a $1,500 MXN notifican en tiempo real a la dirección de operaciones.</span>
+</div>
+</main>
+<!-- BottomNavBar (Shared Component Guide compliant: docked bottom, no border top lines, active navigation mapped to Aprobaciones) -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 max-w-md mx-auto bg-[#FBF9F4] shadow-[0_-4px_16px_rgba(30,47,40,0.06)]">
+<!-- Destino 1: Inicio -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 py-1 opacity-70 hover:opacity-100 hover:text-[#1E2F28] transition-all active:scale-95 duration-150" href="#inicio">
+<span class="material-symbols-outlined text-[22px]" data-icon="table_restaurant">table_restaurant</span>
+<span class="font-label text-[10px] uppercase tracking-wider mt-0.5 font-medium">Mesas</span>
+</a>
+<!-- Destino 2: Aprobaciones (ACTIVO) -->
+<a aria-current="page" class="flex flex-col items-center justify-center text-[#1E2F28] font-semibold py-1 relative active:scale-95 transition-transform duration-150" href="#aprobaciones">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px] text-[#1E2F28]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="absolute -top-1.5 -right-2 bg-[#B45A3C] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+            3
+          </span>
+</div>
+<span class="font-label text-[10px] uppercase tracking-wider mt-0.5 text-[#1E2F28] font-bold">Aprobaciones</span>
+<div class="w-1 h-1 rounded-full bg-[#1E2F28] mt-0.5"></div>
+</a>
+<!-- Destino 3: Personal -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 py-1 opacity-70 hover:opacity-100 hover:text-[#1E2F28] transition-all active:scale-95 duration-150" href="#personal">
+<span class="material-symbols-outlined text-[22px]" data-icon="badge">badge</span>
+<span class="font-label text-[10px] uppercase tracking-wider mt-0.5 font-medium">Personal</span>
+</a>
+<!-- Destino 4: Alertas -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 py-1 opacity-70 hover:opacity-100 hover:text-[#1E2F28] transition-all active:scale-95 duration-150" href="#alertas">
+<span class="material-symbols-outlined text-[22px]" data-icon="notifications">notifications</span>
+<span class="font-label text-[10px] uppercase tracking-wider mt-0.5 font-medium">Alertas</span>
+</a>
+</nav>
+</div>
+<script>
+    // Micro-interactions and subtle feedback for touch action buttons
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const text = this.innerText.trim();
+        if (text.includes('Aprobar') || text.includes('Rechazar')) {
+          const card = this.closest('article, div.relative');
+          if (card) {
+            this.style.pointerEvents = 'none';
+            this.classList.add('opacity-50');
+            setTimeout(() => {
+              card.style.transition = 'all 0.3s ease';
+              card.style.opacity = '0.4';
+              card.style.transform = 'scale(0.98)';
+            }, 100);
+          }
+        }
+      });
+    });
+  </script>
+</body></html>

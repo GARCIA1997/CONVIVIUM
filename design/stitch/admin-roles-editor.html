@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#EAE6DD]" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Administración · Editor de Rol y Alta de Usuario</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              olivo: "#1E2F28",
+              marfil: "#EAE6DD",
+              arena: "#C9B89F",
+              terracota: "#B45A3C",
+              carbon: "#1A1A1A",
+              dorado: "#D4AF7C"
+            }
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      font-size: 20px;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(201, 184, 159, 0.15);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(201, 184, 159, 0.5);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(30, 47, 40, 0.4);
+    }
+  </style>
+</head>
+<body class="h-full text-brand-carbon font-body bg-[#EAE6DD] antialiased flex overflow-hidden">
+<!-- ============================================================== -->
+<!-- 1. SIDEBAR LATERAL (Shared Component: SideNavBar)             -->
+<!-- ============================================================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col z-30 bg-[#1E2F28] border-r border-[#C9B89F]/20 text-xs shadow-none">
+<div class="w-64 h-full flex flex-col justify-between p-4">
+<!-- Top Section: Brand & Navigation -->
+<div class="space-y-6">
+<!-- Brand Header -->
+<div class="px-2 pt-2 pb-3 border-b border-[#C9B89F]/15 flex items-center gap-3">
+<div class="w-9 h-9 rounded bg-[#D4AF7C]/15 border border-[#D4AF7C]/40 flex items-center justify-center text-[#D4AF7C] font-headline text-lg font-bold shadow-inner">
+            C
+          </div>
+<div>
+<span class="font-headline text-base tracking-widest text-[#D4AF7C] font-semibold uppercase block leading-none">CONVIVIUM</span>
+<span class="text-[10px] text-[#EAE6DD]/60 tracking-wider font-light mt-1 block">Administración Central</span>
+</div>
+</div>
+<!-- Primary Navigation Tabs -->
+<nav class="space-y-1.5 font-medium">
+<!-- 1. Mesas y Salón -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="table_restaurant">table_restaurant</span>
+<span>Mesas y Salón</span>
+</a>
+<!-- 2. Comandas y Cocina -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span>Comandas y Cocina</span>
+</a>
+<!-- 3. Caja y Facturación -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="point_of_sale">point_of_sale</span>
+<span>Caja y Facturación</span>
+</a>
+<!-- 4. Personal y Roles (ACTIVE MATCH) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#EAE6DD]/10 text-[#D4AF7C] font-medium border-l-2 border-[#D4AF7C]" href="#">
+<span class="material-symbols-outlined fill-1" data-icon="badge" style="font-variation-settings: 'FILL' 1;">badge</span>
+<span class="font-semibold tracking-wide">Personal y Roles</span>
+</a>
+<!-- 5. Inventario y Carta -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Inventario y Carta</span>
+</a>
+<!-- 6. Reportes y Cierre -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#EAE6DD]/70 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reportes y Cierre</span>
+</a>
+</nav>
+</div>
+<!-- Bottom / Footer Actions -->
+<div class="space-y-4 pt-4 border-t border-[#C9B89F]/15">
+<!-- Secondary CTA: Nuevo Empleado -->
+<button class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#D4AF7C] hover:bg-[#c49e6b] text-[#1E2F28] font-semibold text-xs tracking-wide shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[18px]" data-icon="person_add">person_add</span>
+<span>Nuevo Empleado</span>
+</button>
+<!-- Footer Navigation Links -->
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#EAE6DD]/60 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors text-xs" href="#">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+<span>Auditoría</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#EAE6DD]/60 hover:text-[#EAE6DD] hover:bg-[#EAE6DD]/5 transition-colors text-xs" href="#">
+<span class="material-symbols-outlined text-base" data-icon="settings">settings</span>
+<span>Configuración General</span>
+</a>
+</div>
+<!-- Venue Tag -->
+<div class="px-3 py-2 rounded bg-black/20 text-[11px] text-[#EAE6DD]/50 flex items-center justify-between">
+<span class="flex items-center gap-1.5 truncate">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span>Polanco CDMX</span>
+</span>
+<span class="text-[10px] text-[#D4AF7C] font-mono">v3.4.2</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- ============================================================== -->
+<!-- MAIN VIEWPORT CONTAINER (Adjusted with pl-64 for fixed sidebar)-->
+<!-- ============================================================== -->
+<div class="flex-1 flex flex-col pl-64 h-screen overflow-hidden">
+<!-- ============================================================ -->
+<!-- 2. TOPBAR (Shared Component: TopNavBar)                      -->
+<!-- ============================================================ -->
+<header class="h-16 bg-[#EAE6DD] border-b border-[#C9B89F]/40 px-6 flex justify-between items-center z-20 shrink-0">
+<!-- Left side: Breadcrumb & Context -->
+<div class="flex items-center gap-4">
+<div>
+<div class="flex items-center gap-2 text-[11px] text-[#1A1A1A]/60 font-medium">
+<span class="hover:text-brand-olivo cursor-pointer">Administración</span>
+<span>/</span>
+<span class="hover:text-brand-olivo cursor-pointer">Personal y Seguridad</span>
+<span>/</span>
+<span class="text-brand-olivo font-semibold">Jerarquía de Roles y Usuarios</span>
+</div>
+<h1 class="font-headline text-lg tracking-normal font-semibold text-[#1E2F28] leading-tight flex items-center gap-2">
+<span>Roles y Jerarquías</span>
+<span class="text-[10px] font-body bg-[#1E2F28]/10 text-brand-olivo px-2 py-0.5 rounded-full border border-[#1E2F28]/15 font-medium">HU E1-07 / E1-08</span>
+</h1>
+</div>
+<div class="h-6 w-px bg-[#C9B89F]/40 ml-2"></div>
+<!-- Sync Indicator -->
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/5 border border-emerald-800/20 text-emerald-800 text-[11px]">
+<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+<span class="font-medium">Sincronizado local (Edge POS)</span>
+</div>
+</div>
+<!-- Center Links (as defined in JSON) -->
+<nav class="hidden lg:flex items-center gap-6 text-sm font-medium">
+<a class="text-[#1E2F28] font-semibold border-b-2 border-[#1E2F28] pb-1" href="#">Roles y Jerarquías</a>
+<a class="text-[#1A1A1A]/60 hover:text-[#1A1A1A] pb-1 transition-colors" href="#">Directorio de Usuarios</a>
+<a class="text-[#1A1A1A]/60 hover:text-[#1A1A1A] pb-1 transition-colors" href="#">Turnos y Accesos</a>
+<a class="text-[#1A1A1A]/60 hover:text-[#1A1A1A] pb-1 transition-colors" href="#">Bitácora de PINs</a>
+</nav>
+<!-- Right side actions -->
+<div class="flex items-center gap-3">
+<!-- Branch Selector Chip -->
+<div class="flex items-center gap-1.5 bg-[#C9B89F]/25 hover:bg-[#C9B89F]/40 transition-colors px-2.5 py-1 rounded-lg text-xs text-[#1E2F28] font-medium cursor-pointer border border-[#C9B89F]/50">
+<span class="material-symbols-outlined text-[16px] text-brand-olivo" data-icon="storefront">storefront</span>
+<span>Polanco CDMX</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="expand_more">expand_more</span>
+</div>
+<!-- Trailing Secondary Action: Simular Rol -->
+<button class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E2F28]/30 text-[#1E2F28] hover:bg-[#C9B89F]/20 text-xs font-medium transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+<span>Simular Rol</span>
+</button>
+<!-- Trailing Primary Action: Guardar Cambios -->
+<button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#1E2F28] hover:bg-[#283e35] text-[#EAE6DD] text-xs font-semibold shadow-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-sm text-[#D4AF7C]" data-icon="check_circle">check_circle</span>
+<span>Guardar Cambios</span>
+</button>
+<!-- Icon actions from JSON -->
+<button class="p-1.5 text-[#1E2F28]/70 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded-md transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#B45A3C]"></span>
+</button>
+<button class="p-1.5 text-[#1E2F28]/70 hover:text-[#1E2F28] hover:bg-[#C9B89F]/20 rounded-md transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-6 w-px bg-[#C9B89F]/40"></div>
+<!-- Admin Avatar Profile -->
+<div class="flex items-center gap-2 pl-1 cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center font-bold text-xs border border-[#D4AF7C]/40">
+            AG
+          </div>
+</div>
+</div>
+</header>
+<!-- ============================================================ -->
+<!-- 3. MAIN WORKSPACE CANVAS (3-COLUMN ERGONOMIC LAYOUT)         -->
+<!-- ============================================================ -->
+<main class="flex-1 overflow-y-auto p-5 grid grid-cols-12 gap-5 bg-[#EAE6DD]/70">
+<!-- ========================================================== -->
+<!-- COLUMNA 1 (Left): ÁRBOL DE JERARQUÍA DE ROLES (Cols: 3)    -->
+<!-- ========================================================== -->
+<section class="col-span-12 xl:col-span-3 flex flex-col bg-white/70 backdrop-blur-sm rounded-xl border border-[#C9B89F]/60 p-4 shadow-sm">
+<!-- Header Column -->
+<div class="flex items-center justify-between pb-3 border-b border-[#C9B89F]/30">
+<div>
+<h2 class="font-headline font-semibold text-base text-[#1E2F28] flex items-center gap-2">
+<span>Jerarquía de Roles</span>
+<span class="text-[11px] font-sans px-2 py-0.5 rounded-full bg-[#D4AF7C]/20 text-[#1E2F28] border border-[#D4AF7C]/40 font-semibold">8 Roles</span>
+</h2>
+<p class="text-[11px] text-[#1A1A1A]/60 mt-0.5">Estructura operativa de personal</p>
+</div>
+<span class="material-symbols-outlined text-[#C9B89F]" data-icon="account_tree">account_tree</span>
+</div>
+<!-- Callout de Herencia Vertical -->
+<div class="my-3 p-3 rounded-lg bg-[#1E2F28]/5 border border-[#1E2F28]/15 text-xs text-[#1E2F28]">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[#D4AF7C] shrink-0 mt-0.5" data-icon="vertical_align_bottom">vertical_align_bottom</span>
+<div>
+<span class="font-semibold text-[11px] uppercase tracking-wider text-[#1E2F28] block mb-0.5">Herencia vertical activa</span>
+<p class="text-[11px] text-[#1A1A1A]/75 leading-relaxed">
+                Un rol superior hereda automáticamente todas las pantallas, accesos y permisos del rol inferior.
+              </p>
+</div>
+</div>
+</div>
+<!-- Tree View Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto pr-1 space-y-2.5 py-1 text-xs">
+<!-- Nivel 1: Dueño -->
+<div class="p-2.5 rounded-lg border border-[#C9B89F]/40 bg-white/90 hover:border-[#1E2F28]/40 transition-colors cursor-pointer group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center text-[10px] font-bold">1</span>
+<div>
+<div class="font-semibold text-[#1E2F28] group-hover:text-[#B45A3C] transition-colors flex items-center gap-1.5">
+<span>Dueño</span>
+<span class="material-symbols-outlined text-[13px] text-[#D4AF7C]" data-icon="star">star</span>
+</div>
+<span class="text-[10px] text-[#1A1A1A]/55">Acceso absoluto e irrestricto</span>
+</div>
+</div>
+<span class="text-[10px] bg-[#C9B89F]/20 text-[#1E2F28] px-1.5 py-0.5 rounded font-mono">1 user</span>
+</div>
+</div>
+<!-- Vertical Connector Line -->
+<div class="w-0.5 h-3 bg-[#C9B89F]/60 ml-5 -my-1.5"></div>
+<!-- Nivel 2: Gerente -->
+<div class="p-2.5 rounded-lg border border-[#C9B89F]/40 bg-white/90 hover:border-[#1E2F28]/40 transition-colors cursor-pointer group">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded bg-[#1E2F28]/15 text-[#1E2F28] flex items-center justify-center text-[10px] font-bold">2</span>
+<div>
+<div class="font-semibold text-[#1E2F28]">Gerente General</div>
+<span class="text-[10px] text-[#1A1A1A]/55">Operación total, cortes y cancelaciones</span>
+</div>
+</div>
+<span class="text-[10px] bg-[#C9B89F]/20 text-[#1E2F28] px-1.5 py-0.5 rounded font-mono">2 users</span>
+</div>
+</div>
+<!-- Vertical Connector Line with Branching -->
+<div class="w-0.5 h-3 bg-[#C9B89F]/60 ml-5 -my-1.5"></div>
+<!-- Nivel 3: Capitán de Sala (Parent) -->
+<div class="p-2.5 rounded-lg border border-[#C9B89F]/50 bg-[#EAE6DD]/40">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded bg-[#1E2F28]/20 text-[#1E2F28] flex items-center justify-center text-[10px] font-bold">3</span>
+<div>
+<div class="font-semibold text-[#1E2F28]">Capitán de Sala</div>
+<span class="text-[10px] text-[#1A1A1A]/55">Supervisión de salón, mesas y reservas</span>
+</div>
+</div>
+<span class="text-[10px] bg-[#C9B89F]/20 text-[#1E2F28] px-1.5 py-0.5 rounded font-mono">3 users</span>
+</div>
+<!-- Sub-ramas Jerárquicas -->
+<div class="mt-2.5 pl-4 border-l-2 border-[#D4AF7C] space-y-2">
+<!-- Rol Activo / Seleccionado: Encargado de Turno -->
+<div class="p-2.5 rounded-lg bg-[#1E2F28] text-[#EAE6DD] shadow-md border-l-4 border-[#D4AF7C] relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#D4AF7C] text-sm" data-icon="tune">tune</span>
+<span class="font-semibold text-white tracking-tight">Encargado de Turno</span>
+</div>
+<span class="text-[9px] bg-[#D4AF7C] text-[#1E2F28] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Editando</span>
+</div>
+<div class="text-[10px] text-[#EAE6DD]/70 mt-1 flex items-center justify-between">
+<span>Híbrido personalizado · Derivado</span>
+<span class="font-mono text-[#D4AF7C]">1 activo</span>
+</div>
+</div>
+<!-- Nivel 4 subordinado: Mesero -->
+<div class="p-2 rounded-lg bg-white/70 border border-[#C9B89F]/40 hover:bg-white text-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#1E2F28]/60"></span>
+<span class="font-medium text-[#1E2F28]">Mesero (Piso)</span>
+</div>
+<span class="text-[10px] text-[#1A1A1A]/50 font-mono">14 users</span>
+</div>
+<span class="text-[10px] text-[#1A1A1A]/50 block pl-3">Comandas, servicio y adiciones</span>
+</div>
+</div>
+</div>
+<!-- Vertical Divider -->
+<div class="flex items-center gap-2 py-1">
+<span class="text-[10px] uppercase font-bold tracking-wider text-[#1A1A1A]/40">Roles Operativos Paralelos</span>
+<div class="flex-1 h-px bg-[#C9B89F]/40"></div>
+</div>
+<!-- Paralelos Grid -->
+<div class="grid grid-cols-2 gap-2">
+<!-- Cajero -->
+<div class="p-2 rounded-lg border border-[#C9B89F]/40 bg-white/80 hover:border-[#1E2F28]/40 transition-colors cursor-pointer">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="point_of_sale">point_of_sale</span>
+<span class="font-medium text-xs text-[#1E2F28]">Cajero TPV</span>
+</div>
+<span class="text-[9px] text-[#1A1A1A]/50 block mt-0.5">Fondo y Corte Z</span>
+</div>
+<!-- Almacenista -->
+<div class="p-2 rounded-lg border border-[#C9B89F]/40 bg-white/80 hover:border-[#1E2F28]/40 transition-colors cursor-pointer">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="inventory">inventory</span>
+<span class="font-medium text-xs text-[#1E2F28]">Almacén</span>
+</div>
+<span class="text-[9px] text-[#1A1A1A]/50 block mt-0.5">Recepción / Merma</span>
+</div>
+<!-- Cocina -->
+<div class="p-2 rounded-lg border border-[#C9B89F]/40 bg-white/80 hover:border-[#1E2F28]/40 transition-colors cursor-pointer">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="soup_kitchen">soup_kitchen</span>
+<span class="font-medium text-xs text-[#1E2F28]">Cocina KDS</span>
+</div>
+<span class="text-[9px] text-[#1A1A1A]/50 block mt-0.5">Tiempos y recetas</span>
+</div>
+<!-- Barra / Mixología -->
+<div class="p-2 rounded-lg border border-[#C9B89F]/40 bg-white/80 hover:border-[#1E2F28]/40 transition-colors cursor-pointer">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#1E2F28]" data-icon="local_bar">local_bar</span>
+<span class="font-medium text-xs text-[#1E2F28]">Mixología</span>
+</div>
+<span class="text-[9px] text-[#1A1A1A]/50 block mt-0.5">KDS Barra</span>
+</div>
+</div>
+</div>
+<!-- Footer Button: Crear Rol Personalizado -->
+<div class="pt-3 border-t border-[#C9B89F]/30 mt-auto">
+<button class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border-2 border-dashed border-[#1E2F28]/30 hover:border-[#1E2F28] hover:bg-[#1E2F28]/5 text-xs text-[#1E2F28] font-semibold transition-all">
+<span class="material-symbols-outlined text-base" data-icon="add_circle">add_circle</span>
+<span>+ Rol personalizado (copiar de...)</span>
+</button>
+</div>
+</section>
+<!-- ========================================================== -->
+<!-- COLUMNA 2 (Center): EDITOR DE ROL ENCARGADO DE TURNO (Cols: 5) -->
+<!-- ========================================================== -->
+<section class="col-span-12 xl:col-span-5 flex flex-col bg-white rounded-xl border border-[#C9B89F]/60 p-5 shadow-sm overflow-hidden">
+<!-- Header: Ficha del Rol -->
+<div class="pb-4 border-b border-[#C9B89F]/30">
+<div class="flex items-start justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[10px] uppercase font-bold tracking-wider text-[#B45A3C] bg-[#B45A3C]/10 px-2 py-0.5 rounded border border-[#B45A3C]/20">HU E1-07</span>
+<span class="text-[11px] bg-[#D4AF7C]/25 text-[#1E2F28] font-semibold px-2.5 py-0.5 rounded-full border border-[#D4AF7C]/40">
+                  Personalizado · Base: Capitán
+                </span>
+</div>
+<div class="flex items-center gap-2">
+<input class="font-headline text-xl font-bold text-[#1E2F28] border-b border-dashed border-[#C9B89F] hover:border-[#1E2F28] focus:border-[#1E2F28] focus:ring-0 bg-transparent py-0 px-1 w-full -ml-1 transition-colors" type="text" value="Encargado de Turno"/>
+</div>
+<p class="text-xs text-[#1A1A1A]/70 mt-1.5">
+                Rol intermedio para supervisión operativa de salón y corte de caja en ausencia de gerente.
+              </p>
+</div>
+<button class="p-1.5 text-[#1A1A1A]/40 hover:text-[#1E2F28] rounded-md transition-colors" title="Historial de modificaciones del rol">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Permission Config Sections -->
+<div class="flex-1 overflow-y-auto pr-1 py-4 space-y-5">
+<!-- Bloque 1: Permisos Heredados (Capitán) -->
+<div class="rounded-lg bg-[#EAE6DD]/40 border border-[#C9B89F]/40 p-3.5">
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#1E2F28] text-base" data-icon="lock">lock</span>
+<h3 class="text-xs font-semibold text-[#1E2F28] uppercase tracking-wider">Permisos Heredados (Capitán de Sala)</h3>
+</div>
+<span class="text-[10px] text-[#1A1A1A]/50 bg-white/60 px-2 py-0.5 rounded border border-[#C9B89F]/40">Inmutables por herencia</span>
+</div>
+<!-- Lista de permisos bloqueados / heredados -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+<div class="flex items-center gap-2 p-2 rounded bg-white/70 border border-[#C9B89F]/25 text-[#1A1A1A]/80" title="Heredado automáticamente de Capitán de Sala">
+<span class="material-symbols-outlined text-[15px] text-emerald-700" data-icon="check_circle">check_circle</span>
+<span class="truncate">Tomar comanda en cualquier mesa</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded bg-white/70 border border-[#C9B89F]/25 text-[#1A1A1A]/80" title="Heredado automáticamente de Capitán de Sala">
+<span class="material-symbols-outlined text-[15px] text-emerald-700" data-icon="check_circle">check_circle</span>
+<span class="truncate">Reasignar mesero a comanda</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded bg-white/70 border border-[#C9B89F]/25 text-[#1A1A1A]/80" title="Heredado automáticamente de Capitán de Sala">
+<span class="material-symbols-outlined text-[15px] text-emerald-700" data-icon="check_circle">check_circle</span>
+<span class="truncate">Cortesía estándar (&lt;$300 MXN)</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded bg-white/70 border border-[#C9B89F]/25 text-[#1A1A1A]/80" title="Heredado automáticamente de Capitán de Sala">
+<span class="material-symbols-outlined text-[15px] text-emerald-700" data-icon="check_circle">check_circle</span>
+<span class="truncate">Reabrir mesa pre-cerrada</span>
+</div>
+</div>
+</div>
+<!-- Bloque 2: Permisos Adicionales Habilitados (Toggles CONVIVIUM) -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-[#1E2F28] uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#D4AF7C] text-base" data-icon="toggle_on">toggle_on</span>
+<span>Permisos Adicionales y Excepciones</span>
+</h3>
+<span class="text-[11px] text-[#B45A3C] font-medium">3 activos · 2 denegados</span>
+</div>
+<div class="space-y-2 text-xs">
+<!-- Toggle 1: ON -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/35 hover:bg-[#EAE6DD]/20 transition-colors">
+<div class="pr-3">
+<span class="font-medium text-[#1E2F28] block">Abrir cajón de dinero sin cobro</span>
+<span class="text-[11px] text-[#1A1A1A]/60">Para dar cambio urgente o revisar fondo inicial</span>
+</div>
+<!-- Switch ON (Olive/Gold) -->
+<button class="w-10 h-6 bg-[#1E2F28] rounded-full p-0.5 flex items-center transition-colors shrink-0" type="button">
+<span class="w-5 h-5 bg-[#D4AF7C] rounded-full shadow-sm transform translate-x-4 transition-transform flex items-center justify-center">
+<span class="w-1.5 h-1.5 bg-[#1E2F28] rounded-full"></span>
+</span>
+</button>
+</div>
+<!-- Toggle 2: ON -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/35 hover:bg-[#EAE6DD]/20 transition-colors">
+<div class="pr-3">
+<span class="font-medium text-[#1E2F28] block">Ejecutar Corte X preliminar</span>
+<span class="text-[11px] text-[#1A1A1A]/60">Arqueo ciego parcial para cambio de turno</span>
+</div>
+<button class="w-10 h-6 bg-[#1E2F28] rounded-full p-0.5 flex items-center transition-colors shrink-0" type="button">
+<span class="w-5 h-5 bg-[#D4AF7C] rounded-full shadow-sm transform translate-x-4 transition-transform flex items-center justify-center">
+<span class="w-1.5 h-1.5 bg-[#1E2F28] rounded-full"></span>
+</span>
+</button>
+</div>
+<!-- Toggle 3: ON -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/35 hover:bg-[#EAE6DD]/20 transition-colors">
+<div class="pr-3">
+<span class="font-medium text-[#1E2F28] block">Recepción de mercancía de proveedores (OC)</span>
+<span class="text-[11px] text-[#1A1A1A]/60">Firma digital de remisiones contra orden de compra</span>
+</div>
+<button class="w-10 h-6 bg-[#1E2F28] rounded-full p-0.5 flex items-center transition-colors shrink-0" type="button">
+<span class="w-5 h-5 bg-[#D4AF7C] rounded-full shadow-sm transform translate-x-4 transition-transform flex items-center justify-center">
+<span class="w-1.5 h-1.5 bg-[#1E2F28] rounded-full"></span>
+</span>
+</button>
+</div>
+<!-- Toggle 4: OFF (Exige autorización) -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/35 bg-[#EAE6DD]/20 opacity-80">
+<div class="pr-3">
+<span class="font-medium text-[#1E2F28] flex items-center gap-1.5">
+<span>Anular comanda ya enviada a cocina</span>
+<span class="text-[10px] text-[#B45A3C] font-semibold bg-[#B45A3C]/10 px-1.5 py-0.2 rounded">Exige Gerente</span>
+</span>
+<span class="text-[11px] text-[#1A1A1A]/60">Requiere PIN de Gerente o Dueño en pantalla TPV</span>
+</div>
+<!-- Switch OFF -->
+<button class="w-10 h-6 bg-[#C9B89F]/60 rounded-full p-0.5 flex items-center transition-colors shrink-0" type="button">
+<span class="w-5 h-5 bg-white rounded-full shadow-sm transform translate-x-0 transition-transform"></span>
+</button>
+</div>
+<!-- Toggle 5: OFF -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/35 bg-[#EAE6DD]/20 opacity-80">
+<div class="pr-3">
+<span class="font-medium text-[#1E2F28]">Ver márgenes de costo y recetas maestras</span>
+<span class="text-[11px] text-[#1A1A1A]/60">Restringido únicamente a Dirección y Costos</span>
+</div>
+<button class="w-10 h-6 bg-[#C9B89F]/60 rounded-full p-0.5 flex items-center transition-colors shrink-0" type="button">
+<span class="w-5 h-5 bg-white rounded-full shadow-sm transform translate-x-0 transition-transform"></span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bloque 3: Topes de Autorización Financiera -->
+<div class="p-4 rounded-lg border border-[#C9B89F]/50 bg-white shadow-xs space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-semibold text-[#1E2F28] uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#D4AF7C] text-base" data-icon="payments">payments</span>
+<span>Topes de Autorización Financiera</span>
+</h3>
+<span class="text-[10px] font-mono text-[#1E2F28]/60 bg-[#C9B89F]/20 px-2 py-0.5 rounded">MXN ($)</span>
+</div>
+<!-- Slider 1: Descuento Autónomo -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center text-xs">
+<span class="text-[#1A1A1A]/80 font-medium">Límite de descuento autónomo:</span>
+<span class="font-bold text-[#1E2F28] font-mono bg-[#EAE6DD] px-2 py-0.5 rounded border border-[#C9B89F]/40">
+                  15% (máx. $500.00 MXN)
+                </span>
+</div>
+<input class="w-full accent-[#1E2F28] h-1.5 bg-[#C9B89F]/30 rounded-lg cursor-pointer" max="50" min="0" type="range" value="15"/>
+<div class="flex justify-between text-[10px] text-[#1A1A1A]/50">
+<span>0% (Sin permiso)</span>
+<span class="text-[#B45A3C] font-medium">15% estándar</span>
+<span>50% (Solo Gerencia)</span>
+</div>
+</div>
+<!-- Input Limit 2: Límite de Cortesía -->
+<div class="pt-2 border-t border-[#C9B89F]/20 flex items-center justify-between">
+<div>
+<span class="text-xs font-medium text-[#1E2F28] block">Cortesía acumulada por turno</span>
+<span class="text-[10px] text-[#1A1A1A]/60">Bebidas y platillos de relaciones públicas</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-xs font-semibold text-[#1A1A1A]/60">$</span>
+<input class="w-24 text-right font-mono text-xs font-bold py-1 px-2 border border-[#C9B89F] rounded bg-white focus:border-[#1E2F28] focus:ring-0" type="text" value="800.00"/>
+<span class="text-[10px] text-[#1A1A1A]/60 font-mono">MXN</span>
+</div>
+</div>
+<div class="p-2 rounded bg-[#B45A3C]/10 border border-[#B45A3C]/20 text-[11px] text-[#B45A3C] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="warning">warning</span>
+<span>Si el monto supera $800.00, la TPV exigirá automáticamente huella o PIN de Gerente.</span>
+</div>
+</div>
+</div>
+<!-- Footer Actions Editor -->
+<div class="pt-3 border-t border-[#C9B89F]/30 flex justify-between items-center">
+<button class="text-xs text-[#1A1A1A]/60 hover:text-[#B45A3C] transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="undo">undo</span>
+<span>Restaurar a Capitán original</span>
+</button>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-[#C9B89F] text-xs font-medium hover:bg-[#EAE6DD]/40">
+              Descartar
+            </button>
+<button class="px-3 py-1.5 rounded-lg bg-[#1E2F28] text-[#D4AF7C] text-xs font-semibold hover:bg-[#283e35] shadow-xs">
+              Aplicar al Rol
+            </button>
+</div>
+</div>
+</section>
+<!-- ========================================================== -->
+<!-- COLUMNA 3 (Right): FICHA Y ALTA DE USUARIO (Cols: 4)        -->
+<!-- ========================================================== -->
+<section class="col-span-12 xl:col-span-4 flex flex-col bg-white/90 backdrop-blur-sm rounded-xl border border-[#C9B89F]/60 p-5 shadow-sm">
+<!-- Header Column / Profile Card (HU E1-08) -->
+<div class="pb-4 border-b border-[#C9B89F]/30">
+<div class="flex items-center justify-between mb-3">
+<span class="text-[10px] uppercase font-bold tracking-wider text-[#1E2F28] bg-[#1E2F28]/10 px-2 py-0.5 rounded border border-[#1E2F28]/15">HU E1-08 · Directorio</span>
+<span class="flex items-center gap-1 text-[11px] text-emerald-800 font-medium">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+<span>Activo · Turno Vespertino</span>
+</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-13 h-13 rounded-full bg-[#1E2F28] border-2 border-[#D4AF7C] text-[#D4AF7C] font-headline text-lg font-bold flex items-center justify-center shadow-sm w-12 h-12">
+              LG
+            </div>
+<div>
+<h2 class="font-headline text-lg font-bold text-[#1E2F28] leading-tight">Luis González Ramos</h2>
+<div class="flex items-center gap-2 mt-0.5 text-xs text-[#1A1A1A]/70">
+<span class="font-mono text-[11px]">ID: EMP-0482</span>
+<span>•</span>
+<span>Ingreso: Feb 2023</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Scrollable Details Form -->
+<div class="flex-1 overflow-y-auto pr-1 py-3.5 space-y-4 text-xs">
+<!-- Roles Asignados (Multi-rol) -->
+<div>
+<label class="block font-semibold text-[#1E2F28] uppercase text-[11px] tracking-wider mb-1.5">
+              Roles Asignados (Multi-función)
+            </label>
+<div class="flex flex-wrap gap-1.5 items-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1E2F28] text-[#D4AF7C] text-[11px] font-medium border border-[#D4AF7C]/40">
+<span class="material-symbols-outlined text-[13px]" data-icon="star">star</span>
+<span>Capitán de Sala (Principal)</span>
+<span class="material-symbols-outlined text-[12px] hover:text-white cursor-pointer ml-0.5" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#EAE6DD] text-[#1E2F28] text-[11px] font-medium border border-[#C9B89F]">
+<span>Cajero TPV</span>
+<span class="material-symbols-outlined text-[12px] hover:text-[#B45A3C] cursor-pointer ml-0.5" data-icon="close">close</span>
+</span>
+<button class="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-dashed border-[#1E2F28]/40 text-[#1E2F28] hover:bg-[#1E2F28]/5 text-[11px] font-medium transition-colors">
+<span class="material-symbols-outlined text-[13px]" data-icon="add">add</span>
+<span>Agregar rol</span>
+</button>
+</div>
+<p class="text-[10px] text-[#1A1A1A]/60 mt-1.5 italic">
+              El usuario suma las facultades de ambos roles sin duplicar credenciales en el sistema.
+            </p>
+</div>
+<!-- Sucursales autorizadas -->
+<div class="pt-2 border-t border-[#C9B89F]/30">
+<label class="block font-semibold text-[#1E2F28] uppercase text-[11px] tracking-wider mb-1.5">
+              Sucursales Autorizadas
+            </label>
+<div class="grid grid-cols-2 gap-2">
+<label class="flex items-center gap-2 p-2 rounded border border-[#1E2F28]/40 bg-[#1E2F28]/5 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-0 border-[#C9B89F]" type="checkbox"/>
+<div>
+<span class="font-medium text-[#1E2F28] block">Polanco CDMX</span>
+<span class="text-[10px] text-[#1A1A1A]/50">Base principal</span>
+</div>
+</label>
+<label class="flex items-center gap-2 p-2 rounded border border-[#C9B89F]/40 bg-white cursor-pointer hover:bg-[#EAE6DD]/30">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-0 border-[#C9B89F]" type="checkbox"/>
+<div>
+<span class="font-medium text-[#1E2F28] block">Roma Norte</span>
+<span class="text-[10px] text-[#1A1A1A]/50">Cobertura apoyo</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Seguridad y Credenciales de Acceso -->
+<div class="pt-2 border-t border-[#C9B89F]/30 space-y-3">
+<div class="flex items-center justify-between">
+<label class="font-semibold text-[#1E2F28] uppercase text-[11px] tracking-wider">
+                Seguridad y Credenciales POS
+              </label>
+<span class="material-symbols-outlined text-xs text-[#D4AF7C]" data-icon="verified_user">verified_user</span>
+</div>
+<!-- PIN Field -->
+<div class="p-3 rounded-lg bg-[#EAE6DD]/40 border border-[#C9B89F]/40 space-y-2">
+<div class="flex items-center justify-between">
+<span class="text-xs text-[#1A1A1A]/75 font-medium">PIN de Servicio (4 dígitos):</span>
+<button class="text-[11px] text-[#1E2F28] hover:text-[#D4AF7C] font-semibold flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[13px]" data-icon="refresh">refresh</span>
+<span>Regenerar PIN aleatorio</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex-1 tracking-widest text-lg font-mono font-bold bg-white px-3 py-1.5 rounded border border-[#C9B89F] text-[#1E2F28] text-center">
+                  • • • •
+                </div>
+<button class="px-2.5 py-1.5 text-[11px] bg-white border border-[#C9B89F] hover:bg-[#EAE6DD] rounded font-medium text-[#1E2F28]">
+                  Revelar
+                </button>
+</div>
+<label class="flex items-center gap-2 pt-1 text-[11px] text-[#1A1A1A]/70 cursor-pointer">
+<input checked="" class="rounded text-[#1E2F28] focus:ring-0 border-[#C9B89F] w-3.5 h-3.5" type="checkbox"/>
+<span>Requerir cambio de PIN en el próximo inicio</span>
+</label>
+</div>
+<!-- Hardware Card / Biometrics -->
+<div class="flex items-center justify-between p-2.5 rounded-lg border border-[#C9B89F]/40 bg-white">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded bg-[#1E2F28]/10 text-[#1E2F28] flex items-center justify-center">
+<span class="material-symbols-outlined text-base" data-icon="contactless">contactless</span>
+</div>
+<div>
+<span class="font-medium text-[#1E2F28] block">Tarjeta NFC #8492-B</span>
+<span class="text-[10px] text-emerald-700 font-medium">Vinculada a llavero de Luis</span>
+</div>
+</div>
+<button class="text-[11px] text-[#B45A3C] hover:underline font-medium">
+                Desvincular
+              </button>
+</div>
+</div>
+<!-- Highlight Action: Botón de Simulación / Preview -->
+<div class="pt-2">
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-[#D4AF7C]/20 border border-[#D4AF7C] text-[#1E2F28] hover:bg-[#D4AF7C]/35 font-semibold text-xs transition-all shadow-xs group">
+<span class="material-symbols-outlined text-[#1E2F28] group-hover:scale-110 transition-transform" data-icon="visibility">visibility</span>
+<span>Ver como este rol (Vista previa)</span>
+</button>
+<p class="text-[10px] text-center text-[#1A1A1A]/55 mt-1">
+              Testea la interfaz exacta del TPV y las comandas que verá Luis G.
+            </p>
+</div>
+</div>
+<!-- Footer Actions Usuario -->
+<div class="pt-3 border-t border-[#C9B89F]/30 flex items-center justify-between gap-2">
+<button class="px-3 py-2 text-xs font-semibold text-[#B45A3C] hover:bg-[#B45A3C]/10 rounded-lg transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="person_off">person_off</span>
+<span>Desactivar</span>
+</button>
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded-lg bg-[#1E2F28] hover:bg-[#283e35] text-[#D4AF7C] text-xs font-bold tracking-wide shadow-sm transition-all flex items-center gap-1.5 active:scale-[0.98]">
+<span class="material-symbols-outlined text-sm text-[#D4AF7C]" data-icon="save">save</span>
+<span>Guardar usuario</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

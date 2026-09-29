@@ -8,8 +8,49 @@ export type Product = Infer<typeof catalog.Product>;
 export type FloorPlan = Infer<typeof floor.FloorPlan>;
 export type Check = Infer<typeof orders.Check>;
 export type OrderItem = Infer<typeof orders.OrderItem>;
+export type CheckSummary = Infer<typeof orders.CheckSummary>;
 export type Approval = Infer<typeof approvals.Approval>;
 export type { RealtimeEvent };
+
+export type ApprovalView = Omit<Approval, "createdAt"> & {
+  createdAt: string;
+  resolvedAt: string | null;
+  tableLabel: string | null;
+  guests: number | null;
+  checkTotal: number;
+  productName: string | null;
+  itemAmount: number | null;
+  reason: string | null;
+  requestedByName: string | null;
+  resolvedByName: string | null;
+};
+
+export interface LiveDashboard {
+  salesToday: number;
+  salesLastWeek: number;
+  tickets: number;
+  avgTicket: number;
+  guests: number;
+  openChecks: number;
+  occupancy: { total: number; occupied: number; pidioCuenta: number; free: number };
+  hourly: { hour: number; total: number }[];
+  topProducts: { name: string; qty: number; amount: number }[];
+  paymentMethods: { method: string; amount: number }[];
+  prepTimes: { station: string; avgSec: number | null; targetSec: number; samples: number }[];
+  alerts: { kind: "cxp" | "insumo" | "fraude"; title: string; detail: string }[];
+}
+
+export interface CashSummary {
+  sessionId: string;
+  cashierName: string;
+  openedAt: string;
+  openingFloat: number;
+  movements: { at: string; type: "entrada" | "retiro" | "proveedor"; amount: number; reason: string }[];
+  sales: number;
+  discounts: number;
+  courtesies: number;
+  tipsByWaiter: { name: string; amount: number }[];
+}
 
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) {
@@ -78,7 +119,7 @@ export function createClient(baseUrl = "/v1") {
     },
     floor: { get: () => request<FloorPlan>("GET", "/floor") },
     orders: {
-      openChecks: () => request<{ id: string; kind: string; tableId: string | null; name: string | null; status: string }[]>("GET", "/orders/checks"),
+      openChecks: () => request<CheckSummary[]>("GET", "/orders/checks"),
       open: (body: Infer<typeof orders.OpenCheckBody>) => request<{ id: string }>("POST", "/orders/checks", body),
       get: (checkId: string) => request<Check>("GET", `/orders/checks/${checkId}`),
       addItems: (checkId: string, items: Infer<typeof orders.AddItemsBody>["items"]) => request<OrderItem[]>("POST", `/orders/checks/${checkId}/items`, { items }),
@@ -89,12 +130,12 @@ export function createClient(baseUrl = "/v1") {
       returnItem: (itemId: string, body: Infer<typeof orders.ReturnItemBody>) => request<{ status: string }>("POST", `/orders/items/${itemId}/return`, body),
     },
     stations: {
-      queue: (stationId: string) => request<(OrderItem & { targetPrepSec: number })[]>("GET", `/stations/${stationId}/queue`),
+      queue: (stationId: string) => request<(OrderItem & { targetPrepSec: number; tableLabel: string | null; waiterName: string | null; folio: string })[]>("GET", `/stations/${stationId}/queue`),
       history: (stationId: string) => request<OrderItem[]>("GET", `/stations/${stationId}/history`),
       consolidated: (stationId: string) => request<{ product: string; quantity: number }[]>("GET", `/stations/${stationId}/consolidated`),
     },
     approvals: {
-      list: () => request<Approval[]>("GET", "/approvals"),
+      list: (status: "pendiente" | "aprobada" | "rechazada" = "pendiente") => request<ApprovalView[]>("GET", `/approvals?status=${status}`),
       create: (body: Record<string, unknown>) => request<Approval>("POST", "/approvals", body),
       resolve: (id: string, decision: "aprobar" | "rechazar", approver?: { approverId: string; approverPin: string }) =>
         request<{ status: string }>("POST", `/approvals/${id}/resolve`, { decision, ...approver }),
@@ -102,10 +143,15 @@ export function createClient(baseUrl = "/v1") {
     cash: {
       current: () => request<{ id: string; openingFloat: number } | null>("GET", "/cash/sessions/current"),
       open: (registerId: string, openingFloat: number) => request("POST", "/cash/sessions", { registerId, openingFloat }),
+      split: (checkId: string, body: { mode: "iguales"; parts: number } | { mode: "por_comensal" } | { mode: "por_producto"; groups: string[][] }) =>
+        request<{ mode: string; parts: { checkId: string; amount: number }[] }>("POST", `/cash/checks/${checkId}/split`, body),
+      summary: () => request<CashSummary>("GET", "/cash/sessions/current/summary"),
+      count: (kind: "X" | "Z", counted: Record<string, number>, approverPin?: string) =>
+        request<{ kind: string; expected: Record<string, number>; counted: Record<string, number>; differences: Record<string, number>; sales: number; tips: number; closed: boolean }>("POST", "/cash/sessions/current/counts", { kind, counted, approverPin }),
       pay: (checkId: string, body: unknown) => request<{ paid: number; change: number; checkStatus: string }>("POST", `/cash/checks/${checkId}/pay`, body),
     },
     reports: {
-      live: () => request<{ salesToday: number; tickets: number; avgTicket: number; openChecks: number; guests: number }>("GET", "/reports/live"),
+      live: () => request<LiveDashboard>("GET", "/reports/live"),
     },
 
     /** Suscripción en tiempo real con reconexión automática. Devuelve función para cerrar. */

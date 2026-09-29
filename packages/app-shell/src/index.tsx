@@ -1,9 +1,11 @@
 import { createClient, type Client, type Session } from "@convivium/api-client";
-import { Button, PinPad, Wordmark } from "@convivium/ui";
+import { AccessScreen } from "./AccessScreen";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export const client = createClient();
 const SessionCtx = createContext<{ session: Session; client: Client; logout: () => void } | null>(null);
+
+export { AccessScreen };
 
 export function useSession() {
   const ctx = useContext(SessionCtx);
@@ -37,57 +39,24 @@ export function DeviceGate({ kind, deviceLabel, children, idleMinutes = 5 }: { k
   return <SessionCtx.Provider value={{ session, client, logout }}>{children}</SessionCtx.Provider>;
 }
 
-const darkScreen = { minHeight: "100%", background: "var(--c-olivo)", color: "var(--c-marfil)", padding: 24, display: "flex", flexDirection: "column" as const, justifyContent: "center", gap: 24 };
-
 function PairScreen({ kind, deviceLabel, onDone }: { kind: DeviceKind; deviceLabel: string; onDone: () => void }) {
-  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const submit = async () => {
-    try { await client.auth.pair({ code, name: deviceLabel, kind }); onDone(); }
-    catch (e) { setError((e as Error).message); setCode(""); }
-  };
   return (
-    <div style={darkScreen}>
-      <Wordmark color="var(--c-marfil)" />
-      <div style={{ textAlign: "center" }}>
-        <h2>Vincular dispositivo</h2>
-        <p style={{ opacity: .7 }}>Ingresa el código de 6 dígitos que muestra Administración → Dispositivos.</p>
-        {error && <p style={{ color: "var(--c-terracota)" }}>{error}</p>}
-      </div>
-      <PinPad length={6} value={code} onChange={setCode} onSubmit={submit} />
-    </div>
+    <AccessScreen mode="pair" deviceLabel={deviceLabel} error={error}
+      onSubmit={(code) => client.auth.pair({ code, name: deviceLabel, kind }).then(onDone, (e) => setError((e as Error).message))} />
   );
 }
 
 function PinScreen({ deviceLabel, onLogin }: { deviceLabel: string; onLogin: (s: Session) => void }) {
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   useEffect(() => { client.auth.deviceUsers().then(setUsers).catch((e) => setError(e.message)); }, []);
-  const submit = async () => {
-    if (!userId) return setError("Elige tu nombre");
-    try { onLogin(await client.auth.pin(userId, pin)); }
-    catch (e) { setError((e as Error).message); setPin(""); }
-  };
   return (
-    <div style={darkScreen}>
-      <Wordmark color="var(--c-marfil)" />
-      <div className="cv-label" style={{ textAlign: "center", color: "var(--c-marfil)", opacity: .7 }}>{deviceLabel}</div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-        {users.map((u) => (
-          <Button key={u.id} variant={u.id === userId ? "primary" : "ghost"} onClick={() => { setUserId(u.id); setError(null); }}
-            style={u.id === userId ? { background: "var(--c-dorado)", color: "var(--c-carbon)" } : { color: "var(--c-marfil)", borderColor: "rgba(212,175,124,.4)" }}>
-            {u.name}
-          </Button>
-        ))}
-      </div>
-      <div style={{ textAlign: "center" }}>
-        <h2>Ingresa tu PIN</h2>
-        {error && <p style={{ color: "var(--c-terracota)" }}>{error}</p>}
-      </div>
-      <PinPad value={pin} onChange={setPin} onSubmit={submit} />
-    </div>
+    <AccessScreen mode="pin" deviceLabel={deviceLabel} users={users} error={error}
+      onSubmit={(pin, userId) => {
+        if (!userId) return setError("Elige tu nombre");
+        client.auth.pin(userId, pin).then(onLogin, (e) => setError((e as Error).message));
+      }} />
   );
 }
 
