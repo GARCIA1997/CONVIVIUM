@@ -20,6 +20,8 @@ export function toItemDto(r: Row): z.infer<typeof orders.OrderItem> {
     state: r.state,
     unitPrice: r.unitPrice,
     priority: r.priority,
+    promoDiscount: r.promoDiscount,
+    promotionName: null,
     createdBy: r.createdBy,
     sentAt: iso(r.sentAt),
     readyAt: iso(r.readyAt),
@@ -29,5 +31,5 @@ export function toItemDto(r: Row): z.infer<typeof orders.OrderItem> {
 
 export function lineTotal(r: Row): number {
   if (r.state === "cancelado" || r.state === "devuelto") return 0;
-  return (r.unitPrice + r.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * r.quantity;
+  return (r.unitPrice + r.modifiers.reduce((s, m) => s + m.priceDelta, 0)) * r.quantity - r.promoDiscount;
 }

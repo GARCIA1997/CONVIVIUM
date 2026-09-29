@@ -16,7 +16,7 @@ function since(iso: string | null) {
 }
 
 export function FloorPage() {
-  const { client } = useSession();
+  const { client, session } = useSession();
   const nav = useNavigate();
   const [plan, setPlan] = useState<FloorPlan | null>(null);
   const [areaId, setAreaId] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function FloorPage() {
   useRealtime(["floor"], () => load());
 
   const openTable = (t: Table) => (t.openCheckId ? nav(`/cuenta/${t.openCheckId}`) : setSheet({ kind: "mesa", table: t }));
-  const confirmTable = async (tableId: string, guests: number) => nav(`/cuenta/${(await client.orders.open({ kind: "mesa", tableId, guests })).id}`);
+  const confirmTable = async (tableId: string, guests: number, joinTableIds: string[]) => nav(`/cuenta/${(await client.orders.open({ kind: "mesa", tableId, guests, joinTableIds })).id}`);
   const confirmBar = async (name: string) => nav(`/cuenta/${(await client.orders.open({ kind: "barra", name })).id}`);
 
   const tables = plan?.tables.filter((t) => t.areaId === areaId) ?? [];
@@ -74,7 +74,7 @@ export function FloorPage() {
       <main className="flex-1 px-3 py-2 overflow-y-auto custom-scrollbar">
         {!plan && <p className="text-xs text-stone-500 p-4">Cargando plano…</p>}
         <div className="grid grid-cols-2 gap-2.5">
-          {tables.map((t) => <TableCard key={t.id} t={t} onClick={() => openTable(t)} />)}
+          {tables.map((t) => <TableCard key={t.id} t={t} me={session.user.id} onClick={() => openTable(t)} />)}
         </div>
       </main>
 
@@ -85,13 +85,13 @@ export function FloorPage() {
         </button>
       </div>
 
-      {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} onCancel={() => setSheet(null)} onConfirm={(g) => confirmTable(sheet.table.id, g)} />}
+      {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} partners={plan?.tables.filter((o) => sheet.table.mergeableWith.includes(o.id) && o.status === "libre") ?? []} onCancel={() => setSheet(null)} onConfirm={(g, j) => confirmTable(sheet.table.id, g, j)} />}
       {sheet?.kind === "barra" && <BarSheet onCancel={() => setSheet(null)} onConfirm={confirmBar} />}
     </MeseroLayout>
   );
 }
 
-function TableCard({ t, onClick }: { t: Table; onClick: () => void }) {
+function TableCard({ t, me, onClick }: { t: Table; me: string; onClick: () => void }) {
   const shape = SHAPE[t.shape] ?? "";
   if (t.status === "libre")
     return (
@@ -110,7 +110,7 @@ function TableCard({ t, onClick }: { t: Table; onClick: () => void }) {
           <span className="inline-block px-2 py-0.5 rounded-full bg-stone-200/80 text-[11px] font-medium text-stone-700">Disponible</span>
         </div>
         <div className="flex items-center justify-between text-[10px] text-stone-500 border-t border-[#C9B89F]/30 pt-1.5">
-          <span>Montada</span>
+          <span className="truncate">{t.assignedUserId === me ? "★ Tu sección" : t.assignedName ? `Sección ${t.assignedName.split(" ")[0]}` : t.mergeableWith.length ? "Unible" : "Montada"}</span>
           <span className="font-medium text-[#1E2F28]">Abrir +</span>
         </div>
       </article>
@@ -189,8 +189,14 @@ function TableCard({ t, onClick }: { t: Table; onClick: () => void }) {
         </span>
       </div>
       <div className="my-auto">
-        <span className="text-xs font-semibold text-[#D4AF7C] block">{mxn(t.total ?? 0)} MXN</span>
-        <p className="text-[11px] text-[#EAE6DD]/80">{t.itemCount} {t.itemCount === 1 ? "platillo" : "platillos"} en mesa</p>
+        {t.joinedTo ? (
+          <span className="text-xs font-semibold text-[#D4AF7C] flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">link</span>Unida a {t.joinedTo}</span>
+        ) : (
+          <>
+            <span className="text-xs font-semibold text-[#D4AF7C] block">{mxn(t.total ?? 0)} MXN</span>
+            <p className="text-[11px] text-[#EAE6DD]/80">{t.itemCount} {t.itemCount === 1 ? "platillo" : "platillos"} en mesa</p>
+          </>
+        )}
       </div>
       <div className="flex items-center justify-between text-[10px] text-[#C9B89F] border-t border-[#C9B89F]/20 pt-1.5">
         <span className="flex items-center gap-0.5">
@@ -216,12 +222,31 @@ function Sheet({ title, onCancel, children }: { title: string; onCancel: () => v
   );
 }
 
-function GuestsSheet({ table, onCancel, onConfirm }: { table: Table; onCancel: () => void; onConfirm: (guests: number) => void }) {
+function GuestsSheet({ table, partners, onCancel, onConfirm }: { table: Table; partners: Table[]; onCancel: () => void; onConfirm: (guests: number, join: string[]) => void }) {
+  const [join, setJoin] = useState<string[]>([]);
+  const capacity = table.capacity + partners.filter((p) => join.includes(p.id)).reduce((n, p) => n + p.capacity, 0);
+  const title = [table.label, ...partners.filter((p) => join.includes(p.id)).map((p) => p.label)].join(" + ");
   return (
-    <Sheet title={`Abrir ${table.label} · comensales`} onCancel={onCancel}>
+    <Sheet title={`Abrir ${title} · comensales`} onCancel={onCancel}>
+      {partners.length > 0 && (
+        <div className="mb-3 p-2.5 rounded-lg border border-[#D4AF7C]/60 bg-[#D4AF7C]/10">
+          <span className="text-[11px] font-semibold text-[#1E2F28] block mb-1.5">¿Grupo grande? Unir con:</span>
+          <div className="flex flex-wrap gap-1.5">
+            {partners.map((p) => {
+              const on = join.includes(p.id);
+              return (
+                <button key={p.id} onClick={() => setJoin(on ? join.filter((x) => x !== p.id) : [...join, p.id])} className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${on ? "bg-[#1E2F28] text-[#D4AF7C] border-[#1E2F28]" : "bg-white text-[#1E2F28] border-[#C9B89F]"}`}>
+                  <span className="material-symbols-outlined text-[14px]">{on ? "link" : "add_link"}</span>{p.label} · {p.capacity}p
+                </button>
+              );
+            })}
+          </div>
+          {join.length > 0 && <p className="text-[10px] text-[#1A1A1A]/60 mt-1.5">Una sola comanda y cuenta para {capacity} lugares.</p>}
+        </div>
+      )}
       <div className="grid grid-cols-4 gap-2">
-        {Array.from({ length: table.capacity + 4 }, (_, i) => i + 1).map((n) => (
-          <button key={n} onClick={() => onConfirm(n)} className="h-14 rounded-lg bg-white border border-[#C9B89F] text-[#1E2F28] font-display text-xl font-bold active:bg-[#1E2F28] active:text-[#D4AF7C] transition-colors">
+        {Array.from({ length: capacity + 4 }, (_, i) => i + 1).map((n) => (
+          <button key={n} onClick={() => onConfirm(n, join)} className="h-14 rounded-lg bg-white border border-[#C9B89F] text-[#1E2F28] font-display text-xl font-bold active:bg-[#1E2F28] active:text-[#D4AF7C] transition-colors">
             {n}
           </button>
         ))}

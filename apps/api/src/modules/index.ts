@@ -11,6 +11,9 @@ import { purchasingModule } from "./purchasing/routes.js";
 import { reportsModule } from "./reports/routes.js";
 import { stationsModule } from "./stations/routes.js";
 import { syncCloudModule } from "./sync/routes.js";
+import { usersModule } from "./users/routes.js";
+import { rolesModule } from "./roles/routes.js";
+import { promotionsModule } from "./promotions/routes.js";
 
 /** Registro central de módulos. Agregar un dominio = crear carpeta + añadirlo aquí. */
 export const modules: ApiModule[] = [
@@ -25,5 +28,8 @@ export const modules: ApiModule[] = [
   purchasingModule,
   reportsModule,
   auditModule,
+  usersModule,
+  rolesModule,
+  promotionsModule,
   syncCloudModule,
 ];

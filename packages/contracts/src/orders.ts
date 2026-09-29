@@ -7,7 +7,7 @@ export const Course = z.enum(["entrada", "fuerte", "postre", "bebida", "sin_tiem
 
 /** Cuenta: de mesa o de barra (E3-10). */
 export const OpenCheckBody = z.union([
-  z.object({ kind: z.literal("mesa"), tableId: Id, guests: z.number().int().min(1) }),
+  z.object({ kind: z.literal("mesa"), tableId: Id, guests: z.number().int().min(1), joinTableIds: z.array(Id).max(6).optional() }),
   z.object({ kind: z.literal("barra"), name: z.string().min(1) }),
 ]);
 
@@ -38,6 +38,9 @@ export const OrderItem = z.object({
   state: ItemState,
   unitPrice: Cents,
   priority: z.enum(["normal", "rehacer"]),
+  /** Descuento automático por promoción, ya restado del total del renglón. */
+  promoDiscount: Cents.default(0),
+  promotionName: z.string().nullable().default(null),
   createdBy: Id,
   sentAt: Timestamp.nullable(),
   readyAt: Timestamp.nullable(),
@@ -57,6 +60,8 @@ export const Check = z.object({
   subtotal: Cents,
   discounts: Cents,
   total: Cents,
+  /** Resumen de promociones aplicadas (ya incluidas en el subtotal). */
+  promotions: z.array(z.object({ name: z.string(), amount: Cents })).default([]),
   openedAt: Timestamp,
   tableLabel: z.string().nullable(),
   waiterName: z.string().nullable(),

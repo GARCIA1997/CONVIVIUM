@@ -98,6 +98,14 @@ export class InventoryService {
 
   // ---------- Recetas ----------
 
+  /** Costo teórico unitario por producto (receta principal, sin modificadores). */
+  async productCosts(tenantId: string) {
+    const [recipes, costs] = await Promise.all([this.recipeMap(tenantId), this.costMap(tenantId)]);
+    const out = new Map<string, number>();
+    for (const r of recipes.values()) if (r.row.productId && !r.row.modifierId && !r.row.isSubRecipe) out.set(r.row.productId, recipeCost(r, recipes, costs));
+    return { byProduct: out, ingredientCost: costs };
+  }
+
   private async recipeMap(tenantId: string) {
     const [rs, ls] = await Promise.all([
       this.db.select().from(schema.recipes).where(eq(schema.recipes.tenantId, tenantId)),

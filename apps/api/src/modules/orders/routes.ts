@@ -19,6 +19,12 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return svc.listOpen(req.user, [...statuses]);
   });
 
+  /** E4-10 · Vista del capitán (requiere poder resolver autorizaciones). */
+  app.get("/floor-overview", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, querystring: z.object({ delayMin: z.coerce.number().int().min(1).max(60).default(5) }) } }, async (req) =>
+    svc.floorOverview(req.user, req.query.delayMin),
+  );
+  app.post("/items/:id/nudge", { onRequest: [app.guard("aprobacion.resolver")], schema: { tags, params: IdParam } }, async (req) => svc.nudge(req.user, req.params.id));
+
   app.post("/checks", { onRequest: [app.guard("mesa.abrir")], schema: { tags, body: orders.OpenCheckBody } }, async (req, reply) =>
     reply.status(201).send(await svc.openCheck(req.user, req.body)),
   );
@@ -46,17 +52,17 @@ const plugin: ApiModule["plugin"] = async (app) => {
   /** Estación marca listo / deshace; mesero marca entregado. */
   app.post("/items/:id/transition", { onRequest: [app.guard()], schema: { tags, params: IdParam, body: orders.ItemTransitionBody } }, async (req) => {
     const need = req.body.to === "entregado" ? "comanda.capturar" : "estacion.despachar";
-    if (!can(req.user.roles, need)) throw forbidden(`Requiere permiso ${need}`);
+    if (!(await app.policy.can(req.user, need))) throw forbidden(`Requiere permiso ${need}`);
     return svc.transition(req.user, req.params.id, req.body.to);
   });
 
   app.post("/items/:id/cancel", { onRequest: [app.guard("comanda.cancelar_no_enviado")], schema: { tags, params: IdParam, body: orders.CancelItemBody } }, async (req) => {
-    const authorizedBy = can(req.user.roles, "comanda.cancelar_preparado") ? req.user.userId : undefined;
+    const authorizedBy = (await app.policy.can(req.user, "comanda.cancelar_preparado")) ? req.user.userId : undefined;
     return svc.cancel(req.user, req.params.id, req.body, authorizedBy);
   });
 
   app.post("/items/:id/return", { onRequest: [app.guard("comanda.devolver")], schema: { tags, params: IdParam, body: orders.ReturnItemBody } }, async (req) => {
-    const authorizedBy = can(req.user.roles, "comanda.cancelar_preparado") ? req.user.userId : undefined;
+    const authorizedBy = (await app.policy.can(req.user, "comanda.cancelar_preparado")) ? req.user.userId : undefined;
     return svc.returnItem(req.user, req.params.id, req.body, authorizedBy);
   });
 };

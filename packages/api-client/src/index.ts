@@ -86,6 +86,7 @@ const store = {
  */
 export function createClient(baseUrl = "/v1") {
   let session: Session | null = JSON.parse(store.get(KEYS.session) ?? "null");
+  const listeners = new Set<(s: Session | null) => void>();
 
   async function request<T>(method: string, path: string, body?: unknown, token = session?.accessToken ?? store.get(KEYS.device)): Promise<T> {
     const res = await fetch(baseUrl + path, {
@@ -94,6 +95,8 @@ export function createClient(baseUrl = "/v1") {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => null);
+    // Sesión vencida: se descarta para que la app regrese a la pantalla de acceso.
+    if (res.status === 401 && session && token === session.accessToken) setSession(null);
     if (!res.ok) throw new ApiError(res.status, data?.error ?? "error", data?.message ?? res.statusText);
     return data as T;
   }
@@ -101,6 +104,7 @@ export function createClient(baseUrl = "/v1") {
   const setSession = (s: Session | null) => {
     session = s;
     store.set(KEYS.session, s ? JSON.stringify(s) : null);
+    for (const l of listeners) l(s);
   };
 
   return {
@@ -108,6 +112,8 @@ export function createClient(baseUrl = "/v1") {
     get deviceToken() { return store.get(KEYS.device); },
     can: (perm: string) => !!session?.permissions.includes(perm),
     logout: () => setSession(null),
+    /** Avisa cuando la sesión cambia (login, logout o vencimiento). Devuelve la función para desuscribirse. */
+    onSessionChange: (l: (s: Session | null) => void) => { listeners.add(l); return () => void listeners.delete(l); },
 
     auth: {
       pair: async (body: Infer<typeof auth.PairDeviceBody>) => {

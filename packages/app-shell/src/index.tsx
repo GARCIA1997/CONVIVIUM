@@ -24,6 +24,7 @@ type DeviceKind = "mesero" | "kds_tv" | "estacion_tactil" | "caja" | "admin";
 export function DeviceGate({ kind, deviceLabel, children, idleMinutes = 5 }: { kind: DeviceKind; deviceLabel: string; children: ReactNode; idleMinutes?: number }) {
   const [paired, setPaired] = useState(!!client.deviceToken);
   const [session, setSession] = useState<Session | null>(client.session);
+  useEffect(() => client.onSessionChange(setSession), []);
   const logout = () => { client.logout(); setSession(null); };
 
   useEffect(() => {

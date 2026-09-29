@@ -41,6 +41,9 @@ importers:
       '@convivium/app-shell':
         specifier: workspace:*
         version: link:../../packages/app-shell
+      '@convivium/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@convivium/ui':
         specifier: workspace:*
         version: link:../../packages/ui

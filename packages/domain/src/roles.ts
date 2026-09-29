@@ -90,14 +90,37 @@ export function expandRole(role: Role): Role[] {
   return [...out];
 }
 
-export function permissionsOf(roles: Role[]): Set<Permission> {
+/** Roles que `role` contiene directamente (para el editor de jerarquía). */
+export const childrenOf = (role: Role): Role[] => INHERITS[role];
+
+/** Permisos base de un rol, sin herencia ni ajustes. */
+export const ownPermissions = (role: Role): Permission[] => OWN[role];
+
+/**
+ * Ajustes por empresa (E1-07): permisos adicionales o denegados sobre la base de cada rol.
+ * Lo que se da a un rol lo heredan los roles que lo contienen; lo que se le niega, no llega a ese rol
+ * ni se reincorpora por herencia en él (pero un rol superior puede tenerlo por su cuenta).
+ */
+export type RoleOverrides = Partial<Record<Role, { grant?: Permission[]; deny?: Permission[] }>>;
+
+/** Permisos que nunca pueden negarse al Dueño (evita dejar la empresa sin administrador). */
+export const LOCKED_OWNER: Permission[] = ["roles.gestionar", "usuarios.gestionar"];
+
+export function roleEffective(role: Role, ov: RoleOverrides = {}): Set<Permission> {
+  const out = new Set<Permission>([...OWN[role], ...(ov[role]?.grant ?? [])]);
+  for (const c of INHERITS[role]) for (const p of roleEffective(c, ov)) out.add(p);
+  for (const p of ov[role]?.deny ?? []) if (!(role === "dueno" && LOCKED_OWNER.includes(p))) out.delete(p);
+  return out;
+}
+
+export function permissionsOf(roles: Role[], ov: RoleOverrides = {}): Set<Permission> {
   const perms = new Set<Permission>();
-  for (const role of roles) for (const r of expandRole(role)) for (const p of OWN[r]) perms.add(p);
+  for (const role of roles) for (const p of roleEffective(role, ov)) perms.add(p);
   return perms;
 }
 
-export function can(roles: Role[], permission: Permission): boolean {
-  return permissionsOf(roles).has(permission);
+export function can(roles: Role[], permission: Permission, ov: RoleOverrides = {}): boolean {
+  return permissionsOf(roles, ov).has(permission);
 }
 
 /** Tope de descuento/cortesía por rol, en porcentaje (null = ilimitado). Configurable por empresa. */

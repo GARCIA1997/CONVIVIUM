@@ -22,6 +22,34 @@
       "when": 1790646990284,
       "tag": "0002_inventario",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790659713236,
+      "tag": "0003_roles_editor",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790660310282,
+      "tag": "0004_plano_completo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790706981669,
+      "tag": "0005_promociones",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790707741659,
+      "tag": "0006_producto_descripcion",
+      "breakpoints": true
     }
   ]
 }

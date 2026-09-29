@@ -1,6 +1,6 @@
 import type { orders } from "@convivium/contracts";
-import { and, eq, inArray, schema, type Db } from "@convivium/db";
-import { cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
+import { and, arrayOverlaps, eq, inArray, or, schema, type Db } from "@convivium/db";
+import { applyPromotions as computePromotions, cancelRequirement, canTransition, type ItemState } from "@convivium/domain";
 import type { FastifyInstance } from "fastify";
 import type { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
@@ -29,12 +29,16 @@ export class OrdersService {
     const discounts = discountRows.reduce((s, d) => s + d.amount, 0);
     const [table] = check.tableId ? await this.db.select().from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
     const [waiter] = await this.db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, check.waiterId));
+    const promoIds = [...new Set(items.map((i) => i.promotionId).filter((x): x is string => !!x))];
+    const promos = promoIds.length ? await this.db.select({ id: schema.promotions.id, name: schema.promotions.name }).from(schema.promotions).where(inArray(schema.promotions.id, promoIds)) : [];
+    const promoName = (id: string | null) => promos.find((p) => p.id === id)?.name ?? null;
     return {
       ...check,
       tableLabel: table?.label ?? null,
       waiterName: waiter?.name ?? null,
       openedAt: check.openedAt.toISOString(),
-      items: items.map(toItemDto),
+      items: items.map((i) => ({ ...toItemDto(i), promotionName: promoName(i.promotionId) })),
+      promotions: promos.map((p) => ({ name: p.name, amount: items.filter((i) => i.promotionId === p.id && lineTotal(i) >= 0 && i.state !== "cancelado" && i.state !== "devuelto").reduce((n, i) => n + i.promoDiscount, 0) })).filter((p) => p.amount > 0),
       subtotal,
       discounts,
       total: Math.max(0, subtotal - discounts),
@@ -74,13 +78,71 @@ export class OrdersService {
       .sort((a, b) => Number(b.status === "pidio_cuenta") - Number(a.status === "pidio_cuenta") || a.openedAt.localeCompare(b.openedAt));
   }
 
+  /** E4-10 · Supervisión del piso para capitán: demoras en pase, carga por mesero y cuentas de barra. */
+  async floorOverview(who: Principal, delayMin = 5) {
+    const checks = await this.db.select().from(schema.checks).where(and(eq(schema.checks.branchId, who.branchId), inArray(schema.checks.status, ["abierta", "pidio_cuenta"])));
+    const ids = checks.map((c) => c.id);
+    const [items, tables, waiters, allTables] = await Promise.all([
+      ids.length ? this.db.select().from(schema.orderItems).where(inArray(schema.orderItems.checkId, ids)) : [],
+      this.db.select().from(schema.tables).where(eq(schema.tables.branchId, who.branchId)),
+      checks.length ? this.db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, [...new Set(checks.map((c) => c.waiterId))])) : [],
+      this.db.select({ id: schema.tables.id }).from(schema.tables).where(and(eq(schema.tables.branchId, who.branchId), eq(schema.tables.active, true))),
+    ]);
+    const label = (c: (typeof checks)[number]) => tables.find((t) => t.id === c.tableId)?.label ?? (c.name ? `Barra · ${c.name}` : "");
+    const now = Date.now();
+    const delays = items
+      .filter((i) => i.state === "listo" && i.readyAt && now - i.readyAt.getTime() > delayMin * 60e3)
+      .map((i) => {
+        const c = checks.find((x) => x.id === i.checkId)!;
+        return { itemId: i.id, product: i.productName, quantity: i.quantity, where: label(c), waiterId: c.waiterId, waiterName: waiters.find((w) => w.id === c.waiterId)?.name ?? "", minutes: Math.floor((now - i.readyAt!.getTime()) / 60e3), readyAt: i.readyAt!.toISOString() };
+      })
+      .sort((a, b) => b.minutes - a.minutes);
+    const byWaiter = waiters.map((w) => {
+      const mine = checks.filter((c) => c.waiterId === w.id);
+      const mineItems = items.filter((i) => mine.some((c) => c.id === i.checkId));
+      return {
+        id: w.id,
+        name: w.name,
+        tables: mine.filter((c) => c.kind === "mesa").map(label),
+        checks: mine.length,
+        pendingDelivery: mineItems.filter((i) => i.state === "listo").length,
+        inKitchen: mineItems.filter((i) => i.state === "enviado" || i.state === "en_preparacion").length,
+        billRequested: mine.filter((c) => c.status === "pidio_cuenta").length,
+      };
+    }).sort((a, b) => b.checks - a.checks);
+    const bar = checks.filter((c) => c.kind === "barra").map((c) => {
+      const mine = items.filter((i) => i.checkId === c.id && i.unitPrice > 0 && i.state !== "cancelado" && i.state !== "devuelto");
+      return { checkId: c.id, name: c.name ?? "", total: mine.reduce((s, i) => s + lineTotal(i), 0), summary: mine.map((i) => `${i.quantity}x ${i.productName}`).join(", "), minutes: Math.floor((now - c.openedAt.getTime()) / 60e3) };
+    });
+    const occupied = new Set(checks.map((c) => c.tableId).filter(Boolean)).size;
+    return { delayMin, delays, waiters: byWaiter, bar, occupancy: { occupied, total: allTables.length, billRequested: checks.filter((c) => c.status === "pidio_cuenta").length } };
+  }
+
+  /** Vuelve a avisar al mesero que un producto sigue listo en el pase. */
+  async nudge(who: Principal, itemId: string) {
+    const item = await this.getItem(who, itemId);
+    if (item.state !== "listo") throw conflict("not_ready", "El producto ya no está en el pase");
+    await this.notifyItem(item);
+    return { ok: true };
+  }
+
   async openCheck(who: Principal, body: z.infer<typeof orders.OpenCheckBody>) {
+    const joined = body.kind === "mesa" ? [...new Set(body.joinTableIds ?? [])].filter((id) => id !== body.tableId) : [];
     if (body.kind === "mesa") {
+      const all = [body.tableId, ...joined];
+      if (joined.length) {
+        const [main] = await this.db.select().from(schema.tables).where(and(eq(schema.tables.id, body.tableId), eq(schema.tables.branchId, who.branchId)));
+        if (!main || joined.some((id) => !main.mergeableWith.includes(id))) throw conflict("not_mergeable", "Esas mesas no están configuradas para unirse");
+      }
       const [busy] = await this.db
         .select({ id: schema.checks.id })
         .from(schema.checks)
-        .where(and(eq(schema.checks.tableId, body.tableId), inArray(schema.checks.status, ["abierta", "pidio_cuenta"])));
-      if (busy) throw conflict("table_busy", "La mesa ya tiene una cuenta abierta");
+        .where(and(
+          eq(schema.checks.branchId, who.branchId),
+          inArray(schema.checks.status, ["abierta", "pidio_cuenta"]),
+          or(inArray(schema.checks.tableId, all), arrayOverlaps(schema.checks.joinedTableIds, all)),
+        ));
+      if (busy) throw conflict("table_busy", joined.length ? "Alguna de las mesas ya tiene una cuenta abierta" : "La mesa ya tiene una cuenta abierta");
     }
     const [check] = await this.db
       .insert(schema.checks)
@@ -89,13 +151,14 @@ export class OrdersService {
         branchId: who.branchId,
         kind: body.kind,
         tableId: body.kind === "mesa" ? body.tableId : null,
+        joinedTableIds: joined,
         guests: body.kind === "mesa" ? body.guests : null,
         name: body.kind === "barra" ? body.name : null,
         waiterId: who.userId,
       })
       .returning();
     await recordEvent(this.db, who, { type: "check.opened", entity: "check", entityId: check!.id, data: body });
-    if (body.kind === "mesa") this.app.hub.publish(["floor"], { type: "table.status", tableId: body.tableId, status: "ocupada" });
+    if (body.kind === "mesa") for (const tableId of [body.tableId, ...joined]) this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "ocupada" });
     return check!;
   }
 
@@ -144,6 +207,7 @@ export class OrdersService {
       );
     }
     const inserted = await this.db.insert(schema.orderItems).values(rows).returning();
+    await this.applyPromotions(checkId);
     await recordEvent(this.db, who, { type: "items.added", entity: "check", entityId: checkId, data: body });
     this.broadcastSent(inserted.filter((i) => i.state === "enviado"));
     this.stock(who, inserted.filter((i) => i.state === "enviado"), 1);
@@ -187,6 +251,7 @@ export class OrdersService {
     await recordEvent(this.db, who, { type: "item.cancelled", entity: "order_item", entityId: itemId, data: { ...body, fromState: item.state }, authorizedBy });
     // Enviado sin preparar → regresa al inventario; ya preparado → queda como merma.
     if (item.state === "enviado") this.stock(who, [item], -1);
+    await this.applyPromotions(item.checkId);
     await this.notifyItem(updated!);
     return { status: "cancelled" as const, item: toItemDto(updated!) };
   }
@@ -207,8 +272,10 @@ export class OrdersService {
         .returning();
       this.broadcastSent([redo!]);
       this.stock(who, [redo!], 1);
+      await this.applyPromotions(item.checkId);
       return { status: "remade" as const, item: toItemDto(redo!) };
     }
+    await this.applyPromotions(item.checkId);
     return { status: "removed" as const };
   }
 
@@ -221,9 +288,44 @@ export class OrdersService {
 
   async moveItems(who: Principal, body: z.infer<typeof orders.MoveItemsBody>) {
     await this.getCheck(who, body.toCheckId);
+    const from = await this.db.selectDistinct({ checkId: schema.orderItems.checkId }).from(schema.orderItems).where(inArray(schema.orderItems.id, body.itemIds));
     await this.db.update(schema.orderItems).set({ checkId: body.toCheckId }).where(and(inArray(schema.orderItems.id, body.itemIds), eq(schema.orderItems.branchId, who.branchId)));
     await recordEvent(this.db, who, { type: "items.moved", entity: "check", entityId: body.toCheckId, data: body });
+    for (const c of new Set([body.toCheckId, ...from.map((f) => f.checkId)])) await this.applyPromotions(c);
     return { ok: true };
+  }
+
+  /** E4-07 · Recalcula las promociones de la cuenta (se llama tras cualquier cambio de renglones). */
+  async applyPromotions(checkId: string) {
+    const [check] = await this.db.select().from(schema.checks).where(eq(schema.checks.id, checkId));
+    if (!check || check.status === "cobrada" || check.status === "cancelada") return;
+    const promos = await this.db.select().from(schema.promotions).where(and(eq(schema.promotions.tenantId, check.tenantId), eq(schema.promotions.status, "activa")));
+    const items = await this.db.select().from(schema.orderItems).where(eq(schema.orderItems.checkId, checkId));
+    if (!items.length) return;
+    const products = await this.db.select({ id: schema.products.id, categoryId: schema.products.categoryId, price: schema.products.price }).from(schema.products).where(inArray(schema.products.id, [...new Set(items.map((i) => i.productId))]));
+    const [branch] = await this.db.select({ tz: schema.branches.timezone }).from(schema.branches).where(eq(schema.branches.id, check.branchId));
+    const [table] = check.tableId ? await this.db.select({ areaId: schema.tables.areaId }).from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
+    const result = promos.length
+      ? computePromotions(
+          items.map((i) => ({
+            id: i.id,
+            productId: i.productId,
+            categoryId: products.find((p) => p.id === i.productId)?.categoryId ?? "",
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            // Solo el renglón con precio (estación principal) participa; lo cancelado/devuelto no.
+            chargeable: i.unitPrice > 0 && i.state !== "cancelado" && i.state !== "devuelto",
+            orderedAt: i.createdAt,
+          })),
+          promos.map((p) => ({ ...p, active: true })),
+          { zone: table?.areaId ?? "barra", checkOpenedAt: check.openedAt, timezone: branch?.tz ?? "America/Mexico_City" },
+        )
+      : new Map<string, { discount: number; promotionId: string | null }>();
+    for (const i of items) {
+      const r = result.get(i.id) ?? { discount: 0, promotionId: null };
+      if (r.discount !== i.promoDiscount || r.promotionId !== i.promotionId)
+        await this.db.update(schema.orderItems).set({ promoDiscount: r.discount, promotionId: r.promotionId }).where(eq(schema.orderItems.id, i.id));
+    }
   }
 
   private async getItem(who: Principal, itemId: string) {

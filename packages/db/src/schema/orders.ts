@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
@@ -14,6 +15,8 @@ export const checks = pgTable("checks", {
   branchId: branchId(),
   kind: checkKindEnum("kind").notNull(),
   tableId: uuid("table_id"),
+  /** Mesas unidas a la principal para un grupo (E3-10). */
+  joinedTableIds: uuid("joined_table_ids").array().notNull().default(sql`'{}'::uuid[]`),
   name: text("name"),
   guests: integer("guests"),
   waiterId: uuid("waiter_id").notNull(),
@@ -47,6 +50,9 @@ export const orderItems = pgTable("order_items", {
   readyAt: timestamp("ready_at", { withTimezone: true }),
   deliveredAt: timestamp("delivered_at", { withTimezone: true }),
   readyBy: uuid("ready_by"),
+  /** Descuento total del renglón por promoción (centavos) y la regla que lo dio. */
+  promoDiscount: integer("promo_discount").notNull().default(0),
+  promotionId: uuid("promotion_id"),
 });
 
 export const approvalKindEnum = pgEnum("approval_kind", ["cancelacion", "devolucion_retiro", "cortesia", "descuento", "reapertura"]);

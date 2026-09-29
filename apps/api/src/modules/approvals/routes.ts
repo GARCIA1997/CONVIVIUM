@@ -59,7 +59,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
         guests: check?.guests ?? null,
         checkTotal: check?.total ?? 0,
         productName: item?.productName ?? null,
-        itemAmount: item ? item.unitPrice * item.quantity : null,
+        itemAmount: item ? item.unitPrice * item.quantity - item.promoDiscount : null,
         reason: reason?.label ?? a.note ?? null,
         requestedByName: people.find((p) => p.id === a.requestedBy)?.name ?? null,
         resolvedByName: people.find((p) => p.id === a.resolvedBy)?.name ?? null,
@@ -77,12 +77,13 @@ const plugin: ApiModule["plugin"] = async (app) => {
       const roles = (await db.select().from(schema.userRoles).where(and(eq(schema.userRoles.userId, u.id), eq(schema.userRoles.branchId, req.user.branchId)))).map((r) => r.role as Role);
       approver = { userId: u.id, roles };
     }
-    if (!can(approver.roles, "aprobacion.resolver")) throw forbidden("No puede aprobar");
+    const pol = await app.policy.get(req.user.tenantId);
+    if (!can(approver.roles, "aprobacion.resolver", pol.overrides)) throw forbidden("No puede aprobar");
 
     const [a] = await db.select().from(schema.approvals).where(and(eq(schema.approvals.id, req.params.id), eq(schema.approvals.branchId, req.user.branchId)));
     if (!a) throw notFound("Solicitud");
     if (a.status !== "pendiente") throw conflict("already_resolved", "Ya fue resuelta");
-    if (a.kind === "descuento" && a.pct !== null && discountNeedsApproval(approver.roles, a.pct)) throw forbidden("Excede su tope de descuento");
+    if (a.kind === "descuento" && a.pct !== null && discountNeedsApproval(approver.roles, a.pct, pol.caps)) throw forbidden("Excede su tope de descuento");
 
     const status = req.body.decision === "aprobar" ? "aprobada" : "rechazada";
     await db.update(schema.approvals).set({ status, resolvedBy: approver.userId, resolvedAt: new Date() }).where(eq(schema.approvals.id, a.id));

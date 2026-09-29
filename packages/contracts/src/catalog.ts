@@ -16,6 +16,8 @@ export const Product = z.object({
   id: Id,
   categoryId: Id,
   name: z.string(),
+  description: z.string().max(160).nullable().default(null),
+  sku: z.string().max(24).nullable().default(null),
   price: Cents.describe("Precio con impuestos incluidos"),
   iepsPct: z.number().min(0).max(200).default(0),
   targetPrepSec: z.number().int().positive(),
@@ -33,4 +35,12 @@ export const ProductUpsert = Product.omit({ id: true, modifierGroups: true }).ex
 
 export const SetSoldOutBody = z.object({ soldOut: z.boolean() });
 
-export const Menu = z.object({ version: z.number().int(), categories: z.array(Category), products: z.array(Product) });
+export const Menu = z.object({ version: z.number().int(), ivaPct: z.number().int().default(16), categories: z.array(Category), products: z.array(Product) });
+
+export const ModifierGroupUpsert = z.object({
+  name: z.string().trim().min(2).max(60),
+  minSelect: z.number().int().min(0).max(10),
+  maxSelect: z.number().int().min(1).max(20),
+  modifiers: z.array(z.object({ id: Id.optional(), name: z.string().trim().min(1).max(60), priceDelta: z.number().int().min(0) })).min(1).max(30),
+}).refine((g) => g.minSelect <= g.maxSelect, { message: "El mínimo no puede ser mayor al máximo", path: ["minSelect"] });
+export const CategoryUpsert = z.object({ name: z.string().trim().min(2).max(40), active: z.boolean().default(true) });

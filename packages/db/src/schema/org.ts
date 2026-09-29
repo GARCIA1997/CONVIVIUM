@@ -10,6 +10,8 @@ export const tenants = pgTable("tenants", {
   rfc: text("rfc"),
   /** Topes de descuento por rol configurables (E1-05). */
   discountCaps: jsonb("discount_caps").$type<Record<string, number | null>>(),
+  /** Permisos adicionales/denegados por rol (E1-07). */
+  rolePermissions: jsonb("role_permissions").$type<Record<string, { grant?: string[]; deny?: string[] }>>(),
   createdAt: createdAt(),
 });
 
