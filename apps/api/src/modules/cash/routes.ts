@@ -67,6 +67,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     if (settled) await db.update(schema.checks).set({ status: "cobrada", closedAt: new Date() }).where(eq(schema.checks.id, check.id));
     await recordEvent(db, req.user, { type: "check.payment", entity: "check", entityId: check.id, data: req.body });
     if (settled && check.tableId) app.hub.publish(["floor"], { type: "table.status", tableId: check.tableId, status: "libre" });
+    if (check.kind === "llevar") app.hub.publish(["floor"], { type: "takeout.updated", checkId: check.id });
     return { paid, change, checkStatus: settled ? "cobrada" : check.status };
   });
 

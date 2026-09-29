@@ -8,6 +8,8 @@ export const RealtimeEvent = z.discriminatedUnion("type", [
   z.object({ type: z.literal("menu.updated") }),
   /** Cambió el plano (mesas, áreas o estructura). */
   z.object({ type: z.literal("floor.updated") }),
+  /** Cambió un pedido para llevar (nuevo, listo, cobrado o entregado). */
+  z.object({ type: z.literal("takeout.updated"), checkId: z.string() }),
   z.object({ type: z.literal("item.updated"), item: OrderItem }),
   z.object({ type: z.literal("item.ready"), item: OrderItem, tableLabel: z.string().nullable(), waiterId: z.string() }),
   z.object({ type: z.literal("product.sold_out"), productId: z.string(), soldOut: z.boolean() }),

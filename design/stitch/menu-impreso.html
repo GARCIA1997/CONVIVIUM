@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CONVIVIUM · Carta Restaurante (US Letter Print)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            display: ['Cinzel', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            marfil: '#FAF8F5',
+            marfilDark: '#F4EFEA',
+            olivo: '#1E2F28',
+            olivoDeep: '#15221D',
+            dorado: '#C59A5F',
+            doradoSoft: '#E6D5BD',
+            arena: '#D9CFC1',
+            carbon: '#1C1D1C',
+            mutedText: '#595B58',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+    @media print {
+      body {
+        background-color: #FAF8F5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-container {
+        box-shadow: none !important;
+        margin: 0 !important;
+        border: none !important;
+      }
+    }
+    .dotted-leader {
+      border-bottom: 1.5px dotted #BDB4A5;
+      flex-grow: 1;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      position: relative;
+      top: -4px;
+    }
+  </style>
+</head>
+<body class="bg-[#ECE7DF] min-h-screen py-6 px-3 sm:px-6 flex flex-col items-center justify-center font-sans antialiased text-carbon selection:bg-dorado/20">
+
+  <!-- Print action banner (sutil flotante arriba para visualización web) -->
+  <div class="no-print max-w-[816px] w-full flex items-center justify-between mb-4 px-3 py-2 bg-olivo text-marfil rounded-lg shadow-md border border-dorado/30 text-xs">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-dorado text-sm">print</span>
+      <span class="font-medium tracking-wide">Vista de Impresión Oficial · Formato US Letter (8.5 × 11 in)</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-white/60 hidden sm:inline text-[11px]">Papel sugerido: Algodón o Marfil 180-240g</span>
+      <button onclick="window.print()" class="bg-dorado hover:bg-[#b58b52] text-olivo font-semibold px-3 py-1 rounded transition-colors flex items-center gap-1.5 shadow-sm active:scale-95">
+        <span class="material-symbols-outlined text-sm">print</span> Imprimir Carta
+      </button>
+    </div>
+  </div>
+
+  <!-- HOJA US LETTER (816px x 1056px en escala web 96DPI estándar) -->
+  <div class="page-container relative bg-marfil w-full max-w-[816px] min-h-[1056px] p-8 sm:p-11 shadow-2xl rounded-none border border-arena/70 flex flex-col justify-between overflow-hidden">
+    
+    <!-- Marco perimetral fino clásico de imprenta gastronómica -->
+    <div class="pointer-events-none absolute inset-3 border border-arena/60"></div>
+    <div class="pointer-events-none absolute inset-4 border border-dorado/40"></div>
+    <!-- Filigranas esquineras sobrias -->
+    <div class="pointer-events-none absolute top-4 left-4 w-3 h-3 border-t-2 border-l-2 border-dorado"></div>
+    <div class="pointer-events-none absolute top-4 right-4 w-3 h-3 border-t-2 border-r-2 border-dorado"></div>
+    <div class="pointer-events-none absolute bottom-4 left-4 w-3 h-3 border-b-2 border-l-2 border-dorado"></div>
+    <div class="pointer-events-none absolute bottom-4 right-4 w-3 h-3 border-b-2 border-r-2 border-dorado"></div>
+
+    <!-- ENCABEZADO CENTRADO -->
+    <header class="text-center pt-2 pb-4 relative z-10">
+      <!-- Monograma C -->
+      <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-dorado bg-marfil mb-2.5 shadow-sm">
+        <span class="font-serif italic font-semibold text-olivo text-xl leading-none">C</span>
+      </div>
+
+      <!-- Logomarca CONVIVIUM -->
+      <h1 class="font-serif font-bold text-3xl sm:text-[34px] tracking-[0.28em] text-olivo uppercase leading-none pl-1">
+        CONVIVIUM
+      </h1>
+
+      <!-- Filete ornamental sutil bajo marca -->
+      <div class="flex items-center justify-center gap-3 my-2 max-w-[340px] mx-auto">
+        <span class="h-[1px] bg-gradient-to-r from-transparent via-dorado to-dorado flex-1"></span>
+        <span class="text-dorado text-[10px] transform rotate-45">◆</span>
+        <span class="h-[1px] bg-gradient-to-l from-transparent via-dorado to-dorado flex-1"></span>
+      </div>
+
+      <!-- Tagline y Sucursal -->
+      <p class="font-serif italic text-xs sm:text-[13px] text-olivo/80 tracking-widest font-normal">
+        Donde todo sucede en la mesa.
+      </p>
+      <p class="text-[9px] uppercase tracking-[0.2em] text-mutedText mt-0.5 font-medium">
+        Cocina de Brasas, Mar & Tradición Contemporánea · México
+      </p>
+    </header>
+
+    <!-- CUERPO DEL MENÚ: 2 COLUMNAS EDITORIALES -->
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 my-1 flex-1 relative z-10">
+      
+      <!-- COLUMNA IZQUIERDA: Entradas, Tacos, Platos Fuertes -->
+      <div class="flex flex-col space-y-4">
+        
+        <!-- SECCIÓN: ENTRADAS -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Entradas al Centro
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Para compartir</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Guacamole Rústico con Cecina
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">185</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Aguacate criollo en molcajete, limón persa, totopos de maíz azul y crocante de cecina artesanal.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Queso Provolone a la Leña
+                  </span>
+                  <span class="text-[10px] text-olivo/70 font-semibold" title="Vegetariano">🌱</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">195</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Cazuela de barro, compota tibia de jitomates heirloom deshidratados, albahaca fresca y aceite de oliva.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Tuétanos Asados al Grill
+                  </span>
+                  <span class="text-[10px] text-dorado font-bold" title="Toque de picante">🌶️</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">240</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Canoas de hueso a las brasas, chimichurri rústico de cilantro silvestre y tortillas de comal nixtamalizadas.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: TACOS DE ESPECIALIDAD -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Tacos de Especialidad
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Orden 3 piezas</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Tacos al Pastor de Lechón
+                  </span>
+                  <span class="text-[10px] text-dorado font-bold">🌶️</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">270</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Lechón confitado al adobo de chiles secos, piña asada al carbón, cebolla morada encurtida y cilantro.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Tacos de Rib Eye con Tuétano
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">310</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Láminas de rib eye selladas a fuego vivo, costra de queso Oaxaca, emulsión de salsa tatemada en molcajete.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: PLATOS FUERTES -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Platos Fuertes
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Brasas & Cocina de Origen</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1: Rib Eye -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Rib Eye Prime a las Brasas (400g)
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">620</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Madurado 28 días, mantequilla de romero y ajo confitado, papines cambray salteados y flor de sal de Colima.
+              </p>
+            </div>
+
+            <!-- Item 2: Hamburguesa -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Hamburguesa Convivium (220g)
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">265</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Blend de sirloin y brisket, provolone ahumado, mermelada de cebolla al vino tinto y brioche artesanal.
+              </p>
+            </div>
+
+            <!-- Item 3: Pulpo -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Pulpo Enamorado a la Parrilla
+                  </span>
+                  <span class="text-[10px] text-dorado font-bold">🌶️</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">380</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Tentáculo tierno con adobo de tres chiles, puré sedoso de camote dulce y reducción de naranja agria de Yucatán.
+              </p>
+            </div>
+
+            <!-- Item 4: Enchiladas -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Enchiladas Suizas de Pato Confitado
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">265</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Salsa verde asada con tomatillo milpero, crema de rancho fresca, gratinadas con queso de cuadro Chiapas.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- COLUMNA DERECHA: Postres, Bebidas, Coctelería de Autor -->
+      <div class="flex flex-col space-y-4">
+        
+        <!-- SECCIÓN: COCTELERÍA DE AUTOR -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Coctelería de Autor
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Destilados & Agaves</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Margarita de Tamarindo & Morita
+                  </span>
+                  <span class="text-[10px] text-dorado font-bold">🌶️</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">165</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Mezcal espadín 100% agave, pulpa de tamarindo tostado, licor de naranja artesanal y sal de gusano oaxaqueña.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Paloma Ahumada de Toronja Rosa
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">160</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Tequila reposado de Los Altos, toronja natural exprimida al momento, toque de Ancho Reyes y sal de lava.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Carajillo Mazapán de la Rosa
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">175</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Espresso recién calibrado, Licor 43 batido con mazapán mexicano tradicional y cacahuate garapiñado.
+              </p>
+            </div>
+
+            <!-- Item 4 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Gin Tonic Botánico de Pepino & Pimienta
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">180</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Ginebra artesanal, agua tónica premium, láminas finas de pepino persa y macerado de pimienta rosa.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: BEBIDAS & CERVEZAS -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Bebidas & Cervezas
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Sin alcohol & Frías</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Agua Fresca de Guayaba & Albahaca
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">65</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Fruta natural macerada en frío con infusión sutil de albahaca fresca del huerto y miel de agave orgánico.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Limonada Artesanal con Chía & Cardamomo
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">60</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Limón colima recién exprimido, semillas de chía hidratadas y agua mineral de manantial gasificada.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Cerveza Charro Artesanal (Pilsner 355ml)
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">85</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Cerveza mexicana de malta fina con notas florales y cuerpo dorado ligero, servida en vaso corto helado.
+              </p>
+            </div>
+
+            <!-- Item 4 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                  Café de Especialidad Pluma Hidalgo (Oaxaca)
+                </span>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">55</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Espresso doble, americano o cortado con notas de chocolate oscuro y frutos rojos maduros.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: POSTRES CASEROS -->
+        <section>
+          <div class="flex items-center gap-2 mb-2 pb-1 border-b border-arena">
+            <h2 class="font-serif uppercase text-[12px] font-bold tracking-[0.22em] text-olivo">
+              Postres Caseros
+            </h2>
+            <span class="text-[8px] uppercase tracking-widest text-dorado font-sans font-semibold">· Sobremesa dulce</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Item 1 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Volcán de Cajeta de Celaya & Plátano
+                  </span>
+                  <span class="text-[10px] text-olivo/70 font-semibold">🌱</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">140</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Bizcocho tibio de corazón fluido de cajeta quemada, acompañado de helado de vainilla pura de Papantla.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div>
+              <div class="flex items-baseline justify-between">
+                <div class="flex items-center gap-1">
+                  <span class="font-serif font-semibold text-[13px] text-olivo tracking-wide">
+                    Pastel Tres Leches al Cardamomo
+                  </span>
+                  <span class="text-[10px] text-olivo/70 font-semibold">🌱</span>
+                </div>
+                <span class="dotted-leader"></span>
+                <span class="font-sans font-bold text-[13px] text-olivo tabular-nums">135</span>
+              </div>
+              <p class="font-sans text-[10px] text-mutedText leading-snug">
+                Pan esponja bañado en reducción aromática de tres leches infusionadas, merengue dorado y canela criolla.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- PIE DE PÁGINA IMPRESO: QR, INFORMACIÓN FISCAL Y LEYENDAS -->
+    <footer class="pt-3 pb-1 border-t-2 border-olivo mt-2 relative z-10">
+      
+      <!-- Fila de leyendas y QR -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        
+        <!-- Bloque Izquierdo: Leyenda dietética y fiscal PROFECO -->
+        <div class="text-left space-y-1 max-w-sm">
+          <div class="flex items-center gap-3 text-[9px] uppercase tracking-wider text-olivo font-semibold">
+            <span class="flex items-center gap-1"><span>🌱</span> Opción vegetariana</span>
+            <span>·</span>
+            <span class="flex items-center gap-1"><span>🌶️</span> Contiene picante</span>
+          </div>
+          <p class="text-[9px] leading-tight text-mutedText font-sans">
+            Precios en MXN, IVA incluido. El consumo de carnes crudas o semicocidas es bajo criterio del comensal. Si usted padece alergias o restricciones alimentarias, favor de notificarlo a su capitán de servicio.
+          </p>
+          <p class="text-[9px] text-olivo/90 font-medium tracking-wide">
+            Av. Paseo de la Reforma 220, Cuauhtémoc, CDMX · Reservaciones: +52 55 4190 2831
+          </p>
+        </div>
+
+        <!-- Bloque Derecho: Código QR y llamado a la Carta Digital -->
+        <div class="flex items-center gap-3 bg-marfilDark px-3 py-2 rounded border border-arena/80">
+          <div class="text-right">
+            <p class="font-serif font-bold text-[10px] text-olivo tracking-wide uppercase leading-tight">
+              Menú Digital en Vivo
+            </p>
+            <p class="text-[8.5px] text-mutedText leading-tight mt-0.5 max-w-[130px]">
+              Escanea para ver fotos, maridajes y especiales del día
+            </p>
+          </div>
+          
+          <!-- QR SVG nítido y vectorial de alta fidelidad -->
+          <div class="w-12 h-12 bg-white p-1 rounded border border-arena shrink-0 flex items-center justify-center">
+            <svg class="w-full h-full text-olivo" viewBox="0 0 100 100" fill="currentColor">
+              <!-- QR Patterns (vectorizado estético y escaneable representativo) -->
+              <!-- Top Left Marker -->
+              <rect x="0" y="0" width="30" height="30" rx="3" fill="#1E2F28"/>
+              <rect x="5" y="5" width="20" height="20" rx="2" fill="#FAF8F5"/>
+              <rect x="10" y="10" width="10" height="10" rx="1" fill="#1E2F28"/>
+              
+              <!-- Top Right Marker -->
+              <rect x="70" y="0" width="30" height="30" rx="3" fill="#1E2F28"/>
+              <rect x="75" y="5" width="20" height="20" rx="2" fill="#FAF8F5"/>
+              <rect x="80" y="10" width="10" height="10" rx="1" fill="#1E2F28"/>
+
+              <!-- Bottom Left Marker -->
+              <rect x="0" y="70" width="30" height="30" rx="3" fill="#1E2F28"/>
+              <rect x="5" y="75" width="20" height="20" rx="2" fill="#FAF8F5"/>
+              <rect x="10" y="80" width="10" height="10" rx="1" fill="#1E2F28"/>
+
+              <!-- Grid data modules -->
+              <rect x="36" y="6" width="6" height="6" fill="#1E2F28"/>
+              <rect x="46" y="6" width="6" height="12" fill="#1E2F28"/>
+              <rect x="58" y="12" width="6" height="6" fill="#1E2F28"/>
+              <rect x="36" y="24" width="12" height="6" fill="#1E2F28"/>
+
+              <rect x="12" y="38" width="6" height="12" fill="#1E2F28"/>
+              <rect x="24" y="44" width="12" height="6" fill="#1E2F28"/>
+              <rect x="42" y="40" width="16" height="16" rx="2" fill="#C59A5F"/>
+              <rect x="46" y="44" width="8" height="8" rx="1" fill="#FAF8F5"/>
+              <rect x="64" y="38" width="6" height="12" fill="#1E2F28"/>
+              <rect x="76" y="44" width="12" height="6" fill="#1E2F28"/>
+
+              <rect x="36" y="68" width="8" height="8" fill="#1E2F28"/>
+              <rect x="48" y="74" width="8" height="8" fill="#1E2F28"/>
+              <rect x="60" y="66" width="6" height="14" fill="#1E2F28"/>
+              <rect x="74" y="72" width="10" height="6" fill="#1E2F28"/>
+              <rect x="88" y="66" width="6" height="12" fill="#1E2F28"/>
+              <rect x="74" y="84" width="18" height="8" fill="#1E2F28"/>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie de página final con monograma y crédito tipográfico -->
+      <div class="mt-2 pt-1 border-t border-arena/40 flex justify-between items-center text-[8px] text-mutedText tracking-wider">
+        <span>CONVIVIUM HOSPITALITY GROUP S.A.P.I. DE C.V.</span>
+        <span>IMPRESO EN MÉXICO · CARTA NOVIEMBRE 2026</span>
+        <span>WWW.CONVIVIUM.MX</span>
+      </div>
+
+    </footer>
+
+  </div>
+
+</body>
+</html>

@@ -29,6 +29,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
       products: prods.map((p) => ({
         ...p,
         iepsPct: Number(p.iepsPct),
+        badges: p.badges.filter((b): b is "nuevo" | "picante" | "vegetariano" | "recomendado" => ["nuevo", "picante", "vegetariano", "recomendado"].includes(b)),
         stationIds: stations.filter((s) => s.productId === p.id).map((s) => s.stationId),
         modifierGroups: pmg.filter((x) => x.productId === p.id).map((x) => groupById.get(x.groupId)!).filter(Boolean),
         soldOut: avail.find((a) => a.productId === p.id)?.soldOut ?? false,

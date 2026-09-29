@@ -29,6 +29,10 @@ const plugin: ApiModule["plugin"] = async (app) => {
     reply.status(201).send(await svc.openCheck(req.user, req.body)),
   );
 
+  /** E3-11 · Pedidos para llevar del día y entrega al cliente. */
+  app.get("/takeout", { onRequest: [app.guard("mesa.abrir")], schema: { tags } }, async (req) => svc.takeoutBoard(req.user));
+  app.post("/checks/:id/hand-over", { onRequest: [app.guard("mesa.abrir")], schema: { tags, params: IdParam } }, async (req) => svc.handOver(req.user, req.params.id));
+
   app.get("/checks/:id", { onRequest: [app.guard()], schema: { tags, params: IdParam, response: { 200: orders.Check } } }, async (req) =>
     svc.getCheck(req.user, req.params.id),
   );

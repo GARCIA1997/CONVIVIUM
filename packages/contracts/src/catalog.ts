@@ -18,6 +18,7 @@ export const Product = z.object({
   name: z.string(),
   description: z.string().max(160).nullable().default(null),
   sku: z.string().max(24).nullable().default(null),
+  badges: z.array(z.enum(["nuevo", "picante", "vegetariano", "recomendado"])).max(4).default([]),
   price: Cents.describe("Precio con impuestos incluidos"),
   iepsPct: z.number().min(0).max(200).default(0),
   targetPrepSec: z.number().int().positive(),

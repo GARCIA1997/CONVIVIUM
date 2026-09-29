@@ -99,6 +99,20 @@
       "when": 1790709603503,
       "tag": "0013_sync_ops_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790710534263,
+      "tag": "0014_llevar_proveedores_menu",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790710554376,
+      "tag": "0015_sync_compras_menu",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
   // E8-01 · Proveedores
   app.get("/suppliers", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags } }, async (req) => svc.suppliers(req.user));
   app.post("/suppliers", { onRequest: [app.guard("compras.aprobar_oc")], schema: { tags, body: purchasing.SupplierUpsert } }, async (req, reply) => reply.status(201).send(await svc.upsertSupplier(req.user, req.body)));
+  app.get("/suppliers/:id", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, params: IdParam } }, async (req) => svc.supplierDetail(req.user, req.params.id));
+  app.put("/suppliers/:id/prices", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, params: IdParam, body: purchasing.SupplierPricesBody } }, async (req) => svc.setSupplierPrices(req.user, req.params.id, req.body));
   app.put("/suppliers/:id", { onRequest: [app.guard("compras.aprobar_oc")], schema: { tags, params: IdParam, body: purchasing.SupplierUpsert } }, async (req) => svc.upsertSupplier(req.user, req.body, req.params.id));
 
   // E8-02 · Órdenes de compra

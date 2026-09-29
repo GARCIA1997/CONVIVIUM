@@ -27,6 +27,14 @@ export const CONFIG_TABLES = [
   { table: "ingredients", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM ingredients cfg_row WHERE cfg_row.tenant_id = $T" },
   { table: "recipes", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM recipes cfg_row WHERE cfg_row.tenant_id = $T" },
   { table: "recipe_lines", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM recipe_lines cfg_row JOIN recipes r ON r.id = cfg_row.recipe_id WHERE r.tenant_id = $T" },
+  { table: "suppliers", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM suppliers cfg_row WHERE cfg_row.tenant_id = $T" },
+  { table: "supplier_prices", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM supplier_prices cfg_row JOIN suppliers s ON s.id = cfg_row.supplier_id WHERE s.tenant_id = $T" },
+  { table: "purchase_orders", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM purchase_orders cfg_row WHERE cfg_row.branch_id = $B" },
+  { table: "purchase_order_lines", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM purchase_order_lines cfg_row JOIN purchase_orders o ON o.id = cfg_row.purchase_order_id WHERE o.branch_id = $B" },
+  { table: "receipts", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM receipts cfg_row WHERE cfg_row.branch_id = $B" },
+  { table: "payables", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM payables cfg_row WHERE cfg_row.tenant_id = $T" },
+  { table: "supplier_payments", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM supplier_payments cfg_row WHERE cfg_row.tenant_id = $T" },
+  { table: "menu_publications", pk: ["id"], scope: "SELECT to_jsonb(cfg_row) FROM menu_publications cfg_row WHERE cfg_row.branch_id = $B" },
 ] as const;
 
 export type ConfigTable = (typeof CONFIG_TABLES)[number]["table"];
