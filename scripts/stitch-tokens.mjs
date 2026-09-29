@@ -35,10 +35,24 @@ for (const f of readdirSync(DIR).filter((f) => f.endsWith(".html"))) {
   Object.assign(animation, ext.animation ?? {});
 }
 
+/** Luminancia relativa aproximada de un color hex. */
+const lum = (hex) => {
+  const h = hex.replace("#", "").padEnd(6, "0");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const LIGHT = /(soft|light|subtle|bg|pale|lighter)$/i;
+const DARK = /(dark|deep|darker)$/i;
+
 const colors = {};
 for (const [token, options] of Object.entries(counts).sort()) {
   const base = token.replace(/^(brand|convivium)-/, "");
-  colors[token] = BRAND[base] ?? Object.entries(options).sort((a, b) => b[1] - a[1])[0][0];
+  const values = Object.keys(options);
+  // El nombre del token manda cuando las pantallas no coinciden: "soft/light" = el más claro, "dark" = el más oscuro.
+  if (BRAND[base]) colors[token] = BRAND[base];
+  else if (values.length > 1 && LIGHT.test(token)) colors[token] = values.sort((a, b) => lum(b) - lum(a))[0];
+  else if (values.length > 1 && DARK.test(token)) colors[token] = values.sort((a, b) => lum(a) - lum(b))[0];
+  else colors[token] = Object.entries(options).sort((a, b) => b[1] - a[1])[0][0];
 }
 // Los tokens de marca siempre existen, aunque ninguna pantalla los declare.
 for (const [k, v] of Object.entries(BRAND)) colors[k] = v;

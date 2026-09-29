@@ -25,7 +25,8 @@ export class InventoryService {
       this.db.select().from(schema.warehouses).where(eq(schema.warehouses.branchId, who.branchId)),
     ]);
     return ings.map((i) => {
-      const byWh = Object.fromEntries(whs.map((w) => [w.id, num(stock.find((s) => s.ingredientId === i.id && s.warehouseId === w.id)?.quantity)]));
+      // Solo almacenes donde el insumo tiene registro de existencia (aunque esté en cero).
+      const byWh = Object.fromEntries(stock.filter((s) => s.ingredientId === i.id && whs.some((w) => w.id === s.warehouseId)).map((s) => [s.warehouseId, num(s.quantity)]));
       const total = Object.values(byWh).reduce((a, b) => a + b, 0);
       const qty = warehouseId ? (byWh[warehouseId] ?? 0) : total;
       return {

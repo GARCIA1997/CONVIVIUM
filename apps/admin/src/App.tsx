@@ -6,6 +6,9 @@ import { ApprovalsPage } from "./features/approvals/ApprovalsPage";
 import { LoginPage } from "./features/auth/LoginPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { AdminHeader, AdminLayout, type Section } from "./features/layout/AdminLayout";
+import { CountPage } from "./features/inventory/CountPage";
+import { InventoryPage } from "./features/inventory/InventoryPage";
+import { RecipesPage } from "./features/inventory/RecipesPage";
 import { MenuPage } from "./features/menu/MenuPage";
 
 /** Secciones de administración; `perm` define quién las ve (roles jerárquicos, E1-07). */
@@ -16,7 +19,9 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", design: "admin-editor-plano" },
   { path: "estaciones", label: "Estaciones", icon: "skillet", perm: "estaciones.editar", design: "admin-estaciones" },
   { path: "usuarios", label: "Usuarios y roles", icon: "group", perm: "usuarios.gestionar", design: "admin-usuarios-permisos" },
-  { path: "inventario", label: "Inventario", icon: "inventory_2", perm: "inventario.contar", design: "admin-inventario-insumos" },
+  { path: "inventario", label: "Insumos y almacenes", icon: "inventory_2", perm: "inventario.contar", element: <InventoryPage /> },
+  { path: "recetas", label: "Recetas", icon: "menu_book", perm: "inventario.contar", element: <RecipesPage /> },
+  { path: "conteo", label: "Conteo físico", icon: "fact_check", perm: "inventario.contar", element: <CountPage /> },
   { path: "compras", label: "Compras", icon: "shopping_cart", perm: "compras.proponer_oc", design: "admin-compras-oc" },
   { path: "cxp", label: "Cuentas por pagar", icon: "account_balance_wallet", perm: "cxp.pagar", design: "admin-cxp" },
   { path: "reportes", label: "Reportes", icon: "bar_chart", perm: "reportes.ver", design: "admin-reportes-control" },

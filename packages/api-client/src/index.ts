@@ -1,4 +1,4 @@
-import type { approvals, auth, catalog, floor, orders, RealtimeEvent } from "@convivium/contracts";
+import type { approvals, auth, catalog, floor, inventory, orders, RealtimeEvent } from "@convivium/contracts";
 import type { z } from "zod";
 
 type Infer<T extends z.ZodTypeAny> = z.infer<T>;
@@ -24,6 +24,22 @@ export type ApprovalView = Omit<Approval, "createdAt"> & {
   requestedByName: string | null;
   resolvedByName: string | null;
 };
+
+export type Ingredient = Infer<typeof inventory.IngredientView>;
+export type IngredientInput = Infer<typeof inventory.IngredientUpsert>;
+export type RecipeInput = z.input<typeof inventory.RecipeUpsert>;
+export interface Warehouse { id: string; name: string }
+export interface RecipeSummary { id: string; name: string; isSubRecipe: boolean; productId: string | null; modifierId: string | null; cost: number }
+export interface RecipeDetail {
+  id: string; name: string; isSubRecipe: boolean; yieldQty: number | null; steps: string[]; productId: string | null; cost: number;
+  lines: { ingredientId: string | null; subRecipeId: string | null; quantity: number; wastePct: number; name: string; unit: string; unitCost: number; cost: number }[];
+  product: { id: string; name: string; price: number; netPrice: number; costPct: number } | null;
+  modifierRecipes: { id: string; name: string; cost: number }[];
+}
+export interface InventoryCount {
+  id: string; warehouseId: string; status: string; countedBy: string; createdAt: string; totalDiffValue: number;
+  lines: { ingredientId: string; name: string; unit: string; theoretical: number; counted: number; diff: number; diffValue: number }[];
+}
 
 export interface LiveDashboard {
   salesToday: number;
@@ -150,6 +166,21 @@ export function createClient(baseUrl = "/v1") {
         request<{ kind: string; expected: Record<string, number>; counted: Record<string, number>; differences: Record<string, number>; sales: number; tips: number; closed: boolean }>("POST", "/cash/sessions/current/counts", { kind, counted, approverPin }),
       pay: (checkId: string, body: unknown) => request<{ paid: number; change: number; checkStatus: string }>("POST", `/cash/checks/${checkId}/pay`, body),
     },
+    inventory: {
+      warehouses: () => request<Warehouse[]>("GET", "/inventory/warehouses"),
+      ingredients: (warehouseId?: string) => request<Ingredient[]>("GET", `/inventory/ingredients${warehouseId ? `?warehouseId=${warehouseId}` : ""}`),
+      saveIngredient: (body: IngredientInput, id?: string) => request(id ? "PUT" : "POST", id ? `/inventory/ingredients/${id}` : "/inventory/ingredients", body),
+      recipes: () => request<RecipeSummary[]>("GET", "/inventory/recipes"),
+      recipe: (id: string) => request<RecipeDetail>("GET", `/inventory/recipes/${id}`),
+      saveRecipe: (body: RecipeInput, id?: string) => request<RecipeDetail>(id ? "PUT" : "POST", id ? `/inventory/recipes/${id}` : "/inventory/recipes", body),
+      produce: (recipeId: string, batches: number, warehouseId: string) => request<{ produced: number; unit: string }>("POST", "/inventory/production", { recipeId, batches, warehouseId }),
+      submitCount: (warehouseId: string, lines: { ingredientId: string; counted: number }[]) => request<InventoryCount>("POST", "/inventory/counts", { warehouseId, lines }),
+      counts: (status?: string) => request<InventoryCount[]>("GET", `/inventory/counts${status ? `?status=${status}` : ""}`),
+      resolveCount: (id: string, approve: boolean) => request<InventoryCount>("POST", `/inventory/counts/${id}/${approve ? "approve" : "reject"}`),
+      suggestions: () => request<{ ingredientId: string; name: string; stock: number; minStock: number; useUnit: string; purchaseUnit: string; suggestedQty: number; supplierId: string | null; supplierName: string | null; unitPrice: number | null }[]>("GET", "/inventory/purchase-suggestions"),
+    },
+    /** Llamada genérica para endpoints sin método dedicado. */
+    request: <T = unknown>(method: string, path: string, body?: unknown) => request<T>(method, path, body),
     reports: {
       live: () => request<LiveDashboard>("GET", "/reports/live"),
     },
