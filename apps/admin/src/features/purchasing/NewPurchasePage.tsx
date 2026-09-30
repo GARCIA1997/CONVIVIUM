@@ -101,7 +101,10 @@ export function NewPurchasePage() {
                   const p = price(l.ingredientId)!, s = sugg(l.ingredientId);
                   return (
                     <tr key={l.ingredientId}>
-                      <td className="py-2 font-medium text-stone-800">{p.name}<span className="block text-[10px] text-stone-400">{p.purchaseUnit}</span></td>
+                      <td className="py-2 font-medium text-stone-800">
+                        <span className="flex items-center gap-2">{p.name}{s && <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded border ${s.stock <= s.minStock / 2 ? "bg-terracota/10 text-terracota border-terracota/30" : "bg-amber-50 text-amber-800 border-amber-200"}`}><span className="material-symbols-outlined text-[12px]">{s.stock <= s.minStock / 2 ? "warning" : "schedule"}</span>{s.stock <= s.minStock / 2 ? "Stock crítico" : "Bajo mínimo"}</span>}</span>
+                        <span className="block text-[10px] text-stone-400">{p.purchaseUnit}</span>
+                      </td>
                       <td className="py-2 text-right font-mono">{s ? `${s.stock} ${s.useUnit}` : "—"}</td>
                       <td className="py-2 text-right font-mono">{s ? `${s.minStock} ${s.useUnit}` : "—"}</td>
                       <td className="py-2 text-right">{s ? <span className="text-[10px] font-semibold bg-dorado/25 text-stone-800 px-1.5 py-0.5 rounded">{s.suggestedQty}</span> : "—"}</td>

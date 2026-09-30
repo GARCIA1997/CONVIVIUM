@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM - Terminal Punto de Venta</title>
+<!-- Google Fonts: Playfair Display for Mexican hospitality editorial touch + Inter for crisp POS numbers -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Public+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: {
+              DEFAULT: '#1E2F28',
+              light: '#283E35',
+              dark: '#14201B'
+            },
+            marfil: {
+              DEFAULT: '#F4F1EA',
+              light: '#FAF8F5',
+              card: '#FCFBF9'
+            },
+            arena: {
+              DEFAULT: '#E3DDD2',
+              dark: '#C9B89F'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#EAD7BD',
+              dark: '#B88E56'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              light: '#F8ECE8',
+              hover: '#9E4B30'
+            },
+            carbon: {
+              DEFAULT: '#1A1A1A',
+              muted: '#5A5854'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "Inter", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-serif-cormorant {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom scrollbar for high-density restaurant touchscreens */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4F1EA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D8D2C5;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C9B89F;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil font-body text-carbon antialiased overflow-hidden select-none">
+<div class="flex h-screen w-screen overflow-hidden">
+<!-- ========================================================================= -->
+<!-- 1. SIDEBAR IZQUIERDA (Estilo Verde Olivo #1E2F28, Docking permanente)     -->
+<!-- ========================================================================= -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-stone-900 flex flex-col justify-between border-r border-stone-800 shadow-xl z-30 transition-all">
+<div class="p-4 flex flex-col h-full justify-between">
+<!-- Brand & Context Header -->
+<div>
+<div class="flex items-center gap-3 px-2 pt-1 pb-4 border-b border-stone-800">
+<div class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center border border-amber-300/40 text-amber-200 font-serif-cormorant text-xl font-bold shadow-inner">
+              C
+            </div>
+<div class="flex flex-col">
+<span class="font-headline tracking-widest text-base font-bold text-stone-100 uppercase">CONVIVIUM</span>
+<span class="text-[10px] text-stone-400 font-light italic truncate tracking-wide">Donde todo sucede en la mesa.</span>
+</div>
+</div>
+<!-- Station Tag -->
+<div class="mt-4 px-2 py-1.5 rounded bg-stone-800/80 border border-stone-700/60 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[11px] font-medium tracking-wider uppercase text-stone-300">CAJA CENTRAL · 01</span>
+</div>
+<span class="text-[10px] text-amber-200/90 font-mono font-medium">TURNO #3</span>
+</div>
+<!-- Main Navigation (Shared Components JSON execution) -->
+<nav class="mt-6 flex flex-col gap-1.5"><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#"><span class="material-symbols-outlined text-stone-400">receipt_long</span><span class="text-xs tracking-wide">Cuentas</span></a><a class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-stone-800 text-amber-200 font-medium active:scale-[0.98] transition-transform duration-100 group shadow-sm" href="#"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-amber-200">shopping_bag</span><span class="text-xs tracking-wide">Para llevar</span></div><span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-200/20 text-amber-200 border border-amber-200/40">5</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#"><span class="material-symbols-outlined text-stone-400">point_of_sale</span><span class="text-xs tracking-wide">Caja y Cobro</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/50 transition-colors active:scale-[0.98] duration-100" href="#"><span class="material-symbols-outlined text-stone-400">calculate</span><span class="text-xs tracking-wide">Corte de Turno</span></a></nav>
+<!-- Quick Action CTA -->
+<div class="mt-6 px-1">
+<button class="w-full py-2 px-3 bg-stone-800/90 hover:bg-stone-700/80 text-amber-200 text-xs font-medium rounded-lg border border-amber-300/30 flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Nueva Venta</span>
+</button>
+</div>
+</div>
+<!-- Sidebar Footer & Cashier Info -->
+<div class="pt-4 border-t border-stone-800 space-y-3">
+<div class="flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-stone-800 border border-stone-700 flex items-center justify-center text-xs font-semibold text-stone-300">
+              LG
+            </div>
+<div class="flex flex-col min-w-0">
+<span class="text-xs font-medium text-stone-200 truncate">Luis G.</span>
+<span class="text-[10px] text-stone-400 truncate">Capitán / Cajero</span>
+</div>
+<div class="ml-auto flex items-center text-emerald-400" title="En línea / Sincronizado localmente">
+<span class="material-symbols-outlined text-sm">cloud_done</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-1.5 pt-1">
+<button class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded bg-stone-800/60 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-[11px] transition-colors" title="Ajustes de terminal">
+<span class="material-symbols-outlined text-sm">settings</span>
+<span>Ajustes</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded bg-stone-800/60 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-[11px] transition-colors" title="Bloquear pantalla / Cerrar Sesión">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span>Cerrar Sesión</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Workspace Canvas (Offset by sidebar width 16rem = 256px) -->
+<div class="flex-1 flex flex-col pl-64 h-screen overflow-hidden">
+<!-- Top Utility App Bar (Shared Component TopNavBar) -->
+<header class="h-14 bg-stone-100 flex items-center justify-between px-6 border-b border-arena/70 shadow-sm shrink-0">
+<div class="flex items-center gap-4">
+<span class="font-headline font-semibold text-xs uppercase tracking-wider text-stone-800">
+            CONVIVIUM POS
+          </span>
+<div class="h-4 w-px bg-arena"></div>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+<input class="w-full bg-white/80 border border-arena rounded-lg pl-8 pr-3 py-1.5 text-xs text-carbon placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-all font-body" placeholder="Buscar mesa, comensal o mesero..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 bg-stone-200/50 p-1 rounded-lg border border-arena/40">
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors" title="Sincronizar">
+<span class="material-symbols-outlined text-sm">sync</span>
+</button>
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors relative" title="Notificaciones">
+<span class="material-symbols-outlined text-sm">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-terracota"></span>
+</button>
+<button class="p-1.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded transition-colors" title="Tiempo de Turno">
+<span class="material-symbols-outlined text-sm">lock_clock</span>
+</button>
+</div>
+<div class="h-4 w-px bg-arena"></div>
+<button class="px-3 py-1.5 rounded-lg border border-arena bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-sm text-stone-500">account_balance_wallet</span>
+<span>Fondo de Caja</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs font-medium flex items-center gap-1.5 shadow-sm transition-colors">
+<span class="material-symbols-outlined text-sm">point_of_sale</span>
+<span>Cerrar Turno</span>
+</button>
+</div>
+</header>
+<!-- 3-Column Working Grid -->
+<main class="flex-1 grid grid-cols-12 overflow-hidden bg-marfil"><section class="col-span-12 flex flex-col h-full bg-marfil overflow-hidden"><div class="p-4 border-b border-arena bg-marfil-card/80 backdrop-blur flex items-center justify-between shrink-0"><div class="flex items-center gap-6"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-2xl text-stone-800">shopping_bag</span><h1 class="font-serif-cormorant text-xl font-bold text-stone-900">Pedidos para llevar</h1></div><div class="flex items-center gap-4 text-xs bg-white px-4 py-2 rounded-xl border border-arena/70 shadow-xs"><div><span class="text-stone-500 font-medium">Activos:</span> <strong class="font-mono font-bold text-stone-900">5</strong></div><div class="h-3 w-px bg-arena"></div><div><span class="text-stone-500 font-medium">Listos:</span> <strong class="font-mono font-bold text-emerald-700">2</strong></div><div class="h-3 w-px bg-arena"></div><div><span class="text-stone-500 font-medium">Tiempo prom. orden:</span> <strong class="font-mono font-bold text-stone-900">14 min</strong></div><div class="h-3 w-px bg-arena"></div><div><span class="text-stone-500 font-medium">Venta hoy:</span> <strong class="font-mono font-bold text-stone-900">$4,890.00 MXN</strong></div></div></div><button class="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-[0.98]"><span class="material-symbols-outlined text-sm">add</span><span>Nuevo pedido para llevar</span></button></div><div class="flex-1 grid grid-cols-3 gap-4 p-4 overflow-x-auto overflow-y-hidden"><div class="flex flex-col h-full bg-marfil-light/80 rounded-2xl border border-arena/80 overflow-hidden shadow-xs"><div class="p-3.5 bg-marfil-card border-b border-arena/70 flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><h2 class="font-headline text-xs font-bold text-stone-800 uppercase tracking-wider">En preparación</h2><span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-200/70 text-stone-700">2</span></div><span class="material-symbols-outlined text-stone-400 text-sm">more_vert</span></div><div class="flex-1 overflow-y-auto p-3 space-y-3"><div class="p-4 rounded-xl bg-white border border-arena shadow-sm space-y-3 hover:border-stone-400 transition-all"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-lg font-bold text-stone-900">#L-014</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-800 font-medium">WhatsApp</span></div><p class="text-xs font-semibold text-stone-800 mt-0.5">Sofía Morales · 📱 +52 55 4192 8391</p></div><div class="text-right"><span class="font-mono text-base font-bold text-stone-900">$890.00</span><span class="block text-[10px] font-medium text-emerald-700">Pagado</span></div></div><div class="py-2 border-t border-b border-arena/40 space-y-1"><p class="text-xs text-stone-600 line-clamp-1">2x Hamburguesa Convivium, 1x Limonada chía</p><div class="flex items-center gap-2 text-[10px] text-stone-500"><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Eco-disposables</span><span>·</span><span>Recoge 14:30 · en 12 min</span></div></div><div class="flex items-center gap-2"><button class="flex-1 py-1.5 px-2 bg-stone-900 hover:bg-stone-800 text-amber-200 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors"><span class="material-symbols-outlined text-sm">notifications</span><span>Avisar listo</span></button><button class="py-1.5 px-2 border border-arena bg-white hover:bg-stone-50 text-stone-700 rounded-lg text-xs font-medium transition-colors" title="Detalles"><span class="material-symbols-outlined text-sm">visibility</span></button></div></div><div class="p-4 rounded-xl bg-white border border-arena shadow-sm space-y-3 hover:border-stone-400 transition-all"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-lg font-bold text-stone-900">#L-015</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 font-medium">Teléfono</span></div><p class="text-xs font-semibold text-stone-800 mt-0.5">Alejandro Garza</p></div><div class="text-right"><span class="font-mono text-base font-bold text-stone-900">$1,250.00</span><span class="block text-[10px] font-medium text-terracota">Por cobrar</span></div></div><div class="py-2 border-t border-b border-arena/40 space-y-1"><p class="text-xs text-stone-600 line-clamp-1">1x Tacos de Rib Eye con Tuétano, 2x Cerveza</p><div class="flex items-center gap-2 text-[10px] text-stone-500"><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Eco-disposables</span><span>·</span><span>Recoge 14:45 · en 27 min</span></div></div><div class="flex items-center gap-2"><button class="flex-1 py-1.5 px-2 bg-stone-900 hover:bg-stone-800 text-amber-200 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors"><span class="material-symbols-outlined text-sm">point_of_sale</span><span>Cobrar ($1,250)</span></button></div></div></div></div><div class="flex flex-col h-full bg-marfil-light/80 rounded-2xl border border-arena/80 overflow-hidden shadow-xs"><div class="p-3.5 bg-marfil-card border-b border-arena/70 flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><h2 class="font-headline text-xs font-bold text-stone-800 uppercase tracking-wider">Listo para entregar</h2><span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">2</span></div><span class="material-symbols-outlined text-stone-400 text-sm">more_vert</span></div><div class="flex-1 overflow-y-auto p-3 space-y-3"><div class="p-4 rounded-xl bg-white border-2 border-emerald-600 shadow-md space-y-3"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-lg font-bold text-stone-900">#L-012</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 font-medium">Mostrador</span></div><p class="text-xs font-semibold text-stone-800 mt-0.5">Mariana R.</p></div><div class="text-right"><span class="font-mono text-base font-bold text-stone-900">$420.00</span><span class="block text-[10px] font-medium text-emerald-700">Pagado</span></div></div><div class="py-2 border-t border-b border-arena/40 space-y-1"><p class="text-xs text-stone-600 line-clamp-1">1x Enchiladas Suizas de Pato Confitado</p><div class="flex items-center gap-2 text-[10px] text-terracota font-semibold"><span>⚠️ 5 min tarde en recoger</span></div></div><div class="flex items-center gap-2"><button class="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors shadow-xs"><span class="material-symbols-outlined text-sm">check_circle</span><span>Marcar entregado</span></button><button class="py-1.5 px-2 border border-arena bg-white hover:bg-stone-50 text-stone-700 rounded-lg text-xs font-medium transition-colors"><span class="material-symbols-outlined text-sm">chat</span></button></div></div><div class="p-4 rounded-xl bg-white border border-arena shadow-sm space-y-3"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-lg font-bold text-stone-900">#L-013</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-800 font-medium">WhatsApp</span></div><p class="text-xs font-semibold text-stone-800 mt-0.5">Daniela C.</p></div><div class="text-right"><span class="font-mono text-base font-bold text-stone-900">$1,150.00</span><span class="block text-[10px] font-medium text-emerald-700">Pagado</span></div></div><div class="py-2 border-t border-b border-arena/40 space-y-1"><p class="text-xs text-stone-600 line-clamp-1">3x Mezcalita Jamaica &amp; Sal de Gusano</p><div class="flex items-center gap-2 text-[10px] text-stone-500"><span>Listo hace 3 min</span></div></div><div class="flex items-center gap-2"><button class="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors shadow-xs"><span class="material-symbols-outlined text-sm">check_circle</span><span>Marcar entregado</span></button></div></div></div></div><div class="flex flex-col h-full bg-marfil-light/80 rounded-2xl border border-arena/80 overflow-hidden shadow-xs"><div class="p-3.5 bg-marfil-card border-b border-arena/70 flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-stone-400"></span><h2 class="font-headline text-xs font-bold text-stone-800 uppercase tracking-wider">Entregado hoy</h2><span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-200/70 text-stone-700">18</span></div><span class="material-symbols-outlined text-stone-400 text-sm">more_vert</span></div><div class="flex-1 overflow-y-auto p-3 space-y-3"><div class="p-4 rounded-xl bg-white/60 border border-arena shadow-xs space-y-2 opacity-80"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-base font-bold text-stone-700">#L-011</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">Mostrador</span></div><p class="text-xs text-stone-500 mt-0.5">Rodrigo P. · Entregado 14:02</p></div><div class="text-right"><span class="font-mono text-sm font-bold text-stone-700">$680.00</span><span class="block text-[9px] text-emerald-700">Pagado</span></div></div></div><div class="p-4 rounded-xl bg-white/60 border border-arena shadow-xs space-y-2 opacity-80"><div class="flex items-start justify-between"><div><div class="flex items-center gap-2"><span class="font-serif-cormorant text-base font-bold text-stone-700">#L-010</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100/80 text-amber-800">WhatsApp</span></div><p class="text-xs text-stone-500 mt-0.5">Valeria L. · Entregado 13:45</p></div><div class="text-right"><span class="font-mono text-sm font-bold text-stone-700">$1,120.00</span><span class="block text-[9px] text-emerald-700">Pagado</span></div></div></div></div></div></div></section></main>
+</div>
+</div>
+</body></html>

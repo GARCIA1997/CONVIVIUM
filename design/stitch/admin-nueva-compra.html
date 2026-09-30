@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Abastecimiento &amp; Compras Inteligentes</title>
+<!-- Google Fonts: Playfair Display & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // CONVIVIUM Custom Mexican Fine-Dining Palette
+            'olivo': {
+              DEFAULT: '#1E2F28',
+              50: '#F2F5F4',
+              100: '#E1E8E5',
+              200: '#C2D1CB',
+              800: '#16231E',
+              900: '#0E1714'
+            },
+            'marfil': {
+              DEFAULT: '#F7F5F0',
+              deep: '#EAE6DD',
+              subtle: '#FAF9F6'
+            },
+            'arena': {
+              DEFAULT: '#C9B89F',
+              light: '#E5DDCF',
+              border: '#DDD3C4',
+              dark: '#9F8B6F'
+            },
+            'dorado': {
+              DEFAULT: '#D4AF7C',
+              light: '#E6CBA3',
+              dark: '#B08852'
+            },
+            'terracota': {
+              DEFAULT: '#B45A3C',
+              light: '#F8ECE7',
+              dark: '#92442B'
+            },
+            'carbon': {
+              DEFAULT: '#1A1A1A',
+              muted: '#4F4F4F',
+              soft: '#7A7A7A'
+            }
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(201, 184, 159, 0.15);
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #C9B89F;
+      border-radius: 9999px;
+    }
+    .watermark-pattern {
+      background-image: radial-gradient(#C9B89F 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+  </style>
+</head>
+<body class="bg-marfil text-carbon font-body min-h-screen antialiased flex selection:bg-dorado/30 selection:text-olivo overflow-x-hidden">
+<!-- ======================================================== -->
+<!-- 1. LATERAL NAVIGATION (SideNavBar Brand Component)       -->
+<!-- ======================================================== -->
+<aside class="fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between w-64 bg-olivo text-marfil border-r border-olivo-800 shadow-xl select-none">
+<!-- Top Brand & Branch Monogram -->
+<div class="p-5 border-b border-white/10">
+<div class="flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-olivo-800 border border-dorado/40 flex items-center justify-center shadow-inner relative overflow-hidden group">
+<span class="font-headline text-dorado text-2xl font-bold tracking-tighter">C</span>
+<div class="absolute inset-0 bg-gradient-to-tr from-dorado/10 to-transparent pointer-events-none"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-headline text-base font-bold tracking-widest text-marfil uppercase">CONVIVIUM</span>
+<span class="font-body text-[11px] font-normal text-arena tracking-wide flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Polanco Virreyes
+          </span>
+</div>
+</div>
+<!-- Quick Action CTA inside sidebar -->
+<button class="mt-5 w-full flex items-center justify-center gap-2 bg-dorado hover:bg-dorado-light active:scale-[0.98] text-olivo-900 px-3.5 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all shadow-sm">
+<span class="material-symbols-outlined text-base font-medium">add_circle</span>
+<span>Nueva Orden de Compra</span>
+</button>
+</div>
+<!-- Navigation Tab Links (Derived from Shared Component JSON) -->
+<nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto custom-scroll">
+<!-- 1. Mesas y Salón -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-white/5 transition-all text-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-arena group-hover:text-dorado transition-colors">table_restaurant</span>
+<span class="tracking-wide">Mesas y Salón</span>
+</a>
+<!-- 2. Comandas / KDS -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-white/5 transition-all text-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-arena group-hover:text-dorado transition-colors">restaurant</span>
+<span class="tracking-wide">Comandas / KDS</span>
+</a>
+<!-- 3. Inventario y Compras (ACTIVA) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-olivo-800 text-dorado font-medium border-l-4 border-dorado shadow-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-dorado font-semibold" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="tracking-wide">Inventario y Compras</span>
+<span class="ml-auto text-[10px] bg-terracota text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">3 Urg</span>
+</a>
+<!-- 4. Recetas y Costos -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-white/5 transition-all text-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-arena group-hover:text-dorado transition-colors">menu_book</span>
+<span class="tracking-wide">Recetas y Costos</span>
+</a>
+<!-- 5. Caja y Facturación -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-white/5 transition-all text-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-arena group-hover:text-dorado transition-colors">point_of_sale</span>
+<span class="tracking-wide">Caja y Facturación</span>
+</a>
+<!-- 6. Reportes -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-arena/80 hover:text-marfil hover:bg-white/5 transition-all text-sm group" href="#">
+<span class="material-symbols-outlined text-[20px] text-arena group-hover:text-dorado transition-colors">analytics</span>
+<span class="tracking-wide">Reportes</span>
+</a>
+</nav>
+<!-- Footer Utility Tabs -->
+<div class="p-3 border-t border-white/10 space-y-1 bg-olivo-900/60">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-arena/70 hover:text-marfil hover:bg-white/5 transition-all text-xs" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>Configuración</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-arena/70 hover:text-marfil hover:bg-white/5 transition-all text-xs" href="#">
+<span class="material-symbols-outlined text-lg">headset_mic</span>
+<span>Soporte Técnico</span>
+</a>
+<div class="pt-2 mt-1 border-t border-white/5 flex items-center justify-between px-2 text-[10px] text-arena/60">
+<span>Convivium SaaS MX v4.2</span>
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+</div>
+</div>
+</aside>
+<!-- ======================================================== -->
+<!-- MAIN WORKSPACE CONTAINER (Offset by 16rem / 64 Tailwind) -->
+<!-- ======================================================== -->
+<div class="flex-1 ml-64 flex flex-col min-w-0 min-h-screen bg-marfil">
+<!-- ======================================================== -->
+<!-- 2. TOP NAVIGATION BAR (TopNavBar Shared Blueprint)        -->
+<!-- ======================================================== -->
+<header class="sticky top-0 z-30 h-16 bg-marfil border-b border-arena/50 px-8 flex items-center justify-between backdrop-blur-md bg-marfil/95">
+<!-- Left: Breadcrumbs & Live Status indicator -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-xs text-carbon-muted">
+<span class="hover:text-olivo cursor-pointer transition-colors font-medium">Inventario &amp; Compras</span>
+<span class="text-arena">/</span>
+<span class="font-semibold text-olivo tracking-wide">Sugerencias de Abastecimiento &amp; OC</span>
+</div>
+<div class="h-4 w-[1px] bg-arena/40"></div>
+<!-- Kardex Live Sync Badge -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+<span>Kardex sincronizado (hace 2m)</span>
+</div>
+</div>
+<!-- Center Links as specified in Shared JSON -->
+<nav class="hidden xl:flex items-center space-x-6 text-xs font-medium">
+<a class="text-olivo font-semibold border-b-2 border-dorado pb-1 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px] text-dorado">auto_awesome</span>
+          Sugeridos IA
+        </a>
+<a class="text-carbon-muted hover:text-olivo pb-1 transition-colors" href="#">Órdenes Activas</a>
+<a class="text-carbon-muted hover:text-olivo pb-1 transition-colors" href="#">Proveedores Aprobados</a>
+<a class="text-carbon-muted hover:text-olivo pb-1 transition-colors" href="#">Histórico OC</a>
+</nav>
+<!-- Right: Branch Selector, Notification, and User Profile -->
+<div class="flex items-center gap-4">
+<!-- Branch Selector Chip -->
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-marfil-deep border border-arena/60 text-xs font-medium text-carbon hover:border-dorado transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-base text-olivo">storefront</span>
+<span>Sucursal Polanco Virreyes</span>
+<span class="material-symbols-outlined text-sm text-carbon-soft">expand_more</span>
+</div>
+<!-- Notifications button with badge -->
+<button class="relative w-9 h-9 rounded-lg border border-arena/50 bg-white/70 hover:bg-white flex items-center justify-center text-carbon hover:text-olivo transition-all" title="Notificaciones operativas">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+<div class="h-6 w-[1px] bg-arena/40"></div>
+<!-- Director de A&B Avatar & Signature Pill -->
+<div class="flex items-center gap-3 pl-1">
+<div class="text-right hidden md:block">
+<p class="text-xs font-semibold text-olivo tracking-tight leading-tight">Chef Eduardo V.</p>
+<p class="text-[10px] text-carbon-soft font-normal">Dir. Alimentos &amp; Bebidas</p>
+</div>
+<div class="w-9 h-9 rounded-full ring-2 ring-dorado/60 overflow-hidden bg-olivo flex items-center justify-center shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Retrato profesional de un chef ejecutivo de restaurante de alta cocina mexicana, con uniforme negro elegante y delantal de lino verde olivo, en una cocina refinada iluminada con luces cálidas doradas y ambiente pulcro." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyIvDtGeC5xm7OyIrF5gJqy73_OpEWEMhwxzf9QWWcngylD5F--zgZvDFFzEzQYRZj7eU4DZ0Q0bNnbQPM7aGp7t57lschLpfixyg-DdInOX8FCn5W1gn_qpeLHI_F-9iTchXBP8nU960f84ZFQIh3M5B0UVkXzOP7uUZ3RUtdD4bLg9iTdOSaZIUj7h4LzIHo-JF28e4zC68NhSQRvv27ZF_MPuBYJm5Ku8vtC6pYZxn3UJ23oBkxlM1sm7CVXd8E4-deWPfLtcFz"/>
+</div>
+</div>
+</div>
+</header>
+<!-- ======================================================== -->
+<!-- 3. PAGE BODY: TWO-PANEL REQUISITION & PURCHASE WORKFLOW  -->
+<!-- ======================================================== -->
+<main class="flex-1 p-6 lg:p-8 flex flex-col xl:flex-row gap-7 overflow-x-hidden">
+<!-- ====================================================== -->
+<!-- LEFT PANEL: Smart Par & Reabastecimiento Automático    -->
+<!-- ====================================================== -->
+<section class="w-full xl:w-[54%] flex flex-col gap-5">
+<!-- Algorithmic Banner Card -->
+<div class="bg-white rounded-xl p-5 border border-arena/50 shadow-sm relative overflow-hidden"><div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-dorado/10 blur-2xl pointer-events-none"></div><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-full bg-olivo text-marfil flex items-center justify-center font-bold text-xs">1</span><span class="text-xs font-bold text-olivo uppercase tracking-wider">Proveedor</span><span class="text-arena mx-1">/</span><span class="w-7 h-7 rounded-full bg-marfil-deep text-carbon-soft flex items-center justify-center font-bold text-xs">2</span><span class="text-xs font-semibold text-carbon-soft uppercase tracking-wider">Insumos</span><span class="text-arena mx-1">/</span><span class="w-7 h-7 rounded-full bg-marfil-deep text-carbon-soft flex items-center justify-center font-bold text-xs">3</span><span class="text-xs font-semibold text-carbon-soft uppercase tracking-wider">Revisar</span></div><span class="text-xs text-carbon-soft">Modo Manual / Edición Directa</span></div><h1 class="font-headline text-2xl font-bold text-olivo tracking-tight mt-3">Nueva Orden de Compra</h1><p class="text-xs text-carbon-muted mt-1">Seleccione el proveedor, almacén destino e ingrese las partidas requeridas para su abastecimiento.</p></div>
+<!-- ==================================================== -->
+<!-- PROVEEDOR 1: Verduras del Bajío S.A. de C.V.         -->
+<!-- ==================================================== -->
+<div class="bg-white rounded-xl border border-arena/60 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+<!-- Vendor Card Header -->
+<div class="bg-marfil-subtle px-5 py-3.5 border-b border-arena/40 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-arena text-olivo focus:ring-dorado cursor-pointer" id="vendor-1" type="checkbox"/>
+<label class="cursor-pointer" for="vendor-1">
+<div class="flex items-center gap-2">
+<h3 class="font-headline text-base font-bold text-olivo tracking-wide">Verduras del Bajío S.A. de C.V.</h3>
+<span class="text-[10px] bg-olivo/10 text-olivo font-semibold px-2 py-0.5 rounded border border-olivo/20">Tier 1 · Preferente</span>
+</div>
+<div class="flex items-center gap-3 text-[11px] text-carbon-soft">
+<span class="flex items-center gap-1 text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+                    98% Cumplimiento en tiempo
+                  </span>
+<span>•</span>
+<span>Ruta Matutina CDMX (Recepción 08:30)</span>
+</div>
+</label>
+</div>
+<button class="text-xs font-semibold text-olivo hover:text-dorado-dark flex items-center gap-1 transition-colors">
+<span>Catálogo pactado</span>
+<span class="material-symbols-outlined text-sm">open_in_new</span>
+</button>
+</div>
+<!-- Items inside Vendor 1 -->
+<div class="divide-y divide-arena/30">
+<!-- Item 1: Limón con semilla (persa) -->
+<div class="p-4 sm:p-5 hover:bg-marfil/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5">
+<input checked="" class="mt-1 w-4 h-4 rounded border-arena text-olivo focus:ring-dorado cursor-pointer" type="checkbox"/>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-carbon text-sm">Limón con semilla (persa)</span>
+<span class="text-[10px] font-mono text-carbon-soft bg-marfil-deep px-1.5 py-0.5 rounded">SKU-VERD-0104</span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px] font-bold tracking-tight">
+<span class="material-symbols-outlined text-[12px] text-red-700">warning</span>
+                      Stock Crítico
+                    </span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-4 text-xs text-carbon-muted">
+<div>Stock actual: <strong class="text-terracota font-semibold">2.1 kg</strong> <span class="text-[10px] text-carbon-soft">(Mín. 10 kg)</span></div>
+<div>Proyección fin de semana: <strong class="text-carbon font-semibold">18.0 kg</strong></div>
+<div>Precio pactado: <strong class="text-olivo font-semibold">$38.00 MXN / kg</strong></div>
+</div>
+</div>
+</div>
+<!-- Stepper & Subtotal Action -->
+<div class="flex items-center justify-between md:justify-end gap-5 pl-7 md:pl-0">
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft mb-1">Cantidad sugerida</span>
+<div class="flex items-center border border-arena rounded-lg bg-white overflow-hidden shadow-xs">
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors" title="Disminuir">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-12 text-center text-xs font-bold text-olivo border-none focus:ring-0 p-0" type="text" value="20"/>
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors" title="Aumentar">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="text-[10px] text-carbon-soft mt-0.5">Kilogramos</span>
+</div>
+<div class="text-right min-w-[90px]">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft block">Subtotal</span>
+<span class="text-sm font-bold text-olivo tracking-tight">$760.00</span>
+<span class="text-[10px] text-carbon-soft block">Sin IVA (0%)</span>
+</div>
+</div>
+</div>
+<!-- Item 2: Aguacate Hass extra -->
+<div class="p-4 sm:p-5 hover:bg-marfil/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5">
+<input checked="" class="mt-1 w-4 h-4 rounded border-arena text-olivo focus:ring-dorado cursor-pointer" type="checkbox"/>
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-carbon text-sm">Aguacate Hass extra (Malla calibrada)</span>
+<span class="text-[10px] font-mono text-carbon-soft bg-marfil-deep px-1.5 py-0.5 rounded">SKU-VERD-0045</span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-semibold">
+<span class="material-symbols-outlined text-[12px] text-amber-700">schedule</span>
+                      Bajo Par Mínimo
+                    </span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-4 text-xs text-carbon-muted">
+<div>Stock actual: <strong class="text-terracota font-semibold">1.5 kg</strong> <span class="text-[10px] text-carbon-soft">(Mín. 6 kg)</span></div>
+<div>Consumo proyectado: <strong class="text-carbon font-semibold">9.0 kg</strong></div>
+<div>Precio pactado: <strong class="text-olivo font-semibold">$65.00 MXN / kg</strong></div>
+</div>
+</div>
+</div>
+<!-- Stepper & Subtotal Action -->
+<div class="flex items-center justify-between md:justify-end gap-5 pl-7 md:pl-0">
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft mb-1">Cantidad sugerida</span>
+<div class="flex items-center border border-arena rounded-lg bg-white overflow-hidden shadow-xs">
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-12 text-center text-xs font-bold text-olivo border-none focus:ring-0 p-0" type="text" value="10"/>
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="text-[10px] text-carbon-soft mt-0.5">Kilogramos</span>
+</div>
+<div class="text-right min-w-[90px]">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft block">Subtotal</span>
+<span class="text-sm font-bold text-olivo tracking-tight">$650.00</span>
+<span class="text-[10px] text-carbon-soft block">Sin IVA (0%)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Vendor Sub-footer -->
+<div class="bg-marfil/60 px-5 py-3 border-t border-arena/40 flex items-center justify-between">
+<div class="text-xs text-carbon-muted">
+              Subtotal proveedor: <strong class="text-carbon">$1,410.00 MXN</strong> (2 insumos)
+            </div>
+<button class="text-xs font-semibold text-olivo hover:text-dorado-dark flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+              Generar OC individual para Verduras del Bajío
+            </button>
+</div>
+</div>
+<!-- ==================================================== -->
+<!-- PROVEEDOR 2: Vinos y Licores La Cava Central         -->
+<!-- ==================================================== -->
+<div class="bg-white rounded-xl border border-arena/60 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+<!-- Vendor Card Header -->
+<div class="bg-marfil-subtle px-5 py-3.5 border-b border-arena/40 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-arena text-olivo focus:ring-dorado cursor-pointer" id="vendor-2" type="checkbox"/>
+<label class="cursor-pointer" for="vendor-2">
+<div class="flex items-center gap-2">
+<h3 class="font-headline text-base font-bold text-olivo tracking-wide">Vinos y Licores La Cava Central</h3>
+<span class="text-[10px] bg-dorado/20 text-olivo font-semibold px-2 py-0.5 rounded border border-dorado/30">Distribuidor Exclusivo Destilados</span>
+</div>
+<div class="flex items-center gap-3 text-[11px] text-carbon-soft">
+<span class="flex items-center gap-1 text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                    Entrega en 24 hrs hábiles
+                  </span>
+<span>•</span>
+<span>Membresía Mayorista C-104</span>
+</div>
+</label>
+</div>
+<button class="text-xs font-semibold text-olivo hover:text-dorado-dark flex items-center gap-1 transition-colors">
+<span>Condiciones de pago (15 días)</span>
+<span class="material-symbols-outlined text-sm">info</span>
+</button>
+</div>
+<!-- Items inside Vendor 2 -->
+<div class="divide-y divide-arena/30">
+<div class="p-4 sm:p-5 hover:bg-marfil/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-start gap-3.5">
+<input checked="" class="mt-1 w-4 h-4 rounded border-arena text-olivo focus:ring-dorado cursor-pointer" type="checkbox"/>
+<div class="space-y-1">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-semibold text-carbon text-sm">Tequila blanco 100% Agave (750 ml)</span>
+<span class="text-[10px] font-mono text-carbon-soft bg-marfil-deep px-1.5 py-0.5 rounded">SKU-LIC-0012</span>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-dorado/20 text-olivo text-[10px] font-bold">
+<span class="material-symbols-outlined text-[12px] text-dorado-dark">trending_up</span>
+                      Alta rotación noche
+                    </span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-y-1 gap-x-4 text-xs text-carbon-muted">
+<div>Stock en barra: <strong class="text-terracota font-semibold">2.4 botellas</strong> <span class="text-[10px] text-carbon-soft">(Mín. 8 bot.)</span></div>
+<div>Consumo estimado: <strong class="text-carbon font-semibold">10.0 botellas</strong></div>
+<div>Precio pactado: <strong class="text-olivo font-semibold">$417.50 MXN / u</strong></div>
+</div>
+</div>
+</div>
+<!-- Stepper & Subtotal Action -->
+<div class="flex items-center justify-between md:justify-end gap-5 pl-7 md:pl-0">
+<div class="flex flex-col items-center">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft mb-1">Cantidad sugerida</span>
+<div class="flex items-center border border-arena rounded-lg bg-white overflow-hidden shadow-xs">
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<input class="w-12 text-center text-xs font-bold text-olivo border-none focus:ring-0 p-0" type="text" value="12"/>
+<button class="w-8 h-8 flex items-center justify-center text-carbon hover:bg-marfil-deep active:bg-arena transition-colors">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="text-[10px] text-carbon-soft mt-0.5">Caja x 12 botellas</span>
+</div>
+<div class="text-right min-w-[90px]">
+<span class="text-[10px] uppercase font-semibold text-carbon-soft block">Subtotal</span>
+<span class="text-sm font-bold text-olivo tracking-tight">$5,010.00</span>
+<span class="text-[10px] text-carbon-soft block">IEPS incluido</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Vendor Sub-footer -->
+<div class="bg-marfil/60 px-5 py-3 border-t border-arena/40 flex items-center justify-between">
+<div class="text-xs text-carbon-muted">
+              Subtotal proveedor: <strong class="text-carbon">$5,010.00 MXN</strong> (1 lote mayorista)
+            </div>
+<button class="text-xs font-semibold text-olivo hover:text-dorado-dark flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+              Generar OC individual para La Cava Central
+            </button>
+</div>
+</div>
+<!-- Sticky Consolidation Bar for Left Panel -->
+<div class="mt-auto bg-olivo text-marfil p-4 rounded-xl border border-olivo-800 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-dorado/20 border border-dorado/40 flex items-center justify-center text-dorado">
+<span class="material-symbols-outlined text-xl">layers</span>
+</div>
+<div>
+<p class="text-xs font-medium text-arena">3 insumos seleccionados de 2 proveedores clave</p>
+<p class="font-headline text-lg font-bold text-marfil tracking-wide">
+                Total sugerido de compra: <span class="text-dorado">$6,420.00 MXN</span>
+</p>
+</div>
+</div>
+<button class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-dorado hover:bg-dorado-light text-olivo-900 font-semibold text-xs tracking-wide flex items-center justify-center gap-2 shadow transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-base font-semibold">sync_alt</span>
+<span>Consolidar en Orden de Compra Activa</span>
+</button>
+</div>
+</section>
+<!-- ====================================================== -->
+<!-- RIGHT PANEL: Orden de Compra OC-0143 (Borrador Activo) -->
+<!-- ====================================================== -->
+<section class="w-full xl:w-[46%] flex flex-col gap-5">
+<!-- Main Document Sheet -->
+<div class="bg-white rounded-xl border border-arena/60 shadow-lg relative flex flex-col overflow-hidden">
+<!-- Top Accent Ribbon -->
+<div class="h-1.5 bg-gradient-to-r from-olivo via-dorado to-olivo"></div>
+<!-- Document Header -->
+<div class="p-6 border-b border-arena/40 watermark-pattern bg-marfil-subtle/50">
+<div class="flex items-start justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-olivo bg-marfil-deep px-2 py-0.5 rounded border border-arena/60">
+                    FOLIO: OC-2026-0143
+                  </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    Borrador → Requiere aprobación del Gerente
+                  </span>
+</div>
+<h2 class="font-headline text-2xl font-bold text-olivo mt-2 tracking-tight">Orden de Compra y Abastecimiento</h2>
+<p class="text-xs text-carbon-soft mt-0.5">Emisión: Hoy, 27 Oct 2026 · 11:30 hrs | Almacén Central Virreyes</p>
+</div>
+<!-- Brand Seal / Monogram -->
+<div class="w-12 h-12 rounded-full border border-dorado/50 bg-white flex flex-col items-center justify-center shadow-xs shrink-0">
+<span class="font-headline text-dorado-dark font-bold text-sm leading-none">CONV</span>
+<span class="text-[8px] font-serif text-olivo uppercase tracking-tighter mt-0.5">MÉXICO</span>
+</div>
+</div>
+<!-- Logistic & Vendor Info Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 p-3.5 rounded-lg bg-white/80 border border-arena/40 text-xs">
+<div>
+<span class="text-[10px] uppercase font-bold text-carbon-soft block">Proveedor Principal / Consorcio:</span>
+<p class="font-medium text-carbon mt-0.5">Verduras del Bajío S.A. &amp; La Cava Central</p>
+<p class="text-[11px] text-carbon-soft">RFC: VBA-140219-KJ8 / LCC-091102-PP1</p>
+</div>
+<div>
+<span class="text-[10px] uppercase font-bold text-carbon-soft block">Condiciones comerciales:</span>
+<p class="font-medium text-carbon mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-dorado-dark">credit_card</span>
+                  Crédito comercial a 15 días pactado
+                </p>
+<p class="text-[11px] text-emerald-800 font-medium">Recepción en andén: Mañana 28 Oct, 08:30 hrs</p>
+</div>
+</div>
+</div>
+<!-- Order Line Items Table -->
+<div class="p-6 flex-1 flex flex-col">
+<h4 class="text-xs font-bold uppercase tracking-wider text-olivo mb-3 flex items-center justify-between">
+<span>Partidas de Compra Autorizadas</span>
+<span class="text-[11px] font-normal text-carbon-soft lowercase">3 partidas registradas</span>
+</h4>
+<div class="overflow-x-auto border border-arena/50 rounded-lg">
+<table class="w-full text-left text-xs">
+<thead class="bg-marfil-deep text-carbon font-semibold border-b border-arena/50">
+<tr>
+<th class="py-2.5 px-3 font-semibold">Clave / Insumo</th>
+<th class="py-2.5 px-2 text-center font-semibold">Cant.</th>
+<th class="py-2.5 px-2 text-center font-semibold">Unidad</th>
+<th class="py-2.5 px-3 text-right font-semibold">P. Pactado</th>
+<th class="py-2.5 px-2 text-center font-semibold">Imp.</th>
+<th class="py-2.5 px-3 text-right font-semibold">Importe Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-arena/30">
+<!-- Row 1 -->
+<tr class="hover:bg-marfil/30 transition-colors">
+<td class="py-2.5 px-3">
+<span class="font-medium text-carbon block">Limón con semilla (persa)</span>
+<span class="font-mono text-[10px] text-carbon-soft">SKU-VERD-0104</span>
+</td>
+<td class="py-2.5 px-2 text-center font-bold text-olivo">20</td>
+<td class="py-2.5 px-2 text-center text-carbon-muted">kg</td>
+<td class="py-2.5 px-3 text-right font-mono text-carbon">$38.00</td>
+<td class="py-2.5 px-2 text-center text-[10px] text-carbon-soft">0%</td>
+<td class="py-2.5 px-3 text-right font-bold text-olivo font-mono">$760.00</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-marfil/30 transition-colors">
+<td class="py-2.5 px-3">
+<span class="font-medium text-carbon block">Aguacate Hass extra</span>
+<span class="font-mono text-[10px] text-carbon-soft">SKU-VERD-0045</span>
+</td>
+<td class="py-2.5 px-2 text-center font-bold text-olivo">10</td>
+<td class="py-2.5 px-2 text-center text-carbon-muted">kg</td>
+<td class="py-2.5 px-3 text-right font-mono text-carbon">$65.00</td>
+<td class="py-2.5 px-2 text-center text-[10px] text-carbon-soft">0%</td>
+<td class="py-2.5 px-3 text-right font-bold text-olivo font-mono">$650.00</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-marfil/30 transition-colors">
+<td class="py-2.5 px-3">
+<span class="font-medium text-carbon block">Tequila blanco 100% Agave 750 ml</span>
+<span class="font-mono text-[10px] text-carbon-soft">SKU-LIC-0012</span>
+</td>
+<td class="py-2.5 px-2 text-center font-bold text-olivo">12</td>
+<td class="py-2.5 px-2 text-center text-carbon-muted">bot</td>
+<td class="py-2.5 px-3 text-right font-mono text-carbon">$417.50</td>
+<td class="py-2.5 px-2 text-center text-[10px] text-amber-800 font-semibold bg-amber-50">IEPS</td>
+<td class="py-2.5 px-3 text-right font-bold text-olivo font-mono">$5,010.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Totals Computation Breakdown -->
+<div class="mt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-3 border-t border-arena/30">
+<div class="text-xs text-carbon-soft space-y-1 max-w-xs">
+<p class="flex items-center gap-1.5 font-medium text-carbon">
+<span class="material-symbols-outlined text-[16px] text-dorado-dark">verified_user</span>
+                  Precios sujetos a contrato anual 2026
+                </p>
+<p class="text-[11px] leading-tight">Retención de merma y verificación contra báscula en plataforma de recepción de cocina.</p>
+</div>
+<div class="w-full sm:w-56 bg-marfil-subtle p-3 rounded-lg border border-arena/40 space-y-1.5 text-xs">
+<div class="flex justify-between text-carbon-muted">
+<span>Subtotal bruto:</span>
+<span class="font-mono">$5,800.00 MXN</span>
+</div>
+<div class="flex justify-between text-carbon-muted">
+<span>Impuestos &amp; IEPS:</span>
+<span class="font-mono text-carbon">$620.00 MXN</span>
+</div>
+<div class="h-[1px] bg-arena/50 my-1"></div>
+<div class="flex justify-between text-sm font-bold text-olivo">
+<span>Total Final:</span>
+<span class="font-mono text-base text-dorado-dark">$6,420.00 MXN</span>
+</div>
+</div>
+</div>
+<!-- =================================================== -->
+<!-- HIGH FIDELITY EMBEDDED PDF PREVIEW / FORMAL SHEET   -->
+<!-- =================================================== -->
+<div class="mt-6 border border-arena rounded-xl p-4 bg-marfil/30 shadow-inner">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] font-semibold uppercase tracking-wider text-olivo flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-dorado">picture_as_pdf</span>
+                  Membrete Oficial &amp; Sello Fiscal Convivium (Vista Previa CFDI)
+                </span>
+<span class="text-[10px] text-carbon-soft">Verificado con SAT v4.0</span>
+</div>
+<!-- Miniature document replica -->
+<div class="bg-white p-4 rounded-lg border border-arena/50 shadow-xs relative text-[10px] space-y-2">
+<div class="flex justify-between border-b border-arena/30 pb-2">
+<div class="flex gap-2 items-center">
+<div class="w-6 h-6 rounded bg-olivo text-dorado font-headline font-bold text-xs flex items-center justify-center">C</div>
+<div>
+<p class="font-bold text-olivo text-[11px]">OPERADORA GASTRONÓMICA CONVIVIUM POLANCO S.A.P.I. DE C.V.</p>
+<p class="text-carbon-soft text-[9px]">RFC: OGC-190412-8GA | Campos Elíseos 204, Polanco Chapultepec, CDMX</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono text-olivo font-bold text-[11px]">OC #0143</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-carbon-soft text-[9px] pt-1">
+<span>UUID Pre-asignado: 4A89-F910-4491-BC01-2026OC</span>
+<span class="text-emerald-700 font-medium">Cadena Digital Válida</span>
+</div>
+<!-- Signature Space Placeholder -->
+<div class="pt-2 flex justify-between items-end border-t border-dashed border-arena/40">
+<div>
+<p class="text-[9px] text-carbon-soft italic">Generado por: Chef Eduardo V. (Compras A&amp;B)</p>
+</div>
+<div class="text-right">
+<div class="h-6 w-36 border-b border-carbon/40 mb-1"></div>
+<p class="text-[9px] font-semibold text-carbon">Firma de Autorización: Lic. Donato G. (Gerente Gral.)</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Dispatch Buttons Grid -->
+<div class="mt-6 pt-4 border-t border-arena/40 space-y-2.5">
+<!-- Primary Approval Button -->
+<button class="w-full py-3.5 px-4 rounded-xl bg-olivo hover:bg-olivo-800 active:scale-[0.99] text-dorado font-bold text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-lg text-dorado group-hover:rotate-12 transition-transform">lock_open</span>
+<span>Aprobar Orden de Compra (PIN Gerente Donato G.)</span>
+</button>
+<!-- Secondary Dispatch Actions -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+<!-- WhatsApp Dispatch -->
+<button class="py-2.5 px-3 rounded-lg bg-white border border-emerald-300 hover:bg-emerald-50/70 text-emerald-900 text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-base text-emerald-600">chat</span>
+<span>Enviar por WhatsApp (+52 55 4190 2831)</span>
+</button>
+<!-- Email CFDI Dispatch -->
+<button class="py-2.5 px-3 rounded-lg bg-white border border-arena hover:bg-marfil-deep text-carbon text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-base text-carbon-soft">mail</span>
+<span>Enviar por Correo (PDF con CFDI)</span>
+</button>
+</div>
+<!-- Auxiliary Export -->
+<div class="flex items-center justify-between pt-2 px-1 text-xs">
+<button class="text-carbon-soft hover:text-olivo flex items-center gap-1 font-medium transition-colors">
+<span class="material-symbols-outlined text-sm">print</span>
+                  Imprimir Orden para Andén
+                </button>
+<button class="text-dorado-dark hover:text-olivo flex items-center gap-1 font-semibold transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+                  Descargar Borrador PDF Firmado
+                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Interactive Demo Micro-script for Quantity adjustments and alerts -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Small feedback on approval button
+      const approveBtn = document.querySelector('button.bg-olivo');
+      if (approveBtn) {
+        approveBtn.addEventListener('click', () => {
+          const originalText = approveBtn.innerHTML;
+          approveBtn.innerHTML = `
+            <span class="material-symbols-outlined text-lg animate-spin">refresh</span>
+            <span>Firmando digitalmente con e.firma SAT...</span>
+          `;
+          setTimeout(() => {
+            approveBtn.classList.remove('bg-olivo');
+            approveBtn.classList.add('bg-emerald-700', 'text-white');
+            approveBtn.innerHTML = `
+              <span class="material-symbols-outlined text-lg">check_circle</span>
+              <span>¡Orden OC-2026-0143 Aprobada y Transmitida!</span>
+            `;
+          }, 1200);
+        });
+      }
+    });
+  </script>
+</body></html>
