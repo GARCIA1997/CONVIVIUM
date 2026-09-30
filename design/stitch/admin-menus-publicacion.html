@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es-MX"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM — Gestión de Menú y Catálogo</title>
+<!-- Google Fonts: Playfair Display + Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // Palette CONVIVIUM
+            olivo: {
+              DEFAULT: '#1E2F28',
+              hover: '#16231E',
+              subtle: '#293E35',
+              dark: '#14201B'
+            },
+            marfil: {
+              DEFAULT: '#F8F6F0',
+              canvas: '#F5F2EB',
+              card: '#FCFBF9'
+            },
+            arena: {
+              DEFAULT: '#D8CFC0',
+              light: '#E7E1D6',
+              border: '#DFD8CC',
+              dark: '#B8AD99'
+            },
+            dorado: {
+              DEFAULT: '#D4AF7C',
+              light: '#E6C99F',
+              subtle: '#F4EBDE'
+            },
+            terracota: {
+              DEFAULT: '#B45A3C',
+              hover: '#9E4E34',
+              subtle: '#F7EDE9'
+            },
+            carbon: '#1A1A1A'
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Playfair Display", "serif"],
+            display: ["Playfair Display", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .font-serif-brand {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(223, 216, 204, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #D8CFC0;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #B8AD99;
+    }
+  </style>
+</head>
+<body class="h-full bg-marfil font-body text-carbon antialiased overflow-hidden flex flex-row select-none">
+<!-- ============================================================== -->
+<!-- 1. FIXED SIDEBAR NAVIGATION (SHARED COMPONENT: SideNavBar)       -->
+<!-- ============================================================== -->
+<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col justify-between bg-stone-900 border-r border-stone-800 text-stone-300 z-40 shrink-0">
+<div class="w-64 h-full flex flex-col py-6 px-4 shrink-0 overflow-y-auto custom-scrollbar">
+<!-- Brand Header -->
+<div class="flex items-center gap-3.5 px-2 pb-5 border-b border-stone-800/80 mb-5">
+<div class="w-10 h-10 rounded-lg bg-olivo flex items-center justify-center border border-dorado/40 shadow-inner">
+<span class="font-serif-brand text-dorado text-2xl font-bold leading-none">C</span>
+</div>
+<div>
+<h1 class="font-headline text-lg font-bold tracking-widest text-amber-200 uppercase leading-tight">CONVIVIUM</h1>
+<p class="text-[10px] text-stone-400 font-light tracking-wide mt-0.5">Donde todo sucede en la mesa</p>
+</div>
+</div>
+<!-- Quick CTA Button -->
+<button class="w-full mb-6 bg-gradient-to-r from-dorado to-dorado-light hover:brightness-105 active:scale-[0.99] text-stone-950 font-medium py-2.5 px-3.5 rounded-lg text-xs flex items-center justify-center gap-2 shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+<span>Nueva Comanda</span>
+</button>
+<!-- Navigation Tabs List -->
+<nav class="space-y-1 text-sm font-normal tracking-normal flex-1">
+<!-- Tab 1: Inicio -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span>Inicio</span>
+</a>
+<!-- Tab 2: Menú y Catálogo (ACTIVE AS PER CONTEXT) -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-stone-800/80 text-amber-200 font-medium transition-colors border-l-2 border-dorado" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+<span>Menú y Catálogo</span>
+</a>
+<!-- Tab 3: Mesas -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">table_restaurant</span>
+<span>Mesas</span>
+</a>
+<!-- Tab 4: Estaciones KDS -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">soup_kitchen</span>
+<span>Estaciones KDS</span>
+</a>
+<!-- Tab 5: Usuarios y Turnos -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">badge</span>
+<span>Usuarios y Turnos</span>
+</a>
+<!-- Tab 6: Inventario -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">inventory_2</span>
+<span>Inventario</span>
+</a>
+<!-- Tab 7: Compras -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">shopping_cart</span>
+<span>Compras</span>
+</a>
+<!-- Tab 8: Reportes -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">bar_chart</span>
+<span>Reportes</span>
+</a>
+<!-- Tab 9: Configuración -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300 hover:text-stone-100 hover:bg-stone-800/50 font-normal transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<span>Configuración</span>
+</a>
+</nav>
+<!-- Sidebar Footer Links -->
+<div class="pt-4 border-t border-stone-800/80 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800/40 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">help</span>
+<span>Ayuda y Soporte</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-stone-400 hover:text-terracota hover:bg-stone-800/40 text-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">logout</span>
+<span>Cerrar Sesión</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- ============================================================== -->
+<!-- 2. MAIN APP CANVAS CONTAINER (OFFSET BY SIDEBAR 256px)         -->
+<!-- ============================================================== -->
+<div class="pl-64 flex-1 flex flex-col h-screen overflow-hidden bg-marfil-canvas">
+<!-- TOP HEADER / APP BAR (SHARED COMPONENT: TopNavBar) -->
+<header class="sticky top-0 right-0 h-16 w-full bg-stone-100 border-b border-stone-300 px-8 flex justify-between items-center z-30 shrink-0">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-xs uppercase tracking-wider text-stone-500 font-semibold">Módulo:</span>
+<h2 class="font-headline text-base font-semibold tracking-wide text-stone-900">Gestión de Menú y Catálogo</h2>
+</div>
+<!-- Secondary Subnav per JSON specification -->
+<nav class="hidden xl:flex items-center gap-6 ml-6 text-xs">
+<a class="text-stone-900 border-b-2 border-stone-900 font-medium pb-4 pt-4 mt-1" href="#">Platillos y Bebidas</a>
+<a class="text-stone-600 hover:text-stone-900 pb-4 pt-4 mt-1 transition-colors" href="#">Modificadores</a>
+<a class="text-stone-600 hover:text-stone-900 pb-4 pt-4 mt-1 transition-colors" href="#">Recetas</a>
+<a class="text-stone-600 hover:text-stone-900 pb-4 pt-4 mt-1 transition-colors" href="#">Combos</a>
+<a class="text-stone-600 hover:text-stone-900 pb-4 pt-4 mt-1 transition-colors" href="#">Precios y Disponibilidad</a>
+</nav>
+</div>
+<!-- Trailing Action Icons & Avatar -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1 border-r border-stone-300 pr-3">
+<button class="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 rounded-lg transition-colors" title="Sincronizar con POS KDS">
+<span class="material-symbols-outlined text-lg">sync</span>
+</button>
+<button class="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 rounded-lg relative transition-colors" title="Notificaciones operativas">
+<span class="material-symbols-outlined text-lg">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracota"></span>
+</button>
+<button class="flex items-center gap-1.5 px-2 py-1.5 text-stone-700 hover:text-stone-900 hover:bg-stone-200/60 rounded-lg text-xs transition-colors" title="Sucursal Roma Norte">
+<span class="material-symbols-outlined text-base">store</span>
+<span class="font-medium hidden sm:inline">Roma Norte</span>
+</button>
+</div>
+<!-- User Chip -->
+<div class="flex items-center gap-2.5 pl-1">
+<div class="w-8 h-8 rounded-full bg-olivo text-dorado flex items-center justify-center font-serif-brand font-bold text-xs border border-dorado/30">
+            RV
+          </div>
+<div class="text-left hidden 2xl:block">
+<p class="text-xs font-semibold text-stone-900 leading-tight">Roberto Vázquez</p>
+<p class="text-[10px] text-stone-500">Gerente General</p>
+</div>
+</div>
+</div>
+</header>
+<!-- WORKSPACE CANVAS (TWO PANELS) -->
+<div class="flex-1 flex overflow-hidden">
+<!-- ============================================================ -->
+<!-- 3. PANEL IZQUIERDO: ÁRBOL Y CATÁLOGO DE PRODUCTOS (320px)    -->
+<!-- ============================================================ -->
+<section class="w-80 bg-marfil-card border-r border-arena-border flex flex-col shrink-0 h-full">
+<!-- Category Tree & Header Filter -->
+<div class="p-4 border-b border-arena-border/70 space-y-3 bg-marfil/40">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-semibold uppercase tracking-wider text-stone-500">Categorías de Carta</span>
+<button class="text-xs text-olivo hover:text-dorado flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-sm">tune</span>
+<span>Reordenar</span>
+</button>
+</div>
+<!-- Quick Category Selector Chips (Horizontal Scrollable) -->
+<div class="flex gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs">
+<button class="px-2.5 py-1 rounded bg-stone-200/70 text-stone-700 whitespace-nowrap hover:bg-stone-200 text-[11px]">
+              Entradas (8)
+            </button>
+<button class="px-2.5 py-1 rounded bg-stone-200/70 text-stone-700 whitespace-nowrap hover:bg-stone-200 text-[11px]">
+              Tacos (6)
+            </button>
+<button class="px-2.5 py-1 rounded-full bg-olivo text-dorado font-medium whitespace-nowrap shadow-xs text-[11px] flex items-center gap-1 border border-dorado/30">
+<span class="w-1.5 h-1.5 rounded-full bg-dorado"></span>
+              Platillos Fuertes (12)
+            </button>
+<button class="px-2.5 py-1 rounded bg-stone-200/70 text-stone-700 whitespace-nowrap hover:bg-stone-200 text-[11px]">
+              Postres (5)
+            </button>
+<button class="px-2.5 py-1 rounded bg-stone-200/70 text-stone-700 whitespace-nowrap hover:bg-stone-200 text-[11px]">
+              Cocteles (14)
+            </button>
+<button class="px-2.5 py-1 rounded bg-stone-200/70 text-stone-700 whitespace-nowrap hover:bg-stone-200 text-[11px]">
+              Cervezas (9)
+            </button>
+</div>
+<!-- Search & Add Item CTA -->
+<div class="flex items-center gap-2 pt-1">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">search</span>
+<input class="w-full bg-white/90 border border-arena-border text-xs rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-olivo text-stone-800 placeholder-stone-400" placeholder="Buscar en fuertes..." type="text"/>
+</div>
+<button class="bg-olivo hover:bg-olivo-hover text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shrink-0 transition-colors shadow-xs" title="Crear nuevo platillo en esta categoría">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="font-medium hidden sm:inline">Nuevo</span>
+</button>
+</div>
+</div>
+<!-- Product List in Category (Platillos Fuertes) -->
+<div class="flex-1 overflow-y-auto custom-scrollbar divide-y divide-arena-border/50">
+<!-- Item 1: Hamburguesa Convivium (SELECTED/ACTIVE) -->
+<div class="p-3.5 bg-dorado/10 border-l-4 border-dorado cursor-pointer transition-colors relative">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-stone-900 font-serif-brand tracking-tight">Hamburguesa Convivium</span>
+<span class="text-[9px] bg-dorado/30 text-stone-900 px-1.5 py-0.5 rounded font-mono font-medium">EDITANDO</span>
+</div>
+<p class="text-[11px] text-stone-500 mt-0.5 font-mono">SKU: FUE-004 · $245.00 MXN</p>
+</div>
+<!-- Mini toggle -->
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800 border border-emerald-300">
+                Activo
+              </span>
+</div>
+<div class="mt-2 flex items-center justify-between text-[11px] text-stone-600">
+<span class="flex items-center gap-1 text-[10px] text-olivo font-medium">
+<span class="material-symbols-outlined text-xs">local_fire_department</span> Parrilla + Cocina
+              </span>
+<span class="text-[10px] text-stone-500 font-medium">Margen: 63.1%</span>
+</div>
+</div>
+<!-- Item 2: Corte Rib Eye 400g -->
+<div class="p-3.5 hover:bg-stone-50/80 cursor-pointer transition-colors">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-semibold text-stone-800 font-serif-brand">Corte Rib Eye 400g</h4>
+<p class="text-[11px] text-stone-500 mt-0.5 font-mono">SKU: FUE-001 · $620.00 MXN</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-7 h-4 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-olivo"></div>
+</label>
+</div>
+<div class="mt-1.5 flex items-center justify-between">
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 border border-stone-200">En existencia (18 pzs)</span>
+<span class="text-[10px] text-stone-400">Parrilla</span>
+</div>
+</div>
+<!-- Item 3: Enchiladas Suizas de Pato -->
+<div class="p-3.5 hover:bg-stone-50/80 cursor-pointer transition-colors">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-semibold text-stone-800 font-serif-brand">Enchiladas Suizas de Pato</h4>
+<p class="text-[11px] text-stone-500 mt-0.5 font-mono">SKU: FUE-008 · $265.00 MXN</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-7 h-4 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-olivo"></div>
+</label>
+</div>
+<div class="mt-1.5 flex items-center justify-between">
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 border border-stone-200">En existencia</span>
+<span class="text-[10px] text-stone-400">Cocina Caliente</span>
+</div>
+</div>
+<!-- Item 4: Tuétanos Asados al Grill (AGOTADO) -->
+<div class="p-3.5 bg-terracota-subtle/30 hover:bg-terracota-subtle/50 cursor-pointer transition-colors border-l-2 border-terracota/40">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-semibold text-stone-700 font-serif-brand line-through">Tuétanos Asados al Grill</h4>
+<p class="text-[11px] text-stone-500 mt-0.5 font-mono">SKU: FUE-011 · $210.00 MXN</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-7 h-4 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-olivo"></div>
+</label>
+</div>
+<div class="mt-1.5 flex items-center justify-between">
+<span class="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded bg-terracota/10 text-terracota border border-terracota/20">
+<span class="material-symbols-outlined text-[10px]">block</span> Agotado en cocina
+              </span>
+<span class="text-[10px] text-stone-400">Sin stock insumo</span>
+</div>
+</div>
+<!-- Item 5: Tacos de Rib Eye con Tuétano -->
+<div class="p-3.5 hover:bg-stone-50/80 cursor-pointer transition-colors">
+<div class="flex items-start justify-between gap-2">
+<div class="flex-1">
+<h4 class="text-xs font-semibold text-stone-800 font-serif-brand">Tacos de Rib Eye con Tuétano</h4>
+<p class="text-[11px] text-stone-500 mt-0.5 font-mono">SKU: FUE-015 · $310.00 MXN</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-7 h-4 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-olivo"></div>
+</label>
+</div>
+<div class="mt-1.5 flex items-center justify-between">
+<span class="text-[10px] px-1.5 py-0.2 rounded bg-stone-100 text-stone-600 border border-stone-200">En existencia (9 ord)</span>
+<span class="text-[10px] text-stone-400">Parrilla</span>
+</div>
+</div>
+</div>
+<!-- Category Footer Quick Counter -->
+<div class="p-3 bg-arena-light/40 border-t border-arena-border text-center text-[11px] text-stone-500 font-medium">
+          Mostrando 5 de 12 platillos en Fuertes
+        </div>
+</section>
+<!-- ============================================================ -->
+<!-- 4. PANEL DERECHO: EDITOR DE PRODUCTO (HU E2-01, 02, 04, 07)  -->
+<!-- ============================================================ -->
+<main class="flex-1 flex flex-col h-full bg-marfil overflow-hidden"><div class="px-8 py-5 bg-white border-b border-arena-border shadow-xs shrink-0"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"><div><div class="flex items-center gap-2 text-xs text-stone-500 mb-1"><span>Catálogo General</span><span>/</span><span class="font-semibold text-stone-800">Publicación y Canales</span></div><h1 class="font-serif-brand text-2xl font-bold text-stone-900 tracking-tight">Centro de Publicación de Menús</h1></div><div class="flex items-center gap-3"><span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200"><span class="w-2 h-2 rounded-full bg-emerald-600"></span>Publicado y Activo en Sucursal</span></div></div></div><div class="flex-1 overflow-y-auto custom-scrollbar p-8 grid grid-cols-1 lg:grid-cols-12 gap-6"><div class="lg:col-span-4 bg-white rounded-xl border border-arena-border p-6 shadow-xs flex flex-col gap-4"><h3 class="font-serif-brand text-base font-semibold text-stone-900 pb-2 border-b border-arena-light">Selección de Carta</h3><div class="space-y-2"><div class="p-3 rounded-lg bg-olivo/10 border border-olivo text-stone-900 cursor-pointer flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-olivo text-base">menu_book</span><span class="text-xs font-bold">Carta Principal</span></div><span class="text-[10px] bg-olivo text-white px-1.5 py-0.5 rounded">Activa</span></div><div class="p-3 rounded-lg bg-stone-50 border border-stone-200 text-stone-700 cursor-pointer hover:bg-stone-100 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-stone-400 text-base">local_bar</span><span class="text-xs font-medium">Bebidas y Coctelería</span></div><span class="text-[10px] bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">Borrador</span></div><div class="p-3 rounded-lg bg-stone-50 border border-stone-200 text-stone-700 cursor-pointer hover:bg-stone-100 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-stone-400 text-base">bakery_dining</span><span class="text-xs font-medium">Menú de Desayunos</span></div><span class="text-[10px] bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded">Programado</span></div></div><div class="mt-auto pt-4 border-t border-arena-light"><button class="w-full bg-olivo hover:bg-olivo-hover text-white text-xs font-medium py-2.5 px-3.5 rounded-lg flex items-center justify-center gap-2 transition-colors"><span class="material-symbols-outlined text-sm">add</span><span>Crear Nueva Carta</span></button></div></div><div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white rounded-xl border border-arena-border p-6 shadow-xs flex flex-col justify-between"><div><h3 class="font-serif-brand text-base font-semibold text-stone-900 pb-2 border-b border-arena-light mb-4">Vista Previa Imprimible</h3><div class="border border-arena-border rounded-lg bg-marfil-canvas p-4 text-center space-y-3"><span class="material-symbols-outlined text-4xl text-olivo">description</span><p class="text-xs font-serif-brand font-bold text-stone-900">Carta Principal_Verano2024.pdf</p><p class="text-[11px] text-stone-500">Formato Carta (Letter) · 4 páginas · Actualizado hoy</p></div></div><div class="mt-4"><button class="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold py-2.5 rounded-lg border border-arena-border flex items-center justify-center gap-2 transition-colors"><span class="material-symbols-outlined text-sm">download</span><span>Descargar PDF</span></button></div></div><div class="bg-white rounded-xl border border-arena-border p-6 shadow-xs flex flex-col justify-between"><div><h3 class="font-serif-brand text-base font-semibold text-stone-900 pb-2 border-b border-arena-light mb-4">Código QR y Enlace Web</h3><div class="flex flex-col items-center justify-center p-4 bg-marfil-canvas rounded-lg border border-arena-border mb-4"><div class="w-24 h-24 bg-white rounded flex items-center justify-center border border-stone-300 shadow-xs mb-2"><span class="material-symbols-outlined text-5xl text-stone-800">qr_code_2</span></div><span class="text-[10px] text-stone-500 font-mono">Escanea para ver menú digital</span></div><div class="space-y-2"><label class="block text-xs font-semibold text-stone-700">Enlace directo</label><div class="flex gap-1"><input class="w-full bg-stone-50 border border-arena-border rounded-lg text-xs font-mono px-2 py-1.5 text-stone-600" readonly="" type="text" value="https://convivium.menu/roma-norte"/><button class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors">Copiar</button></div></div></div><div class="mt-4 pt-4 border-t border-arena-light"><button class="w-full bg-olivo hover:bg-olivo-hover text-white text-xs font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors"><span class="material-symbols-outlined text-sm">qr_code</span><span>Descargar QR en Alta Calidad</span></button></div></div></div></div></main>
+</div>
+</div>
+</body></html>

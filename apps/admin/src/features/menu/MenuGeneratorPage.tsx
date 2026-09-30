@@ -1,4 +1,4 @@
-/* Generador de menú (E2-09): impreso en PDF, digital con QR. Vista impresa: design/stitch/menu-impreso.html. */
+/* Generador de menú (E2-09): impreso en PDF, digital con QR. Diseño: design/stitch/admin-menus-publicacion.html y menu-impreso.html. */
 import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -34,6 +34,7 @@ export function MenuGeneratorPage() {
   const [tab, setTab] = useState<"impreso" | "digital">("impreso");
   const [qr, setQr] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const timer = useRef<number>();
 
   const load = useCallback(async () => {
@@ -71,7 +72,17 @@ export function MenuGeneratorPage() {
   const publish = async (published: boolean) => { if (dirty) await save(); await client.request("POST", "/menus/current/publish", { published }); await load(); setMsg({ ok: true, text: published ? "Menú digital publicado." : "Menú digital retirado." }); };
 
   return (
-    <main className="flex-1 grid grid-cols-12 h-screen overflow-hidden bg-marfil">
+    <main className="flex-1 flex flex-col h-screen overflow-hidden bg-marfil">
+      <div className="px-8 py-5 bg-white border-b border-arena-border shrink-0 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-stone-500 mb-1"><span>Menú</span><span>/</span><span className="font-semibold text-stone-800">Publicación y canales</span></div>
+          <h1 className="font-serif-brand text-2xl font-bold text-stone-900 tracking-tight">Centro de publicación de menús</h1>
+        </div>
+        {cur.published
+          ? <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200"><span className="w-2 h-2 rounded-full bg-emerald-600" />Publicado y activo en sucursal</span>
+          : <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-stone-100 text-stone-600 border border-stone-200"><span className="w-2 h-2 rounded-full bg-stone-400" />Sin publicar</span>}
+      </div>
+      <div className="flex-1 grid grid-cols-12 overflow-hidden">
       <section className="col-span-3 border-r border-arena-border bg-marfil-card flex flex-col overflow-hidden">
         <div className="p-4 border-b border-arena-border/70"><h2 className="font-serif-brand text-lg font-bold text-stone-900">Contenido</h2><p className="text-[11px] text-stone-500">Orden y platillos que aparecen en el menú</p></div>
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
@@ -139,12 +150,17 @@ export function MenuGeneratorPage() {
           <label className="block"><span className="block font-semibold text-stone-700 mb-1">Dirección del menú digital</span>
             <div className="flex items-center border border-arena-border rounded-lg overflow-hidden bg-white"><span className="px-2 text-stone-400 font-mono text-[10px]">/m/</span><input value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="flex-1 border-0 font-mono text-[11px] px-1 py-1.5 focus:ring-0" /></div>
           </label>
-          <a href={cur.publicUrl} target="_blank" rel="noreferrer" className="block text-[11px] text-olivo underline break-all">{cur.publicUrl}</a>
-          {qr && <div className="bg-white rounded-lg p-3 border border-arena-border flex justify-center" dangerouslySetInnerHTML={{ __html: qr.replace("<svg", '<svg width="150" height="150"') }} />}
-          <div className="grid grid-cols-2 gap-1.5">
-            <button onClick={() => download("/menus/current/qr?format=png&size=1024", `qr-menu-${cur.slug}.png`)} className="py-2 rounded-lg border border-arena-border text-olivo font-semibold flex items-center justify-center gap-1"><span className="material-symbols-outlined text-sm">qr_code_2</span>QR (PNG)</button>
-            <button onClick={() => download("/menus/current/qr?format=svg", `qr-menu-${cur.slug}.svg`)} className="py-2 rounded-lg border border-arena-border text-olivo font-semibold flex items-center justify-center gap-1"><span className="material-symbols-outlined text-sm">print</span>QR para mesa (SVG)</button>
+          <div className="space-y-1">
+            <span className="block font-semibold text-stone-700">Enlace directo</span>
+            <div className="flex gap-1">
+              <input readOnly value={cur.publicUrl} onFocus={(e) => e.target.select()} className="w-full min-w-0 bg-stone-50 border border-arena-border rounded-lg font-mono text-[10px] px-2 py-1.5 text-stone-600" />
+              <button onClick={() => navigator.clipboard.writeText(cur.publicUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }).catch(() => {})} className="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1.5 rounded-lg font-medium shrink-0">{copied ? "Copiado" : "Copiar"}</button>
+            </div>
+            <a href={cur.publicUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] text-olivo underline"><span className="material-symbols-outlined text-[13px]">open_in_new</span>Abrir menú digital</a>
           </div>
+          {qr && <div className="flex flex-col items-center p-3 bg-marfil-canvas/60 rounded-lg border border-arena-border"><div className="bg-white rounded p-2 border border-stone-200" dangerouslySetInnerHTML={{ __html: qr.replace("<svg", '<svg width="140" height="140"') }} /><span className="text-[10px] text-stone-500 font-mono mt-1.5">Escanea para ver el menú digital</span></div>}
+          <button onClick={() => download("/menus/current/qr?format=png&size=1024", `qr-menu-${cur.slug}.png`)} className="w-full py-2.5 rounded-lg bg-olivo text-white font-semibold flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-sm">qr_code</span>Descargar QR en alta calidad</button>
+          <button onClick={() => download("/menus/current/qr?format=svg", `qr-menu-${cur.slug}.svg`)} className="w-full py-1.5 text-olivo font-semibold underline">QR para imprenta (SVG)</button>
           <button disabled={dirty} title={dirty ? "Guarda primero los cambios" : ""} onClick={() => download("/menus/current/pdf", `menu-${cur.slug}.pdf`)} className="w-full py-2.5 rounded-lg bg-white border-2 border-olivo text-olivo font-semibold flex items-center justify-center gap-1.5 disabled:opacity-40"><span className="material-symbols-outlined text-sm">picture_as_pdf</span>Descargar PDF para imprimir</button>
           {cur.published
             ? <button onClick={() => publish(false)} className="w-full py-2 rounded-lg border border-terracota/40 text-terracota font-semibold">Retirar menú digital</button>
@@ -154,6 +170,7 @@ export function MenuGeneratorPage() {
         {msg && <p className={msg.ok ? "text-emerald-700" : "text-terracota"}>{msg.text}</p>}
         <button disabled={!dirty} onClick={save} className="w-full py-2.5 rounded-lg bg-olivo text-white font-semibold disabled:opacity-40">Guardar cambios</button>
       </aside>
+      </div>
     </main>
   );
 }
