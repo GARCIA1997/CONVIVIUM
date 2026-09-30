@@ -8,7 +8,8 @@
     "start": "tsx --env-file=../../.env src/index.ts",
     "typecheck": "tsc -p .",
     "openapi": "tsx src/openapi.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "menu-css": "tsx scripts/build-menu-css.ts"
   },
   "dependencies": {
     "@convivium/contracts": "workspace:*",

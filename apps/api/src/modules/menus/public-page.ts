@@ -1,116 +1,246 @@
 /**
- * Menú digital público (se abre con el QR de la mesa). Página ligera renderizada en el servidor:
- * carga al instante en cualquier celular, sin JavaScript de la app ni inicio de sesión.
- * Paleta, tipografía y estructura del diseño Stitch design/stitch/menu-digital-publico.html.
+ * Menú digital público (se abre con el QR de la mesa). Página renderizada en el servidor, sin inicio de sesión.
+ * Estructura y clases tomadas tal cual del diseño Stitch design/stitch/menu-digital-qr.html.
+ * Las clases se compilan a CSS con `pnpm --filter @convivium/api menu-css` (ver menu-styles.ts); así el
+ * celular del cliente no descarga Tailwind.
  */
-import { BADGES, type MenuView } from "./render.js";
+import { MENU_CSS } from "./menu-styles.js";
+import type { MenuView } from "./render.js";
+
+type Item = MenuView["sections"][number]["items"][number];
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const price = (c: number) => `$${(c / 100).toLocaleString("es-MX", { minimumFractionDigits: c % 100 ? 2 : 0 })}`;
-const BADGE_CLS: Record<string, string> = { nuevo: "b-nuevo", picante: "b-picante", vegetariano: "b-veg", recomendado: "b-rec" };
+/** Etiquetas del producto → claves de filtro del diseño (veg, spicy, nuevo). */
+const TAG: Record<string, string> = { vegetariano: "veg", picante: "spicy", nuevo: "nuevo" };
+const tags = (i: Item) => i.badges.map((b) => TAG[b]).filter(Boolean).join(" ");
+const search = (i: Item) => esc(`${i.name} ${i.description ?? ""}`.toLowerCase());
+
+/** Ícono de la categoría según su nombre (el diseño usa uno por categoría). */
+function catIcon(name: string) {
+  const n = name.toLowerCase();
+  const map: [RegExp, string][] = [
+    [/entrad|botan|antoj/, "tapas"], [/taco/, "lunch_dining"], [/fuert|plato|especial|carne|corte/, "soup_kitchen"],
+    [/postre|dulce/, "cake"], [/coctel|c[oó]ctel|mezcal|tequila|destil|bar|cerve/, "local_bar"], [/vino|cava/, "wine_bar"],
+    [/caf[eé]|bebida|agua|refresco/, "local_cafe"], [/desayun/, "egg_alt"], [/ensalad/, "eco"], [/sopa|caldo/, "ramen_dining"],
+  ];
+  return map.find(([re]) => re.test(n))?.[1] ?? "restaurant";
+}
+
+const chip = (i: Item) => [
+  i.badges.includes("vegetariano") && `<span class="px-1.5 py-0.5 rounded bg-green-100 text-green-800 text-[9px] font-medium tracking-tight">Vegetariano</span>`,
+  i.badges.includes("picante") && `<span class="px-1.5 py-0.5 rounded bg-terracota/15 text-terracota text-[9px] font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">local_fire_department</span> Picante</span>`,
+  i.badges.includes("nuevo") && `<span class="px-1.5 py-0.5 rounded bg-dorado/30 text-carbon text-[9px] font-medium">Nuevo</span>`,
+  i.badges.includes("recomendado") && `<span class="px-1.5 py-0.5 rounded bg-primary text-dorado text-[9px] font-medium">Recomendado</span>`,
+].filter(Boolean).join("");
+
+function itemCard(i: Item) {
+  if (i.soldOut) return `
+<article class="menu-item-card rounded-2xl bg-arena/20 p-3.5 shadow-none opacity-60 relative overflow-hidden" data-name="${search(i)}" data-tags="">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1 flex-1">
+<div class="flex items-center gap-2 flex-wrap">
+<h4 class="font-headline font-semibold text-sm text-carbon/80 line-through">${esc(i.name)}</h4>
+<span class="px-2 py-0.5 rounded-full bg-terracota text-white text-[9px] font-bold uppercase tracking-wider">Agotado hoy</span>
+</div>
+${i.description ? `<p class="text-xs text-carbon/60 font-body leading-relaxed">${esc(i.description)}</p>` : ""}
+</div>
+<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-arena/40 grayscale flex items-center justify-center">
+<span class="material-symbols-outlined text-carbon/40 text-[26px]">block</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-xs pt-1">
+<span class="font-medium text-carbon/50 line-through">${price(i.price)} MXN</span>
+<span class="text-[11px] text-terracota/80 font-medium">Pregunta a tu mesero por disponibilidad</span>
+</div>
+</article>`;
+  return `
+<article class="menu-item-card rounded-2xl bg-white/80 p-3.5 shadow-sm space-y-2.5" data-name="${search(i)}" data-tags="${tags(i)}">
+<div class="flex items-start justify-between gap-3">
+<div class="space-y-1 flex-1">
+<div class="flex items-center gap-1.5 flex-wrap">
+<h4 class="font-headline font-semibold text-sm text-carbon">${esc(i.name)}</h4>
+${chip(i)}
+</div>
+${i.description ? `<p class="text-xs text-carbon/75 font-body leading-relaxed">${esc(i.description)}</p>` : ""}
+</div>
+${i.photoUrl ? `<div class="w-16 h-16 rounded-xl overflow-hidden shrink-0 shadow-inner bg-arena/20"><img class="w-full h-full object-cover" src="${esc(i.photoUrl)}" alt="" loading="lazy"/></div>` : ""}
+</div>
+<div class="flex items-center justify-between text-xs pt-1">
+<span class="font-semibold text-primary font-body">${price(i.price)} MXN</span>
+</div>
+</article>`;
+}
+
+function featuredCard(i: Item) {
+  return `
+<article class="menu-item-card snap-start shrink-0 w-[265px] rounded-2xl bg-white/85 p-3 shadow-md flex flex-col justify-between space-y-3" data-name="${search(i)}" data-tags="${tags(i)}">
+<div class="relative w-full h-36 rounded-xl overflow-hidden bg-arena/20 flex items-center justify-center">
+${i.photoUrl ? `<img alt="${esc(i.name)}" class="w-full h-full object-cover" src="${esc(i.photoUrl)}" loading="lazy"/>` : `<span class="material-symbols-outlined text-primary/40 text-[40px]">restaurant</span>`}
+<div class="absolute top-2 left-2 flex flex-col gap-1">
+<span class="px-2 py-0.5 rounded-md bg-primary/90 text-dorado text-[9px] font-semibold tracking-wider uppercase backdrop-blur-xs">Recomendado</span>
+${i.badges.includes("nuevo") ? `<span class="px-2 py-0.5 rounded-md bg-dorado text-carbon text-[9px] font-bold tracking-wider uppercase">Nuevo</span>` : ""}
+</div>
+</div>
+<div class="space-y-1">
+<h4 class="font-headline font-bold text-sm text-carbon leading-snug">${esc(i.name)}</h4>
+${i.description ? `<p class="text-[11px] text-carbon/70 font-body line-clamp-2">${esc(i.description)}</p>` : ""}
+</div>
+<div class="flex items-center justify-between pt-1 border-none">
+<span class="text-sm font-semibold font-body text-primary tracking-tight">${price(i.price)} <span class="text-[10px] font-normal text-carbon/60">MXN</span></span>
+${i.badges.includes("picante") ? `<span class="text-[11px] text-terracota font-medium flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">local_fire_department</span> Toque picante</span>` : ""}
+</div>
+</article>`;
+}
+
+const CAT_OFF = "menu-cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-arena/30 text-carbon font-normal text-xs whitespace-nowrap shadow-sm hover:bg-arena/50 transition-all";
+const CAT_ON = "menu-cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-dorado font-medium text-xs whitespace-nowrap shadow-sm transition-all";
 
 export function renderPublicMenu(view: MenuView): string {
   const { config: c } = view;
-  const accent = /^#[0-9a-f]{6}$/i.test(c.accent) ? c.accent : "#D4AF7C";
-  const time = new Date(view.updatedAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" });
-  const wa = c.whatsapp.replace(/\D/g, "");
-  const present = (["vegetariano", "picante", "nuevo"] as const).filter((b) => view.sections.some((s) => s.items.some((i) => i.badges.includes(b))));
-  const filters = present.length ? `<div class="filters"><span>Filtros:</span>${present.map((b) => `<button type="button" data-f="${b}">${BADGES[b]}</button>`).join("")}</div>` : "";
-  const sections = view.sections.map((s) => `
-    <section id="c-${s.id}">
-      <h2>${esc(s.name)}</h2>
-      ${s.items.map((i) => `
-      <article class="dish${i.soldOut ? " out" : ""}" data-b="${i.badges.join(" ")}">
-        ${i.photoUrl ? `<img src="${esc(i.photoUrl)}" alt="" loading="lazy">` : ""}
-        <div class="body">
-          <div class="row"><h3>${esc(i.name)}</h3><span class="price">${price(i.price)}</span></div>
-          ${i.description ? `<p>${esc(i.description)}</p>` : ""}
-          <div class="badges">${i.soldOut ? `<span class="b b-out">Agotado hoy</span>` : ""}${i.badges.filter((b) => b in BADGES).map((b) => `<span class="b ${BADGE_CLS[b]}">${BADGES[b as keyof typeof BADGES]}</span>`).join("")}</div>
-        </div>
-      </article>`).join("")}
-    </section>`).join("");
-  return `<!doctype html>
-<html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(c.title)} · ${esc(view.branchName)} · Menú</title>
-<meta name="description" content="Menú de ${esc(c.title)} ${esc(view.branchName)}">
-<meta name="theme-color" content="#1E2F28">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root { --olivo:#1E2F28; --marfil:#EAE6DD; --fondo:#F7F5F0; --arena:#C9B89F; --terracota:#B45A3C; --carbon:#1A1A1A; --dorado:${accent}; }
-  * { box-sizing:border-box; margin:0; padding:0 }
-  body { font-family:Inter,system-ui,sans-serif; background:var(--fondo); color:var(--carbon); -webkit-font-smoothing:antialiased }
-  header { background:var(--olivo); color:var(--marfil); text-align:center; padding:28px 16px 22px }
-  .mono { width:44px; height:44px; border-radius:50%; border:1px solid var(--dorado); display:inline-flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:700; color:var(--dorado); font-size:22px }
-  header h1 { font-family:'Playfair Display',serif; font-weight:500; letter-spacing:.28em; font-size:22px; margin-top:10px; color:#F3E9D2 }
-  header .branch { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--arena); margin-top:4px }
-  header .tag { font-family:'Playfair Display',serif; font-style:italic; font-size:13px; color:var(--arena); margin-top:8px; opacity:.9 }
-  nav { position:sticky; top:0; z-index:5; background:rgba(247,245,240,.96); backdrop-filter:blur(6px); border-bottom:1px solid rgba(201,184,159,.5); display:flex; gap:8px; overflow-x:auto; padding:10px 16px; scrollbar-width:none }
-  nav::-webkit-scrollbar { display:none }
-  nav a { flex:none; text-decoration:none; font-size:13px; font-weight:500; color:var(--olivo); border:1px solid var(--arena); border-radius:999px; padding:6px 14px; background:#fff }
-  main { max-width:640px; margin:0 auto; padding:8px 16px 32px }
-  .promo { margin:14px 0 4px; background:linear-gradient(90deg, color-mix(in srgb, var(--dorado) 22%, #fff), #fff); border:1px solid var(--dorado); border-radius:10px; padding:12px 14px }
-  .promo strong { font-family:'Playfair Display',serif; color:var(--olivo); font-size:15px; display:block }
-  .promo span { font-size:12px; color:#5b5b5b }
-  section { padding-top:18px; scroll-margin-top:56px }
-  h2 { font-family:'Playfair Display',serif; font-weight:700; color:var(--olivo); font-size:20px; padding-bottom:6px; border-bottom:1px solid var(--arena); margin-bottom:4px }
-  .dish { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid rgba(201,184,159,.35) }
-  .dish img { width:64px; height:64px; border-radius:8px; object-fit:cover; flex:none }
-  .dish .body { flex:1; min-width:0 }
-  .row { display:flex; justify-content:space-between; gap:12px; align-items:baseline }
-  h3 { font-family:'Playfair Display',serif; font-weight:500; font-size:16px; color:var(--carbon) }
-  .price { font-weight:600; color:var(--olivo); white-space:nowrap }
-  .dish p { font-size:13px; line-height:1.4; color:#6b6b6b; margin-top:3px }
-  .badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px }
-  .badges:empty { display:none }
-  .b { font-size:10.5px; font-weight:600; letter-spacing:.02em; border-radius:999px; padding:2px 8px; border:1px solid }
-  .b-nuevo { color:#1E2F28; background:color-mix(in srgb, var(--dorado) 25%, #fff); border-color:var(--dorado) }
-  .b-picante { color:var(--terracota); background:#F8ECE8; border-color:#E5C2B6 }
-  .b-veg { color:#2F6B45; background:#ECF6EF; border-color:#BFDDC8 }
-  .b-rec { color:#fff; background:var(--olivo); border-color:var(--olivo) }
-  .b-out { color:var(--terracota); background:#fff; border-color:var(--terracota) }
-  .out { opacity:.5 } .out .price { text-decoration:line-through }
-  .filters { display:flex; gap:8px; align-items:center; overflow-x:auto; padding:12px 0 2px; font-size:12px; color:#6b6b6b; scrollbar-width:none }
-  .filters button { flex:none; font:inherit; font-weight:500; color:var(--olivo); background:#fff; border:1px solid var(--arena); border-radius:999px; padding:5px 12px; cursor:pointer }
-  .filters button.on { background:var(--olivo); color:var(--dorado); border-color:var(--olivo) }
-  .hide { display:none }
-  .help { margin:26px 0 0; background:#fff; border:1px solid var(--arena); border-radius:12px; padding:16px; text-align:center }
-  .help strong { font-family:'Playfair Display',serif; color:var(--olivo); font-size:16px; display:block }
-  .help p { font-size:13px; color:#6b6b6b; margin-top:4px }
-  .legal { font-size:11px; color:#8a8a8a }
-  footer { text-align:center; padding:26px 16px 40px; font-size:12px; color:#6b6b6b; line-height:1.7 }
-  .wa { display:inline-block; margin:10px 0; background:var(--olivo); color:var(--dorado); text-decoration:none; font-weight:600; border-radius:10px; padding:10px 18px }
-</style></head>
-<body>
-<header>
-  <span class="mono">${esc(c.title.charAt(0) || "C")}</span>
-  <h1>${esc(c.title.toUpperCase())}</h1>
-  <div class="branch">${esc(view.branchName)}</div>
-  ${c.subtitle ? `<div class="tag">${esc(c.subtitle)}</div>` : ""}
-</header>
-<nav>${view.sections.map((s) => `<a href="#c-${s.id}">${esc(s.name)}</a>`).join("")}</nav>
-<main>
-  ${c.showPromos ? view.promos.map((p) => `<div class="promo"><strong>${esc(p.name)}</strong><span>${esc(p.detail)}</span></div>`).join("") : ""}
-  ${filters}
-  ${sections || `<p style="padding:40px 0;text-align:center;color:#6b6b6b">El menú se está actualizando.</p>`}
-  ${wa ? `<div class="help"><strong>¿Tienes alguna duda sobre la carta?</strong><p>Escríbenos y con gusto te ayudamos.</p><a class="wa" href="https://wa.me/52${wa.slice(-10)}">Asistencia por WhatsApp</a></div>` : ""}
-</main>
-<footer>
-  ${c.footer ? `<div>${esc(c.footer)}</div>` : ""}
-  ${c.address ? `<div>${esc(c.address)}</div>` : ""}
-  ${c.phone ? `<div>Tel. ${esc(c.phone)}</div>` : ""}
-  <div class="legal">Precios en MXN, IVA incluido</div>
-  <div class="legal">Carta sincronizada hoy a las ${time}</div>
+  const title = c.title || "CONVIVIUM";
+  const time = new Date(view.updatedAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Mexico_City" });
+  const wa = c.whatsapp.replace(/\D/g, "").slice(-10);
+  const all = view.sections.flatMap((s) => s.items);
+  const featured = all.filter((i) => i.badges.includes("recomendado") && !i.soldOut).slice(0, 6);
+  const present = (["vegetariano", "picante", "nuevo"] as const).filter((b) => all.some((i) => i.badges.includes(b)));
+  const FILTER = {
+    vegetariano: `<span class="material-symbols-outlined text-[15px] text-green-700">spa</span><span>Vegetariano</span>`,
+    picante: `<span class="material-symbols-outlined text-[15px] text-terracota">local_fire_department</span><span>Picante</span>`,
+    nuevo: `<span class="material-symbols-outlined text-[15px] text-amber-600">star</span><span>Nuevo</span>`,
+  };
+
+  return `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>${esc(title)} · ${esc(view.branchName)} · Menú</title>
+<meta name="description" content="Menú de ${esc(title)} ${esc(view.branchName)}"><meta name="theme-color" content="#EAE6DD">
+<link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>${MENU_CSS}</style></head>
+<body class="bg-surface font-body text-carbon flex flex-col min-h-screen">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-4 flex items-center justify-between"><div class="flex flex-col justify-center"><h1 class="font-headline text-lg font-bold tracking-[0.2em] uppercase text-primary leading-tight">${esc(title)}</h1><p class="text-[10px] tracking-wide text-carbon/75 font-body mt-0.5">${[c.subtitle, `Sucursal ${view.branchName}`].filter(Boolean).map(esc).join(" · ")}</p></div></div></header>
+<main class="flex flex-col relative w-full pt-20 pb-28 bg-surface px-4"><div class="flex flex-col w-full space-y-6 pb-6">
+
+<section class="rounded-2xl bg-primary text-on-primary p-4 shadow-md relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-dorado/10 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="space-y-1">
+<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-dorado animate-pulse"></span><span class="text-[10px] tracking-[0.25em] font-medium text-dorado uppercase font-body">Menú Digital · Solo Consulta</span></div>
+<h2 class="font-headline text-xl font-bold tracking-[0.15em] text-on-primary">${esc(title.toUpperCase())}</h2>
+<p class="text-xs text-on-primary/80 font-body flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-dorado">location_on</span><span>Sucursal ${esc(view.branchName)}${c.address ? ` · ${esc(c.address)}` : ""}</span></p>
+</div>
+<div class="w-11 h-11 rounded-xl bg-surface/10 flex items-center justify-center text-dorado shadow-inner backdrop-blur-sm"><span class="material-symbols-outlined text-[24px]">restaurant</span></div>
+</div>
+</section>
+
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-carbon/50 text-[20px] pointer-events-none">search</span>
+<input class="w-full pl-10 pr-10 py-3 bg-white/70 focus:bg-white text-carbon text-xs rounded-xl shadow-sm placeholder:text-carbon/40 transition-all outline-none" id="menu-search-input" placeholder="Buscar platillo, ingrediente o bebida..." type="search" autocomplete="off"/>
+<button class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 text-carbon/40 hover:text-carbon" id="clear-search" type="button" aria-label="Borrar búsqueda"><span class="material-symbols-outlined text-[18px]">cancel</span></button>
+</div>
+
+<div class="sticky top-20 z-30 -mx-4 px-4 py-2 bg-surface/95 backdrop-blur-md transition-all">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
+<button class="${CAT_ON}" data-target="cat-todos" type="button"><span class="material-symbols-outlined text-[16px]">menu_book</span><span>Todos</span></button>
+${view.sections.map((s) => `<button class="${CAT_OFF}" data-target="cat-${s.id}" type="button"><span class="material-symbols-outlined text-[16px]">${catIcon(s.name)}</span><span>${esc(s.name)}</span></button>`).join("\n")}
+</div>
+</div>
+
+${c.showPromos ? view.promos.map((p) => `
+<div class="relative rounded-2xl bg-gradient-to-r from-primary to-[#2a4037] text-on-primary p-4 shadow-md overflow-hidden">
+<div class="absolute -right-8 -top-8 w-28 h-28 bg-dorado/15 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start gap-3.5 relative z-10">
+<div class="w-10 h-10 rounded-xl bg-dorado/20 text-dorado flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[22px]">local_offer</span></div>
+<div class="space-y-1">
+<div class="flex items-center gap-2"><span class="px-2 py-0.5 rounded-full bg-dorado text-primary font-bold text-[9px] uppercase tracking-wider">Hoy</span><span class="text-dorado text-xs font-semibold tracking-wide">${esc(p.detail)}</span></div>
+<h3 class="font-headline font-semibold text-sm leading-snug text-white">${esc(p.name)}</h3>
+</div>
+</div>
+</div>`).join("") : ""}
+
+${present.length ? `<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+${present.map((b) => `<button class="diet-filter-chip flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/70 text-carbon text-xs shadow-sm hover:bg-white transition-colors" data-tag="${TAG[b]}" type="button">${FILTER[b]}</button>`).join("\n")}
+</div>` : ""}
+
+${featured.length ? `<section class="space-y-3 pt-1" id="recomendados">
+<div class="flex items-baseline justify-between">
+<div><h2 class="font-headline font-bold text-lg text-primary tracking-wide">Recomendados de la casa</h2><p class="text-xs text-carbon/70 font-body">Nuestros favoritos para disfrutar en la mesa</p></div>
+<span class="text-[10px] font-semibold text-dorado uppercase tracking-widest bg-primary px-2 py-0.5 rounded-full">Top ${featured.length}</span>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-2 pt-1 -mx-4 px-4 snap-x snap-mandatory">${featured.map(featuredCard).join("")}</div>
+</section>` : ""}
+
+<div class="space-y-8" id="full-menu-sections">
+${view.sections.map((s) => `
+<section class="menu-section space-y-3 scroll-mt-36" id="cat-${s.id}">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span><h3 class="font-headline font-bold text-base text-primary uppercase tracking-wider">${esc(s.name)}</h3></div>
+<span class="text-[11px] text-carbon/50 font-body">${s.items.length} ${s.items.length === 1 ? "selección" : "selecciones"}</span>
+</div>
+<div class="space-y-3">${s.items.map(itemCard).join("")}</div>
+</section>`).join("") || `<p class="text-center text-xs text-carbon/60 py-10">El menú se está actualizando.</p>`}
+</div>
+
+<div class="hidden text-center py-10 px-4 space-y-3" id="no-results">
+<div class="w-12 h-12 rounded-full bg-arena/30 flex items-center justify-center mx-auto text-carbon/60"><span class="material-symbols-outlined text-[24px]">search_off</span></div>
+<h4 class="font-headline font-semibold text-sm text-carbon">Sin platillos coincidentes</h4>
+<p class="text-xs text-carbon/60 max-w-xs mx-auto">No encontramos platillos con ese nombre o ingrediente. Revisa la ortografía o explora las categorías.</p>
+</div>
+
+<footer class="mt-8 pt-8 space-y-4 text-center rounded-2xl bg-white/40 p-6 shadow-sm">
+<div class="flex flex-col items-center justify-center space-y-1">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-dorado font-headline text-sm font-bold shadow-xs">${esc(title.charAt(0).toUpperCase())}</div>
+<h3 class="font-headline font-bold text-sm tracking-[0.2em] text-primary">${esc(title.toUpperCase())}</h3>
+${c.subtitle ? `<p class="text-[10px] text-carbon/60 tracking-wider uppercase">${esc(c.subtitle)}</p>` : ""}
+</div>
+<div class="space-y-1 text-xs text-carbon/75 font-body">
+${c.address ? `<p class="font-medium text-carbon">${esc(c.address)}</p>` : ""}
+${c.phone ? `<p>Reservaciones y dudas: <span class="text-primary font-semibold select-all">${esc(c.phone)}</span></p>` : ""}
+</div>
+<div class="pt-2 space-y-1 text-[11px] text-carbon/60 font-body">
+<p>Precios en MXN, IVA incluido${c.footer ? ` · ${esc(c.footer)}` : ""}</p>
+<p>Carta digital actualizada hoy a las ${time} hrs</p>
+</div>
 </footer>
-${filters ? `<script>
-  // Filtros por etiqueta: muestra solo los platillos que tengan todas las elegidas.
-  const on = new Set();
-  document.querySelectorAll("[data-f]").forEach((b) => b.addEventListener("click", () => {
-    const f = b.dataset.f; on.has(f) ? on.delete(f) : on.add(f); b.classList.toggle("on");
-    document.querySelectorAll(".dish").forEach((d) => { const bs = d.dataset.b.split(" "); d.classList.toggle("hide", [...on].some((x) => !bs.includes(x))); });
-    document.querySelectorAll("main section").forEach((s) => s.classList.toggle("hide", !s.querySelector(".dish:not(.hide)")));
-  }));
-</script>` : ""}
+</div></main>
+${wa ? `<a class="fixed bottom-6 right-4 z-40 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-primary/95 text-dorado text-xs font-medium shadow-[0_4px_16px_rgba(30,47,40,0.25)] backdrop-blur-md transition-transform active:scale-95 pb-safe" href="https://wa.me/52${wa}" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">chat</span><span>Dudas por WhatsApp</span></a>` : ""}
+<script>
+(function () {
+  var input = document.getElementById("menu-search-input"), clear = document.getElementById("clear-search");
+  var cards = document.querySelectorAll(".menu-item-card"), cats = document.querySelectorAll(".menu-cat-btn");
+  var chips = document.querySelectorAll(".diet-filter-chip"), none = document.getElementById("no-results");
+  var featured = document.getElementById("recomendados"), diet = null;
+  var ON = ${JSON.stringify(CAT_ON)}, OFF = ${JSON.stringify(CAT_OFF)};
+  function filter() {
+    var term = input.value.trim().toLowerCase(), n = 0;
+    clear.classList.toggle("hidden", !term);
+    cards.forEach(function (c) {
+      var ok = (!term || c.dataset.name.indexOf(term) >= 0) && (!diet || (" " + c.dataset.tags + " ").indexOf(" " + diet + " ") >= 0);
+      c.classList.toggle("hidden", !ok); if (ok) n++;
+    });
+    document.querySelectorAll(".menu-section").forEach(function (s) { s.classList.toggle("hidden", !s.querySelector(".menu-item-card:not(.hidden)")); });
+    if (featured) featured.classList.toggle("hidden", !featured.querySelector(".menu-item-card:not(.hidden)"));
+    none.classList.toggle("hidden", n > 0);
+  }
+  input.addEventListener("input", filter);
+  clear.addEventListener("click", function () { input.value = ""; filter(); input.focus(); });
+  cats.forEach(function (b) {
+    b.addEventListener("click", function () {
+      cats.forEach(function (x) { x.className = OFF; }); b.className = ON;
+      var el = b.dataset.target === "cat-todos" ? document.body : document.getElementById(b.dataset.target);
+      if (b.dataset.target === "cat-todos") window.scrollTo({ top: 0, behavior: "smooth" }); else if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      var t = chip.dataset.tag;
+      chips.forEach(function (c) { c.classList.remove("bg-primary", "text-dorado"); c.classList.add("bg-white/70", "text-carbon"); });
+      if (diet === t) diet = null; else { diet = t; chip.classList.add("bg-primary", "text-dorado"); chip.classList.remove("bg-white/70", "text-carbon"); }
+      filter();
+    });
+  });
+})();
+</script>
 </body></html>`;
 }
