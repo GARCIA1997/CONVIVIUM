@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CONVIVIUM · Carta Digital</title>
+<!-- Google Fonts: Playfair Display, Cormorant Garamond, Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&amp;family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Public+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            olivo: '#1E2F28',
+            marfil: '#EAE6DD',
+            'marfil-bg': '#FAF7F2',
+            arena: '#C9B89F',
+            terracota: '#B45A3C',
+            carbon: '#1A1A1A',
+            dorado: '#D4AF7C'
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            headline: ["Public Sans", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+            serif: ["Playfair Display", "serif"],
+            cormorant: ["Cormorant Garamond", "serif"],
+            body: ["Inter", "sans-serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      line-height: 1;
+      display: inline-block;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400;
+    }
+    /* Hide scrollbars for neat touch navigation */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FAF7F2] text-[#1A1A1A] font-body antialiased min-h-screen selection:bg-[#D4AF7C]/30 pb-28">
+<!-- TOP APP BAR (Shared Component Anchor) -->
+<header class="bg-[#1E2F28] text-[#D4AF7C] border-b border-[#C9B89F]/30 sticky top-0 z-40 shadow-sm">
+<div class="flex flex-col w-full px-5 py-3 max-w-xl mx-auto">
+<div class="flex items-center justify-between">
+<!-- Monograma & Branding -->
+<div class="flex items-center space-x-3">
+<div class="w-9 h-9 rounded-full border border-[#D4AF7C]/40 flex items-center justify-center bg-[#1E2F28] text-[#D4AF7C] shadow-inner">
+<span class="font-serif font-bold text-base tracking-normal">C</span>
+</div>
+<div>
+<h1 class="font-serif uppercase tracking-widest text-[#EAE6DD] text-sm md:text-base font-semibold leading-tight">
+              CONVIVIUM · Sucursal Centro
+            </h1>
+<p class="font-cormorant italic text-[#D4AF7C] text-xs">Donde todo sucede en la mesa.</p>
+</div>
+</div>
+<!-- Trailing Action / Info & Language -->
+<div class="flex items-center space-x-2">
+<div class="flex items-center bg-[#15221d] rounded-full px-2 py-0.5 border border-[#C9B89F]/20 text-[10px] font-medium tracking-wider text-[#EAE6DD]">
+<span class="text-[#D4AF7C] font-semibold">ES</span>
+<span class="mx-1 text-[#C9B89F]/40">|</span>
+<button class="text-[#EAE6DD]/60 hover:text-[#EAE6DD]" type="button">EN</button>
+</div>
+<button class="text-[#D4AF7C] hover:opacity-80 p-1 active:scale-95 transition-transform" title="Información del restaurante" type="button">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</button>
+</div>
+</div>
+<!-- Live Sync status subbar -->
+<div class="mt-2.5 pt-2 border-t border-[#C9B89F]/15 flex items-center justify-between text-[11px] text-[#EAE6DD]/80">
+<div class="flex items-center space-x-1.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="font-light tracking-wide text-stone-200">Mesa con QR activo <span class="text-[#C9B89F]/60">·</span> Hoy 13:00 – 23:00 hrs</span>
+</div>
+<span class="text-[#D4AF7C] font-mono text-[10px] tracking-tight">MESA #14</span>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="max-w-xl mx-auto px-4 pt-4 space-y-6">
+<!-- PROMOTIONAL HERO BANNER (Happy Hour) -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#1E2F28] via-[#283d34] to-[#1E2F28] text-[#EAE6DD] p-4 border border-[#C9B89F]/40 shadow-sm">
+<div class="absolute -right-6 -bottom-6 opacity-10 text-[#D4AF7C] pointer-events-none">
+<span class="material-symbols-outlined text-[130px]" style="font-variation-settings: 'FILL' 1;">local_bar</span>
+</div>
+<div class="relative z-10 flex items-start space-x-3.5">
+<div class="p-2.5 rounded-lg bg-[#D4AF7C]/15 text-[#D4AF7C] shrink-0 border border-[#D4AF7C]/30">
+<span class="material-symbols-outlined text-2xl">local_bar</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center space-x-2">
+<span class="bg-[#B45A3C] text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full">
+              EN SALA
+            </span>
+<span class="text-[#D4AF7C] text-[11px] font-semibold tracking-wider uppercase">
+              17:00 – 20:00 HRS
+            </span>
+</div>
+<h2 class="font-serif text-base font-bold text-[#EAE6DD]">
+            Happy Hour: 2x1 en Margaritas Artesanales
+          </h2>
+<p class="text-xs text-[#EAE6DD]/80 leading-relaxed font-light">
+            Válido en barra y mesas con mezcal espadín joven y macerados de temporada. Pide a tu mesero las notas del día.
+          </p>
+</div>
+</div>
+</section>
+<!-- STICKY HORIZONTAL CATEGORIES & FILTERS BAR -->
+<div class="sticky top-[89px] z-30 -mx-4 px-4 py-2.5 bg-[#FAF7F2]/95 backdrop-blur-md border-y border-[#C9B89F]/30 shadow-[0_4px_12px_rgba(0,0,0,0.03)] space-y-2">
+<!-- Primary Categories -->
+<nav class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5 text-xs">
+<a class="shrink-0 px-3.5 py-1.5 rounded-full bg-[#1E2F28] text-[#EAE6DD] font-medium tracking-wide shadow-sm hover:opacity-95 transition-opacity" href="#entradas">
+          Entradas
+        </a>
+<a class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/80 text-[#1A1A1A] hover:bg-[#EAE6DD] border border-[#C9B89F]/50 font-medium tracking-wide transition-colors" href="#fuertes">
+          Fuertes
+        </a>
+<a class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/80 text-[#1A1A1A] hover:bg-[#EAE6DD] border border-[#C9B89F]/50 font-medium tracking-wide transition-colors" href="#cocteles">
+          Cocteles
+        </a>
+<a class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/80 text-[#1A1A1A] hover:bg-[#EAE6DD] border border-[#C9B89F]/50 font-medium tracking-wide transition-colors" href="#postres">
+          Postres
+        </a>
+<a class="shrink-0 px-3.5 py-1.5 rounded-full bg-white/80 text-[#1A1A1A] hover:bg-[#EAE6DD] border border-[#C9B89F]/50 font-medium tracking-wide transition-colors" href="#bebidas">
+          Bebidas
+        </a>
+</nav>
+<!-- Dietary Quick Filter Pills -->
+<div class="flex items-center space-x-1.5 overflow-x-auto no-scrollbar text-[11px] text-[#1A1A1A]/80 pt-0.5">
+<span class="text-[10px] uppercase font-bold tracking-wider text-[#C9B89F] mr-1">Filtros:</span>
+<button class="shrink-0 inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-[#FAF7F2] border border-[#C9B89F]/40 hover:border-[#1E2F28] text-[#1A1A1A] transition-colors" type="button">
+<span>🌿</span>
+<span class="font-medium">Vegetariano</span>
+</button>
+<button class="shrink-0 inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-[#FAF7F2] border border-[#C9B89F]/40 hover:border-[#1E2F28] text-[#1A1A1A] transition-colors" type="button">
+<span>🌾</span>
+<span class="font-medium">Sin Gluten</span>
+</button>
+<button class="shrink-0 inline-flex items-center space-x-1 px-2.5 py-1 rounded-md bg-[#FAF7F2] border border-[#C9B89F]/40 hover:border-[#1E2F28] text-[#1A1A1A] transition-colors" type="button">
+<span>🌶️</span>
+<span class="font-medium">Con Picante</span>
+</button>
+</div>
+</div>
+<!-- SECCIÓN 1: ENTRADAS -->
+<section class="pt-2 space-y-4" id="entradas">
+<div class="flex items-baseline justify-between border-b border-[#C9B89F]/40 pb-2">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-[#B45A3C] font-bold">Para comenzar</span>
+<h3 class="font-serif text-xl font-bold text-[#1E2F28]">Entradas al Centro</h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60 italic font-cormorant">Recetas de maíz nativo &amp; brasas</span>
+</div>
+<div class="space-y-3">
+<!-- Item 1: Activo con badge -->
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<div class="flex items-center space-x-2">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Guacamole Rústico con Chapulines</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-[#1E2F28]/10 text-[#1E2F28] px-1.5 py-0.5 rounded">RECOMENDADO</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Aguacate criollo molcajeteado, queso cotija añejo, chapulines al ajillo y totopos de maíz azul nixtamalizado.
+              </p>
+<div class="flex items-center space-x-2 mt-2 text-[10px] text-[#1A1A1A]/60">
+<span>🌾 Sin Gluten</span>
+<span>•</span>
+<span>🌿 Opción Vegana</span>
+</div>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$185 MXN</span>
+</div>
+</article>
+<!-- Item 2: Dimmed / AGOTADO -->
+<article class="p-3.5 bg-stone-100/70 rounded-lg border border-stone-200 opacity-60">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<div class="flex items-center space-x-2">
+<h4 class="font-serif font-medium text-base text-stone-600 line-through">Tuétanos Asados al Grill (2 pzas)</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-[#B45A3C] text-white px-2 py-0.5 rounded">
+                  Agotado hoy
+                </span>
+</div>
+<p class="text-xs text-stone-500 mt-1">
+                Con chimichurri de quelites silvestres, salsa macha de chile morita y tortillas comaleadas.
+              </p>
+</div>
+<span class="font-medium text-sm text-stone-500 whitespace-nowrap">$220 MXN</span>
+</div>
+</article>
+<!-- Item 3: Con Picante -->
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<div class="flex items-center space-x-2">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Ceviche Verde de Pesca Ribereña</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded flex items-center">
+                  🌶️ Picante
+                </span>
+</div>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Robalo fresco en aguachile de pepino, chile habanero y cilantro, con perlas de cebolla morada curtida.
+              </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$240 MXN</span>
+</div>
+</article>
+</div>
+</section>
+<!-- SECCIÓN 2: PLATILLOS FUERTES & ESPECIALIDADES (CON IMAGEN EDITORIAL) -->
+<section class="pt-3 space-y-4" id="fuertes">
+<div class="flex items-baseline justify-between border-b border-[#C9B89F]/40 pb-2">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-[#B45A3C] font-bold">Fuego &amp; Carbón</span>
+<h3 class="font-serif text-xl font-bold text-[#1E2F28]">Platillos Fuertes &amp; Especialidades</h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60 italic font-cormorant">Cortes añejados y cocina mexicana</span>
+</div>
+<!-- Tarjeta Destacada con Imagen: Hamburguesa Convivium -->
+<article class="bg-white rounded-xl overflow-hidden border border-[#C9B89F]/40 shadow-sm transition-all hover:shadow-md">
+<div class="relative h-48 w-full overflow-hidden bg-stone-200">
+<img alt="Hamburguesa artesanal Convivium con carne jugosa, provolone derretido y relish de cebollas caramelizadas" class="w-full h-full object-cover object-center" src="https://lh3.googleusercontent.com/aida/AEtjO1U4QxESzB0vb5TtKdtrRkEOQiM6PA3t-VBbEblm-fOOkDDZIaM5mEG3KITw5JUaPVoIu8eeLr9SJPDLrUv9DR2OawO-Dq_nzo5c7o2rKPKYLxsfreMna3o5GrNjbhcPtKoJ-Tm9zyKtdxQmkUp1rtFzi6_GFDCixltp8PEVzFYQRxIfS7GO03M1_L2vhBPVLUNpYobYz_4BAtV1vNstwiSWkeg0wTwjAQEcj4eHZ9hGy0mSA6Hpw9-oI8wF"/>
+<div class="absolute top-3 left-3 bg-[#1E2F28]/90 backdrop-blur-sm text-[#D4AF7C] px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border border-[#D4AF7C]/30">
+            Firma de la Casa
+          </div>
+<div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-[#1E2F28] px-2.5 py-1 rounded font-serif font-bold text-sm shadow">
+            $295 MXN
+          </div>
+</div>
+<div class="p-4 space-y-2">
+<div class="flex items-baseline justify-between">
+<h4 class="font-serif font-bold text-lg text-[#1A1A1A]">Hamburguesa Artesanal Convivium</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-[#B45A3C]/10 text-[#B45A3C] px-1.5 py-0.5 rounded">NUEVO</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/75 leading-relaxed">
+            Mezcla prime de rib eye y picaña (220g) a las brasas, queso provolone ahumado derretido, relish de cebolla caramelizada al vino tinto y pan brioche horneado al amanecer. Acompañada con papas gajo a las finas hierbas.
+          </p>
+</div>
+</article>
+<!-- Tarjeta Destacada con Imagen Placeholder: Rib Eye Prime 400g -->
+<article class="bg-white rounded-xl overflow-hidden border border-[#C9B89F]/40 shadow-sm transition-all hover:shadow-md">
+<div class="relative h-48 w-full overflow-hidden bg-stone-200">
+<img class="w-full h-full object-cover object-center" data-alt="A gourmet Mexican rib eye prime steak grilled to medium-rare perfection served on an artisanal talavera plate with roasted baby potatoes and rosemary butter. Soft warm candlelit ambiance reminiscent of a rustic modern hacienda dining room with rich earthen tones, deep olive green, and dark clay textures. High-end food photography style with steam rising and flaky sea salt sparkles." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpP-9XMjSa1qcb8xGlsCHleMqQcavrCr62z9EvN9LyEQOgF_OA3Qpa6nyqeRYJktYj0UoJYdq-TecSU-zo-QHmeO83g4Lilq4ACikrjjZMXx--c8A6O5Rit3dPkr5RHiG98JhX2hbVMK7TVdZHKXenDMjF2T5mLm08USOILjY74Phzv0L6r6_ueQff5_lwinQC9_uMZx6QfAA8B8R94u9TUBBeTxHrn9_1PNKJ2UALoUxwoUrtnyvr0wdh0ajah3PTBM5WBk0FKAH6"/>
+<div class="absolute top-3 left-3 bg-[#D4AF7C] text-[#1E2F28] px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider font-semibold shadow">
+            Corte Prime
+          </div>
+<div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-[#1E2F28] px-2.5 py-1 rounded font-serif font-bold text-sm shadow">
+            $540 MXN
+          </div>
+</div>
+<div class="p-4 space-y-2">
+<div class="flex items-baseline justify-between">
+<h4 class="font-serif font-bold text-lg text-[#1A1A1A]">Rib Eye Prime a las Brasas (400g)</h4>
+<span class="text-xs text-[#1A1A1A]/60 font-mono">Término a elección</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/75 leading-relaxed">
+            Asado en leña de mezquite, con mantequilla de romero y ajo confitado, papitas cambray al tomillo y cebollitas cambray toreadas.
+          </p>
+</div>
+</article>
+<!-- Fila Clásica de Platillo -->
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<div class="flex items-center space-x-2">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Mole Negro de Oaxaca con Pato Confitado</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-[#1E2F28]/10 text-[#1E2F28] px-1.5 py-0.5 rounded">TRADICIÓN</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+              Pierna y muslo de pato crujiente bañados en mole negro artesanal de 32 ingredientes, arroz blanco al azafrán y plátano macho frito.
+            </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$380 MXN</span>
+</div>
+</article>
+</section>
+<!-- SECCIÓN 3: COCTELERÍA DE AUTOR & DESTILADOS -->
+<section class="pt-3 space-y-4" id="cocteles">
+<div class="flex items-baseline justify-between border-b border-[#C9B89F]/40 pb-2">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-[#B45A3C] font-bold">Barra de Destilados</span>
+<h3 class="font-serif text-xl font-bold text-[#1E2F28]">Coctelería de Autor</h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60 italic font-cormorant">Agaves, hierbas &amp; licores de origen</span>
+</div>
+<!-- Tarjeta Destacada con Imagen Placeholder: Margarita de Tamarindo -->
+<article class="bg-white rounded-xl overflow-hidden border border-[#C9B89F]/40 shadow-sm transition-all hover:shadow-md">
+<div class="relative h-48 w-full overflow-hidden bg-stone-200">
+<img class="w-full h-full object-cover object-center" data-alt="An exquisite smoky artisanal mezcal tamarind cocktail in an earthen clay goblet, rimmed with chili salt and a dehydrated lime wheel on a rustic dark granite bar counter. Dim atmospheric warm lighting illuminates copper shakers and mezcal bottles in the blurred background. Earthy amber, terracotta, and deep forest green tones evoke a sophisticated Mexican cantina ambiance." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHTC_5U_3_EBuJM79A4lqGkL0KY045WODeDJ4o1Y8XuTSmcAioErp-33AbYZ_4dlBBKLcnOmzAilR5_VTCRweuoOTUOULojSHCo7aLVR2rrGownPtdzdLsflOX4VNRPOPzSJmIqYEOv32xwg5xgCG21JRfUs2Zgv4NBpUYtjebS9Xt9Fz_VOKFAM-tgT6Mz2Ty8g0JTIWV4E2CugVq32rJ1Qeek5_DAdlWLexhxeIhfGZRBEMRC4V6OzATbfKIutIBf8iokirwrNya"/>
+<div class="absolute top-3 left-3 bg-[#B45A3C] text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider font-semibold shadow">
+            En Happy Hour 2x1
+          </div>
+<div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm text-[#1E2F28] px-2.5 py-1 rounded font-serif font-bold text-sm shadow">
+            $195 MXN
+          </div>
+</div>
+<div class="p-4 space-y-2">
+<div class="flex items-baseline justify-between">
+<h4 class="font-serif font-bold text-lg text-[#1A1A1A]">Margarita de Tamarindo &amp; Morita</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">🌶️ Toque picante</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/75 leading-relaxed">
+            Mezcal Espadín joven macerado en casa, pulpa natural de tamarindo confitado, reducción de piloncillo y escarcha de sal de gusano con chile morita molido.
+          </p>
+</div>
+</article>
+<div class="space-y-3">
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Carajillo Oaxaqueño</h4>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Espresso de Chiapas extracción doble, Licor 43, infusión de cacao criollo y dash de mezcal Tobalá.
+              </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$180 MXN</span>
+</div>
+</article>
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Paloma de Toronja Rosa &amp; Romero</h4>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Tequila Reposado 100% agave, jugo de toronja fresca clarificado, jarabe de romero quemado y refresco de toronja artesanal.
+              </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$175 MXN</span>
+</div>
+</article>
+</div>
+</section>
+<!-- SECCIÓN 4: POSTRES CASEROS -->
+<section class="pt-3 space-y-4" id="postres">
+<div class="flex items-baseline justify-between border-b border-[#C9B89F]/40 pb-2">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-[#B45A3C] font-bold">Dulce Final</span>
+<h3 class="font-serif text-xl font-bold text-[#1E2F28]">Postres Caseros</h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60 italic font-cormorant">Repostería de mesa</span>
+</div>
+<div class="space-y-3">
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<div class="flex items-center space-x-2">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Pastel Tibio de Tres Leches con Rompope de Convento</h4>
+<span class="text-[9px] font-bold uppercase tracking-wider bg-[#1E2F28]/10 text-[#1E2F28] px-1.5 py-0.5 rounded">FAVORITO</span>
+</div>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Bizcocho bañado en infusión de canela y vainilla de Papantla, cubierto con merengue flameado y canela espolvoreada.
+              </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$145 MXN</span>
+</div>
+</article>
+<article class="p-3.5 bg-white rounded-lg border border-[#C9B89F]/30 hover:border-[#D4AF7C] transition-colors">
+<div class="flex justify-between items-start">
+<div class="pr-3">
+<h4 class="font-serif font-bold text-base text-[#1A1A1A]">Flan de Queso de Cabra &amp; Cajeta Envinada</h4>
+<p class="text-xs text-[#1A1A1A]/70 mt-1 leading-relaxed">
+                Textura aterciopelada con cajeta de Celaya elaborada en cazo de cobre y nuez pecana garapiñada.
+              </p>
+</div>
+<span class="font-semibold text-sm text-[#1E2F28] whitespace-nowrap pt-0.5">$135 MXN</span>
+</div>
+</article>
+</div>
+</section>
+<!-- SECCIÓN 5: BEBIDAS SIN ALCOHOL & CAFÉ -->
+<section class="pt-3 space-y-4" id="bebidas">
+<div class="flex items-baseline justify-between border-b border-[#C9B89F]/40 pb-2">
+<div>
+<span class="text-[10px] uppercase tracking-widest text-[#B45A3C] font-bold">Aguas Frescas &amp; Cafetería</span>
+<h3 class="font-serif text-xl font-bold text-[#1E2F28]">Bebidas</h3>
+</div>
+<span class="text-xs text-[#1A1A1A]/60 italic font-cormorant">Sin alcohol</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div class="p-3 bg-white rounded-lg border border-[#C9B89F]/30 flex justify-between items-center">
+<div>
+<h5 class="font-serif font-semibold text-sm text-[#1A1A1A]">Agua Fresca de Horchata con Coco</h5>
+<p class="text-[11px] text-[#1A1A1A]/60">Hecha en casa con arroz y canela</p>
+</div>
+<span class="font-medium text-xs text-[#1E2F28]">$65 MXN</span>
+</div>
+<div class="p-3 bg-white rounded-lg border border-[#C9B89F]/30 flex justify-between items-center">
+<div>
+<h5 class="font-serif font-semibold text-sm text-[#1A1A1A]">Café de Olla Tradicional</h5>
+<p class="text-[11px] text-[#1A1A1A]/60">Piloncillo, canela y piel de naranja</p>
+</div>
+<span class="font-medium text-xs text-[#1E2F28]">$55 MXN</span>
+</div>
+</div>
+</section>
+<!-- ASISTENCIA / LLAMAR AL MESERO BANNER -->
+<div class="mt-6 p-4 rounded-xl bg-white border border-[#C9B89F]/50 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-[#1E2F28] text-[#D4AF7C] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">room_service</span>
+</div>
+<div>
+<h4 class="font-serif font-bold text-sm text-[#1E2F28]">¿Listo para ordenar o necesitas asistencia?</h4>
+<p class="text-xs text-[#1A1A1A]/70">Llama a tu mesero con un solo toque desde tu mesa.</p>
+</div>
+</div>
+<button class="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-[#1E2F28] hover:bg-[#283d34] text-[#EAE6DD] text-xs font-semibold uppercase tracking-wider active:scale-95 transition-all shadow" onclick="alert('Notificación enviada a la terminal del mesero para la Mesa #14.');" type="button">
+        Llamar a tu Mesero
+      </button>
+</div>
+</main>
+<!-- FOOTER (Shared Component Anchor) -->
+<footer class="bg-[#EAE6DD] dark:bg-[#1A1A1A] border-t border-[#C9B89F]/40 mt-12">
+<div class="flex flex-col items-center text-center px-6 py-10 max-w-xl mx-auto space-y-4">
+<!-- Brand Logo -->
+<div class="font-serif tracking-widest text-sm uppercase text-[#1E2F28] dark:text-[#D4AF7C] font-bold">
+        CONVIVIUM HOSPITALITY
+      </div>
+<p class="text-xs text-[#1A1A1A]/80 font-medium">
+        Av. Paseo de la Reforma #220, Cuauhtémoc, CDMX
+      </p>
+<!-- Links -->
+<div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-xs text-[#1A1A1A]/70 dark:text-[#EAE6DD]/70 font-sans">
+<a class="hover:text-[#B45A3C] transition-colors flex items-center space-x-1" href="https://wa.me/" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-sm">chat</span>
+<span>Asistencia por WhatsApp</span>
+</a>
+<span class="text-[#C9B89F]">•</span>
+<a class="hover:text-[#B45A3C] transition-colors" href="#privacidad">Aviso de Privacidad</a>
+<span class="text-[#C9B89F]">•</span>
+<a class="hover:text-[#B45A3C] transition-colors" href="#horarios">Horarios y Sucursales</a>
+</div>
+<!-- Legal & Sync Status -->
+<div class="pt-2 text-[11px] text-[#1A1A1A]/60 dark:text-[#EAE6DD]/60 space-y-1">
+<p>Precios en MXN, IVA incluido · CONVIVIUM Hospitality. Conforme a normas oficiales PROFECO.</p>
+<p class="font-mono text-[10px] text-[#1E2F28]/70">Carta sincronizada hoy a las 14:05 hrs desde cocina</p>
+</div>
+</div>
+</footer>
+<!-- BOTTOM NAVBAR (Shared Component Anchor - Active: Fuertes as center gastronomic focus) -->
+<nav aria-label="Navegación de carta" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-[#EAE6DD]/95 dark:bg-[#1A1A1A]/95 backdrop-blur-md border-t border-[#C9B89F]/40 shadow-sm">
+<!-- Item 1: Entradas -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 dark:text-[#EAE6DD]/60 pb-1 hover:text-[#1E2F28] dark:hover:text-[#D4AF7C] transition-colors active:scale-95 duration-150" href="#entradas">
+<span class="material-symbols-outlined text-[20px]" data-icon="tapas">tapas</span>
+<span class="font-sans text-[11px] uppercase tracking-wider font-medium mt-0.5">Entradas</span>
+</a>
+<!-- Item 2: Fuertes (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-[#1E2F28] dark:text-[#D4AF7C] font-semibold border-b-2 border-[#1E2F28] dark:border-[#D4AF7C] pb-1 hover:text-[#1E2F28] dark:hover:text-[#D4AF7C] transition-colors active:scale-95 duration-150" href="#fuertes">
+<span class="material-symbols-outlined text-[20px]" data-icon="lunch_dining">lunch_dining</span>
+<span class="font-sans text-[11px] uppercase tracking-wider font-medium mt-0.5">Fuertes</span>
+</a>
+<!-- Item 3: Postres -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 dark:text-[#EAE6DD]/60 pb-1 hover:text-[#1E2F28] dark:hover:text-[#D4AF7C] transition-colors active:scale-95 duration-150" href="#postres">
+<span class="material-symbols-outlined text-[20px]" data-icon="bakery_dining">bakery_dining</span>
+<span class="font-sans text-[11px] uppercase tracking-wider font-medium mt-0.5">Postres</span>
+</a>
+<!-- Item 4: Bebidas -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 dark:text-[#EAE6DD]/60 pb-1 hover:text-[#1E2F28] dark:hover:text-[#D4AF7C] transition-colors active:scale-95 duration-150" href="#bebidas">
+<span class="material-symbols-outlined text-[20px]" data-icon="local_cafe">local_cafe</span>
+<span class="font-sans text-[11px] uppercase tracking-wider font-medium mt-0.5">Bebidas</span>
+</a>
+<!-- Item 5: Cocteles -->
+<a class="flex flex-col items-center justify-center text-[#1A1A1A]/60 dark:text-[#EAE6DD]/60 pb-1 hover:text-[#1E2F28] dark:hover:text-[#D4AF7C] transition-colors active:scale-95 duration-150" href="#cocteles">
+<span class="material-symbols-outlined text-[20px]" data-icon="local_bar">local_bar</span>
+<span class="font-sans text-[11px] uppercase tracking-wider font-medium mt-0.5">Cocteles</span>
+</a>
+</nav>
+</body></html>

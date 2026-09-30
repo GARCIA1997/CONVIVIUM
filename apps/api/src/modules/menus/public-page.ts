@@ -1,7 +1,7 @@
 /**
  * Menú digital público (se abre con el QR de la mesa). Página ligera renderizada en el servidor:
  * carga al instante en cualquier celular, sin JavaScript de la app ni inicio de sesión.
- * Paleta y tipografía del sistema de diseño CONVIVIUM (Stitch).
+ * Paleta, tipografía y estructura del diseño Stitch design/stitch/menu-digital-publico.html.
  */
 import { BADGES, type MenuView } from "./render.js";
 
@@ -14,11 +14,13 @@ export function renderPublicMenu(view: MenuView): string {
   const accent = /^#[0-9a-f]{6}$/i.test(c.accent) ? c.accent : "#D4AF7C";
   const time = new Date(view.updatedAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" });
   const wa = c.whatsapp.replace(/\D/g, "");
+  const present = (["vegetariano", "picante", "nuevo"] as const).filter((b) => view.sections.some((s) => s.items.some((i) => i.badges.includes(b))));
+  const filters = present.length ? `<div class="filters"><span>Filtros:</span>${present.map((b) => `<button type="button" data-f="${b}">${BADGES[b]}</button>`).join("")}</div>` : "";
   const sections = view.sections.map((s) => `
     <section id="c-${s.id}">
       <h2>${esc(s.name)}</h2>
       ${s.items.map((i) => `
-      <article class="dish${i.soldOut ? " out" : ""}">
+      <article class="dish${i.soldOut ? " out" : ""}" data-b="${i.badges.join(" ")}">
         ${i.photoUrl ? `<img src="${esc(i.photoUrl)}" alt="" loading="lazy">` : ""}
         <div class="body">
           <div class="row"><h3>${esc(i.name)}</h3><span class="price">${price(i.price)}</span></div>
@@ -69,6 +71,14 @@ export function renderPublicMenu(view: MenuView): string {
   .b-rec { color:#fff; background:var(--olivo); border-color:var(--olivo) }
   .b-out { color:var(--terracota); background:#fff; border-color:var(--terracota) }
   .out { opacity:.5 } .out .price { text-decoration:line-through }
+  .filters { display:flex; gap:8px; align-items:center; overflow-x:auto; padding:12px 0 2px; font-size:12px; color:#6b6b6b; scrollbar-width:none }
+  .filters button { flex:none; font:inherit; font-weight:500; color:var(--olivo); background:#fff; border:1px solid var(--arena); border-radius:999px; padding:5px 12px; cursor:pointer }
+  .filters button.on { background:var(--olivo); color:var(--dorado); border-color:var(--olivo) }
+  .hide { display:none }
+  .help { margin:26px 0 0; background:#fff; border:1px solid var(--arena); border-radius:12px; padding:16px; text-align:center }
+  .help strong { font-family:'Playfair Display',serif; color:var(--olivo); font-size:16px; display:block }
+  .help p { font-size:13px; color:#6b6b6b; margin-top:4px }
+  .legal { font-size:11px; color:#8a8a8a }
   footer { text-align:center; padding:26px 16px 40px; font-size:12px; color:#6b6b6b; line-height:1.7 }
   .wa { display:inline-block; margin:10px 0; background:var(--olivo); color:var(--dorado); text-decoration:none; font-weight:600; border-radius:10px; padding:10px 18px }
 </style></head>
@@ -82,14 +92,25 @@ export function renderPublicMenu(view: MenuView): string {
 <nav>${view.sections.map((s) => `<a href="#c-${s.id}">${esc(s.name)}</a>`).join("")}</nav>
 <main>
   ${c.showPromos ? view.promos.map((p) => `<div class="promo"><strong>${esc(p.name)}</strong><span>${esc(p.detail)}</span></div>`).join("") : ""}
+  ${filters}
   ${sections || `<p style="padding:40px 0;text-align:center;color:#6b6b6b">El menú se está actualizando.</p>`}
+  ${wa ? `<div class="help"><strong>¿Tienes alguna duda sobre la carta?</strong><p>Escríbenos y con gusto te ayudamos.</p><a class="wa" href="https://wa.me/52${wa.slice(-10)}">Asistencia por WhatsApp</a></div>` : ""}
 </main>
 <footer>
   ${c.footer ? `<div>${esc(c.footer)}</div>` : ""}
   ${c.address ? `<div>${esc(c.address)}</div>` : ""}
   ${c.phone ? `<div>Tel. ${esc(c.phone)}</div>` : ""}
-  ${wa ? `<a class="wa" href="https://wa.me/52${wa.slice(-10)}">Escríbenos por WhatsApp</a>` : ""}
-  <div>Menú actualizado ${time}</div>
+  <div class="legal">Precios en MXN, IVA incluido</div>
+  <div class="legal">Carta sincronizada hoy a las ${time}</div>
 </footer>
+${filters ? `<script>
+  // Filtros por etiqueta: muestra solo los platillos que tengan todas las elegidas.
+  const on = new Set();
+  document.querySelectorAll("[data-f]").forEach((b) => b.addEventListener("click", () => {
+    const f = b.dataset.f; on.has(f) ? on.delete(f) : on.add(f); b.classList.toggle("on");
+    document.querySelectorAll(".dish").forEach((d) => { const bs = d.dataset.b.split(" "); d.classList.toggle("hide", [...on].some((x) => !bs.includes(x))); });
+    document.querySelectorAll("main section").forEach((s) => s.classList.toggle("hide", !s.querySelector(".dish:not(.hide)")));
+  }));
+</script>` : ""}
 </body></html>`;
 }
