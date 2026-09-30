@@ -101,6 +101,7 @@ export function renderPublicMenu(view: MenuView): string {
   const title = c.title || "CONVIVIUM";
   const time = new Date(view.updatedAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Mexico_City" });
   const wa = c.whatsapp.replace(/\D/g, "").slice(-10);
+  const branch = /^sucursal\b/i.test(view.branchName) ? view.branchName : `Sucursal ${view.branchName}`;
   const all = view.sections.flatMap((s) => s.items);
   const featured = all.filter((i) => i.badges.includes("recomendado") && !i.soldOut).slice(0, 6);
   const present = (["vegetariano", "picante", "nuevo"] as const).filter((b) => all.some((i) => i.badges.includes(b)));
@@ -119,7 +120,7 @@ export function renderPublicMenu(view: MenuView): string {
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style>${MENU_CSS}</style></head>
 <body class="bg-surface font-body text-carbon flex flex-col min-h-screen">
-<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-4 flex items-center justify-between"><div class="flex flex-col justify-center"><h1 class="font-headline text-lg font-bold tracking-[0.2em] uppercase text-primary leading-tight">${esc(title)}</h1><p class="text-[10px] tracking-wide text-carbon/75 font-body mt-0.5">${[c.subtitle, `Sucursal ${view.branchName}`].filter(Boolean).map(esc).join(" · ")}</p></div></div></header>
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-4 flex items-center justify-between"><div class="flex flex-col justify-center"><h1 class="font-headline text-lg font-bold tracking-[0.2em] uppercase text-primary leading-tight">${esc(title)}</h1><p class="text-[10px] tracking-wide text-carbon/75 font-body mt-0.5">${[c.subtitle, branch].filter(Boolean).map(esc).join(" · ")}</p></div></div></header>
 <main class="flex flex-col relative w-full pt-20 pb-28 bg-surface px-4"><div class="flex flex-col w-full space-y-6 pb-6">
 
 <section class="rounded-2xl bg-primary text-on-primary p-4 shadow-md relative overflow-hidden">
@@ -128,7 +129,7 @@ export function renderPublicMenu(view: MenuView): string {
 <div class="space-y-1">
 <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-dorado animate-pulse"></span><span class="text-[10px] tracking-[0.25em] font-medium text-dorado uppercase font-body">Menú Digital · Solo Consulta</span></div>
 <h2 class="font-headline text-xl font-bold tracking-[0.15em] text-on-primary">${esc(title.toUpperCase())}</h2>
-<p class="text-xs text-on-primary/80 font-body flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-dorado">location_on</span><span>Sucursal ${esc(view.branchName)}${c.address ? ` · ${esc(c.address)}` : ""}</span></p>
+<p class="text-xs text-on-primary/80 font-body flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-dorado">location_on</span><span>${esc(branch)}${c.address ? ` · ${esc(c.address)}` : ""}</span></p>
 </div>
 <div class="w-11 h-11 rounded-xl bg-surface/10 flex items-center justify-center text-dorado shadow-inner backdrop-blur-sm"><span class="material-symbols-outlined text-[24px]">restaurant</span></div>
 </div>

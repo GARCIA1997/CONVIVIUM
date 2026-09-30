@@ -20,5 +20,5 @@ export default defineConfig({
       },
     }),
   ],
-  server: { proxy: { "/v1": { target: "http://localhost:4000", ws: true }, "/m/": { target: "http://localhost:4000" } } },
+  server: { proxy: { "/v1": { target: "http://localhost:4000", ws: true }, "/m/": { target: "http://localhost:4000" }, "/media/": { target: "http://localhost:4000" } } },
 });

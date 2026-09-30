@@ -23,6 +23,8 @@ services:
       NODE_TOKEN: ${NODE_TOKEN:-}
       BRANCH_ID: ${BRANCH_ID:-}
       PUBLIC_MENU_URL: ${PUBLIC_MENU_URL:-}
+      MEDIA_DIR: /srv/media
+    volumes: [media:/srv/media]
     # Solo en el propio equipo: Caddy (red del host) lo publica con TLS a la WiFi.
     ports: ["127.0.0.1:4000:4000"]
     depends_on: { postgres: { condition: service_healthy } }
@@ -33,5 +35,6 @@ services:
     volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data]
     depends_on: [api]
 volumes:
+  media:
   pgdata:
   caddy_data:

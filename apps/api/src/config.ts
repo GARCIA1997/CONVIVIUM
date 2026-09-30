@@ -9,6 +9,8 @@ const Env = z.object({
   BRANCH_ID: z.string().optional(),
   /** Carpeta con las PWA compiladas (/srv/web en Docker). */
   WEB_ROOT: z.string().optional(),
+  /** Carpeta donde se guardan las fotos de platillos (volumen en Docker). */
+  MEDIA_DIR: z.string().default("data/media"),
   /** Base pública del menú digital para el QR (p. ej. https://menu.convivium.mx). Por omisión, el host de la petición. */
   PUBLIC_MENU_URL: z.string().url().optional(),
   /** Token del nodo para autenticarse con la nube (se obtiene al vincular el nodo). */

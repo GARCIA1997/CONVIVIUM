@@ -1,9 +1,13 @@
 import { catalog } from "@convivium/contracts";
 import { and, eq, inArray, schema } from "@convivium/db";
+import { randomUUID } from "node:crypto";
+import { unlink, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
 import type { ApiModule } from "../../lib/module.js";
-import { notFound } from "../../plugins/errors.js";
+import { AppError, notFound } from "../../plugins/errors.js";
+import { mediaDir } from "../../plugins/media.js";
 
 const plugin: ApiModule["plugin"] = async (app) => {
   const { db } = app;
@@ -111,6 +115,35 @@ const plugin: ApiModule["plugin"] = async (app) => {
   });
 
   /** E2-07 · Marcar agotado; se refleja en meseros en tiempo real. */
+  /** Foto del platillo (menú digital y editor). Se guarda en MEDIA_DIR y se sirve en /media/. */
+  const EXT = { jpeg: "jpg", png: "png", webp: "webp" } as const;
+  const dropOld = async (url: string | null) => { if (url?.startsWith("/media/")) await unlink(join(mediaDir, url.slice(7))).catch(() => {}); };
+  app.put("/products/:id/photo", { onRequest: [app.guard("menu.editar")], bodyLimit: 8 * 1024 * 1024, schema: { tags: ["catálogo"], params: z.object({ id: z.string().uuid() }), body: catalog.ProductPhotoBody, response: { 200: z.object({ photoUrl: z.string() }) } } }, async (req) => {
+    const where = and(eq(schema.products.id, req.params.id), eq(schema.products.tenantId, req.user.tenantId));
+    const [p] = await db.select({ photoUrl: schema.products.photoUrl }).from(schema.products).where(where);
+    if (!p) throw notFound("Producto");
+    const [, type, b64] = req.body.dataUrl.match(/^data:image\/(jpeg|png|webp);base64,(.+)$/s)!;
+    const buf = Buffer.from(b64!, "base64");
+    if (buf.length > 5 * 1024 * 1024) throw new AppError(413, "photo_too_large", "La foto pesa más de 5 MB");
+    const file = `${randomUUID()}.${EXT[type as keyof typeof EXT]}`;
+    await writeFile(join(mediaDir, file), buf);
+    const photoUrl = `/media/${file}`;
+    await db.update(schema.products).set({ photoUrl, updatedAt: new Date() }).where(where);
+    await dropOld(p.photoUrl);
+    app.hub.publish(["menu"], { type: "menu.updated" });
+    return { photoUrl };
+  });
+
+  app.delete("/products/:id/photo", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], params: z.object({ id: z.string().uuid() }) } }, async (req) => {
+    const where = and(eq(schema.products.id, req.params.id), eq(schema.products.tenantId, req.user.tenantId));
+    const [p] = await db.select({ photoUrl: schema.products.photoUrl }).from(schema.products).where(where);
+    if (!p) throw notFound("Producto");
+    await db.update(schema.products).set({ photoUrl: null, updatedAt: new Date() }).where(where);
+    await dropOld(p.photoUrl);
+    app.hub.publish(["menu"], { type: "menu.updated" });
+    return { ok: true };
+  });
+
   app.put("/products/:id/sold-out", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], params: z.object({ id: z.string().uuid() }), body: catalog.SetSoldOutBody } }, async (req) => {
     await db
       .insert(schema.productAvailability)

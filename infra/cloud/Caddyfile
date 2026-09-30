@@ -4,8 +4,8 @@
   reverse_proxy api:4000
 }
 {$MENU_DOMAIN} {
-  # Menú digital público de cada sucursal (el QR apunta aquí): https://menu.dominio/m/<sucursal>
-  @menu path /m/*
+  # Menú digital público de cada sucursal (el QR apunta aquí): https://menu.dominio/m/<sucursal>, con sus fotos en /media/
+  @menu path /m/* /media/*
   handle @menu { reverse_proxy api:4000 }
   handle { respond "CONVIVIUM" 404 }
 }

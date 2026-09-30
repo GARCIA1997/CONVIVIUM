@@ -19,6 +19,8 @@ services:
       DATABASE_URL: postgres://convivium:${POSTGRES_PASSWORD}@postgres:5432/convivium
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
       PUBLIC_MENU_URL: ${PUBLIC_MENU_URL:-}
+      MEDIA_DIR: /srv/media
+    volumes: [media:/srv/media]
     depends_on: { postgres: { condition: service_healthy } }
   caddy:
     image: caddy:2-alpine
@@ -30,5 +32,6 @@ services:
     volumes: [./Caddyfile:/etc/caddy/Caddyfile:ro, caddy_data:/data]
     depends_on: [api]
 volumes:
+  media:
   pgdata:
   caddy_data:

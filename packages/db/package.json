@@ -8,10 +8,11 @@
   "scripts": {
     "typecheck": "tsc -p .",
     "generate": "drizzle-kit generate",
-    "migrate": "tsx -e \"import('./src/migrate.ts').then(m=>m.runMigrations(process.env.DATABASE_URL ?? 'postgres://convivium:convivium@localhost:5432/convivium')).then(()=>console.log('migraciones al d\u00eda'))\"",
+    "migrate": "tsx -e \"import('./src/migrate.ts').then(m=>m.runMigrations(process.env.DATABASE_URL ?? 'postgres://convivium:convivium@localhost:5432/convivium')).then(()=>console.log('migraciones al día'))\"",
     "seed": "tsx src/seed.ts && tsx src/seed-inventory.ts",
     "seed:ventas": "tsx src/seed-sales.ts",
-    "setup": "tsx src/setup.ts"
+    "setup": "tsx src/setup.ts",
+    "seed:carta": "tsx src/seed-carta.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.36.4",

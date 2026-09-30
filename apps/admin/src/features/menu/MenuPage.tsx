@@ -198,7 +198,9 @@ export function MenuPage() {
           <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-6">
             <div ref={sections.general} className="bg-white rounded-xl border border-arena-border p-6 shadow-xs scroll-mt-4">
               <h3 className="font-serif-brand text-base font-semibold text-stone-900 mb-4 pb-2 border-b border-arena-light flex items-center justify-between"><span>Información General y Presentación</span></h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+              <PhotoCard draft={draft} onChange={(photoUrl) => { set({ photoUrl }); load(); }} />
+              <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-semibold text-stone-700 mb-1.5">Nombre comercial del platillo <span className="text-terracota">*</span></label><input value={draft.name} onChange={(e) => set({ name: e.target.value })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-lg text-xs font-medium px-3 py-2 text-stone-900 focus:bg-white focus:ring-1 focus:ring-olivo" type="text" /></div>
                 <div><label className="block text-xs font-semibold text-stone-700 mb-1.5">Categoría en carta <span className="text-terracota">*</span></label>
                   <select value={draft.categoryId} onChange={(e) => set({ categoryId: e.target.value })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-lg text-xs font-medium px-3 py-2 text-stone-900 focus:bg-white focus:ring-1 focus:ring-olivo">{menu?.categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
@@ -213,6 +215,7 @@ export function MenuPage() {
                 <div><label className="block text-xs font-semibold text-stone-700 mb-1.5">Código SKU / PLU Interno</label>
                   <div className="flex"><span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-arena-border bg-stone-100 text-stone-500 font-mono text-xs">#</span><input value={draft.sku} maxLength={24} onChange={(e) => set({ sku: e.target.value.toUpperCase() })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-r-lg text-xs font-mono px-3 py-2 text-stone-800 focus:bg-white focus:ring-1 focus:ring-olivo" type="text" /></div>
                 </div>
+              </div>
               </div>
             </div>
 
@@ -406,6 +409,50 @@ function GroupEditor({ group, onClose, onSaved }: { group: ModGroup | null; onCl
           <button disabled={name.trim().length < 2 || !mods.some((m) => m.name.trim())} onClick={save} className="px-4 py-2 rounded-lg bg-olivo text-white text-xs font-semibold disabled:opacity-40">Guardar grupo</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Fotografía del platillo (diseño Stitch admin-menu-editor: tarjeta cuadrada con "Reemplazar imagen"). */
+function PhotoCard({ draft, onChange }: { draft: Draft; onChange: (photoUrl: string | null) => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const upload = async (file: File) => {
+    setErr(null);
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setErr("Usa una foto JPG, PNG o WebP.");
+    if (file.size > 5 * 1024 * 1024) return setErr("La foto pesa más de 5 MB.");
+    setBusy(true);
+    try {
+      const dataUrl = await new Promise<string>((ok, ko) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.onerror = ko; r.readAsDataURL(file); });
+      const { photoUrl } = await client.request<{ photoUrl: string }>("PUT", `/catalog/products/${draft.id}/photo`, { dataUrl });
+      onChange(photoUrl);
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); if (input.current) input.current.value = ""; }
+  };
+  const remove = async () => { setBusy(true); try { await client.request("DELETE", `/catalog/products/${draft.id}/photo`); onChange(null); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); } };
+  return (
+    <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-2">
+      <label className="text-xs font-medium text-stone-700">Fotografía de Platillo</label>
+      <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+      {!draft.id ? (
+        <div className="rounded-lg border border-dashed border-arena-border bg-stone-100 aspect-square flex flex-col items-center justify-center gap-1 p-3 text-center">
+          <span className="material-symbols-outlined text-stone-400 text-2xl">photo_camera</span>
+          <span className="text-[11px] text-stone-500">Guarda el platillo para subir su foto</span>
+        </div>
+      ) : (
+        <div className="relative group rounded-lg overflow-hidden border border-arena-border bg-stone-100 aspect-square flex items-center justify-center">
+          {draft.photoUrl ? <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={draft.photoUrl} alt={draft.name} /> : <span className="material-symbols-outlined text-stone-400 text-4xl">photo_camera</span>}
+          <div className={`absolute inset-0 bg-stone-900/40 transition-opacity flex flex-col items-center justify-center gap-2 p-3 text-center ${draft.photoUrl && !busy ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}>
+            <button disabled={busy} onClick={() => input.current?.click()} className="bg-white/95 hover:bg-white text-stone-900 text-xs font-medium px-3 py-1.5 rounded shadow-sm flex items-center gap-1.5 disabled:opacity-60">
+              <span className="material-symbols-outlined text-sm">photo_camera</span>{busy ? "Subiendo…" : draft.photoUrl ? "Reemplazar imagen" : "Subir imagen"}
+            </button>
+            {draft.photoUrl && !busy && <button onClick={remove} className="text-[11px] text-white/95 underline">Quitar foto</button>}
+            <span className="text-[10px] text-white/90">JPG / PNG hasta 5MB</span>
+          </div>
+          <span className="absolute bottom-2 left-2 bg-stone-900/70 backdrop-blur-xs text-white text-[10px] px-1.5 py-0.5 rounded font-mono">1200x800px</span>
+        </div>
+      )}
+      {err && <p className="text-[11px] text-terracota">{err}</p>}
     </div>
   );
 }

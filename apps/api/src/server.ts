@@ -10,6 +10,7 @@ import dbPlugin from "./plugins/db.js";
 import errorsPlugin from "./plugins/errors.js";
 import realtimePlugin from "./plugins/realtime.js";
 import webPlugin from "./plugins/web.js";
+import mediaPlugin from "./plugins/media.js";
 import { startSyncWorker } from "./lib/sync-worker.js";
 import { publicMenuRoutes } from "./modules/menus/routes.js";
 
@@ -47,6 +48,7 @@ export async function buildServer() {
     if (mod.mode && mod.mode !== (isEdge ? "edge" : "cloud")) continue;
     await app.register(mod.plugin, { prefix: `/v1/${mod.prefix}` });
   }
+  await app.register(mediaPlugin);
   await app.register(publicMenuRoutes);
   await app.register(webPlugin);
   if (isEdge) startSyncWorker(app);

@@ -24,7 +24,8 @@ export const Product = z.object({
   targetPrepSec: z.number().int().positive(),
   stationIds: z.array(Id).min(1),
   modifierGroups: z.array(ModifierGroup),
-  photoUrl: z.string().url().nullable(),
+  /** Foto subida (/media/…) o URL externa. */
+  photoUrl: z.string().max(500).refine((s) => s.startsWith("/media/") || /^https?:\/\//.test(s), "URL de foto inválida").nullable(),
   active: z.boolean(),
   soldOut: z.boolean(),
 });
@@ -33,6 +34,9 @@ export type Product = z.infer<typeof Product>;
 export const ProductUpsert = Product.omit({ id: true, modifierGroups: true }).extend({
   modifierGroupIds: z.array(Id).default([]),
 });
+
+/** Foto del platillo como data URL (JPG, PNG o WebP, máx. 5 MB). */
+export const ProductPhotoBody = z.object({ dataUrl: z.string().regex(/^data:image\/(jpeg|png|webp);base64,/, "Formato no soportado: usa JPG, PNG o WebP") });
 
 export const SetSoldOutBody = z.object({ soldOut: z.boolean() });
 

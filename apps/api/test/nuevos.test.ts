@@ -102,3 +102,22 @@ describe("generador de menú (E2-09)", () => {
     expect((await api("GET", "/menus/current", mesero)).status).toBe(403);
   });
 });
+
+describe("foto del platillo", () => {
+  it("se sube, se sirve en /media/, aparece en el menú y se puede quitar; solo quien edita el menú", async () => {
+    const p = menu.products.find((x) => x.name.startsWith("Guacamole"))!;
+    const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    expect((await api("PUT", `/catalog/products/${p.id}/photo`, mesero, { dataUrl: png })).status).toBe(403);
+    expect((await api("PUT", `/catalog/products/${p.id}/photo`, owner, { dataUrl: "data:image/gif;base64,R0lG" })).status).toBe(400);
+    const up = await api("PUT", `/catalog/products/${p.id}/photo`, owner, { dataUrl: png });
+    expect(up.body.photoUrl).toMatch(/^\/media\/.+\.png$/);
+    const file = await getApp().inject({ method: "GET", url: up.body.photoUrl });
+    expect(file.statusCode).toBe(200);
+    expect(file.headers["content-type"]).toBe("image/png");
+    const after = (await api("GET", "/catalog/menu", mesero)).body.products.find((x: { id: string }) => x.id === p.id);
+    expect(after.photoUrl).toBe(up.body.photoUrl);
+    expect((await getApp().inject({ method: "GET", url: "/m/prueba-centro" })).body).toContain(up.body.photoUrl);
+    await api("DELETE", `/catalog/products/${p.id}/photo`, owner);
+    expect((await getApp().inject({ method: "GET", url: up.body.photoUrl })).statusCode).toBe(404);
+  });
+});
