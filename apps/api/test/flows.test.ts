@@ -73,17 +73,32 @@ describe("comanda y cancelaciones", () => {
 });
 
 describe("mesas unidas (E3-10)", () => {
-  it("solo se unen mesas configuradas como unibles y libres", async () => {
+  it("familia grande: une mesas libres del área (aunque no estén configuradas), no de otra área ni ocupadas", async () => {
     const layout = (await api("GET", "/floor", owner)).body;
     const tables = layout.tables.map((t: any) => ({ id: t.id, areaId: t.areaId, label: t.label, capacity: t.capacity, shape: t.shape, x: t.x, y: t.y, rotation: t.rotation, assignedUserId: t.assignedUserId, mergeableWith: t.label === "M5" ? ["M6"] : [] }));
     expect((await api("PUT", "/floor/layout", owner, { tables, removed: [], fixtures: [] })).status).toBe(200);
     floor = (await api("GET", "/floor", mesero)).body;
-    expect((await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: table("M5").id, guests: 8, joinTableIds: [table("M7").id] })).status).toBe(409);
-    const id = await openTable("M5", mesero, { joinTableIds: [table("M6").id] });
+    // M9 está en Terraza: no se une con Salón.
+    expect((await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: table("M5").id, guests: 12, joinTableIds: [table("M9").id] })).status).toBe(409);
+    // M5 + M6 (configuradas) + M7 (no configurada, misma área) para 12 personas.
+    const id = await openTable("M5", mesero, { guests: 12, joinTableIds: [table("M6").id, table("M7").id] });
+    const c = await getCheck(id);
+    expect(c.tableLabel).toBe("M5 + M6 + M7");
+    expect(c.capacity).toBe(table("M5").capacity + table("M6").capacity + table("M7").capacity);
     floor = (await api("GET", "/floor", mesero)).body;
-    expect(table("M6")).toMatchObject({ status: "ocupada", joinedTo: "M5" });
+    expect(table("M7")).toMatchObject({ status: "ocupada", joinedTo: "M5" });
     expect((await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: table("M6").id, guests: 2 })).status).toBe(409);
-    expect((await getCheck(id)).kind).toBe("mesa");
+  });
+  it("con la cuenta abierta se suelta una mesa y se une otra; no se roba una mesa ocupada", async () => {
+    floor = (await api("GET", "/floor", mesero)).body;
+    const id = floor.tables.find((t: any) => t.label === "M5")!.openCheckId as string;
+    expect((await api("POST", `/orders/checks/${id}/unjoin`, mesero, { tableId: table("M7").id })).body.tableLabel).toBe("M5 + M6");
+    floor = (await api("GET", "/floor", mesero)).body;
+    expect(table("M7").status).toBe("libre");
+    expect((await api("POST", `/orders/checks/${id}/join`, mesero, { tableIds: [table("M7").id] })).body.tableLabel).toBe("M5 + M6 + M7");
+    // M2 tiene su propia cuenta (prueba de cancelaciones): no se puede unir.
+    expect(table("M2").status).not.toBe("libre");
+    expect((await api("POST", `/orders/checks/${id}/join`, mesero, { tableIds: [table("M2").id] })).status).toBe(409);
   });
 });
 

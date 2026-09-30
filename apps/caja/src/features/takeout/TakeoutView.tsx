@@ -1,6 +1,7 @@
 /* Pedidos para llevar (E3-11). Clases y componentes del diseño Stitch de caja (caja-tpv). */
 import { useRealtime, useSession } from "@convivium/app-shell";
 import { useCallback, useEffect, useState } from "react";
+import { NewTakeout } from "./NewTakeout";
 
 interface Takeout {
   id: string; folio: number; label: string; customerName: string | null; customerPhone: string | null; channel: string | null;
@@ -21,6 +22,7 @@ export function TakeoutView({ onCharge, onCount }: { onCharge: (checkId: string)
   const [list, setList] = useState<Takeout[]>([]);
   const [now, setNow] = useState(Date.now());
   const [err, setErr] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const load = useCallback(() => client.request<Takeout[]>("GET", "/orders/takeout").then((l) => { setList(l); onCount(l.filter((t) => t.stage !== "entregado").length); }), [client, onCount]);
   useEffect(() => { load(); const t = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(t); }, [load]);
   useRealtime(["floor"], () => load());
@@ -79,7 +81,8 @@ export function TakeoutView({ onCharge, onCount }: { onCharge: (checkId: string)
   return (
     <main className="flex-1 p-6 space-y-5 bg-marfil min-h-screen">
       <div className="flex items-end justify-between">
-        <div><span className="text-[11px] font-bold uppercase tracking-[0.2em] text-terracota">Caja</span><h1 className="font-headline text-2xl font-bold text-olivo">Pedidos para llevar</h1><p className="text-xs text-stone-500">Se capturan desde el comandero (Para llevar). Aquí se cobran, se avisa al cliente y se entregan.</p></div>
+        <div><span className="text-[11px] font-bold uppercase tracking-[0.2em] text-terracota">Caja</span><h1 className="font-headline text-2xl font-bold text-olivo">Pedidos para llevar</h1><p className="text-xs text-stone-500">Se capturan aquí en el mostrador o desde el comandero. Se cobran, se avisa al cliente y se entregan.</p></div>
+        <button onClick={() => setCreating(true)} className="px-4 py-2.5 rounded-lg bg-olivo text-amber-100 text-sm font-semibold flex items-center gap-1.5 shadow-sm"><span className="material-symbols-outlined text-base">add</span>Nuevo pedido para llevar</button>
       </div>
       <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {[["Activos", String(active.length), "takeout_dining"], ["Listos por entregar", String(list.filter((t) => t.stage === "listo").length), "notifications_active"], ["Tiempo promedio", avgMin !== null ? `${avgMin} min` : "—", "timer"], ["Venta para llevar hoy", money(list.reduce((n, t) => n + t.total, 0)), "payments"]].map(([t, v, i]) => (
@@ -99,6 +102,7 @@ export function TakeoutView({ onCharge, onCount }: { onCharge: (checkId: string)
           );
         })}
       </section>
+      {creating && <NewTakeout onClose={() => setCreating(false)} onCreated={() => { setCreating(false); load(); }} />}
     </main>
   );
 }

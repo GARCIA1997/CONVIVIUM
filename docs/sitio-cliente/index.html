@@ -174,7 +174,7 @@ Barra y caja ─────────┘                          sin interne
         <div class="role"><strong>Mesero</strong><span>Abre mesas, toma comandas, pide la cuenta, registra devoluciones y pedidos para llevar.</span><a href="#comandero">Ver guía</a></div>
         <div class="role"><strong>Capitán</strong><span>Todo lo del mesero, más cortesías y descuentos con tope, cancelaciones de lo enviado y autorizaciones.</span><a href="#capitan">Ver guía</a></div>
         <div class="role"><strong>Cocina y Barra</strong><span>Ven y despachan los platillos de su estación.</span><a href="#estaciones-kds">Ver guía</a></div>
-        <div class="role"><strong>Cajero</strong><span>Abre caja, cobra, entrega pedidos para llevar y hace el corte X.</span><a href="#caja">Ver guía</a></div>
+        <div class="role"><strong>Cajero</strong><span>Abre caja, cobra, captura y entrega pedidos para llevar y hace el corte X.</span><a href="#caja">Ver guía</a></div>
         <div class="role"><strong>Almacén</strong><span>Mermas, traspasos, conteos, propone compras y recibe mercancía.</span><a href="#inventario">Ver guía</a></div>
         <div class="role"><strong>Gerente</strong><span>Corte Z, aprueba compras y ajustes, paga a proveedores, configura menú, mesas, estaciones y personal.</span><a href="#admin">Ver guía</a></div>
         <div class="role"><strong>Dueño</strong><span>Todo, más editor de roles, tablero, bitácora e ingeniería de menú.</span><a href="#reportes">Ver guía</a></div>
@@ -194,8 +194,9 @@ Barra y caja ─────────┘                          sin interne
       <h3>Abrir una mesa</h3>
       <ol class="steps">
         <li>Toca una mesa libre y elige el número de comensales.</li>
-        <li>Si es un grupo grande y la mesa se puede unir, aparece “¿Grupo grande? Unir con…”: elige las mesas y se abre una sola cuenta para todas.</li>
+        <li>Si es un grupo grande, en “¿Grupo grande? Unir con…” elige las mesas a juntar. Primero aparecen las que están junto a la mesa según el plano (también en cadena: M5, M6, M7…) y con “Ver otras mesas libres del área” puedes unir cualquier mesa libre de la misma área. Se abre una sola cuenta para todas y los comensales se ajustan a la capacidad total.</li>
       </ol>
+      <p><b>Si llegan más personas después</b>, abre la cuenta y toca el ícono de mesa en la parte superior: puedes <b>unir otra mesa libre</b> o <b>soltar</b> una que ya no se usa. No se puede unir una mesa que tenga su propia cuenta ni una de otra área.</p>
       <h3>Tomar la comanda</h3>
       <ol class="steps">
         <li>Elige categoría y platillo. Si tiene opciones obligatorias (como el término), el sistema las pide.</li>
@@ -219,7 +220,7 @@ Barra y caja ─────────┘                          sin interne
         <li>Escribe el nombre del cliente y, si quieres avisarle por WhatsApp, su teléfono a 10 dígitos. Elige cuándo lo recoge, el canal (mostrador, teléfono o WhatsApp), una nota y si lleva desechables.</li>
         <li><b>Abrir pedido y capturar</b>: se asigna un folio del día (L-001, L-002…) y capturas los platillos como en una mesa.</li>
       </ol>
-      <p>Los pedidos activos aparecen en una franja arriba del plano. La caja los cobra y los entrega.</p>
+      <p>Los pedidos activos aparecen en una franja arriba del plano. La caja los cobra y los entrega. En el mostrador, la caja también puede capturarlos directamente.</p>
       <h3>Cuenta de barra</h3>
       <p>Para clientes en la barra sin mesa: <b>Cuenta de barra</b> y un nombre o número de pulsera.</p>
     </section>
@@ -262,6 +263,7 @@ Barra y caja ─────────┘                          sin interne
       <div class="note"><b>Dólares</b>El tipo de cambio lo fija la sucursal en Administración → Sucursal. La caja no lo puede modificar. Si la sucursal no acepta dólares, esa opción no aparece.</div>
       <p><b>Dividir la cuenta:</b> en partes iguales o por comensal (C1, C2…). Cada parte se cobra por separado.</p>
       <h3 id="para-llevar-caja">Para llevar</h3>
+      <p>Para un cliente en el mostrador, toca <b>Nuevo pedido para llevar</b>: nombre, teléfono opcional, cuándo lo recoge, platillos (con sus opciones, como el término) y <b>Enviar a cocina</b>. El cajero solo puede capturar en pedidos para llevar, no en mesas.</p>
       <p>La pestaña <b>Para llevar</b> muestra tres columnas: En preparación, Listo para entregar y Entregado hoy, con la hora de recogida (en rojo si ya pasó).</p>
       <ul>
         <li><b>Avisar que está listo</b> abre WhatsApp con el mensaje al cliente.</li>

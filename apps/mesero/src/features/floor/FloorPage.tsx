@@ -4,6 +4,7 @@ import { useRealtime, useSession } from "@convivium/app-shell";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MeseroLayout } from "../layout/MeseroLayout";
+import { JoinPicker } from "./JoinPicker";
 
 type Table = FloorPlan["tables"][number];
 
@@ -108,7 +109,7 @@ export function FloorPage() {
         </button>
       </div>
 
-      {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} partners={plan?.tables.filter((o) => sheet.table.mergeableWith.includes(o.id) && o.status === "libre") ?? []} onCancel={() => setSheet(null)} onConfirm={(g, j) => confirmTable(sheet.table.id, g, j)} />}
+      {sheet?.kind === "mesa" && <GuestsSheet table={sheet.table} tables={plan?.tables ?? []} onCancel={() => setSheet(null)} onConfirm={(g, j) => confirmTable(sheet.table.id, g, j)} />}
       {sheet?.kind === "barra" && <BarSheet onCancel={() => setSheet(null)} onConfirm={confirmBar} />}
       {sheet?.kind === "llevar" && <TakeoutSheet onCancel={() => setSheet(null)} onConfirm={confirmTakeout} />}
     </MeseroLayout>
@@ -246,28 +247,18 @@ function Sheet({ title, onCancel, children }: { title: string; onCancel: () => v
   );
 }
 
-function GuestsSheet({ table, partners, onCancel, onConfirm }: { table: Table; partners: Table[]; onCancel: () => void; onConfirm: (guests: number, join: string[]) => void }) {
+function GuestsSheet({ table, tables, onCancel, onConfirm }: { table: Table; tables: Table[]; onCancel: () => void; onConfirm: (guests: number, join: string[]) => void }) {
   const [join, setJoin] = useState<string[]>([]);
-  const capacity = table.capacity + partners.filter((p) => join.includes(p.id)).reduce((n, p) => n + p.capacity, 0);
-  const title = [table.label, ...partners.filter((p) => join.includes(p.id)).map((p) => p.label)].join(" + ");
+  const joined = join.map((id) => tables.find((t) => t.id === id)!).filter(Boolean);
+  const capacity = table.capacity + joined.reduce((n, p) => n + p.capacity, 0);
+  const title = [table.label, ...joined.map((p) => p.label)].join(" + ");
   return (
     <Sheet title={`Abrir ${title} · comensales`} onCancel={onCancel}>
-      {partners.length > 0 && (
-        <div className="mb-3 p-2.5 rounded-lg border border-[#D4AF7C]/60 bg-[#D4AF7C]/10">
-          <span className="text-[11px] font-semibold text-[#1E2F28] block mb-1.5">¿Grupo grande? Unir con:</span>
-          <div className="flex flex-wrap gap-1.5">
-            {partners.map((p) => {
-              const on = join.includes(p.id);
-              return (
-                <button key={p.id} onClick={() => setJoin(on ? join.filter((x) => x !== p.id) : [...join, p.id])} className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${on ? "bg-[#1E2F28] text-[#D4AF7C] border-[#1E2F28]" : "bg-white text-[#1E2F28] border-[#C9B89F]"}`}>
-                  <span className="material-symbols-outlined text-[14px]">{on ? "link" : "add_link"}</span>{p.label} · {p.capacity}p
-                </button>
-              );
-            })}
-          </div>
-          {join.length > 0 && <p className="text-[10px] text-[#1A1A1A]/60 mt-1.5">Una sola comanda y cuenta para {capacity} lugares.</p>}
-        </div>
-      )}
+      <div className="mb-3 p-2.5 rounded-lg border border-[#D4AF7C]/60 bg-[#D4AF7C]/10">
+        <span className="text-[11px] font-semibold text-[#1E2F28] block mb-1.5">¿Grupo grande? Unir con:</span>
+        <JoinPicker tables={tables} main={table} value={join} onChange={setJoin} />
+        {join.length > 0 && <p className="text-[10px] text-[#1A1A1A]/60 mt-1.5">Una sola comanda y cuenta para {capacity} lugares.</p>}
+      </div>
       <div className="grid grid-cols-4 gap-2">
         {Array.from({ length: capacity + 4 }, (_, i) => i + 1).map((n) => (
           <button key={n} onClick={() => onConfirm(n, join)} className="h-14 rounded-lg bg-white border border-[#C9B89F] text-[#1E2F28] font-display text-xl font-bold active:bg-[#1E2F28] active:text-[#D4AF7C] transition-colors">
