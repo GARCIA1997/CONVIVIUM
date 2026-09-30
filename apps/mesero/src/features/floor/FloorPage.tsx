@@ -257,7 +257,6 @@ function GuestsSheet({ table, tables, onCancel, onConfirm }: { table: Table; tab
       <div className="mb-3 p-2.5 rounded-lg border border-[#D4AF7C]/60 bg-[#D4AF7C]/10">
         <span className="text-[11px] font-semibold text-[#1E2F28] block mb-1.5">¿Grupo grande? Unir con:</span>
         <JoinPicker tables={tables} main={table} value={join} onChange={setJoin} />
-        {join.length > 0 && <p className="text-[10px] text-[#1A1A1A]/60 mt-1.5">Una sola comanda y cuenta para {capacity} lugares.</p>}
       </div>
       <div className="grid grid-cols-4 gap-2">
         {Array.from({ length: capacity + 4 }, (_, i) => i + 1).map((n) => (
