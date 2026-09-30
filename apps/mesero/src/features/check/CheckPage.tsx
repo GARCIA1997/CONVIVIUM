@@ -1,10 +1,11 @@
 /* Diseño: design/stitch/mesero-comanda.html (Stitch). Marcado y clases originales; datos reales. E3-02, E3-03, E3-05, E3-09. */
-import type { Check, Menu, OrderItem, Product } from "@convivium/api-client";
+import type { Check, FloorPlan, Menu, OrderItem, Product } from "@convivium/api-client";
 import { useRealtime, useSession } from "@convivium/app-shell";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ReadyNotifications } from "../notifications/ReadyNotifications";
 import { ReturnSheet } from "./ReturnSheet";
+import { JoinPicker } from "../floor/JoinPicker";
 
 type Course = "entrada" | "fuerte" | "postre" | "bebida" | "sin_tiempo";
 type Draft = { key: number; product: Product; modifierIds: string[]; note?: string; guest: number; course: Course };
@@ -39,6 +40,7 @@ export function CheckPage() {
   const [picking, setPicking] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [returning, setReturning] = useState<OrderItem | null>(null);
+  const [joining, setJoining] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const load = useCallback(() => client.orders.get(checkId!).then(setCheck), [client, checkId]);
@@ -113,6 +115,11 @@ export function CheckPage() {
           </div>
         </div>
         <div className="flex items-center space-x-1">
+          {check.kind === "mesa" && (
+            <button onClick={() => setJoining(true)} aria-label="Unir mesas" title="Unir o soltar mesas" className="p-2 rounded-lg text-[#EAE6DD] hover:text-[#D4AF7C] active:opacity-80 transition-all flex items-center justify-center" type="button">
+              <span className="material-symbols-outlined text-[22px]">table_restaurant</span>
+            </button>
+          )}
           <button onClick={() => client.orders.requestBill(checkId!).then(() => nav("/"))} aria-label="Pedir cuenta" className="p-2 rounded-lg text-[#EAE6DD] hover:text-[#D4AF7C] active:opacity-80 transition-all flex items-center justify-center relative" type="button">
             <span className="material-symbols-outlined text-[22px]">receipt_long</span>
           </button>
@@ -291,6 +298,8 @@ export function CheckPage() {
         <ReturnSheet item={returning} tableLabel={title} onClose={() => setReturning(null)} onDone={(m) => { setReturning(null); setNotice(m); load(); }} />
       )}
 
+      {joining && check.tableId && <JoinTablesSheet check={check} onClose={() => setJoining(false)} onChanged={(m) => { setNotice(m); load(); }} />}
+
       {picking && (
         <ModifierSheet product={picking} guests={guests} guest={guest} course={isBar(picking) ? "bebida" : course}
           onCancel={() => setPicking(null)} onAdd={(ids, note, g) => add(picking, ids, note, g)} />
@@ -338,6 +347,48 @@ export function CheckPage() {
 }
 
 /** El aviso de "listo" también aparece mientras se captura (debajo de las barras fijas). */
+/* Unir más mesas a la cuenta (la familia llegó en dos grupos) o soltar una. Hoja inferior del comandero. */
+function JoinTablesSheet({ check, onClose, onChanged }: { check: Check; onClose: () => void; onChanged: (msg: string) => void }) {
+  const { client } = useSession();
+  const [plan, setPlan] = useState<FloorPlan | null>(null);
+  const [add, setAdd] = useState<string[]>([]);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { client.floor.get().then(setPlan); }, [client]);
+  const main = plan?.tables.find((t) => t.id === check.tableId);
+  const run = async (fn: () => Promise<unknown>, msg: string) => {
+    setErr(null);
+    try { await fn(); onChanged(msg); onClose(); } catch (e) { setErr((e as Error).message); }
+  };
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end justify-center" onClick={onClose}>
+      <div className="w-full max-w-[414px] bg-[#F5F3EF] rounded-t-2xl p-4 pb-6 border-t border-[#C9B89F] space-y-3" onClick={(e) => e.stopPropagation()}>
+        <div className="w-10 h-1 rounded-full bg-[#C9B89F] mx-auto" />
+        <h3 className="font-headline text-lg font-bold text-[#1E2F28]">Mesas de la cuenta · {check.capacity ?? ""} lugares</h3>
+        {check.joinedTables.length > 0 && (
+          <div>
+            <span className="block text-[10px] uppercase tracking-wider font-semibold text-[#1E2F28]/60 mb-1">Unidas</span>
+            <div className="flex flex-wrap gap-1.5">
+              {check.joinedTables.map((t) => (
+                <button key={t.id} onClick={() => run(() => client.request("POST", `/orders/checks/${check.id}/unjoin`, { tableId: t.id }), `${t.label} quedó libre`)} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-[#B45A3C]/40 bg-white text-[#B45A3C] flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">link_off</span>Soltar {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div>
+          <span className="block text-[11px] font-semibold text-[#1E2F28] mb-1.5">Unir otra mesa</span>
+          {!plan || !main ? <p className="text-xs text-[#1A1A1A]/60">Cargando mesas…</p> : <JoinPicker tables={plan.tables} main={main} already={check.joinedTables.map((t) => t.id)} value={add} onChange={setAdd} />}
+        </div>
+        {err && <p className="text-xs text-[#B45A3C]">{err}</p>}
+        <button disabled={!add.length} onClick={() => run(() => client.request("POST", `/orders/checks/${check.id}/join`, { tableIds: add }), "Mesas unidas a la cuenta")} className="w-full h-12 rounded-lg bg-[#1E2F28] text-[#D4AF7C] font-semibold tracking-wide disabled:opacity-40">
+          Unir {add.length ? `${add.length} mesa${add.length > 1 ? "s" : ""}` : "mesas"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function ReadyNotificationsSlot() {
   return (
     <div className="fixed top-[104px] left-0 right-0 z-40 max-w-xl mx-auto">

@@ -31,13 +31,17 @@ export class OrdersService {
     const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
     const discounts = discountRows.reduce((s, d) => s + d.amount, 0);
     const [table] = check.tableId ? await this.db.select().from(schema.tables).where(eq(schema.tables.id, check.tableId)) : [];
+    const joinedTables = check.joinedTableIds.length ? await this.db.select({ id: schema.tables.id, label: schema.tables.label, capacity: schema.tables.capacity }).from(schema.tables).where(inArray(schema.tables.id, check.joinedTableIds)) : [];
     const [waiter] = await this.db.select({ name: schema.users.name }).from(schema.users).where(eq(schema.users.id, check.waiterId));
     const promoIds = [...new Set(items.map((i) => i.promotionId).filter((x): x is string => !!x))];
     const promos = promoIds.length ? await this.db.select({ id: schema.promotions.id, name: schema.promotions.name }).from(schema.promotions).where(inArray(schema.promotions.id, promoIds)) : [];
     const promoName = (id: string | null) => promos.find((p) => p.id === id)?.name ?? null;
     return {
       ...check,
-      tableLabel: table?.label ?? (check.kind === "llevar" ? `Llevar ${takeoutFolio(check.folio)}` : null),
+      // M5 + M6 + M7 cuando hay mesas unidas.
+      tableLabel: table ? [table.label, ...joinedTables.map((t) => t.label)].join(" + ") : check.kind === "llevar" ? `Llevar ${takeoutFolio(check.folio)}` : null,
+      joinedTables,
+      capacity: table ? table.capacity + joinedTables.reduce((n, t) => n + t.capacity, 0) : null,
       waiterName: waiter?.name ?? null,
       openedAt: check.openedAt.toISOString(),
       pickupAt: check.pickupAt?.toISOString() ?? null,
@@ -136,22 +140,7 @@ export class OrdersService {
 
   async openCheck(who: Principal, body: z.infer<typeof orders.OpenCheckBody>) {
     const joined = body.kind === "mesa" ? [...new Set(body.joinTableIds ?? [])].filter((id) => id !== body.tableId) : [];
-    if (body.kind === "mesa") {
-      const all = [body.tableId, ...joined];
-      if (joined.length) {
-        const [main] = await this.db.select().from(schema.tables).where(and(eq(schema.tables.id, body.tableId), eq(schema.tables.branchId, who.branchId)));
-        if (!main || joined.some((id) => !main.mergeableWith.includes(id))) throw conflict("not_mergeable", "Esas mesas no están configuradas para unirse");
-      }
-      const [busy] = await this.db
-        .select({ id: schema.checks.id })
-        .from(schema.checks)
-        .where(and(
-          eq(schema.checks.branchId, who.branchId),
-          inArray(schema.checks.status, ["abierta", "pidio_cuenta"]),
-          or(inArray(schema.checks.tableId, all), arrayOverlaps(schema.checks.joinedTableIds, all)),
-        ));
-      if (busy) throw conflict("table_busy", joined.length ? "Alguna de las mesas ya tiene una cuenta abierta" : "La mesa ya tiene una cuenta abierta");
-    }
+    if (body.kind === "mesa") await this.assertJoinable(who, body.tableId, joined);
     const [check] = await this.db
       .insert(schema.checks)
       .values({
@@ -172,6 +161,52 @@ export class OrdersService {
     if (body.kind === "mesa") for (const tableId of [body.tableId, ...joined]) this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "ocupada" });
     if (body.kind === "llevar") this.app.hub.publish(["floor"], { type: "takeout.updated", checkId: check!.id });
     return check!;
+  }
+
+  /**
+   * E3-10 · Mesas unidas para grupos grandes. Cualquier mesa activa y libre del mismo área que la principal
+   * se puede unir (así se juntan en la vida real); las configuradas como unibles en el plano solo se sugieren primero.
+   * `ownCheckId`: la cuenta que ya ocupa esas mesas (al unir más), que no cuenta como "otra cuenta".
+   */
+  private async assertJoinable(who: Principal, mainId: string, joinIds: string[], ownCheckId?: string) {
+    if (joinIds.length > 8) throw conflict("too_many", "Máximo 8 mesas unidas en una cuenta");
+    const ids = [mainId, ...joinIds];
+    const tables = await this.db.select().from(schema.tables).where(and(inArray(schema.tables.id, ids), eq(schema.tables.branchId, who.branchId), eq(schema.tables.active, true)));
+    const main = tables.find((t) => t.id === mainId);
+    if (!main || tables.length !== new Set(ids).size) throw notFound("Mesa");
+    if (tables.some((t) => t.areaId !== main.areaId)) throw conflict("other_area", "Solo se unen mesas de la misma área");
+    const busy = await this.db
+      .select({ id: schema.checks.id })
+      .from(schema.checks)
+      .where(and(
+        eq(schema.checks.branchId, who.branchId),
+        inArray(schema.checks.status, ["abierta", "pidio_cuenta"]),
+        or(inArray(schema.checks.tableId, ids), arrayOverlaps(schema.checks.joinedTableIds, ids)),
+      ));
+    if (busy.some((c) => c.id !== ownCheckId)) throw conflict("table_busy", joinIds.length ? "Alguna de las mesas ya tiene una cuenta abierta" : "La mesa ya tiene una cuenta abierta");
+  }
+
+  /** Une más mesas a una cuenta abierta (la familia llegó en dos grupos). */
+  async joinTables(who: Principal, checkId: string, tableIds: string[]) {
+    const check = await this.getCheck(who, checkId);
+    if (check.kind !== "mesa" || !check.tableId) throw conflict("not_table", "Solo las cuentas de mesa se unen");
+    if (check.status !== "abierta" && check.status !== "pidio_cuenta") throw conflict("check_closed", "La cuenta ya está cerrada");
+    const next = [...new Set([...check.joinedTableIds, ...tableIds])].filter((id) => id !== check.tableId);
+    await this.assertJoinable(who, check.tableId, next, checkId);
+    await this.db.update(schema.checks).set({ joinedTableIds: next }).where(eq(schema.checks.id, checkId));
+    await recordEvent(this.db, who, { type: "check.tables_joined", entity: "check", entityId: checkId, data: { added: tableIds } });
+    for (const tableId of tableIds) this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "ocupada" });
+    return this.getCheck(who, checkId);
+  }
+
+  /** Suelta una mesa unida (el grupo se acomodó en menos mesas). La mesa principal no se suelta. */
+  async unjoinTable(who: Principal, checkId: string, tableId: string) {
+    const check = await this.getCheck(who, checkId);
+    if (!check.joinedTableIds.includes(tableId)) throw conflict("not_joined", "Esa mesa no está unida a la cuenta");
+    await this.db.update(schema.checks).set({ joinedTableIds: check.joinedTableIds.filter((id) => id !== tableId) }).where(eq(schema.checks.id, checkId));
+    await recordEvent(this.db, who, { type: "check.table_released", entity: "check", entityId: checkId, data: { tableId } });
+    this.app.hub.publish(["floor"], { type: "table.status", tableId, status: "libre" });
+    return this.getCheck(who, checkId);
   }
 
   /** E3-02 · Agrega productos; se rutea cada uno a su(s) estación(es) (E2-04). */

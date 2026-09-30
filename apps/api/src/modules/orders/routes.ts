@@ -31,6 +31,12 @@ const plugin: ApiModule["plugin"] = async (app) => {
     return reply.status(201).send(await svc.openCheck(req.user, req.body));
   });
 
+  /** E3-10 · Unir más mesas a una cuenta abierta o soltar una. */
+  app.post("/checks/:id/join", { onRequest: [app.guard("mesa.abrir")], schema: { tags, params: IdParam, body: z.object({ tableIds: z.array(z.string().uuid()).min(1).max(8) }) } }, async (req) =>
+    svc.joinTables(req.user, req.params.id, req.body.tableIds));
+  app.post("/checks/:id/unjoin", { onRequest: [app.guard("mesa.abrir")], schema: { tags, params: IdParam, body: z.object({ tableId: z.string().uuid() }) } }, async (req) =>
+    svc.unjoinTable(req.user, req.params.id, req.body.tableId));
+
   /** E3-11 · Pedidos para llevar del día y entrega al cliente. */
   app.get("/takeout", { onRequest: [app.guard("pedido_llevar.abrir")], schema: { tags } }, async (req) => svc.takeoutBoard(req.user));
   app.post("/checks/:id/hand-over", { onRequest: [app.guard("pedido_llevar.abrir")], schema: { tags, params: IdParam } }, async (req) => svc.handOver(req.user, req.params.id));
@@ -39,9 +45,15 @@ const plugin: ApiModule["plugin"] = async (app) => {
     svc.getCheck(req.user, req.params.id),
   );
 
-  app.post("/checks/:id/items", { onRequest: [app.guard("comanda.capturar")], schema: { tags, params: IdParam, body: orders.AddItemsBody } }, async (req, reply) =>
-    reply.status(201).send(await svc.addItems(req.user, req.params.id, req.body)),
-  );
+  // Capturar: comanda.capturar en cualquier cuenta; quien atiende pedidos para llevar (p. ej. cajero en mostrador)
+  // puede capturar solo en cuentas "llevar".
+  app.post("/checks/:id/items", { onRequest: [app.guard()], schema: { tags, params: IdParam, body: orders.AddItemsBody } }, async (req, reply) => {
+    if (!(await app.policy.can(req.user, "comanda.capturar"))) {
+      const check = await svc.getCheck(req.user, req.params.id);
+      if (check.kind !== "llevar" || !(await app.policy.can(req.user, "pedido_llevar.abrir"))) throw forbidden("Requiere permiso comanda.capturar");
+    }
+    return reply.status(201).send(await svc.addItems(req.user, req.params.id, req.body));
+  });
 
   app.post("/checks/:id/fire", { onRequest: [app.guard("comanda.capturar")], schema: { tags, params: IdParam, body: orders.FireCourseBody } }, async (req) =>
     svc.fireCourse(req.user, req.params.id, req.body.course),

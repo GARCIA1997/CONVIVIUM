@@ -39,6 +39,20 @@ describe("pedidos para llevar (E3-11)", () => {
   });
 });
 
+describe("captura en mostrador", () => {
+  it("el cajero abre y captura pedidos para llevar, pero no puede capturar en una mesa", async () => {
+    const p = menu.products.find((x) => x.name.startsWith("Tacos"))!;
+    const c = (await api("POST", "/orders/checks", cajero, { kind: "llevar", customerName: "Mostrador" })).body;
+    expect((await api("POST", `/orders/checks/${c.id}/items`, cajero, { items: [{ productId: p.id, quantity: 2, fireNow: true }] })).status).toBe(201);
+    expect((await api("GET", `/orders/checks/${c.id}`, cajero)).body.total).toBe(p.price * 2);
+    expect((await api("POST", "/orders/checks", cajero, { kind: "mesa", tableId: crypto.randomUUID(), guests: 2 })).status).toBe(403);
+    const floor = (await api("GET", "/floor", mesero)).body;
+    const free = floor.tables.find((t: any) => t.status === "libre");
+    const mesa = (await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: free.id, guests: 2 })).body;
+    expect((await api("POST", `/orders/checks/${mesa.id}/items`, cajero, { items: [{ productId: p.id, quantity: 1 }] })).status).toBe(403);
+  });
+});
+
 describe("proveedores (E8-01)", () => {
   it("alta completa, lista de precios con historial y variación", async () => {
     const ingredients = (await api("GET", "/inventory/ingredients", owner)).body as { id: string; name: string }[];

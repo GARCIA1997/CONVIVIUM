@@ -72,6 +72,9 @@ export const Check = z.object({
   note: z.string().nullable().default(null),
   handedOverAt: Timestamp.nullable().default(null),
   tableId: Id.nullable(),
+  /** Mesas unidas a la principal (grupo grande) y capacidad total. */
+  joinedTables: z.array(z.object({ id: Id, label: z.string(), capacity: z.number().int() })).default([]),
+  capacity: z.number().int().nullable().default(null),
   name: z.string().nullable(),
   guests: z.number().int().nullable(),
   waiterId: Id,
