@@ -254,7 +254,12 @@ export class InventoryService {
     if (!ingredientIds.length) return;
     const crit = await this.db.select().from(schema.ingredients).where(and(inArray(schema.ingredients.id, ingredientIds), eq(schema.ingredients.critical, true)));
     if (!crit.length) return;
-    const stock = await this.db.select().from(schema.stock).where(inArray(schema.stock.ingredientId, crit.map((c) => c.id)));
+    // Solo cuenta la existencia de los almacenes de esta sucursal: otra sucursal con stock no evita el agotado aquí.
+    const stock = await this.db
+      .select({ ingredientId: schema.stock.ingredientId, quantity: schema.stock.quantity })
+      .from(schema.stock)
+      .innerJoin(schema.warehouses, eq(schema.warehouses.id, schema.stock.warehouseId))
+      .where(and(inArray(schema.stock.ingredientId, crit.map((c) => c.id)), eq(schema.warehouses.branchId, who.branchId)));
     const out = crit.filter((c) => stock.filter((s) => s.ingredientId === c.id).reduce((a, s) => a + num(s.quantity), 0) <= 0);
     if (!out.length) return;
     const recipes = await this.recipeMap(who.tenantId);
@@ -264,12 +269,19 @@ export class InventoryService {
       const used = explode(r, recipes);
       if (out.some((c) => used.has(c.id))) products.add(r.row.productId);
     }
+    if (!products.size) return;
+    const already = await this.db
+      .select({ productId: schema.productAvailability.productId })
+      .from(schema.productAvailability)
+      .where(and(eq(schema.productAvailability.branchId, who.branchId), inArray(schema.productAvailability.productId, [...products]), eq(schema.productAvailability.soldOut, true)));
+    for (const a of already) products.delete(a.productId);
     for (const productId of products) {
       await this.db
         .insert(schema.productAvailability)
         .values({ productId, branchId: who.branchId, soldOut: true })
         .onConflictDoUpdate({ target: [schema.productAvailability.productId, schema.productAvailability.branchId], set: { soldOut: true } });
       this.app.hub.publish(["menu"], { type: "product.sold_out", productId, soldOut: true });
+      await recordEvent(this.db, who, { type: "product.auto_sold_out", entity: "product", entityId: productId, data: { ingredients: out.map((c) => c.name) } });
     }
   }
 

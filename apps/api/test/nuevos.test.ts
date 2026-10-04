@@ -47,7 +47,8 @@ describe("captura en mostrador", () => {
     expect((await api("GET", `/orders/checks/${c.id}`, cajero)).body.total).toBe(p.price * 2);
     expect((await api("POST", "/orders/checks", cajero, { kind: "mesa", tableId: crypto.randomUUID(), guests: 2 })).status).toBe(403);
     const floor = (await api("GET", "/floor", mesero)).body;
-    const free = floor.tables.find((t: any) => t.status === "libre");
+    // La última mesa libre: flows.test.ts usa las primeras (M1–M9) y el orden de archivos no está garantizado.
+    const free = [...floor.tables].reverse().find((t: any) => t.status === "libre");
     const mesa = (await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: free.id, guests: 2 })).body;
     expect((await api("POST", `/orders/checks/${mesa.id}/items`, cajero, { items: [{ productId: p.id, quantity: 1 }] })).status).toBe(403);
   });
@@ -160,5 +161,27 @@ describe("eliminar recetas", () => {
     expect((await api("DELETE", `/inventory/recipes/${main.id}`, owner)).status).toBe(200);
     expect((await api("DELETE", `/inventory/recipes/${sub.id}`, owner)).status).toBe(200);
     expect((await api("GET", `/inventory/recipes/${sub.id}`, owner)).status).toBe(404);
+  });
+});
+
+describe("agotado automático por insumo crítico (E7-07)", () => {
+  it("al quedar en cero en la sucursal marca agotado el platillo, una sola vez y con bitácora", async () => {
+    const ing = (await api("POST", "/inventory/ingredients", owner, { name: "Trufa prueba", purchaseUnit: "kg", useUnit: "g", conversion: 1000, minStock: 0, maxStock: 100, critical: true })).body;
+    // Producto propio: no tocar recetas del seed que usan otras pruebas en paralelo.
+    const base = (menu.products as any[]).find((x) => x.name.startsWith("Hamburguesa"))!;
+    const created = (await api("POST", "/catalog/products", owner, { categoryId: base.categoryId, name: "Platillo trufado prueba", price: 25000, targetPrepSec: 600, stationIds: base.stationIds, photoUrl: null, active: true, soldOut: false })).body;
+    const p = { id: created.id as string, name: "Platillo trufado prueba" };
+    await api("POST", "/inventory/recipes", owner, { name: p.name, productId: p.id, modifierId: null, isSubRecipe: false, yieldQty: null, steps: [], lines: [{ ingredientId: ing.id, subRecipeId: null, quantity: 5, wastePct: 0 }] });
+    const wh = ((await api("GET", "/inventory/warehouses", owner)).body as any[])[0];
+    const mv = (direction: string, type: string) => api("POST", "/inventory/movements", owner, { type, ingredientId: ing.id, quantity: 10, warehouseId: wh.id, direction });
+    await mv("entrada", "ajuste");
+    const soldOut = async () => ((await api("GET", "/catalog/menu", mesero)).body.products as any[]).find((x) => x.id === p.id).soldOut;
+    expect(await soldOut()).toBe(false);
+    await mv("salida", "merma");
+    expect(await soldOut()).toBe(true);
+    await mv("salida", "merma"); // ya agotado: no debe volver a registrar
+    const { schema, eq, and } = await import("@convivium/db");
+    const events = await getApp().db.select().from(schema.events).where(and(eq(schema.events.type, "product.auto_sold_out"), eq(schema.events.entityId, p.id)));
+    expect(events).toHaveLength(1);
   });
 });
