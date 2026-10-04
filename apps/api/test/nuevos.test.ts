@@ -193,3 +193,19 @@ describe("agotado automático por insumo crítico (E7-07)", () => {
     expect(events).toHaveLength(1);
   });
 });
+
+describe("cierre de sesión por inactividad (E1-03)", () => {
+  it("la sucursal guarda minutos por app; cualquier rol los lee y se validan rangos", async () => {
+    const b = (await api("GET", "/branch", mesero)).body;
+    expect(b.idleMinutes).toEqual({ mesero: 5, caja: 30, estacion: 720 });
+    const { id: _id, idleMinutes: _idle, ...body } = b;
+    expect((await api("PUT", "/branch", owner, { ...body, idleMinutes: { mesero: 0, caja: 30, estacion: 720 } })).status).toBe(400);
+    expect((await api("PUT", "/branch", mesero, { ...body, idleMinutes: { mesero: 10, caja: 30, estacion: 720 } })).status).toBe(403);
+    expect((await api("PUT", "/branch", owner, { ...body, idleMinutes: { mesero: 10, caja: 45, estacion: 600 } })).status).toBe(200);
+    expect((await api("GET", "/branch", cajero)).body.idleMinutes).toEqual({ mesero: 10, caja: 45, estacion: 600 });
+    // Sin idleMinutes (clientes anteriores) no se tocan.
+    expect((await api("PUT", "/branch", owner, body)).status).toBe(200);
+    expect((await api("GET", "/branch", owner)).body.idleMinutes.mesero).toBe(10);
+    await api("PUT", "/branch", owner, { ...body, idleMinutes: { mesero: 5, caja: 30, estacion: 720 } });
+  });
+});

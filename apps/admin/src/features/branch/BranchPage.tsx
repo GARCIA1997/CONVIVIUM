@@ -2,7 +2,9 @@
 import { client } from "@convivium/app-shell";
 import { useEffect, useState } from "react";
 
-interface Branch { name: string; timezone: string; ivaPct: 16 | 8; usdRate: number | null }
+type IdleKey = "mesero" | "caja" | "estacion";
+interface Branch { name: string; timezone: string; ivaPct: 16 | 8; usdRate: number | null; idleMinutes: Record<IdleKey, number> }
+const IDLE: [IdleKey, string, number][] = [["mesero", "Comandero (meseros)", 60], ["caja", "Caja", 240], ["estacion", "Estaciones (KDS)", 1440]];
 const ZONES: [string, string][] = [
   ["America/Mexico_City", "Centro (CDMX, Guadalajara, Monterrey)"],
   ["America/Cancun", "Sureste (Quintana Roo)"],
@@ -45,11 +47,19 @@ export function BranchPage() {
             )}
             <span className="block text-[11px] text-stone-500 mt-1">La caja siempre usa este tipo de cambio; el cambio se entrega en pesos.</span>
           </div>
+          <div><span className="block font-semibold text-stone-700 mb-1.5">Cierre de sesión por inactividad</span>
+            <div className="grid grid-cols-3 gap-2">{IDLE.map(([k, l, max]) => (
+              <label key={k} className="block"><span className="block text-stone-600 mb-1">{l}</span>
+                <span className="flex items-center gap-1.5"><input type="number" min={1} max={max} value={b.idleMinutes[k]} onChange={(e) => setB({ ...b, idleMinutes: { ...b.idleMinutes, [k]: Math.round(Number(e.target.value)) } })} className="w-20 font-mono border border-arena-border rounded-lg px-3 py-2 text-right" /><span className="text-stone-600">min</span></span>
+              </label>
+            ))}</div>
+            <span className="block text-[11px] text-stone-500 mt-1">Pasado ese tiempo sin tocar la pantalla, el equipo vuelve a pedir PIN. Aplica la próxima vez que cada persona entre.</span>
+          </div>
         </div>
         {msg && <p className={`text-xs ${msg.ok ? "text-emerald-700" : "text-terracota"}`}>{msg.text}</p>}
         <div className="flex justify-end gap-2">
           <button disabled={!dirty} onClick={() => setB(saved)} className="px-4 py-2 rounded-lg border border-arena-border text-xs disabled:opacity-40">Descartar</button>
-          <button disabled={!dirty || b.name.trim().length < 2} onClick={save} className="px-5 py-2 rounded-lg bg-olivo text-white text-xs font-semibold disabled:opacity-40">Guardar</button>
+          <button disabled={!dirty || b.name.trim().length < 2 || IDLE.some(([k, , max]) => !(b.idleMinutes[k] >= 1 && b.idleMinutes[k] <= max))} onClick={save} className="px-5 py-2 rounded-lg bg-olivo text-white text-xs font-semibold disabled:opacity-40">Guardar</button>
         </div>
       </div>
     </main>

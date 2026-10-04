@@ -21,19 +21,40 @@ type DeviceKind = "mesero" | "kds_tv" | "estacion_tactil" | "caja" | "admin";
  *  2. Si no hay sesión → selector de usuario + PIN (E1-03).
  *  3. Con sesión → renderiza la app. Cierra sesión por inactividad.
  */
-export function DeviceGate({ kind, deviceLabel, children, idleMinutes = 5 }: { kind: DeviceKind; deviceLabel: string; children: ReactNode; idleMinutes?: number }) {
+export function DeviceGate({ kind, deviceLabel, children, idleMinutes: fallback = 5 }: { kind: DeviceKind; deviceLabel: string; children: ReactNode; idleMinutes?: number }) {
   const [paired, setPaired] = useState(!!client.deviceToken);
   const [session, setSession] = useState<Session | null>(client.session);
+  const [idleMinutes, setIdleMinutes] = useState(fallback);
   useEffect(() => client.onSessionChange(setSession), []);
   const logout = () => { client.logout(); setSession(null); };
 
+  // Minutos configurados en la sucursal (E1-03); si falla la consulta se queda el valor por omisión de la app.
   useEffect(() => {
     if (!session) return;
-    let t = setTimeout(logout, idleMinutes * 60_000);
-    const reset = () => { clearTimeout(t); t = setTimeout(logout, idleMinutes * 60_000); };
-    window.addEventListener("pointerdown", reset);
-    return () => { clearTimeout(t); window.removeEventListener("pointerdown", reset); };
-  }, [session, idleMinutes]);
+    const key = kind === "mesero" ? "mesero" : kind === "caja" ? "caja" : "estacion";
+    client.request<{ idleMinutes?: Record<"mesero" | "caja" | "estacion", number> }>("GET", "/branch")
+      .then((b) => b.idleMinutes?.[key] && setIdleMinutes(b.idleMinutes[key]))
+      .catch(() => {});
+  }, [session, kind]);
+
+  // Se compara contra la hora de la última actividad y no con un setTimeout: el navegador congela los
+  // temporizadores con el teléfono bloqueado o la app en segundo plano, y al volver la sesión seguiría abierta.
+  useEffect(() => {
+    if (!session) return;
+    let last = Date.now();
+    const touch = () => { last = Date.now(); };
+    const check = () => { if (Date.now() - last >= idleMinutes * 60_000) logout(); };
+    const onVisible = () => document.visibilityState === "visible" && check();
+    const events = ["pointerdown", "keydown"] as const;
+    for (const e of events) window.addEventListener(e, touch);
+    document.addEventListener("visibilitychange", onVisible);
+    const t = setInterval(check, 15_000);
+    return () => {
+      clearInterval(t);
+      for (const e of events) window.removeEventListener(e, touch);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [session, idleMinutes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!paired) return <PairScreen kind={kind} deviceLabel={deviceLabel} onDone={() => setPaired(true)} />;
   if (!session) return <PinScreen deviceLabel={deviceLabel} onLogin={setSession} />;

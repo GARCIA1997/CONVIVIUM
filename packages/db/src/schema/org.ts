@@ -24,6 +24,10 @@ export const branches = pgTable("branches", {
   timezone: text("timezone").notNull().default("America/Mexico_City"),
   ivaPct: integer("iva_pct").notNull().default(16),
   usdRate: integer("usd_rate_cents"),
+  /** Minutos sin actividad antes de regresar a la pantalla de PIN, por tipo de app (E1-03). */
+  idleMinutesMesero: integer("idle_minutes_mesero").notNull().default(5),
+  idleMinutesCaja: integer("idle_minutes_caja").notNull().default(30),
+  idleMinutesEstacion: integer("idle_minutes_estacion").notNull().default(720),
   createdAt: createdAt(),
 });
 

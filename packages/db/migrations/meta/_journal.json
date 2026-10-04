@@ -127,6 +127,13 @@
       "when": 1791144289916,
       "tag": "0017_branding",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791146376200,
+      "tag": "0018_idle_logout",
+      "breakpoints": true
     }
   ]
 }
