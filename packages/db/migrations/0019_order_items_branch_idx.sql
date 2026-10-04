@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "order_items_branch_created_idx" ON "order_items" USING btree ("branch_id","created_at");

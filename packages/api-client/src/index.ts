@@ -135,6 +135,7 @@ export function createClient(baseUrl = "/v1") {
     },
     catalog: {
       menu: () => request<Menu>("GET", "/catalog/menu"),
+      favorites: () => request<{ productIds: string[] }>("GET", "/catalog/favorites"),
       stations: () => request<{ id: string; name: string; kind: "cocina" | "barra" }[]>("GET", "/catalog/stations"),
       reasons: (kind?: string) => request<{ id: string; label: string; kind: string }[]>("GET", `/catalog/reasons${kind ? `?kind=${kind}` : ""}`),
       setSoldOut: (productId: string, soldOut: boolean) => request("PUT", `/catalog/products/${productId}/sold-out`, { soldOut }),

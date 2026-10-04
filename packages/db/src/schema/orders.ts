@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid, index } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
 export const checkKindEnum = pgEnum("check_kind", ["mesa", "barra", "llevar"]);
@@ -65,7 +65,10 @@ export const orderItems = pgTable("order_items", {
   /** Descuento total del renglón por promoción (centavos) y la regla que lo dio. */
   promoDiscount: integer("promo_discount").notNull().default(0),
   promotionId: uuid("promotion_id"),
-});
+}, (t) => [
+  // Ventas por periodo de la sucursal (favoritos del comandero, reportes).
+  index("order_items_branch_created_idx").on(t.branchId, t.createdAt),
+]);
 
 export const approvalKindEnum = pgEnum("approval_kind", ["cancelacion", "devolucion_retiro", "cortesia", "descuento", "reapertura"]);
 export const approvalStatusEnum = pgEnum("approval_status", ["pendiente", "aprobada", "rechazada"]);

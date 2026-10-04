@@ -25,6 +25,9 @@ function courseStatus(items: OrderItem[]) {
   return { label: "marchando", cls: "bg-emerald-100 text-emerald-800" };
 }
 
+/** Pestaña virtual con los más vendidos de la sucursal (E3-02). */
+const FAV = "__favoritos";
+
 export function CheckPage() {
   const { checkId } = useParams<{ checkId: string }>();
   const { client, session } = useSession();
@@ -34,6 +37,7 @@ export function CheckPage() {
   const [stations, setStations] = useState<{ id: string; name: string; kind: string }[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [guest, setGuest] = useState(1);
   const [course, setCourse] = useState<Course>("fuerte");
   const [draft, setDraft] = useState<Draft[]>([]);
@@ -46,7 +50,12 @@ export function CheckPage() {
   const load = useCallback(() => client.orders.get(checkId!).then(setCheck), [client, checkId]);
   useEffect(() => {
     load();
-    client.catalog.menu().then((m) => { setMenu(m); setCategoryId(m.categories[0]?.id ?? null); });
+    // E3-02 · Si hay favoritos se abre en ellos; si no (sucursal nueva), en la primera categoría.
+    Promise.all([client.catalog.menu(), client.catalog.favorites().catch(() => ({ productIds: [] }))]).then(([m, f]) => {
+      setMenu(m);
+      setFavorites(f.productIds);
+      setCategoryId(f.productIds.length ? FAV : (m.categories[0]?.id ?? null));
+    });
     client.catalog.stations().then(setStations);
   }, [client, load]);
   useRealtime(["menu", "floor"], (e) => {
@@ -55,12 +64,16 @@ export function CheckPage() {
     else load();
   });
 
-  const category = menu?.categories.find((c) => c.id === categoryId);
+  const category = categoryId === FAV ? { name: "Favoritos" } : menu?.categories.find((c) => c.id === categoryId);
   const products = useMemo(() => {
     if (!menu) return [];
     const q = query.trim().toLowerCase();
+    if (!q && categoryId === FAV) {
+      const byId = new Map(menu.products.map((p) => [p.id, p]));
+      return favorites.map((id) => byId.get(id)).filter((p): p is Product => !!p && p.active);
+    }
     return menu.products.filter((p) => p.active && (q ? p.name.toLowerCase().includes(q) : p.categoryId === categoryId));
-  }, [menu, query, categoryId]);
+  }, [menu, query, categoryId, favorites]);
   const stationKind = (id: string) => stations.find((s) => s.id === id)?.kind;
   const stationName = (p: Product) => stations.find((s) => s.id === p.stationIds[0])?.name ?? "";
   const isBar = (p: Product) => stationKind(p.stationIds[0]!) === "barra";
@@ -159,7 +172,7 @@ export function CheckPage() {
         </div>
 
         <nav aria-label="Categorías de menú" className="flex space-x-2 overflow-x-auto custom-scrollbar pb-1 -mx-3.5 px-3.5">
-          {menu.categories.map((c) =>
+          {[...(favorites.length ? [{ id: FAV, name: "★ Favoritos" }] : []), ...menu.categories].map((c) =>
             c.id === categoryId && !query ? (
               <button key={c.id} className="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-[#D4AF7C] text-[#1E2F28] border border-[#D4AF7C] shadow-sm" type="button">{c.name}</button>
             ) : (

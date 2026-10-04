@@ -1,5 +1,5 @@
 import { catalog } from "@convivium/contracts";
-import { and, eq, inArray, schema } from "@convivium/db";
+import { and, desc, eq, gte, inArray, notInArray, schema, sql } from "@convivium/db";
 import { randomUUID } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -39,6 +39,32 @@ const plugin: ApiModule["plugin"] = async (app) => {
         soldOut: avail.find((a) => a.productId === p.id)?.soldOut ?? false,
       })),
     };
+  });
+
+  /**
+   * E3-02 · Favoritos del comandero: los más vendidos de la sucursal en los últimos 7 días
+   * (no solo "hoy", que al abrir estaría vacío). Caché de 5 min por sucursal: lo consulta cada cuenta abierta.
+   */
+  const favCache = new Map<string, { at: number; ids: string[] }>();
+  app.get("/favorites", { onRequest: [app.guard()], schema: { tags: ["catálogo"], response: { 200: z.object({ productIds: z.array(z.string()) }) } } }, async (req) => {
+    const { branchId } = req.user;
+    const hit = favCache.get(branchId);
+    if (hit && Date.now() - hit.at < 5 * 60_000) return { productIds: hit.ids };
+    const qty = sql<number>`sum(${schema.orderItems.quantity})`;
+    const rows = await db
+      .select({ productId: schema.orderItems.productId, qty })
+      .from(schema.orderItems)
+      .where(and(
+        eq(schema.orderItems.branchId, branchId),
+        gte(schema.orderItems.createdAt, new Date(Date.now() - 7 * 864e5)),
+        notInArray(schema.orderItems.state, ["cancelado", "devuelto"]),
+      ))
+      .groupBy(schema.orderItems.productId)
+      .orderBy(desc(qty))
+      .limit(8);
+    const ids = rows.map((r) => r.productId);
+    favCache.set(branchId, { at: Date.now(), ids });
+    return { productIds: ids };
   });
 
   /** E2-01/E2-04 · Alta de producto. */

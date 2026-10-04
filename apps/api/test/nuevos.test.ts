@@ -209,3 +209,23 @@ describe("cierre de sesión por inactividad (E1-03)", () => {
     await api("PUT", "/branch", owner, { ...body, idleMinutes: { mesero: 5, caja: 30, estacion: 720 } });
   });
 });
+
+describe("favoritos del comandero (E3-02)", () => {
+  it("devuelve hasta 8 productos de la carta, el más vendido primero", async () => {
+    const r = await api("GET", "/catalog/favorites", mesero);
+    expect(r.status).toBe(200);
+    const ids = r.body.productIds as string[];
+    expect(ids.length).toBeGreaterThan(0); // flows.test.ts y este archivo ya registraron ventas
+    expect(ids.length).toBeLessThanOrEqual(8);
+    const known = new Set(menu.products.map((p) => p.id));
+    expect(ids.every((id) => known.has(id))).toBe(true);
+    const { schema, sql } = await import("@convivium/db");
+    const sold = await getApp().db
+      .select({ productId: schema.orderItems.productId, q: sql<number>`sum(${schema.orderItems.quantity})::int` })
+      .from(schema.orderItems)
+      .where(sql`${schema.orderItems.state} not in ('cancelado','devuelto')`)
+      .groupBy(schema.orderItems.productId);
+    const qty = new Map(sold.map((x) => [x.productId, x.q]));
+    expect(qty.get(ids[0]!)).toBe(Math.max(...sold.map((x) => x.q))); // empates no vuelven intermitente la prueba
+  });
+});
