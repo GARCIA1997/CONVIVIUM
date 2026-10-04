@@ -21,6 +21,10 @@ const plugin: ApiModule["plugin"] = async (app) => {
   app.get("/purchase-orders/:id", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, params: IdParam } }, async (req) => svc.order(req.user, req.params.id));
   app.post("/purchase-orders", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, body: purchasing.PurchaseOrderBody } }, async (req, reply) => reply.status(201).send(await svc.createOrder(req.user, req.body)));
   app.post("/purchase-orders/:id/approve", { onRequest: [app.guard("compras.aprobar_oc")], schema: { tags, params: IdParam } }, async (req) => svc.approveOrder(req.user, req.params.id));
+  app.get("/purchase-orders/:id/pdf", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, params: IdParam } }, async (req, reply) => {
+    const { folio, pdf } = await svc.orderPdf(req.user, req.params.id);
+    return reply.header("content-type", "application/pdf").header("content-disposition", `attachment; filename="${folio.replace(/[^\w-]/g, "")}.pdf"`).send(pdf);
+  });
   app.post("/purchase-orders/:id/share", { onRequest: [app.guard("compras.proponer_oc")], schema: { tags, params: IdParam } }, async (req) => svc.orderShareText(req.user, req.params.id));
 
   // E8-03 / E8-04 · Recepción y lectura de CFDI

@@ -5,7 +5,9 @@ import type { FastifyInstance } from "fastify";
 import { recordEvent } from "../../lib/audit.js";
 import type { Principal } from "../../plugins/auth.js";
 import { AppError, conflict, notFound } from "../../plugins/errors.js";
+import { resolveBranding } from "../branding/routes.js";
 import { InventoryService } from "../inventory/service.js";
+import { renderPurchaseOrderPdf } from "./pdf.js";
 
 const num = (v: string | number | null | undefined) => Number(v ?? 0);
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
@@ -142,6 +144,19 @@ export class PurchasingService {
     if (po.status === "aprobada") await this.db.update(schema.purchaseOrders).set({ status: "enviada" }).where(eq(schema.purchaseOrders.id, id));
     const phone = (po.supplier.phone ?? "").replace(/\D/g, "");
     return { text, whatsappUrl: `https://wa.me/${phone ? `52${phone.slice(-10)}` : ""}?text=${encodeURIComponent(text)}`, mailto: `mailto:${po.supplier.email ?? ""}?subject=${encodeURIComponent(`Orden de compra ${po.folio}`)}&body=${encodeURIComponent(text)}` };
+  }
+
+  /** E8-02 · PDF de la OC para el proveedor. Solo lectura: no cambia el estado (eso lo hace compartir). */
+  async orderPdf(who: Principal, id: string) {
+    const po = await this.order(who, id);
+    if (po.status === "borrador") throw conflict("not_approved", "La orden debe estar aprobada");
+    const [[branch], [tenant], brand] = await Promise.all([
+      this.db.select({ name: schema.branches.name }).from(schema.branches).where(eq(schema.branches.id, po.branchId)),
+      this.db.select({ rfc: schema.tenants.rfc }).from(schema.tenants).where(eq(schema.tenants.id, who.tenantId)),
+      resolveBranding(this.db, who.tenantId),
+    ]);
+    const pdf = await renderPurchaseOrderPdf({ ...po, branchName: branch?.name ?? "", tenantRfc: tenant?.rfc ?? null }, brand);
+    return { folio: po.folio, pdf };
   }
 
   // ---------- Recepción (E8-03) y CxP (E8-05) ----------

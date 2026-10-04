@@ -2,6 +2,7 @@
 import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { download } from "../../lib/download";
 
 interface Config {
   title: string; subtitle: string; footer: string; address: string; phone: string; whatsapp: string;
@@ -16,15 +17,6 @@ interface MenuData { categories: { id: string; name: string; sortOrder: number }
 
 const BADGE: Record<string, string> = { nuevo: "Nuevo", picante: "Picante", vegetariano: "Vegetariano", recomendado: "Recomendado" };
 const peso = (c: number) => (c % 100 ? (c / 100).toFixed(2) : String(c / 100));
-
-/** Descarga un archivo protegido de la API (PDF, QR). */
-async function download(path: string, filename: string) {
-  const res = await fetch(`/v1${path}`, { headers: { authorization: `Bearer ${client.session?.accessToken}` } });
-  if (!res.ok) throw new Error("No se pudo descargar");
-  const url = URL.createObjectURL(await res.blob());
-  const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 export function MenuGeneratorPage() {
   const [cur, setCur] = useState<Current | null>(null);

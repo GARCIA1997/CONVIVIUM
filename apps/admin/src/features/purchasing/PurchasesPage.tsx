@@ -2,6 +2,7 @@
 import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { download } from "../../lib/download";
 import { PurchasingApi, type PurchaseOrder, type Suggestion } from "./api";
 
 const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(c / 100);
@@ -240,7 +241,7 @@ export function PurchasesPage() {
                   <>
                     <button onClick={() => share("whatsapp")} className="py-3 rounded-lg bg-olivo text-dorado font-semibold text-xs flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-base">chat</span>Enviar por WhatsApp</button>
                     <button onClick={() => share("mail")} className="py-3 rounded-lg bg-white border border-arena text-olivo font-semibold text-xs flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-base">mail</span>Enviar por correo</button>
-                    <button onClick={() => window.print()} className="py-3 rounded-lg bg-white border border-arena text-olivo font-semibold text-xs flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-base">picture_as_pdf</span>Imprimir / PDF</button>
+                    <button onClick={() => download(`/purchasing/purchase-orders/${current.id}/pdf`, `${current.folio}.pdf`).catch((e) => setMsg(e.message))} className="py-3 rounded-lg bg-white border border-arena text-olivo font-semibold text-xs flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-base">picture_as_pdf</span>Descargar PDF</button>
                   </>
                 )}
               </div>

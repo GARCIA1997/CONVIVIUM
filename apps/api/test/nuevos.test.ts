@@ -76,8 +76,16 @@ describe("proveedores (E8-01)", () => {
     const po = await api("POST", "/purchasing/purchase-orders", almacenista, { supplierId: sup.id, warehouseId: wh.id, lines: [{ ingredientId: sup.supplies[0].ingredientId, quantity: 3, unitPrice: 11000 }] });
     expect(po.status).toBe(201);
     expect(po.body.status).toBe("borrador");
+    const pdf = (token: string) => getApp().inject({ method: "GET", url: `/v1/purchasing/purchase-orders/${po.body.id}/pdf`, headers: { authorization: `Bearer ${token}` } });
+    expect((await pdf(almacenista)).statusCode).toBe(409); // borrador: no se manda al proveedor
     expect((await api("POST", `/purchasing/purchase-orders/${po.body.id}/approve`, almacenista)).status).toBe(403);
     expect((await api("POST", `/purchasing/purchase-orders/${po.body.id}/approve`, owner)).status).toBeLessThan(300);
+    // E8-02 · PDF de la OC aprobada; descargarlo no la marca como enviada.
+    const res = await pdf(almacenista);
+    expect(res.statusCode).toBe(200);
+    expect(res.headers["content-type"]).toBe("application/pdf");
+    expect(res.rawPayload.subarray(0, 5).toString()).toBe("%PDF-");
+    expect((await api("GET", `/purchasing/purchase-orders/${po.body.id}`, owner)).body.status).toBe("aprobada");
   });
 });
 
