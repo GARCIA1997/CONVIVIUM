@@ -178,7 +178,7 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
    - publicar el menú.
 
    Hoy solo hay pruebas de API.
-2. **CI** (`.github/workflows/ci.yml`): confirmar que corre en GitHub tras el primer push y agregar el build de las 4 apps.
+2. **CI** (`.github/workflows/ci.yml`): **verificado**, corre en cada push a `main` y en PR: typecheck de todo el monorepo, build de las 4 apps y pruebas (dominio + API contra Postgres). Node 22. Antes de subir, correr localmente `pnpm -r typecheck && pnpm -r build && pnpm -r test` (no basta `tsc` por app).
 3. **Desbordes en pantallas angostas:** se corrigió la columna principal del admin (`AdminLayout`, `min-w-0`). Revisar el resto de pantallas del admin a 900–1100 px y las de caja en tablet.
 4. **Revisión visual con capturas** de comandero, estaciones y caja contra sus HTML de Stitch (pendiente desde antes).
 

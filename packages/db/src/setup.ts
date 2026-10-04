@@ -12,7 +12,7 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { runMigrations } from "./migrate.js";
-import { branchCode, createDb, eq, schema } from "./index.js";
+import { branchCode, createDb, schema } from "./index.js";
 
 const url = process.env.DATABASE_URL ?? "postgres://convivium:convivium@localhost:5432/convivium";
 const arg = (k: string) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : undefined; };

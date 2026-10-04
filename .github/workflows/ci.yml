@@ -22,10 +22,12 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
       - run: sudo apt-get install -y postgresql-client
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r typecheck
+      # Las 4 PWA (mesero, estación, caja, admin) deben compilar: tsc + vite build
+      - run: pnpm -r build
       # domain: reglas puras · api: integración contra Postgres real (bases desechables)
       - run: pnpm -r test
