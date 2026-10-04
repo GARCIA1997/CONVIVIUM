@@ -12,7 +12,7 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { runMigrations } from "./migrate.js";
-import { createDb, schema } from "./index.js";
+import { branchCode, createDb, eq, schema } from "./index.js";
 
 const url = process.env.DATABASE_URL ?? "postgres://convivium:convivium@localhost:5432/convivium";
 const arg = (k: string) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : undefined; };
@@ -20,7 +20,8 @@ const fail = (msg: string): never => { console.error(`✗ ${msg}`); process.exit
 const code6 = () => String(Math.floor(100000 + Math.random() * 900000));
 
 async function baseBranch(db: ReturnType<typeof createDb>, tenantId: string, name: string) {
-  const [b] = await db.insert(schema.branches).values({ tenantId, name }).returning();
+  const taken = (await db.select({ code: schema.branches.code }).from(schema.branches).where(eq(schema.branches.tenantId, tenantId))).map((x) => x.code);
+  const [b] = await db.insert(schema.branches).values({ tenantId, name, code: branchCode(name, taken) }).returning();
   const branchId = b!.id;
   await db.insert(schema.stations).values([
     { tenantId, branchId, name: "Cocina", kind: "cocina", defaultTargetSec: 900 },

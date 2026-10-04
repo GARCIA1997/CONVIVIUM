@@ -18,7 +18,7 @@ const db = createDb(process.env.DATABASE_URL ?? "postgres://convivium:convivium@
 
 async function main() {
   const [tenant] = await db.insert(schema.tenants).values({ name: "Convivium Demo" }).returning();
-  const [branch] = await db.insert(schema.branches).values({ tenantId: tenant!.id, name: "Sucursal Centro", usdRate: 1720 }).returning();
+  const [branch] = await db.insert(schema.branches).values({ tenantId: tenant!.id, name: "Sucursal Centro", code: "CEN", usdRate: 1720 }).returning();
   const t = tenant!.id;
   const b = branch!.id;
 

@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId, updatedAt } from "./_shared";
 
 export const roleEnum = pgEnum("role", ["dueno", "gerente", "capitan", "mesero", "cajero", "cocina", "barra", "almacenista"]);
@@ -21,6 +21,8 @@ export const branches = pgTable("branches", {
   id: id(),
   tenantId: tenantId(),
   name: text("name").notNull(),
+  /** Clave corta de la sucursal (2–6 letras/dígitos), única por restaurante. Va en los folios: OC-CEN-0001. */
+  code: text("code").notNull(),
   timezone: text("timezone").notNull().default("America/Mexico_City"),
   ivaPct: integer("iva_pct").notNull().default(16),
   usdRate: integer("usd_rate_cents"),
@@ -29,7 +31,7 @@ export const branches = pgTable("branches", {
   idleMinutesCaja: integer("idle_minutes_caja").notNull().default(30),
   idleMinutesEstacion: integer("idle_minutes_estacion").notNull().default(720),
   createdAt: createdAt(),
-});
+}, (t) => [uniqueIndex("branches_tenant_code_uq").on(t.tenantId, t.code)]);
 
 export const users = pgTable("users", {
   id: id(),

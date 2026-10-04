@@ -3,7 +3,7 @@ import { client } from "@convivium/app-shell";
 import { useEffect, useState } from "react";
 
 type IdleKey = "mesero" | "caja" | "estacion";
-interface Branch { name: string; timezone: string; ivaPct: 16 | 8; usdRate: number | null; idleMinutes: Record<IdleKey, number> }
+interface Branch { name: string; code: string; timezone: string; ivaPct: 16 | 8; usdRate: number | null; idleMinutes: Record<IdleKey, number> }
 const IDLE: [IdleKey, string, number][] = [["mesero", "Comandero (meseros)", 60], ["caja", "Caja", 240], ["estacion", "Estaciones (KDS)", 1440]];
 const ZONES: [string, string][] = [
   ["America/Mexico_City", "Centro (CDMX, Guadalajara, Monterrey)"],
@@ -32,6 +32,9 @@ export function BranchPage() {
         <div><span className="text-[11px] font-bold uppercase tracking-[0.2em] text-terracota">Configuración</span><h1 className="font-serif-brand text-2xl font-bold text-stone-900">Sucursal</h1></div>
         <div className="bg-white rounded-xl border border-arena-border p-6 shadow-xs space-y-5 text-xs">
           <label className="block"><span className="block font-semibold text-stone-700 mb-1.5">Nombre de la sucursal</span><input value={b.name} onChange={(e) => setB({ ...b, name: e.target.value })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-lg px-3 py-2" /></label>
+          <label className="block"><span className="block font-semibold text-stone-700 mb-1.5">Clave de la sucursal</span><input value={b.code} maxLength={6} onChange={(e) => setB({ ...b, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })} className="w-28 font-mono bg-marfil-canvas/40 border border-arena-border rounded-lg px-3 py-2" />
+            <span className="block text-[11px] text-stone-500 mt-1">Va en los folios de órdenes de compra (OC-{b.code || "CEN"}-0001). Cambiarla no modifica los folios ya emitidos.</span>
+          </label>
           <label className="block"><span className="block font-semibold text-stone-700 mb-1.5">Zona horaria</span>
             <select value={b.timezone} onChange={(e) => setB({ ...b, timezone: e.target.value })} className="w-full bg-marfil-canvas/40 border border-arena-border rounded-lg px-3 py-2">{ZONES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
             <span className="block text-[11px] text-stone-500 mt-1">Define horarios de promociones, reportes por hora y el corte del día.</span>
@@ -59,7 +62,7 @@ export function BranchPage() {
         {msg && <p className={`text-xs ${msg.ok ? "text-emerald-700" : "text-terracota"}`}>{msg.text}</p>}
         <div className="flex justify-end gap-2">
           <button disabled={!dirty} onClick={() => setB(saved)} className="px-4 py-2 rounded-lg border border-arena-border text-xs disabled:opacity-40">Descartar</button>
-          <button disabled={!dirty || b.name.trim().length < 2 || IDLE.some(([k, , max]) => !(b.idleMinutes[k] >= 1 && b.idleMinutes[k] <= max))} onClick={save} className="px-5 py-2 rounded-lg bg-olivo text-white text-xs font-semibold disabled:opacity-40">Guardar</button>
+          <button disabled={!dirty || b.name.trim().length < 2 || !/^[A-Z0-9]{2,6}$/.test(b.code) || IDLE.some(([k, , max]) => !(b.idleMinutes[k] >= 1 && b.idleMinutes[k] <= max))} onClick={save} className="px-5 py-2 rounded-lg bg-olivo text-white text-xs font-semibold disabled:opacity-40">Guardar</button>
         </div>
       </div>
     </main>

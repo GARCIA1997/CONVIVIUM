@@ -3,6 +3,7 @@ import { and, desc, eq, gte, inArray, schema, sql, type Db } from "@convivium/db
 import type { z } from "zod";
 import type { FastifyInstance } from "fastify";
 import { recordEvent } from "../../lib/audit.js";
+import { assertBranchAuthority } from "../../lib/authority.js";
 import { assertOwned } from "../../lib/ownership.js";
 import type { Principal } from "../../plugins/auth.js";
 import { AppError, conflict, notFound } from "../../plugins/errors.js";
@@ -99,15 +100,22 @@ export class PurchasingService {
 
   // ---------- Órdenes de compra (E8-02) ----------
 
-  private async nextFolio(tenantId: string) {
-    const [r] = await this.db.select({ n: sql<number>`count(*)::int` }).from(schema.purchaseOrders).where(eq(schema.purchaseOrders.tenantId, tenantId));
-    return `OC-${String((r?.n ?? 0) + 1).padStart(4, "0")}`;
-  }
-
   async createOrder(who: Principal, b: { supplierId: string; warehouseId: string; expectedAt?: string; lines: { ingredientId: string; quantity: number; unitPrice: number }[] }) {
     await assertOwned(this.db, who, { suppliers: [b.supplierId], warehouses: [b.warehouseId], ingredients: b.lines.map((l) => l.ingredientId) });
-    const [po] = await this.db.insert(schema.purchaseOrders).values({ tenantId: who.tenantId, branchId: who.branchId, folio: await this.nextFolio(who.tenantId), supplierId: b.supplierId, expectedAt: b.expectedAt, createdBy: who.userId }).returning();
-    await this.db.insert(schema.purchaseOrderLines).values(b.lines.map((l) => ({ purchaseOrderId: po!.id, ingredientId: l.ingredientId, quantity: String(l.quantity), unitPrice: l.unitPrice })));
+    await assertBranchAuthority(this.db, who.branchId, "crear órdenes de compra");
+    // Consecutivo por sucursal bajo candado de la sucursal: dos OC simultáneas no pueden tomar el mismo número.
+    const po = await this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`po:${who.branchId}`}))`);
+      const [[branch], [last]] = await Promise.all([
+        tx.select({ code: schema.branches.code }).from(schema.branches).where(eq(schema.branches.id, who.branchId)),
+        tx.select({ seq: sql<number | null>`max(${schema.purchaseOrders.seq})` }).from(schema.purchaseOrders).where(eq(schema.purchaseOrders.branchId, who.branchId)),
+      ]);
+      const seq = (last?.seq ?? 0) + 1;
+      const folio = `OC-${branch!.code}-${String(seq).padStart(4, "0")}`;
+      const [row] = await tx.insert(schema.purchaseOrders).values({ tenantId: who.tenantId, branchId: who.branchId, folio, seq, supplierId: b.supplierId, expectedAt: b.expectedAt, createdBy: who.userId }).returning();
+      await tx.insert(schema.purchaseOrderLines).values(b.lines.map((l) => ({ purchaseOrderId: row!.id, ingredientId: l.ingredientId, quantity: String(l.quantity), unitPrice: l.unitPrice })));
+      return row!;
+    });
     await recordEvent(this.db, who, { type: "po.created", entity: "purchase_order", entityId: po!.id, data: b });
     return this.order(who, po!.id);
   }
@@ -168,6 +176,7 @@ export class PurchasingService {
     const lines = b.lines.filter((l) => l.quantity > 0);
     if (!lines.length) throw conflict("empty_receipt", "No hay cantidades recibidas");
     await assertOwned(this.db, who, { suppliers: [b.supplierId], warehouses: [b.warehouseId], ingredients: lines.map((l) => l.ingredientId) });
+    await assertBranchAuthority(this.db, who.branchId, "recibir mercancía");
     if (b.purchaseOrderId) {
       const po = await this.order(who, b.purchaseOrderId); // 404 si la OC es de otro restaurante
       if (po.supplierId !== b.supplierId) throw conflict("supplier_mismatch", "La recepción no corresponde al proveedor de la orden");

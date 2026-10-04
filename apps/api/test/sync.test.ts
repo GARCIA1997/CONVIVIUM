@@ -94,10 +94,33 @@ describe("sincronización de configuración nube ↔ nodo", () => {
     expect((await api("GET", `/reports/sales?days=1&branch=${crypto.randomUUID()}`, gerente)).status).toBe(403);
   });
 
+  it("con nodo vinculado, la nube no crea OC ni recibe mercancía de esa sucursal (autoridad del nodo)", async () => {
+    const [sup] = (await api("GET", "/purchasing/suppliers", owner)).body as any[];
+    const [wh] = (await api("GET", "/inventory/warehouses", owner)).body as any[];
+    const [ing] = (await api("GET", "/inventory/ingredients", owner)).body as any[];
+    const lines = [{ ingredientId: ing.id, quantity: 1, unitPrice: 100 }];
+    const po = await api("POST", "/purchasing/purchase-orders", owner, { supplierId: sup.id, warehouseId: wh.id, lines });
+    expect(po.status).toBe(409);
+    expect(po.body.error).toBe("branch_has_node");
+    const rec = await api("POST", "/purchasing/receipts", owner, { supplierId: sup.id, warehouseId: wh.id, createPayable: false, lines });
+    expect(rec.body.error).toBe("branch_has_node");
+  });
+
   it("un nodo revocado ya no sincroniza", async () => {
     const devices = (await api<{ id: string; kind: string }[]>("GET", "/auth/devices", owner)).body;
     const n = devices.find((d) => d.kind === "nodo")!;
     await api("POST", `/auth/devices/${n.id}/revoke`, owner);
     expect((await api("GET", `/sync/config?since=${cursor}`, nodeToken)).status).toBe(403);
+  });
+});
+
+describe("órdenes de compra en la nube sin nodo", () => {
+  it("con el nodo revocado, la nube vuelve a ser la autoridad y numera por sucursal", async () => {
+    const [sup] = (await api("GET", "/purchasing/suppliers", owner)).body as any[];
+    const [wh] = (await api("GET", "/inventory/warehouses", owner)).body as any[];
+    const [ing] = (await api("GET", "/inventory/ingredients", owner)).body as any[];
+    const po = await api("POST", "/purchasing/purchase-orders", owner, { supplierId: sup.id, warehouseId: wh.id, lines: [{ ingredientId: ing.id, quantity: 1, unitPrice: 100 }] });
+    expect(po.status).toBe(201);
+    expect(po.body.folio).toMatch(/^OC-CEN-\d{4}$/);
   });
 });

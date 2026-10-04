@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, date, integer, numeric, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, date, integer, numeric, pgEnum, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { branchId, createdAt, id, tenantId } from "./_shared";
 
 export const poStatusEnum = pgEnum("po_status", ["borrador", "aprobada", "enviada", "recibida_parcial", "recibida", "cancelada"]);
@@ -38,13 +38,15 @@ export const purchaseOrders = pgTable("purchase_orders", {
   tenantId: tenantId(),
   branchId: branchId(),
   folio: text("folio").notNull(),
+  /** Consecutivo por sucursal; lo asigna solo la autoridad de la sucursal (su nodo, o la nube si no tiene). */
+  seq: integer("seq").notNull(),
   supplierId: uuid("supplier_id").notNull().references(() => suppliers.id),
   status: poStatusEnum("status").notNull().default("borrador"),
   expectedAt: date("expected_at"),
   createdBy: uuid("created_by").notNull(),
   approvedBy: uuid("approved_by"),
   createdAt: createdAt(),
-});
+}, (t) => [uniqueIndex("purchase_orders_branch_seq_uq").on(t.branchId, t.seq)]);
 
 export const purchaseOrderLines = pgTable("purchase_order_lines", {
   id: id(),

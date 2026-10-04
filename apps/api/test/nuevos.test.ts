@@ -76,6 +76,14 @@ describe("proveedores (E8-01)", () => {
     const po = await api("POST", "/purchasing/purchase-orders", almacenista, { supplierId: sup.id, warehouseId: wh.id, lines: [{ ingredientId: sup.supplies[0].ingredientId, quantity: 3, unitPrice: 11000 }] });
     expect(po.status).toBe(201);
     expect(po.body.status).toBe("borrador");
+    expect(po.body.folio).toMatch(/^OC-CEN-\d{4}$/);
+    // Consecutivo por sucursal sin huecos ni repetidos aunque se creen a la vez.
+    const many = await Promise.all(Array.from({ length: 6 }, () => api("POST", "/purchasing/purchase-orders", almacenista, { supplierId: sup.id, warehouseId: wh.id, lines: [{ ingredientId: sup.supplies[0].ingredientId, quantity: 1, unitPrice: 100 }] })));
+    expect(many.every((r) => r.status === 201)).toBe(true);
+    const folios = [po.body.folio, ...many.map((r) => r.body.folio)].sort();
+    expect(new Set(folios).size).toBe(7);
+    const n = folios.map((f) => Number(f.slice(-4)));
+    expect(n[6]! - n[0]!).toBe(6);
     const pdf = (token: string) => getApp().inject({ method: "GET", url: `/v1/purchasing/purchase-orders/${po.body.id}/pdf`, headers: { authorization: `Bearer ${token}` } });
     expect((await pdf(almacenista)).statusCode).toBe(409); // borrador: no se manda al proveedor
     expect((await api("POST", `/purchasing/purchase-orders/${po.body.id}/approve`, almacenista)).status).toBe(403);
@@ -262,7 +270,7 @@ describe("aislamiento entre restaurantes", () => {
 
     // Escrituras con ids de otro restaurante: 400 y nada ajeno cambia.
     const { eq, and } = await import("@convivium/db");
-    const [b2] = await db.insert(schema.branches).values({ tenantId: t2!.id, name: "Sucursal ajena" }).returning();
+    const [b2] = await db.insert(schema.branches).values({ tenantId: t2!.id, name: "Sucursal ajena", code: "AJE" }).returning();
     const [st2] = await db.insert(schema.stations).values({ tenantId: t2!.id, branchId: b2!.id, name: "Cocina ajena", kind: "cocina" }).returning();
     const [wh2] = await db.insert(schema.warehouses).values({ tenantId: t2!.id, branchId: b2!.id, name: "General" }).returning();
     const [ing2] = await db.insert(schema.ingredients).values({ tenantId: t2!.id, name: "Insumo ajeno", purchaseUnit: "kg", useUnit: "g", conversion: "1000" }).returning();

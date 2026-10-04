@@ -141,6 +141,13 @@
       "when": 1791146617129,
       "tag": "0019_order_items_branch_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791152130051,
+      "tag": "0020_po_folio_por_sucursal",
+      "breakpoints": true
     }
   ]
 }

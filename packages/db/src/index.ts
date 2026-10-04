@@ -11,4 +11,5 @@ export function createDb(url: string) {
 }
 export type Db = ReturnType<typeof createDb>;
 export * from "./sync.js";
+export { branchCode, BRANCH_CODE_RE } from "./branch-code.js";
 export { runMigrations } from "./migrate.js";

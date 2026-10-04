@@ -1,11 +1,13 @@
-import { eq, schema } from "@convivium/db";
+import { and, BRANCH_CODE_RE, eq, ne, schema } from "@convivium/db";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
 import type { ApiModule } from "../../lib/module.js";
-import { notFound } from "../../plugins/errors.js";
+import { conflict, notFound } from "../../plugins/errors.js";
 
 const Body = z.object({
   name: z.string().trim().min(2).max(80),
+  /** Clave para folios (OC-CEN-0001). Opcional para no romper clientes anteriores. */
+  code: z.string().trim().toUpperCase().regex(BRANCH_CODE_RE, "Clave de 2 a 6 letras o números").optional(),
   timezone: z.string().refine((tz) => { try { new Intl.DateTimeFormat("es-MX", { timeZone: tz }); return true; } catch { return false; } }, "Zona horaria inválida"),
   ivaPct: z.union([z.literal(16), z.literal(8)]),
   /** Centavos de MXN por 1 USD; nulo = no se aceptan dólares. */
@@ -23,13 +25,18 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const [b] = await app.db.select().from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
     if (!b) throw notFound("Sucursal");
     return {
-      id: b.id, name: b.name, timezone: b.timezone, ivaPct: b.ivaPct, usdRate: b.usdRate,
+      id: b.id, name: b.name, code: b.code, timezone: b.timezone, ivaPct: b.ivaPct, usdRate: b.usdRate,
       idleMinutes: { mesero: b.idleMinutesMesero, caja: b.idleMinutesCaja, estacion: b.idleMinutesEstacion },
     };
   });
   app.put("/", { onRequest: [app.guard("sucursal.configurar")], schema: { tags, body: Body } }, async (req) => {
     const [before] = await app.db.select().from(schema.branches).where(eq(schema.branches.id, req.user.branchId));
     const { idleMinutes, ...rest } = req.body;
+    if (rest.code) {
+      const [dup] = await app.db.select({ id: schema.branches.id }).from(schema.branches)
+        .where(and(eq(schema.branches.tenantId, req.user.tenantId), eq(schema.branches.code, rest.code), ne(schema.branches.id, req.user.branchId)));
+      if (dup) throw conflict("code_taken", `La clave ${rest.code} ya la usa otra sucursal`);
+    }
     const idle = idleMinutes ? { idleMinutesMesero: idleMinutes.mesero, idleMinutesCaja: idleMinutes.caja, idleMinutesEstacion: idleMinutes.estacion } : {};
     await app.db.update(schema.branches).set({ ...rest, ...idle }).where(eq(schema.branches.id, req.user.branchId));
     await recordEvent(app.db, req.user, { type: "branch.updated", entity: "branch", entityId: req.user.branchId, data: { before, after: req.body } });
