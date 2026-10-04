@@ -230,6 +230,7 @@ function ActiveCard({ i, entry, theo, diff, onChange }: { i: Ingredient; entry?:
           <span className="font-mono text-brand-olivo font-bold">{fmt(open, 2)} ({Math.round(open * 100)}%)</span>
         </div>
         <input value={open} onChange={(e) => onChange({ open: Number(e.target.value) })} className="w-full h-2 bg-brand-arena/50 rounded-lg cursor-pointer" max={1} min={0} step={0.05} type="range" />
+        <ExactRemaining i={i} open={open} onChange={(v) => onChange({ open: v })} />
       </div>
       <div className="mt-3.5 pt-3 border-t border-brand-arena/30 space-y-2.5">
         <div className="flex items-center justify-between bg-brand-marfil p-2.5 rounded-lg border border-brand-arena/30">
@@ -255,5 +256,50 @@ function ActiveCard({ i, entry, theo, diff, onChange }: { i: Ingredient; entry?:
         )}
       </div>
     </section>
+  );
+}
+
+const ML_PER_OZ = 29.5735;
+
+/**
+ * E7-11 · Lo que queda en la botella abierta, exacto en la unidad de uso (o en oz si es ml).
+ * El deslizador va de 5 % en 5 % (37.5 ml en una de 750): aquí se captura lo medido o pesado.
+ */
+function ExactRemaining({ i, open, onChange }: { i: Ingredient; open: number; onChange: (fraction: number) => void }) {
+  const conv = i.conversion || 1;
+  const [oz, setOz] = useState(false);
+  const factor = oz ? ML_PER_OZ : 1;
+  const shown = Math.round(((open * conv) / factor) * 10) / 10;
+  const [text, setText] = useState<string | null>(null); // mientras se escribe, no se reformatea
+  const max = Math.round((conv / factor) * 10) / 10;
+  const commit = (raw: string) => {
+    const v = Number(raw.replace(",", "."));
+    if (!Number.isFinite(v)) return;
+    onChange(Math.min(1, Math.max(0, (v * factor) / conv)));
+  };
+  return (
+    <div className="mt-2 flex items-center justify-between gap-2 text-[11px] font-medium text-brand-carbon/70">
+      <span>Queda en la abierta:</span>
+      <span className="flex items-center gap-1.5">
+        <input
+          value={text ?? String(shown)}
+          onChange={(e) => { setText(e.target.value); commit(e.target.value); }}
+          onBlur={() => setText(null)}
+          inputMode="decimal"
+          aria-label={`Cantidad en la botella abierta (${oz ? "oz" : i.useUnit})`}
+          className="w-20 text-right font-mono bg-white border border-brand-arena/60 rounded px-2 py-1 text-brand-carbon"
+        />
+        {i.useUnit === "ml" ? (
+          <span className="flex rounded border border-brand-arena/60 overflow-hidden">
+            {([false, true] as const).map((v) => (
+              <button key={String(v)} type="button" onClick={() => { setOz(v); setText(null); }} className={oz === v ? "px-1.5 py-0.5 bg-brand-olivo text-brand-marfil font-bold" : "px-1.5 py-0.5 bg-white"}>{v ? "oz" : "ml"}</button>
+            ))}
+          </span>
+        ) : (
+          <span>{i.useUnit}</span>
+        )}
+        <span className="text-brand-carbon/50">/ {fmt(max)}</span>
+      </span>
+    </div>
   );
 }
