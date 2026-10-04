@@ -76,6 +76,16 @@ export function RecipesPage() {
     if (!r.id) setParams({ receta: saved.id }); else load();
     setMsg("Receta guardada; costo teórico recalculado.");
   };
+  const remove = async () => {
+    if (!r?.id || !confirm(`¿Eliminar la receta "${r.product?.name ?? r.name}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await InventoryApi.deleteRecipe(r.id);
+      setList(await InventoryApi.recipes());
+      setParams(r.isSubRecipe ? { tipo: "subrecetas" } : {});
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "No se pudo eliminar la receta.");
+    }
+  };
   const produce = async () => {
     if (!r) return;
     const wh = whs.find((w) => w.name === "Cocina") ?? whs[0];
@@ -108,6 +118,11 @@ export function RecipesPage() {
           {r?.isSubRecipe && r.id && (
             <button onClick={produce} className="px-3 py-1.5 rounded-lg border border-brand-arena bg-white hover:bg-stone-50 text-neutral-700 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm">
               <span className="material-symbols-outlined text-base text-neutral-500">science</span>Registrar producción (1 lote)
+            </button>
+          )}
+          {r?.id && !edit && (
+            <button onClick={remove} className="px-3 py-1.5 rounded-lg border border-brand-arena bg-white hover:bg-stone-50 text-brand-terracota text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm">
+              <span className="material-symbols-outlined text-base">delete</span>Eliminar
             </button>
           )}
           {edit ? (

@@ -146,3 +146,19 @@ describe("identidad del restaurante (marca blanca)", () => {
     expect((await getApp().inject({ method: "GET", url: logo })).statusCode).toBe(404);
   });
 });
+
+describe("eliminar recetas", () => {
+  it("no borra una subreceta en uso (409); borra la receta y luego la subreceta", async () => {
+    const ing = ((await api("GET", "/inventory/ingredients", owner)).body as { id: string }[])[0]!;
+    const line = (x: object) => ({ ingredientId: null, subRecipeId: null, quantity: 10, wastePct: 0, ...x });
+    const sub = (await api("POST", "/inventory/recipes", owner, { name: "Salsa prueba", productId: null, modifierId: null, isSubRecipe: true, yieldQty: 500, steps: [], lines: [line({ ingredientId: ing.id })] })).body;
+    const main = (await api("POST", "/inventory/recipes", owner, { name: "Plato prueba", productId: null, modifierId: null, isSubRecipe: false, yieldQty: null, steps: [], lines: [line({ subRecipeId: sub.id })] })).body;
+    const busy = await api("DELETE", `/inventory/recipes/${sub.id}`, owner);
+    expect(busy.status).toBe(409);
+    expect(busy.body.message).toContain("Plato prueba");
+    expect((await api("DELETE", `/inventory/recipes/${main.id}`, mesero)).status).toBe(403);
+    expect((await api("DELETE", `/inventory/recipes/${main.id}`, owner)).status).toBe(200);
+    expect((await api("DELETE", `/inventory/recipes/${sub.id}`, owner)).status).toBe(200);
+    expect((await api("GET", `/inventory/recipes/${sub.id}`, owner)).status).toBe(404);
+  });
+});

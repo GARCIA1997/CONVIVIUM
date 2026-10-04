@@ -92,11 +92,7 @@ cd apps/api && npx tsx --env-file=../../.env src/index.ts   # sirve todo en :400
 - La ficha muestra el nombre actual del platillo.
 
 **Falta:**
-1. **Eliminar receta o subreceta.**
-   - La API no tiene `DELETE /v1/inventory/recipes/:id`.
-   - Una subreceta usada por otra receta no debe poder borrarse: responder 409 con la lista de recetas que la usan.
-   - Debe quedar en la bitácora (`recordEvent`).
-   - Archivos: `apps/api/src/modules/inventory/{routes,service}.ts` y `apps/admin/src/features/inventory/RecipesPage.tsx`.
+1. ~~**Eliminar receta o subreceta.**~~ Hecho: `DELETE /v1/inventory/recipes/:id` (permiso `menu.editar`), 409 `recipe_in_use` con los nombres de las recetas que usan la subreceta, evento `recipe.deleted` en bitácora y botón "Eliminar" en la ficha. Se acotó además la carga de `recipe_lines` al restaurante (antes leía las de todos los tenants).
 2. **Recetas de modificadores (E7-03).**
    - El contrato acepta `modifierId` y la ficha muestra `modifierRecipes`, pero no hay forma de crearlas desde la pantalla.
    - Agregar en la ficha del platillo, por cada modificador ligado, "Capturar receta del modificador": un editor igual con `modifierId` y sin `productId`.

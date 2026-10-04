@@ -37,6 +37,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   app.put("/recipes/:id", { onRequest: [app.guard("menu.editar")], schema: { tags, params: IdParam, body: inventory.RecipeUpsert } }, async (req) =>
     svc.upsertRecipe(req.user, req.body, req.params.id),
   );
+  app.delete("/recipes/:id", { onRequest: [app.guard("menu.editar")], schema: { tags, params: IdParam } }, async (req) => svc.deleteRecipe(req.user, req.params.id));
   app.post("/production", { onRequest: [app.guard("inventario.gestionar")], schema: { tags, body: inventory.ProductionBody } }, async (req) => svc.produce(req.user, req.body));
 
   // E7-09 · Conteos físicos con aprobación del gerente

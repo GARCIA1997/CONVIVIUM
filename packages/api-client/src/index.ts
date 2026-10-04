@@ -179,6 +179,7 @@ export function createClient(baseUrl = "/v1") {
       recipes: () => request<RecipeSummary[]>("GET", "/inventory/recipes"),
       recipe: (id: string) => request<RecipeDetail>("GET", `/inventory/recipes/${id}`),
       saveRecipe: (body: RecipeInput, id?: string) => request<RecipeDetail>(id ? "PUT" : "POST", id ? `/inventory/recipes/${id}` : "/inventory/recipes", body),
+      deleteRecipe: (id: string) => request<{ ok: true }>("DELETE", `/inventory/recipes/${id}`),
       produce: (recipeId: string, batches: number, warehouseId: string) => request<{ produced: number; unit: string }>("POST", "/inventory/production", { recipeId, batches, warehouseId }),
       submitCount: (warehouseId: string, lines: { ingredientId: string; counted: number }[]) => request<InventoryCount>("POST", "/inventory/counts", { warehouseId, lines }),
       counts: (status?: string) => request<InventoryCount[]>("GET", `/inventory/counts${status ? `?status=${status}` : ""}`),

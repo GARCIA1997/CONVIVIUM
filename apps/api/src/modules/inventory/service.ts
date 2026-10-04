@@ -109,16 +109,20 @@ export class InventoryService {
   private async recipeMap(tenantId: string) {
     const [rs, ls] = await Promise.all([
       this.db.select().from(schema.recipes).where(eq(schema.recipes.tenantId, tenantId)),
-      this.db.select().from(schema.recipeLines),
+      this.db
+        .select({ line: schema.recipeLines })
+        .from(schema.recipeLines)
+        .innerJoin(schema.recipes, eq(schema.recipes.id, schema.recipeLines.recipeId))
+        .where(eq(schema.recipes.tenantId, tenantId)),
     ]);
+    const byRecipe = new Map<string, RecipeInput["lines"]>();
+    for (const { line: l } of ls) {
+      const arr = byRecipe.get(l.recipeId) ?? [];
+      arr.push({ ingredientId: l.ingredientId, subRecipeId: l.subRecipeId, quantity: num(l.quantity), wastePct: num(l.wastePct) });
+      byRecipe.set(l.recipeId, arr);
+    }
     const map = new Map<string, RecipeInput & { row: typeof rs[number] }>();
-    for (const r of rs)
-      map.set(r.id, {
-        id: r.id,
-        yieldQty: r.yieldQty ? num(r.yieldQty) : null,
-        row: r,
-        lines: ls.filter((l) => l.recipeId === r.id).map((l) => ({ ingredientId: l.ingredientId, subRecipeId: l.subRecipeId, quantity: num(l.quantity), wastePct: num(l.wastePct) })),
-      });
+    for (const r of rs) map.set(r.id, { id: r.id, yieldQty: r.yieldQty ? num(r.yieldQty) : null, row: r, lines: byRecipe.get(r.id) ?? [] });
     return map;
   }
 
@@ -174,6 +178,21 @@ export class InventoryService {
     await this.db.insert(schema.recipeLines).values(body.lines.map((l) => ({ recipeId: recipeId!, ingredientId: l.ingredientId, subRecipeId: l.subRecipeId, quantity: String(l.quantity), wastePct: String(l.wastePct) })));
     await recordEvent(this.db, who, { type: id ? "recipe.updated" : "recipe.created", entity: "recipe", entityId: recipeId, data: body });
     return this.recipeDetail(who, recipeId!);
+  }
+
+  /** Elimina una receta o subreceta. Una subreceta usada por otra receta no se borra (409). */
+  async deleteRecipe(who: Principal, id: string) {
+    const [r] = await this.db.select().from(schema.recipes).where(and(eq(schema.recipes.id, id), eq(schema.recipes.tenantId, who.tenantId)));
+    if (!r) throw notFound("Receta");
+    const users = await this.db
+      .selectDistinct({ name: schema.recipes.name })
+      .from(schema.recipeLines)
+      .innerJoin(schema.recipes, eq(schema.recipes.id, schema.recipeLines.recipeId))
+      .where(and(eq(schema.recipeLines.subRecipeId, id), eq(schema.recipes.tenantId, who.tenantId)));
+    if (users.length) throw conflict("recipe_in_use", `La subreceta se usa en: ${users.map((u) => u.name).join(", ")}`);
+    await this.db.delete(schema.recipes).where(eq(schema.recipes.id, id));
+    await recordEvent(this.db, who, { type: "recipe.deleted", entity: "recipe", entityId: id, data: { name: r.name, productId: r.productId, modifierId: r.modifierId, isSubRecipe: r.isSubRecipe } });
+    return { ok: true };
   }
 
   /** E7-04 · Producción de subreceta: descuenta insumos y suma el preparado como insumo "SR: <nombre>". */
