@@ -12,11 +12,12 @@
   "dependencies": {
     "@convivium/api-client": "workspace:*",
     "@convivium/app-shell": "workspace:*",
+    "@convivium/contracts": "workspace:*",
+    "@convivium/domain": "workspace:*",
     "@convivium/ui": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "@convivium/domain": "workspace:*"
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

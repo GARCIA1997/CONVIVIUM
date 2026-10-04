@@ -1,8 +1,14 @@
-// Tema del diseño Stitch del menú digital (design/stitch/menu-digital-qr.html), copiado de su tailwind.config.
+// Tema del diseño Stitch del menú digital (design/stitch/menu-digital-qr.html). Los colores y fuentes son
+// variables CSS que public-page.ts llena con la identidad del restaurante (marca blanca).
+const v = (name) => `rgb(var(--brand-${name}) / <alpha-value>)`;
 module.exports = {
   content: ["./src/modules/menus/public-page.ts"],
   theme: { extend: {
-    colors: { primary: "#1E2F28", "on-primary": "#EAE6DD", background: "#EAE6DD", "on-background": "#1A1A1A", surface: "#EAE6DD", "on-surface": "#1A1A1A", "surface-variant": "#C9B89F", "on-surface-variant": "#1E2F28", arena: "#C9B89F", terracota: "#B45A3C", "on-terracota": "#EAE6DD", dorado: "#D4AF7C", "on-dorado": "#1A1A1A", carbon: "#1A1A1A" },
-    fontFamily: { headline: ["Playfair Display", "serif"], body: ["Inter", "sans-serif"] },
+    colors: {
+      primary: v("primary"), "on-primary": v("on-primary"), background: v("bg"), "on-background": v("text"), surface: v("bg"), "on-surface": v("text"),
+      "surface-variant": v("muted"), "on-surface-variant": v("primary"), arena: v("muted"), terracota: "#B45A3C", "on-terracota": "#EAE6DD",
+      dorado: v("accent"), "on-dorado": v("on-accent"), carbon: v("text"),
+    },
+    fontFamily: { headline: ["var(--brand-font-heading)", "serif"], body: ["var(--brand-font-body)", "sans-serif"] },
   } },
 };

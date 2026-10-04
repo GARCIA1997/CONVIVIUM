@@ -7,4 +7,5 @@ export * as approvals from "./approvals.js";
 export * as cash from "./cash.js";
 export * as inventory from "./inventory.js";
 export * as purchasing from "./purchasing.js";
+export * as branding from "./branding.js";
 export * from "./realtime.js";

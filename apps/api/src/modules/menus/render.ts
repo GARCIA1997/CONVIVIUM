@@ -1,5 +1,7 @@
 import { and, eq, schema, type Db } from "@convivium/db";
+import type { branding } from "@convivium/contracts";
 import { promoActiveAt, type Promotion } from "@convivium/domain";
+import { resolveBranding } from "../branding/routes.js";
 
 /** Configuración del generador de menú (guardada en menu_publications.config). */
 export interface MenuConfig {
@@ -44,6 +46,8 @@ export const BADGES = { nuevo: "Nuevo", picante: "Picante", vegetariano: "Vegeta
 
 export interface MenuView {
   branchName: string;
+  /** Identidad del restaurante (logo, nombre, colores, tipografías). */
+  brand: branding.Branding;
   config: MenuConfig;
   sections: { id: string; name: string; items: { id: string; name: string; description: string | null; price: number; badges: string[]; soldOut: boolean; photoUrl: string | null }[] }[];
   promos: { name: string; detail: string }[];
@@ -85,7 +89,8 @@ export async function buildMenuView(db: Db, branchId: string, rawConfig: Partial
       name: p.name,
       detail: [p.days.length && p.days.length < 7 ? p.days.map((d) => DAYS[d]).join(", ") : "Todos los días", p.startTime ? `${p.startTime}–${p.endTime}` : ""].filter(Boolean).join(" · "),
     }));
-  return { branchName: branch.name, config, sections, promos: promoList, updatedAt: now.toISOString() };
+  const brand = await resolveBranding(db, branch.tenantId);
+  return { branchName: branch.name, brand, config, sections, promos: promoList, updatedAt: now.toISOString() };
 }
 
 /** Dirección amigable para el menú público (sin acentos ni espacios). */

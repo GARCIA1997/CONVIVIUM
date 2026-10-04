@@ -76,6 +76,9 @@ async function main() {
   if (promo) await db.update(schema.promotions).set(promoData).where(eq(schema.promotions.id, promo.id));
   else await db.insert(schema.promotions).values({ tenantId: t, name: "Happy hour · 2x1 en margaritas", ...promoData });
 
+  // Identidad del restaurante (marca blanca): la demo usa la paleta de CONVIVIUM.
+  if (!tenant!.branding) await db.update(schema.tenants).set({ branding: { name: "CONVIVIUM", slogan: "Donde todo sucede en la mesa", logoUrl: null, primary: "#1E2F28", accent: "#D4AF7C", background: "#EAE6DD", text: "#1A1A1A", fontHeading: "Playfair Display", fontBody: "Inter" } }).where(eq(schema.tenants.id, t));
+
   // Datos de contacto del menú (dirección, teléfono y WhatsApp del diseño).
   const [pub] = await db.select().from(schema.menuPublications).where(eq(schema.menuPublications.branchId, branch!.id));
   if (pub) {

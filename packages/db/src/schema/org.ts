@@ -12,6 +12,8 @@ export const tenants = pgTable("tenants", {
   discountCaps: jsonb("discount_caps").$type<Record<string, number | null>>(),
   /** Permisos adicionales/denegados por rol (E1-07). */
   rolePermissions: jsonb("role_permissions").$type<Record<string, { grant?: string[]; deny?: string[] }>>(),
+  /** Identidad del restaurante para menú digital, PDF y QR (ver contracts/branding). Nulo = valores por omisión. */
+  branding: jsonb("branding").$type<Record<string, unknown>>(),
   createdAt: createdAt(),
 });
 

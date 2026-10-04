@@ -41,6 +41,9 @@ importers:
       '@convivium/app-shell':
         specifier: workspace:*
         version: link:../../packages/app-shell
+      '@convivium/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@convivium/domain':
         specifier: workspace:*
         version: link:../../packages/domain

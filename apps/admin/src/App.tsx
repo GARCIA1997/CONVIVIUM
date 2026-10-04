@@ -12,6 +12,7 @@ import { RecipesPage } from "./features/inventory/RecipesPage";
 import { AuditPage } from "./features/audit/AuditPage";
 import { MenuPage } from "./features/menu/MenuPage";
 import { BranchPage } from "./features/branch/BranchPage";
+import { BrandingPage } from "./features/branch/BrandingPage";
 import { MenuGeneratorPage } from "./features/menu/MenuGeneratorPage";
 import { NewPurchasePage } from "./features/purchasing/NewPurchasePage";
 import { SuppliersPage } from "./features/purchasing/SuppliersPage";
@@ -33,6 +34,7 @@ const SECTIONS: (Section & { design?: string })[] = [
   { path: "menu", label: "Menú", icon: "restaurant_menu", perm: "menu.editar", element: <MenuPage /> },
   { path: "promociones", label: "Promociones", icon: "local_offer", perm: "menu.editar", element: <PromotionsPage /> },
   { path: "generador-menu", label: "Generador de menú", icon: "menu_book", perm: "menu.editar", element: <MenuGeneratorPage /> },
+  { path: "identidad", label: "Identidad del restaurante", icon: "palette", perm: "sucursal.configurar", element: <BrandingPage /> },
   { path: "mesas", label: "Mesas", icon: "table_restaurant", perm: "mesas.editar", element: <FloorEditorPage /> },
   { path: "estaciones", label: "Estaciones y dispositivos", icon: "skillet", perm: "estaciones.editar", element: <StationsPage /> },
   { path: "sucursal", label: "Sucursal", icon: "storefront", perm: "sucursal.configurar", element: <BranchPage /> },

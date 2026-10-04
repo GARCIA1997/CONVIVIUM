@@ -56,6 +56,9 @@ const plugin: ApiModule["plugin"] = async (app) => {
 
   /** Vista previa con configuración sin guardar (para el editor en vivo). */
   app.post("/preview", { ...guard, schema: { tags, body: ConfigBody } }, async (req) => buildMenuView(app.db, req.user.branchId, req.body as MenuConfig));
+  /** Vista previa del menú digital tal como lo ve el cliente (HTML), con la configuración sin guardar. */
+  app.post("/preview.html", { ...guard, schema: { tags, body: ConfigBody } }, async (req, reply) =>
+    reply.type("text/html; charset=utf-8").send(renderPublicMenu(await buildMenuView(app.db, req.user.branchId, req.body as MenuConfig))));
 
   app.put("/current", { ...guard, schema: { tags, body: z.object({ slug: z.string().regex(/^[a-z0-9-]{3,60}$/, "Solo minúsculas, números y guiones"), config: ConfigBody }) } }, async (req) => {
     const pub = await currentPublication(app, req.user.tenantId, req.user.branchId);

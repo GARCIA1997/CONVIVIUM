@@ -3,7 +3,10 @@
  * Estructura y clases tomadas tal cual del diseño Stitch design/stitch/menu-digital-qr.html.
  * Las clases se compilan a CSS con `pnpm --filter @convivium/api menu-css` (ver menu-styles.ts); así el
  * celular del cliente no descarga Tailwind.
+ * Marca blanca: colores, tipografías, logo y nombre son los del restaurante (view.brand); CONVIVIUM solo
+ * aparece como "Powered by CONVIVIUM" al pie.
  */
+import { branding } from "@convivium/contracts";
 import { MENU_CSS } from "./menu-styles.js";
 import type { MenuView } from "./render.js";
 
@@ -14,6 +17,18 @@ const price = (c: number) => `$${(c / 100).toLocaleString("es-MX", { minimumFrac
 /** Etiquetas del producto → claves de filtro del diseño (veg, spicy, nuevo). */
 const TAG: Record<string, string> = { vegetariano: "veg", picante: "spicy", nuevo: "nuevo" };
 const tags = (i: Item) => i.badges.map((b) => TAG[b]).filter(Boolean).join(" ");
+/** "#1E2F28" → "30 47 40" para las variables rgb() del tema. */
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(" ");
+/** Mezcla de dos colores hex (t = 0 → a, 1 → b). */
+const mix = (a: string, b: string, t: number) => "#" + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, "0")).join("");
+/** Texto legible sobre un color: el fondo de la marca si contrasta, si no blanco o negro. */
+const onColor = (c: string, bg: string) => (branding.contrastRatio(c, bg) >= 4.5 ? bg : branding.contrastRatio(c, "#FFFFFF") >= branding.contrastRatio(c, "#1A1A1A") ? "#FFFFFF" : "#1A1A1A");
+function brandStyle(b: MenuView["brand"]) {
+  const vars = { primary: b.primary, "on-primary": onColor(b.primary, b.background), accent: b.accent, "on-accent": onColor(b.accent, b.text), bg: b.background, text: b.text, muted: mix(b.background, b.text, 0.22) };
+  return `:root{${Object.entries(vars).map(([k, v]) => `--brand-${k}:${rgb(v)}`).join(";")};--brand-font-heading:"${b.fontHeading}";--brand-font-body:"${b.fontBody}"}`;
+}
+const fontsHref = (b: MenuView["brand"]) => `https://fonts.googleapis.com/css2?${[...new Set([b.fontHeading, b.fontBody])].map((f) => `family=${f.replace(/ /g, "+")}:wght@400;500;600;700`).join("&")}&display=swap`;
+
 const search = (i: Item) => esc(`${i.name} ${i.description ?? ""}`.toLowerCase());
 
 /** Ícono de la categoría según su nombre (el diseño usa uno por categoría). */
@@ -97,8 +112,9 @@ const CAT_OFF = "menu-cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl b
 const CAT_ON = "menu-cat-btn flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-dorado font-medium text-xs whitespace-nowrap shadow-sm transition-all";
 
 export function renderPublicMenu(view: MenuView): string {
-  const { config: c } = view;
-  const title = c.title || "CONVIVIUM";
+  const { config: c, brand } = view;
+  const title = brand.name;
+  const logo = brand.logoUrl ? `<img src="${esc(brand.logoUrl)}" alt="${esc(title)}" class="w-full h-full object-cover"/>` : "";
   const time = new Date(view.updatedAt).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Mexico_City" });
   const wa = c.whatsapp.replace(/\D/g, "").slice(-10);
   const branch = /^sucursal\b/i.test(view.branchName) ? view.branchName : `Sucursal ${view.branchName}`;
@@ -114,13 +130,13 @@ export function renderPublicMenu(view: MenuView): string {
   return `<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <title>${esc(title)} · ${esc(view.branchName)} · Menú</title>
-<meta name="description" content="Menú de ${esc(title)} ${esc(view.branchName)}"><meta name="theme-color" content="#EAE6DD">
+<meta name="description" content="Menú de ${esc(title)} ${esc(view.branchName)}"><meta name="theme-color" content="${brand.background}">
 <link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="${esc(fontsHref(brand))}" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>${MENU_CSS}</style></head>
+<style>${brandStyle(brand)}${MENU_CSS}</style></head>
 <body class="bg-surface font-body text-carbon flex flex-col min-h-screen">
-<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-4 flex items-center justify-between"><div class="flex flex-col justify-center"><h1 class="font-headline text-lg font-bold tracking-[0.2em] uppercase text-primary leading-tight">${esc(title)}</h1><p class="text-[10px] tracking-wide text-carbon/75 font-body mt-0.5">${[c.subtitle, branch].filter(Boolean).map(esc).join(" · ")}</p></div></div></header>
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-4 flex items-center gap-3">${logo ? `<div class="w-11 h-11 rounded-full overflow-hidden shrink-0 bg-white shadow-sm">${logo}</div>` : ""}<div class="flex flex-col justify-center min-w-0"><h1 class="font-headline text-lg font-bold tracking-[0.2em] uppercase text-primary leading-tight truncate">${esc(title)}</h1><p class="text-[10px] tracking-wide text-carbon/75 font-body mt-0.5 truncate">${[brand.slogan, branch].filter(Boolean).map(esc).join(" · ")}</p></div></div></header>
 <main class="flex flex-col relative w-full pt-20 pb-28 bg-surface px-4"><div class="flex flex-col w-full space-y-6 pb-6">
 
 <section class="rounded-2xl bg-primary text-on-primary p-4 shadow-md relative overflow-hidden">
@@ -131,7 +147,7 @@ export function renderPublicMenu(view: MenuView): string {
 <h2 class="font-headline text-xl font-bold tracking-[0.15em] text-on-primary">${esc(title.toUpperCase())}</h2>
 <p class="text-xs text-on-primary/80 font-body flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px] text-dorado">location_on</span><span>${esc(branch)}${c.address ? ` · ${esc(c.address)}` : ""}</span></p>
 </div>
-<div class="w-11 h-11 rounded-xl bg-surface/10 flex items-center justify-center text-dorado shadow-inner backdrop-blur-sm"><span class="material-symbols-outlined text-[24px]">restaurant</span></div>
+${logo ? `<div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white shadow-inner">${logo}</div>` : `<div class="w-11 h-11 rounded-xl bg-surface/10 flex items-center justify-center text-dorado shadow-inner backdrop-blur-sm"><span class="material-symbols-outlined text-[24px]">restaurant</span></div>`}
 </div>
 </section>
 
@@ -149,13 +165,13 @@ ${view.sections.map((s) => `<button class="${CAT_OFF}" data-target="cat-${s.id}"
 </div>
 
 ${c.showPromos ? view.promos.map((p) => `
-<div class="relative rounded-2xl bg-gradient-to-r from-primary to-[#2a4037] text-on-primary p-4 shadow-md overflow-hidden">
+<div class="relative rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-on-primary p-4 shadow-md overflow-hidden">
 <div class="absolute -right-8 -top-8 w-28 h-28 bg-dorado/15 rounded-full blur-2xl pointer-events-none"></div>
 <div class="flex items-start gap-3.5 relative z-10">
 <div class="w-10 h-10 rounded-xl bg-dorado/20 text-dorado flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[22px]">local_offer</span></div>
 <div class="space-y-1">
 <div class="flex items-center gap-2"><span class="px-2 py-0.5 rounded-full bg-dorado text-primary font-bold text-[9px] uppercase tracking-wider">Hoy</span><span class="text-dorado text-xs font-semibold tracking-wide">${esc(p.detail)}</span></div>
-<h3 class="font-headline font-semibold text-sm leading-snug text-white">${esc(p.name)}</h3>
+<h3 class="font-headline font-semibold text-sm leading-snug text-on-primary">${esc(p.name)}</h3>
 </div>
 </div>
 </div>`).join("") : ""}
@@ -191,9 +207,9 @@ ${view.sections.map((s) => `
 
 <footer class="mt-8 pt-8 space-y-4 text-center rounded-2xl bg-white/40 p-6 shadow-sm">
 <div class="flex flex-col items-center justify-center space-y-1">
-<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-dorado font-headline text-sm font-bold shadow-xs">${esc(title.charAt(0).toUpperCase())}</div>
+${logo ? `<div class="w-12 h-12 rounded-full overflow-hidden bg-white shadow-xs">${logo}</div>` : `<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-dorado font-headline text-sm font-bold shadow-xs">${esc(title.charAt(0).toUpperCase())}</div>`}
 <h3 class="font-headline font-bold text-sm tracking-[0.2em] text-primary">${esc(title.toUpperCase())}</h3>
-${c.subtitle ? `<p class="text-[10px] text-carbon/60 tracking-wider uppercase">${esc(c.subtitle)}</p>` : ""}
+${brand.slogan ? `<p class="text-[10px] text-carbon/60 tracking-wider uppercase">${esc(brand.slogan)}</p>` : ""}
 </div>
 <div class="space-y-1 text-xs text-carbon/75 font-body">
 ${c.address ? `<p class="font-medium text-carbon">${esc(c.address)}</p>` : ""}
@@ -204,6 +220,7 @@ ${c.phone ? `<p>Reservaciones y dudas: <span class="text-primary font-semibold s
 <p>Carta digital actualizada hoy a las ${time} hrs</p>
 </div>
 </footer>
+<p class="text-center text-[10px] tracking-wider text-carbon/45 font-body pt-2">Powered by <span class="font-semibold tracking-[0.2em]">CONVIVIUM</span></p>
 </div></main>
 ${wa ? `<a class="fixed bottom-6 right-4 z-40 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-primary/95 text-dorado text-xs font-medium shadow-[0_4px_16px_rgba(30,47,40,0.25)] backdrop-blur-md transition-transform active:scale-95 pb-safe" href="https://wa.me/52${wa}" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[18px]">chat</span><span>Dudas por WhatsApp</span></a>` : ""}
 <script>

@@ -62,13 +62,25 @@ cd apps/api && npx tsx --env-file=../../.env src/index.ts   # sirve todo en :400
 
 ---
 
-## 1. Siguiente feature en curso: identidad del restaurante en el menú ("Powered by CONVIVIUM")
+## 1. Identidad del restaurante (marca blanca) — hecho, con pendientes
 
-**Requerimiento del cliente:** CONVIVIUM es el software, pero el menú (digital, PDF impreso y QR) debe verse con la **imagen y colores del restaurante que compró CONVIVIUM**. Al pie debe decir **"Powered by CONVIVIUM"**.
+**Requerimiento del cliente:** CONVIVIUM es el software, pero el menú debe verse con la imagen y colores del restaurante que lo compró, con "Powered by CONVIVIUM" al pie.
 
-Estado y detalle en la sección 9 de este documento.
+**Hecho:**
+- Admin → **Identidad del restaurante** (`/identidad`, diseño `design/stitch/admin-identidad-restaurante.html`): logo, nombre comercial, eslogan, 4 colores (principal, acento, fondo, texto), tipografía de títulos y de texto, revisión de contraste AA y vista previa del menú digital y del encabezado del PDF.
+- API `/v1/branding`: GET, PUT y `PUT`/`DELETE /logo`. Lo editan quienes tienen `sucursal.configurar`.
+  - Se guarda en `tenants.branding` (migración `0017`) y se sincroniza al nodo con la configuración.
+- Menú digital (`/m/:slug`): colores y tipografías por variables CSS (`--brand-*`), logo en encabezado, tarjeta y pie, y "Powered by CONVIVIUM".
+- PDF: logo, nombre, eslogan y colores del restaurante, con "Powered by CONVIVIUM" al pie de cada página.
+- Generador de menú: la vista previa "Digital" muestra la página real dentro del marco de celular, y la marca se edita en Identidad.
 
----
+**Falta:**
+1. **Tipografías en el PDF:** hoy se usan Times y Helvetica. Para usar la fuente de la marca hay que descargar el TTF de Google Fonts al guardar la identidad, guardarlo en `MEDIA_DIR` y usar `doc.registerFont`.
+2. **Logo en el nodo del restaurante:** el archivo vive en `MEDIA_DIR` de la nube y no se sincroniza (mismo pendiente que las fotos, sección 4.3).
+3. **Logo en SVG:** no se acepta porque puede contener scripts. Si el cliente lo pide, sanearlo con DOMPurify en el servidor o convertirlo a PNG.
+4. **Identidad por sucursal:** hoy es por restaurante. Si una sucursal necesita otra marca, agregar `branches.branding` que sobreescriba la del restaurante.
+5. **Marca en la tarjeta del QR para mesa:** el QR descargable es solo el código. Falta una "tarjeta de mesa" imprimible con logo, nombre y QR.
+6. **PWA instalable con la marca:** el `manifest` del comandero y la caja siguen siendo de CONVIVIUM. Decidir con el cliente si el personal debe ver la marca del restaurante o la de CONVIVIUM.
 
 ## 2. Recetas (reportado por el cliente) — estado y lo que falta
 
@@ -131,7 +143,7 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 ---
 
 ## 4. Menú digital, PDF y generador
-1. **Identidad del restaurante y "Powered by CONVIVIUM"** (sección 9).
+1. **Identidad del restaurante:** hecha; sus pendientes están en la sección 1.
 2. **Varias cartas por sucursal** (Carta principal, Bebidas, Desayunos con horario). El diseño Stitch `design/stitch/admin-menus-publicacion.html` las muestra; hoy hay una sola carta por sucursal en `menu_publications`.
    - Cambio de modelo: `menus(id, branch_id, name, slug, schedule, status)` con N por sucursal.
    - Ajustar `/v1/menus/*`, `/m/:slug`, el QR y el PDF.
@@ -140,7 +152,7 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 4. **Optimizar fotos al subirlas**: redimensionar a 1200 px y convertir a WebP con `sharp`. Hoy se guarda el archivo tal cual, hasta 5 MB.
 5. **Pantalla "Generador de menú":**
    - Al lado de "Publicar" queda un segundo botón principal ("Descargar QR en alta calidad"). Revisar la jerarquía con Stitch.
-   - El tab "Digital" de la vista previa replica el diseño anterior del menú, no el actual de Stitch: actualizar `DigitalPreview` en `apps/admin/src/features/menu/MenuGeneratorPage.tsx` para que muestre la página real, por ejemplo en un iframe a `POST /menus/preview` que devuelva HTML.
+   - El panel "Diseño" del generador se ve apretado a menos de 1100 px de ancho; revisarlo.
 
 ---
 
@@ -188,25 +200,3 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 - **Volver a publicar el artifact** del manual (claude.ai, privado; el cliente decide si lo comparte).
 
 ---
-
-## 9. Feature: identidad del restaurante en el menú
-
-### Objetivo
-- El menú digital (`/m/:slug`), el PDF impreso y la tarjeta del QR usan **logo, nombre, colores y tipografía del restaurante**.
-- CONVIVIUM solo aparece al pie: **"Powered by CONVIVIUM"**.
-- El admin de CONVIVIUM sigue con la imagen de CONVIVIUM.
-
-### Diseño
-- Pedir a Stitch las pantallas con marcadores de marca: logo del restaurante, color primario y secundario, fondo y fuente de títulos.
-- Pedir también la sección "Identidad del restaurante" para el admin: subir logo y elegir colores con vista previa.
-
-### Modelo
-- `tenants.branding` (jsonb): `{ logoUrl, primary, secondary, accent, background, text, fontHeading, fontBody }`, con valores por omisión de CONVIVIUM.
-- La sucursal puede heredar o sobreescribir.
-- Validar contraste de texto contra fondo (WCAG AA).
-
-### Implementación
-- Menú público: en `public-page.ts`, inyectar los colores como variables CSS. Hoy las clases de Tailwind están compiladas con colores fijos; hay que **pasar el tema a `var(--brand-…)` en `scripts/menu-tailwind.config.cjs`** y regenerar `menu-styles.ts`.
-- PDF: `apps/api/src/modules/menus/pdf.ts` usa los colores y el logo del restaurante.
-- Admin: el logo se sube por el mismo mecanismo de fotos (`/media/`).
-- Pie fijo en el menú digital y en el PDF: "Powered by CONVIVIUM", con enlace al sitio de CONVIVIUM cuando exista.

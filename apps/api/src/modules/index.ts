@@ -16,6 +16,7 @@ import { rolesModule } from "./roles/routes.js";
 import { promotionsModule } from "./promotions/routes.js";
 import { menusModule } from "./menus/routes.js";
 import { branchModule } from "./branch/routes.js";
+import { brandingModule } from "./branding/routes.js";
 
 /** Registro central de módulos. Agregar un dominio = crear carpeta + añadirlo aquí. */
 export const modules: ApiModule[] = [
@@ -35,5 +36,6 @@ export const modules: ApiModule[] = [
   promotionsModule,
   menusModule,
   branchModule,
+  brandingModule,
   syncCloudModule,
 ];

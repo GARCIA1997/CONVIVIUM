@@ -1,6 +1,7 @@
 /* Generador de menú (E2-09): impreso en PDF, digital con QR. Diseño: design/stitch/admin-menus-publicacion.html y menu-impreso.html. */
 import { client } from "@convivium/app-shell";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface Config {
   title: string; subtitle: string; footer: string; address: string; phone: string; whatsapp: string;
@@ -9,10 +10,10 @@ interface Config {
   categories: { id: string; visible: boolean }[]; hiddenProducts: string[];
 }
 interface Current { slug: string; published: boolean; publishedAt: string | null; config: Config; publicUrl: string }
-interface View { branchName: string; sections: { id: string; name: string; items: { id: string; name: string; description: string | null; price: number; badges: string[]; soldOut: boolean }[] }[]; promos: { name: string; detail: string }[] }
+interface Brand { name: string; slogan: string; logoUrl: string | null; primary: string; accent: string; background: string; text: string; fontHeading: string; fontBody: string }
+interface View { branchName: string; brand: Brand; sections: { id: string; name: string; items: { id: string; name: string; description: string | null; price: number; badges: string[]; soldOut: boolean }[] }[]; promos: { name: string; detail: string }[] }
 interface MenuData { categories: { id: string; name: string; sortOrder: number }[]; products: { id: string; name: string; categoryId: string; badges: string[]; active: boolean }[] }
 
-const ACCENTS = ["#D4AF7C", "#B45A3C", "#1E2F28", "#8A6A2F", "#5E7A5A"];
 const BADGE: Record<string, string> = { nuevo: "Nuevo", picante: "Picante", vegetariano: "Vegetariano", recomendado: "Recomendado" };
 const peso = (c: number) => (c % 100 ? (c / 100).toFixed(2) : String(c / 100));
 
@@ -33,6 +34,7 @@ export function MenuGeneratorPage() {
   const [view, setView] = useState<View | null>(null);
   const [tab, setTab] = useState<"impreso" | "digital">("impreso");
   const [qr, setQr] = useState<string | null>(null);
+  const [html, setHtml] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const timer = useRef<number>();
@@ -48,7 +50,10 @@ export function MenuGeneratorPage() {
   useEffect(() => {
     if (!cfg) return;
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => client.request<View>("POST", "/menus/preview", cfg).then(setView).catch(() => {}), 250);
+    timer.current = window.setTimeout(() => {
+      client.request<View>("POST", "/menus/preview", cfg).then(setView).catch(() => {});
+      fetch("/v1/menus/preview.html", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${client.session?.accessToken}` }, body: JSON.stringify(cfg) }).then((r) => (r.ok ? r.text() : null)).then((h) => h && setHtml(h)).catch(() => {});
+    }, 250);
   }, [cfg]);
 
   if (!cfg || !cur || !menu) return <main className="flex-1 p-8 text-sm text-stone-500">Cargando…</main>;
@@ -121,14 +126,19 @@ export function MenuGeneratorPage() {
         </div>
         <div className="flex-1 overflow-auto p-6 bg-stone-200/50 flex justify-center">
           {view && tab === "impreso" && <PrintPreview view={view} cfg={cfg} qr={qr} url={cur.publicUrl} />}
-          {view && tab === "digital" && <DigitalPreview view={view} cfg={cfg} />}
+          {tab === "digital" && html && <DigitalPreview html={html} />}
         </div>
       </section>
 
       <aside className="col-span-3 border-l border-arena-border bg-white overflow-y-auto p-5 space-y-5 text-xs">
         <div className="space-y-3">
           <h3 className="font-serif-brand text-base font-semibold text-stone-900">Diseño</h3>
-          {([["title", "Nombre"], ["subtitle", "Lema"], ["address", "Dirección"], ["phone", "Teléfono"], ["whatsapp", "WhatsApp"], ["footer", "Pie"]] as const).map(([k, l]) => (
+          <div className="p-3 rounded-lg border border-arena-border bg-marfil-canvas/40 flex items-center gap-3">
+            {view?.brand.logoUrl ? <img src={view.brand.logoUrl} alt="" className="w-9 h-9 rounded-full object-cover" /> : <span className="w-9 h-9 rounded-full flex items-center justify-center font-bold" style={{ background: view?.brand.primary, color: view?.brand.background }}>{view?.brand.name.charAt(0)}</span>}
+            <div className="min-w-0 flex-1"><span className="block font-semibold text-stone-800 truncate">{view?.brand.name}</span><span className="block text-[10px] text-stone-500">Logo, nombre, colores y tipografías</span></div>
+            <Link to="/identidad" className="text-olivo font-semibold underline shrink-0">Identidad</Link>
+          </div>
+          {([["address", "Dirección"], ["phone", "Teléfono"], ["whatsapp", "WhatsApp"], ["footer", "Pie"]] as const).map(([k, l]) => (
             <label key={k} className="block"><span className="block font-semibold text-stone-700 mb-1">{l}</span><input value={cfg[k]} onChange={(e) => set({ [k]: e.target.value } as Partial<Config>)} className="w-full border border-arena-border rounded-lg px-2.5 py-1.5" /></label>
           ))}
           <div><span className="block font-semibold text-stone-700 mb-1">Tamaño del impreso</span>
@@ -136,9 +146,6 @@ export function MenuGeneratorPage() {
           </div>
           <div><span className="block font-semibold text-stone-700 mb-1">Columnas</span>
             <div className="grid grid-cols-2 gap-1.5">{([1, 2] as const).map((n) => <button key={n} onClick={() => set({ columns: n })} className={cfg.columns === n ? "py-1.5 rounded-lg border-2 border-olivo bg-olivo/5 text-olivo font-semibold" : "py-1.5 rounded-lg border border-arena-border text-stone-600"}>{n} columna{n > 1 ? "s" : ""}</button>)}</div>
-          </div>
-          <div><span className="block font-semibold text-stone-700 mb-1">Color de acento</span>
-            <div className="flex gap-2">{ACCENTS.map((a) => <button key={a} onClick={() => set({ accent: a })} style={{ background: a }} className={`w-7 h-7 rounded-full border-2 ${cfg.accent === a ? "border-stone-900" : "border-white shadow"}`} />)}</div>
           </div>
           {([["showDescriptions", "Mostrar descripciones"], ["showSoldOut", "Mostrar agotados como “Agotado hoy” (digital)"], ["showPromos", "Mostrar promociones activas (digital)"]] as const).map(([k, l]) => (
             <label key={k} className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={cfg[k]} onChange={(e) => set({ [k]: e.target.checked } as Partial<Config>)} className="rounded text-olivo border-arena-border" /><span className="text-stone-700">{l}</span></label>
@@ -182,18 +189,18 @@ function PrintPreview({ view, cfg, qr, url }: { view: View; cfg: Config; qr: str
   return (
     <div style={{ width: w, minHeight: h }} className="bg-white shadow-xl px-10 py-9 flex flex-col text-stone-900">
       <div className="text-center">
-        <span className="inline-flex w-9 h-9 rounded-full border items-center justify-center font-serif-brand font-bold text-olivo" style={{ borderColor: cfg.accent }}>C</span>
-        <h1 className="font-serif-brand text-2xl text-olivo mt-2" style={{ letterSpacing: "0.3em" }}>{cfg.title.toUpperCase()}</h1>
-        {cfg.subtitle && <p className="font-serif-brand italic text-xs text-stone-500 mt-1">{cfg.subtitle}</p>}
-        <div className="w-20 h-px mx-auto mt-2" style={{ background: cfg.accent }} />
+        {view.brand.logoUrl ? <img src={view.brand.logoUrl} alt="" className="inline-block w-12 h-12 object-contain" /> : <span className="inline-flex w-9 h-9 rounded-full border items-center justify-center font-serif-brand font-bold" style={{ borderColor: view.brand.accent, color: view.brand.primary }}>{view.brand.name.charAt(0)}</span>}
+        <h1 className="font-serif-brand text-2xl mt-2" style={{ letterSpacing: "0.3em", color: view.brand.primary }}>{view.brand.name.toUpperCase()}</h1>
+        {view.brand.slogan && <p className="font-serif-brand italic text-xs text-stone-500 mt-1">{view.brand.slogan}</p>}
+        <div className="w-20 h-px mx-auto mt-2" style={{ background: view.brand.accent }} />
       </div>
       <div className="mt-6 flex-1" style={{ columnCount: cfg.columns, columnGap: 28 }}>
         {sections.map((s) => (
           <div key={s.id} className="mb-5 break-inside-avoid-column">
-            <h2 className="font-serif-brand font-bold text-[11px] text-olivo border-b border-arena pb-1 mb-2" style={{ letterSpacing: "0.18em" }}>{s.name.toUpperCase()}</h2>
+            <h2 className="font-serif-brand font-bold text-[11px] border-b border-arena pb-1 mb-2" style={{ letterSpacing: "0.18em", color: view.brand.primary }}>{s.name.toUpperCase()}</h2>
             {s.items.map((i) => (
               <div key={i.id} className="mb-2 break-inside-avoid">
-                <div className="flex items-baseline gap-1 text-[11px]"><span className="font-serif-brand font-bold">{i.name}{i.badges.includes("picante") && " (picante)"}{i.badges.includes("vegetariano") && " (veg.)"}</span><span className="flex-1 border-b border-dotted border-arena translate-y-[-3px]" /><span className="font-bold text-olivo">{peso(i.price)}</span></div>
+                <div className="flex items-baseline gap-1 text-[11px]"><span className="font-serif-brand font-bold">{i.name}{i.badges.includes("picante") && " (picante)"}{i.badges.includes("vegetariano") && " (veg.)"}</span><span className="flex-1 border-b border-dotted border-arena translate-y-[-3px]" /><span className="font-bold" style={{ color: view.brand.primary }}>{peso(i.price)}</span></div>
                 {i.description && <p className="text-[9px] text-stone-500 leading-snug">{i.description}</p>}
               </div>
             ))}
@@ -203,41 +210,24 @@ function PrintPreview({ view, cfg, qr, url }: { view: View; cfg: Config; qr: str
       <div className="border-t border-arena pt-3 mt-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {qr && <div className="w-14 h-14" dangerouslySetInnerHTML={{ __html: qr.replace("<svg", '<svg width="56" height="56"') }} />}
-          <div><p className="font-serif-brand font-bold text-[10px] text-olivo">Escanea para ver el menú digital</p><p className="text-[8px] text-stone-500 break-all">{url}</p></div>
+          <div><p className="font-serif-brand font-bold text-[10px]" style={{ color: view.brand.primary }}>Escanea para ver el menú digital</p><p className="text-[8px] text-stone-500 break-all">{url}</p></div>
         </div>
         <p className="text-[8px] text-stone-500 text-right whitespace-pre-line">{[cfg.address, cfg.phone && `Tel. ${cfg.phone}`, cfg.footer].filter(Boolean).join("\n")}</p>
       </div>
+      <p className="text-center text-[7px] tracking-wider text-stone-400 mt-2">Powered by CONVIVIUM</p>
     </div>
   );
 }
 
-/** Réplica del menú digital en un marco de celular. */
-function DigitalPreview({ view, cfg }: { view: View; cfg: Config }) {
+/**
+ * Menú digital real (mismo HTML que abre el QR) dentro de un marco de celular.
+ * allow-same-origin: el HTML lo genera nuestra API (texto escapado) y, sin él, el navegador bloquea
+ * las fotos y el logo servidos desde una dirección local (red del restaurante).
+ */
+function DigitalPreview({ html }: { html: string }) {
   return (
-    <div className="w-[375px] h-[720px] rounded-[2.2rem] border-[10px] border-stone-900 bg-[#F7F5F0] overflow-y-auto shadow-2xl shrink-0">
-      <header className="bg-olivo text-center px-4 pt-7 pb-5">
-        <span className="inline-flex w-10 h-10 rounded-full border items-center justify-center font-serif-brand font-bold" style={{ borderColor: cfg.accent, color: cfg.accent }}>{cfg.title.charAt(0)}</span>
-        <h1 className="font-serif-brand text-lg text-amber-50 mt-2" style={{ letterSpacing: "0.28em" }}>{cfg.title.toUpperCase()}</h1>
-        <p className="text-[10px] uppercase tracking-widest text-arena">{view.branchName}</p>
-        {cfg.subtitle && <p className="font-serif-brand italic text-[11px] text-arena mt-1">{cfg.subtitle}</p>}
-      </header>
-      <nav className="sticky top-0 bg-[#F7F5F0]/95 border-b border-arena/50 flex gap-2 overflow-x-auto px-3 py-2">{view.sections.map((s) => <span key={s.id} className="shrink-0 text-[11px] font-medium text-olivo border border-arena rounded-full px-3 py-1 bg-white">{s.name}</span>)}</nav>
-      <div className="px-4 pb-6">
-        {cfg.showPromos && view.promos.map((p) => <div key={p.name} className="mt-3 rounded-lg border p-2.5 bg-white" style={{ borderColor: cfg.accent }}><strong className="font-serif-brand text-olivo text-sm block">{p.name}</strong><span className="text-[10px] text-stone-500">{p.detail}</span></div>)}
-        {view.sections.map((s) => (
-          <section key={s.id} className="pt-4">
-            <h2 className="font-serif-brand font-bold text-olivo text-base border-b border-arena pb-1">{s.name}</h2>
-            {s.items.map((i) => (
-              <div key={i.id} className={`py-2.5 border-b border-arena/30 ${i.soldOut ? "opacity-50" : ""}`}>
-                <div className="flex justify-between gap-2"><span className="font-serif-brand text-sm">{i.name}</span><span className={`text-sm font-semibold text-olivo ${i.soldOut ? "line-through" : ""}`}>${peso(i.price)}</span></div>
-                {i.description && <p className="text-[11px] text-stone-500">{i.description}</p>}
-                <div className="flex gap-1 mt-1">{i.soldOut && <span className="text-[9px] font-semibold px-1.5 rounded-full border border-terracota text-terracota">Agotado hoy</span>}{i.badges.map((b) => <span key={b} className="text-[9px] font-semibold px-1.5 rounded-full bg-dorado/25 text-stone-800">{BADGE[b]}</span>)}</div>
-              </div>
-            ))}
-          </section>
-        ))}
-        <p className="text-center text-[10px] text-stone-500 mt-5">{cfg.footer}</p>
-      </div>
+    <div className="w-[375px] h-[720px] rounded-[2.2rem] border-[10px] border-stone-900 bg-white overflow-hidden shadow-2xl shrink-0">
+      <iframe title="Vista previa del menú digital" srcDoc={html.replace("<head>", `<head><base href="${location.origin}/">`)} sandbox="allow-scripts allow-same-origin" className="w-full h-full border-0" />
     </div>
   );
 }

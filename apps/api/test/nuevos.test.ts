@@ -121,3 +121,28 @@ describe("foto del platillo", () => {
     expect((await getApp().inject({ method: "GET", url: up.body.photoUrl })).statusCode).toBe(404);
   });
 });
+
+describe("identidad del restaurante (marca blanca)", () => {
+  it("el menú digital y el PDF usan logo, nombre y colores del restaurante con 'Powered by CONVIVIUM'", async () => {
+    const def = (await api("GET", "/branding", mesero)).body;
+    expect(def.primary).toBe("#1E2F28");
+    const body = { name: "Mariscos El Faro", slogan: "Del mar a tu mesa", primary: "#12355B", accent: "#E8684A", background: "#F6F1E7", text: "#1A1A1A", fontHeading: "DM Serif Display", fontBody: "Nunito" };
+    expect((await api("PUT", "/branding", mesero, body)).status).toBe(403);
+    expect((await api("PUT", "/branding", owner, { ...body, primary: "azul" })).status).toBe(400);
+    expect((await api("PUT", "/branding", owner, body)).body.name).toBe("Mariscos El Faro");
+    const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    expect((await api("PUT", "/branding/logo", owner, { dataUrl: "data:image/svg+xml;base64,PHN2Zz4=" })).status).toBe(400);
+    const logo = (await api("PUT", "/branding/logo", owner, { dataUrl: png })).body.logoUrl;
+    expect(logo).toMatch(/^\/media\/logo-.+\.png$/);
+    const page = (await getApp().inject({ method: "GET", url: "/m/prueba-centro" })).body;
+    expect(page).toContain("Mariscos El Faro");
+    expect(page).toContain(logo);
+    expect(page).toContain("--brand-primary:18 53 91");
+    expect(page).toContain("family=DM+Serif+Display");
+    expect(page).toContain("Powered by");
+    const pdf = await getApp().inject({ method: "GET", url: "/v1/menus/current/pdf", headers: { authorization: `Bearer ${owner}` } });
+    expect(pdf.rawPayload.subarray(0, 5).toString()).toBe("%PDF-");
+    await api("DELETE", "/branding/logo", owner);
+    expect((await getApp().inject({ method: "GET", url: logo })).statusCode).toBe(404);
+  });
+});
