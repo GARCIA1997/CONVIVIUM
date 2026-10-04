@@ -5,6 +5,7 @@ import { unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
+import { assertOwned } from "../../lib/ownership.js";
 import type { ApiModule } from "../../lib/module.js";
 import { AppError, notFound } from "../../plugins/errors.js";
 import { mediaDir } from "../../plugins/media.js";
@@ -90,6 +91,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   /** E2-01/E2-04 · Alta de producto. */
   app.post("/products", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"], body: catalog.ProductUpsert, response: { 201: z.object({ id: z.string() }) } } }, async (req, reply) => {
     const { stationIds, modifierGroupIds, soldOut: _s, iepsPct, ...data } = req.body;
+    await assertOwned(db, req.user, { stations: stationIds, modifierGroups: modifierGroupIds, categories: [data.categoryId] });
     const [p] = await db.insert(schema.products).values({ ...data, iepsPct: String(iepsPct), tenantId: req.user.tenantId }).returning();
     await db.insert(schema.productStations).values(stationIds.map((stationId) => ({ productId: p!.id, stationId })));
     if (modifierGroupIds.length) await db.insert(schema.productModifierGroups).values(modifierGroupIds.map((groupId) => ({ productId: p!.id, groupId })));
@@ -104,6 +106,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     const [before] = await db.select().from(schema.products).where(where);
     if (!before) throw notFound("Producto");
     const { stationIds, modifierGroupIds, soldOut: _s, iepsPct, ...data } = req.body;
+    await assertOwned(db, req.user, { stations: stationIds, modifierGroups: modifierGroupIds, categories: [data.categoryId] });
     await db.update(schema.products).set({ ...data, iepsPct: String(iepsPct), updatedAt: new Date() }).where(where);
     await db.delete(schema.productStations).where(eq(schema.productStations.productId, req.params.id));
     await db.insert(schema.productStations).values(stationIds.map((stationId) => ({ productId: req.params.id, stationId })));

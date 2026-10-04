@@ -342,8 +342,16 @@ export class OrdersService {
   }
 
   async moveItems(who: Principal, body: z.infer<typeof orders.MoveItemsBody>) {
-    await this.getCheck(who, body.toCheckId);
-    const from = await this.db.selectDistinct({ checkId: schema.orderItems.checkId }).from(schema.orderItems).where(inArray(schema.orderItems.id, body.itemIds));
+    // Solo entre cuentas vivas: pasar productos a una cuenta ya cobrada los dejaría sin cobrar.
+    const OPEN = ["abierta", "pidio_cuenta"];
+    const to = await this.getCheck(who, body.toCheckId);
+    if (!OPEN.includes(to.status)) throw conflict("check_closed", "La cuenta destino no está abierta");
+    const from = await this.db
+      .selectDistinct({ checkId: schema.orderItems.checkId, status: schema.checks.status })
+      .from(schema.orderItems)
+      .innerJoin(schema.checks, eq(schema.checks.id, schema.orderItems.checkId))
+      .where(and(inArray(schema.orderItems.id, body.itemIds), eq(schema.orderItems.branchId, who.branchId)));
+    if (from.some((f) => !OPEN.includes(f.status))) throw conflict("check_closed", "Solo se mueven productos de cuentas abiertas");
     await this.db.update(schema.orderItems).set({ checkId: body.toCheckId }).where(and(inArray(schema.orderItems.id, body.itemIds), eq(schema.orderItems.branchId, who.branchId)));
     await recordEvent(this.db, who, { type: "items.moved", entity: "check", entityId: body.toCheckId, data: body });
     for (const c of new Set([body.toCheckId, ...from.map((f) => f.checkId)])) await this.applyPromotions(c);

@@ -166,6 +166,10 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 
 ## 6. Calidad
 0. **Aislamiento entre restaurantes (hecho):** se corrigieron consultas sin `tenant_id` sobre tablas hijas (`product_stations`, `modifiers`, `product_modifier_groups`, `recipe_lines`, `supplier_prices`) en menú, grupos de modificadores, estaciones, insumos, proveedores y sugerencia de compra (que podía proponer un proveedor de otro restaurante). En `addItems` se podía vender un producto de otro restaurante por su id y colgar cualquier modificador a cualquier platillo: ahora 404 y 400. Prueba de regresión con un segundo restaurante en `nuevos.test.ts`. **Regla:** toda consulta a una tabla sin `tenant_id` debe unirse a su padre y filtrar por él.
+   - **Escrituras (hecho):** `apps/api/src/lib/ownership.ts` (`assertOwned`) valida que los ids del cuerpo sean del restaurante/sucursal. Aplicado en movimientos, recetas, producción, conteos, OC, recepción (y que la OC sea del mismo proveedor), precios de proveedor, alta/edición de producto (estaciones, grupos, categoría) y plano de mesas (mesero asignado). `move()` además no actualiza existencias de otro restaurante (`setWhere`). Antes un ajuste con almacén+insumo ajenos modificaba las existencias de otro cliente. **Regla:** todo id que llegue en el cuerpo pasa por `assertOwned`.
+   - `moveItems` ya no permite mover productos desde/hacia cuentas cobradas o canceladas (se podían dejar platillos sin cobrar).
+   - Aprobación con PIN: el aprobador debe ser del mismo restaurante y estar activo.
+   - Sin revisar: promociones guardan `productIds`/`categoryIds` sin validar (ids ajenos nunca coinciden; sin impacto).
 1. **Pruebas de interfaz (E2E)** con Playwright para los flujos clave:
    - abrir mesa, capturar, enviar, marcar listo, entregar y cobrar;
    - pedido para llevar;

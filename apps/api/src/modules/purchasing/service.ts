@@ -3,6 +3,7 @@ import { and, desc, eq, gte, inArray, schema, sql, type Db } from "@convivium/db
 import type { z } from "zod";
 import type { FastifyInstance } from "fastify";
 import { recordEvent } from "../../lib/audit.js";
+import { assertOwned } from "../../lib/ownership.js";
 import type { Principal } from "../../plugins/auth.js";
 import { AppError, conflict, notFound } from "../../plugins/errors.js";
 import { resolveBranding } from "../branding/routes.js";
@@ -87,6 +88,7 @@ export class PurchasingService {
   /** Actualiza la lista de precios: un precio distinto crea un registro nuevo (queda historial). */
   async setSupplierPrices(who: Principal, id: string, body: z.infer<typeof purchasing.SupplierPricesBody>) {
     const detail = await this.supplierDetail(who, id);
+    await assertOwned(this.db, who, { ingredients: body.prices.map((p) => p.ingredientId) });
     const today = new Date().toISOString().slice(0, 10);
     const changed = body.prices.filter((p) => detail.priceList.find((x) => x.ingredientId === p.ingredientId)?.unitPrice !== p.unitPrice);
     if (changed.length) await this.db.insert(schema.supplierPrices).values(changed.map((p) => ({ supplierId: id, ingredientId: p.ingredientId, unitPrice: p.unitPrice, validFrom: today })));
@@ -103,6 +105,7 @@ export class PurchasingService {
   }
 
   async createOrder(who: Principal, b: { supplierId: string; warehouseId: string; expectedAt?: string; lines: { ingredientId: string; quantity: number; unitPrice: number }[] }) {
+    await assertOwned(this.db, who, { suppliers: [b.supplierId], warehouses: [b.warehouseId], ingredients: b.lines.map((l) => l.ingredientId) });
     const [po] = await this.db.insert(schema.purchaseOrders).values({ tenantId: who.tenantId, branchId: who.branchId, folio: await this.nextFolio(who.tenantId), supplierId: b.supplierId, expectedAt: b.expectedAt, createdBy: who.userId }).returning();
     await this.db.insert(schema.purchaseOrderLines).values(b.lines.map((l) => ({ purchaseOrderId: po!.id, ingredientId: l.ingredientId, quantity: String(l.quantity), unitPrice: l.unitPrice })));
     await recordEvent(this.db, who, { type: "po.created", entity: "purchase_order", entityId: po!.id, data: b });
@@ -164,6 +167,11 @@ export class PurchasingService {
   async receive(who: Principal, b: { purchaseOrderId?: string; supplierId: string; warehouseId: string; invoiceFolio?: string; createPayable: boolean; lines: { ingredientId: string; quantity: number; unitPrice: number; lot?: string; expiresAt?: string }[] }) {
     const lines = b.lines.filter((l) => l.quantity > 0);
     if (!lines.length) throw conflict("empty_receipt", "No hay cantidades recibidas");
+    await assertOwned(this.db, who, { suppliers: [b.supplierId], warehouses: [b.warehouseId], ingredients: lines.map((l) => l.ingredientId) });
+    if (b.purchaseOrderId) {
+      const po = await this.order(who, b.purchaseOrderId); // 404 si la OC es de otro restaurante
+      if (po.supplierId !== b.supplierId) throw conflict("supplier_mismatch", "La recepción no corresponde al proveedor de la orden");
+    }
     const total = Math.round(lines.reduce((s, l) => s + l.quantity * l.unitPrice, 0));
     const [rec] = await this.db.insert(schema.receipts).values({ tenantId: who.tenantId, branchId: who.branchId, purchaseOrderId: b.purchaseOrderId, supplierId: b.supplierId, warehouseId: b.warehouseId, invoiceFolio: b.invoiceFolio, total, receivedBy: who.userId }).returning();
     for (const l of lines) await this.inventory.receive(who, b.warehouseId, l.ingredientId, l.quantity, l.unitPrice, rec!.id);

@@ -72,7 +72,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   app.post("/:id/resolve", { onRequest: [app.guard()], schema: { tags, params: IdParam, body: approvals.ResolveApprovalBody } }, async (req) => {
     let approver = { userId: req.user.userId, roles: req.user.roles };
     if (req.body.approverId && req.body.approverPin) {
-      const [u] = await db.select().from(schema.users).where(eq(schema.users.id, req.body.approverId));
+      const [u] = await db.select().from(schema.users).where(and(eq(schema.users.id, req.body.approverId), eq(schema.users.tenantId, req.user.tenantId), eq(schema.users.active, true)));
       if (!u?.pinHash || !(await bcrypt.compare(req.body.approverPin, u.pinHash))) throw new AppError(401, "bad_pin", "PIN incorrecto");
       const roles = (await db.select().from(schema.userRoles).where(and(eq(schema.userRoles.userId, u.id), eq(schema.userRoles.branchId, req.user.branchId)))).map((r) => r.role as Role);
       approver = { userId: u.id, roles };

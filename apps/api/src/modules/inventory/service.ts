@@ -2,6 +2,7 @@ import { and, eq, inArray, schema, sql, type Db } from "@convivium/db";
 import { breakdownIncludedTaxes, costPct, explode, purchaseSuggestion, recipeCost, weightedAvgCost, type RecipeInput } from "@convivium/domain";
 import type { FastifyInstance } from "fastify";
 import { recordEvent } from "../../lib/audit.js";
+import { assertOwned } from "../../lib/ownership.js";
 import type { Principal } from "../../plugins/auth.js";
 import { conflict, notFound } from "../../plugins/errors.js";
 
@@ -67,7 +68,7 @@ export class InventoryService {
     await this.db
       .insert(schema.stock)
       .values({ tenantId: who.tenantId, warehouseId: m.warehouseId, ingredientId: m.ingredientId, quantity: String(m.qty) })
-      .onConflictDoUpdate({ target: [schema.stock.warehouseId, schema.stock.ingredientId], set: { quantity: sql`${schema.stock.quantity} + ${m.qty}` } });
+      .onConflictDoUpdate({ target: [schema.stock.warehouseId, schema.stock.ingredientId], set: { quantity: sql`${schema.stock.quantity} + ${m.qty}` }, setWhere: eq(schema.stock.tenantId, who.tenantId) });
     await this.db.insert(schema.stockMovements).values({
       tenantId: who.tenantId,
       branchId: who.branchId,
@@ -83,6 +84,7 @@ export class InventoryService {
   }
 
   async manualMovement(who: Principal, b: { type: "merma" | "traspaso" | "ajuste"; ingredientId: string; quantity: number; warehouseId: string; toWarehouseId?: string; direction: "entrada" | "salida"; reasonId?: string }) {
+    await assertOwned(this.db, who, { ingredients: [b.ingredientId], warehouses: [b.warehouseId, b.toWarehouseId] });
     if (b.type === "traspaso") {
       if (!b.toWarehouseId || b.toWarehouseId === b.warehouseId) throw conflict("bad_transfer", "Elige un almacén destino distinto");
       await this.move(who, { type: "traspaso", ingredientId: b.ingredientId, warehouseId: b.warehouseId, qty: -b.quantity });
@@ -165,6 +167,13 @@ export class InventoryService {
   }
 
   async upsertRecipe(who: Principal, body: { name: string; productId: string | null; modifierId: string | null; isSubRecipe: boolean; yieldQty: number | null; steps: string[]; lines: { ingredientId: string | null; subRecipeId: string | null; quantity: number; wastePct: number }[] }, id?: string) {
+    await assertOwned(this.db, who, {
+      products: [body.productId],
+      modifiers: [body.modifierId],
+      ingredients: body.lines.map((l) => l.ingredientId),
+      recipes: body.lines.map((l) => l.subRecipeId),
+    });
+    if (id && body.lines.some((l) => l.subRecipeId === id)) throw conflict("recipe_cycle", "Una receta no puede usarse a sí misma");
     const values = { name: body.name, productId: body.productId, modifierId: body.modifierId, isSubRecipe: body.isSubRecipe, yieldQty: body.yieldQty === null ? null : String(body.yieldQty), steps: body.steps };
     let recipeId = id;
     if (id) {
@@ -197,6 +206,7 @@ export class InventoryService {
 
   /** E7-04 · Producción de subreceta: descuenta insumos y suma el preparado como insumo "SR: <nombre>". */
   async produce(who: Principal, b: { recipeId: string; batches: number; warehouseId: string }) {
+    await assertOwned(this.db, who, { warehouses: [b.warehouseId] });
     const recipes = await this.recipeMap(who.tenantId);
     const r = recipes.get(b.recipeId);
     if (!r?.row.isSubRecipe) throw conflict("not_subrecipe", "Solo se producen subrecetas");
@@ -288,6 +298,7 @@ export class InventoryService {
   // ---------- Conteos físicos (E7-09) ----------
 
   async submitCount(who: Principal, b: { warehouseId: string; lines: { ingredientId: string; counted: number }[] }) {
+    await assertOwned(this.db, who, { warehouses: [b.warehouseId], ingredients: b.lines.map((l) => l.ingredientId) });
     const ings = await this.ingredients(who, b.warehouseId);
     const [c] = await this.db.insert(schema.inventoryCounts).values({ tenantId: who.tenantId, branchId: who.branchId, warehouseId: b.warehouseId, countedBy: who.userId }).returning();
     await this.db.insert(schema.inventoryCountLines).values(

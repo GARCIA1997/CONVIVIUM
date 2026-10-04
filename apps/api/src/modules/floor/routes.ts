@@ -2,6 +2,7 @@ import { floor } from "@convivium/contracts";
 import { and, eq, inArray, schema } from "@convivium/db";
 import { z } from "zod";
 import { recordEvent } from "../../lib/audit.js";
+import { assertOwned } from "../../lib/ownership.js";
 import type { ApiModule } from "../../lib/module.js";
 import { AppError } from "../../plugins/errors.js";
 import { lineTotal } from "../orders/mapper.js";
@@ -101,6 +102,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
     if (dup) throw new AppError(400, "duplicate_label", `La clave ${dup} está repetida`);
     const areaIds = new Set((await db.select({ id: schema.areas.id }).from(schema.areas).where(eq(schema.areas.branchId, branchId))).map((a) => a.id));
     if (tables.some((t) => !areaIds.has(t.areaId)) || req.body.fixtures.some((f) => !areaIds.has(f.areaId))) throw new AppError(400, "bad_area", "Área inválida");
+    await assertOwned(db, req.user, { users: tables.map((t) => t.assignedUserId) });
     if (removed.length) {
       const busy = await db.select({ tableId: schema.checks.tableId }).from(schema.checks)
         .where(and(inArray(schema.checks.tableId, removed), inArray(schema.checks.status, ["abierta", "pidio_cuenta"])));

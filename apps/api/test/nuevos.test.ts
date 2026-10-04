@@ -257,10 +257,40 @@ describe("aislamiento entre restaurantes", () => {
     expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1, modifierIds: [mod!.id] }] })).status).toBe(400);
     const otherMod = m.products.filter((p: any) => p.id !== own.id).flatMap((p: any) => p.modifierGroups).flatMap((g: any) => g.modifiers).find((x: any) => !own.modifierGroups.some((g: any) => g.modifiers.some((y: any) => y.id === x.id)));
     if (otherMod) expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1, modifierIds: [otherMod.id] }] })).status).toBe(400);
-    expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1 }] })).status).toBe(201);
+    const added = (await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1 }] }));
+    expect(added.status).toBe(201);
+
+    // Escrituras con ids de otro restaurante: 400 y nada ajeno cambia.
+    const { eq, and } = await import("@convivium/db");
+    const [b2] = await db.insert(schema.branches).values({ tenantId: t2!.id, name: "Sucursal ajena" }).returning();
+    const [st2] = await db.insert(schema.stations).values({ tenantId: t2!.id, branchId: b2!.id, name: "Cocina ajena", kind: "cocina" }).returning();
+    const [wh2] = await db.insert(schema.warehouses).values({ tenantId: t2!.id, branchId: b2!.id, name: "General" }).returning();
+    const [ing2] = await db.insert(schema.ingredients).values({ tenantId: t2!.id, name: "Insumo ajeno", purchaseUnit: "kg", useUnit: "g", conversion: "1000" }).returning();
+    await db.insert(schema.stock).values({ tenantId: t2!.id, warehouseId: wh2!.id, ingredientId: ing2!.id, quantity: "100" });
+    const ownWh = ((await api("GET", "/inventory/warehouses", owner)).body as any[])[0];
+    const ownIng = ((await api("GET", "/inventory/ingredients", owner)).body as any[])[0];
+    const bad = async (method: string, url: string, body: object) => expect((await api(method, url, owner, body)).status).toBe(400);
+    await bad("POST", "/inventory/movements", { type: "ajuste", direction: "salida", ingredientId: ing2!.id, warehouseId: wh2!.id, quantity: 100 });
+    await bad("POST", "/inventory/movements", { type: "traspaso", direction: "salida", ingredientId: ownIng.id, warehouseId: ownWh.id, toWarehouseId: wh2!.id, quantity: 1 });
+    await bad("POST", "/inventory/recipes", { name: "X", productId: null, modifierId: null, isSubRecipe: true, yieldQty: 1, steps: [], lines: [{ ingredientId: ing2!.id, subRecipeId: null, quantity: 1, wastePct: 0 }] });
+    await bad("POST", "/inventory/counts", { warehouseId: wh2!.id, lines: [{ ingredientId: ing2!.id, counted: 0 }] });
+    const ownProduct = { categoryId: own.categoryId, name: "Prueba estación ajena", price: 100, targetPrepSec: 60, photoUrl: null, active: true, soldOut: false };
+    await bad("POST", "/catalog/products", { ...ownProduct, stationIds: [st2!.id] });
+    await bad("POST", "/catalog/products", { ...ownProduct, stationIds: own.stationIds, modifierGroupIds: [grp!.id] });
+    await bad("PUT", `/catalog/products/${own.id}`, { ...own, stationIds: [st2!.id], modifierGroupIds: [] });
+    const [stock2] = await db.select().from(schema.stock).where(and(eq(schema.stock.warehouseId, wh2!.id), eq(schema.stock.ingredientId, ing2!.id)));
+    expect(Number(stock2!.quantity)).toBe(100);
+
+    // No se mueven productos a una cuenta ya cobrada (quedarían sin cobrar).
+    const [paid] = await db.select().from(schema.checks).where(and(eq(schema.checks.branchId, (await api("GET", "/branch", owner)).body.id), eq(schema.checks.status, "cobrada"))).limit(1);
+    expect((await api("POST", "/orders/items/move", mesero, { itemIds: [added.body[0].id], toCheckId: paid!.id })).status).toBe(409);
 
     // Limpieza: sync.test.ts compara conteos de toda la base contra el nodo.
-    const { eq } = await import("@convivium/db");
+    await db.delete(schema.stock).where(eq(schema.stock.ingredientId, ing2!.id));
+    await db.delete(schema.ingredients).where(eq(schema.ingredients.id, ing2!.id));
+    await db.delete(schema.warehouses).where(eq(schema.warehouses.id, wh2!.id));
+    await db.delete(schema.stations).where(eq(schema.stations.id, st2!.id));
+    await db.delete(schema.branches).where(eq(schema.branches.id, b2!.id));
     await db.delete(schema.products).where(eq(schema.products.id, foreign!.id));
     await db.delete(schema.modifierGroups).where(eq(schema.modifierGroups.id, grp!.id));
     await db.delete(schema.categories).where(eq(schema.categories.id, cat!.id));
