@@ -21,7 +21,7 @@ export class InventoryService {
     const [ings, stock, lines, whs] = await Promise.all([
       this.db.select().from(schema.ingredients).where(eq(schema.ingredients.tenantId, who.tenantId)),
       this.db.select().from(schema.stock).where(eq(schema.stock.tenantId, who.tenantId)),
-      this.db.select({ ingredientId: schema.recipeLines.ingredientId, productId: schema.recipes.productId }).from(schema.recipeLines).innerJoin(schema.recipes, eq(schema.recipes.id, schema.recipeLines.recipeId)),
+      this.db.select({ ingredientId: schema.recipeLines.ingredientId, productId: schema.recipes.productId }).from(schema.recipeLines).innerJoin(schema.recipes, eq(schema.recipes.id, schema.recipeLines.recipeId)).where(eq(schema.recipes.tenantId, who.tenantId)),
       this.db.select().from(schema.warehouses).where(eq(schema.warehouses.branchId, who.branchId)),
     ]);
     return ings.map((i) => {
@@ -334,7 +334,9 @@ export class InventoryService {
   async purchaseSuggestions(who: Principal) {
     const [ings, prices, suppliers] = await Promise.all([
       this.ingredients(who),
-      this.db.select().from(schema.supplierPrices),
+      // Solo precios de proveedores de este restaurante: si no, la sugerencia podía proponer un proveedor ajeno.
+      this.db.select({ ingredientId: schema.supplierPrices.ingredientId, supplierId: schema.supplierPrices.supplierId, unitPrice: schema.supplierPrices.unitPrice })
+        .from(schema.supplierPrices).innerJoin(schema.suppliers, eq(schema.suppliers.id, schema.supplierPrices.supplierId)).where(eq(schema.suppliers.tenantId, who.tenantId)),
       this.db.select().from(schema.suppliers).where(eq(schema.suppliers.tenantId, who.tenantId)),
     ]);
     return ings

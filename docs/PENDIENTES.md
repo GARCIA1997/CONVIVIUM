@@ -165,6 +165,7 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 ---
 
 ## 6. Calidad
+0. **Aislamiento entre restaurantes (hecho):** se corrigieron consultas sin `tenant_id` sobre tablas hijas (`product_stations`, `modifiers`, `product_modifier_groups`, `recipe_lines`, `supplier_prices`) en menú, grupos de modificadores, estaciones, insumos, proveedores y sugerencia de compra (que podía proponer un proveedor de otro restaurante). En `addItems` se podía vender un producto de otro restaurante por su id y colgar cualquier modificador a cualquier platillo: ahora 404 y 400. Prueba de regresión con un segundo restaurante en `nuevos.test.ts`. **Regla:** toda consulta a una tabla sin `tenant_id` debe unirse a su padre y filtrar por él.
 1. **Pruebas de interfaz (E2E)** con Playwright para los flujos clave:
    - abrir mesa, capturar, enviar, marcar listo, entregar y cobrar;
    - pedido para llevar;

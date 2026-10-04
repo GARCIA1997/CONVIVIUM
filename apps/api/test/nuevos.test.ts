@@ -229,3 +229,41 @@ describe("favoritos del comandero (E3-02)", () => {
     expect(qty.get(ids[0]!)).toBe(Math.max(...sold.map((x) => x.q))); // empates no vuelven intermitente la prueba
   });
 });
+
+describe("aislamiento entre restaurantes", () => {
+  it("no se ven ni se venden productos o modificadores de otro restaurante", async () => {
+    const { schema } = await import("@convivium/db");
+    const db = getApp().db;
+    const [t2] = await db.insert(schema.tenants).values({ name: "Otro restaurante" }).returning();
+    const [cat] = await db.insert(schema.categories).values({ tenantId: t2!.id, name: "Ajena" }).returning();
+    const [foreign] = await db.insert(schema.products).values({ tenantId: t2!.id, categoryId: cat!.id, name: "Platillo ajeno", price: 100, targetPrepSec: 60 }).returning();
+    const [grp] = await db.insert(schema.modifierGroups).values({ tenantId: t2!.id, name: "Ajeno", minSelect: 0, maxSelect: 1 }).returning();
+    const [mod] = await db.insert(schema.modifiers).values({ groupId: grp!.id, name: "Mod ajeno", priceDelta: -5000 }).returning();
+    await db.insert(schema.productModifierGroups).values({ productId: foreign!.id, groupId: grp!.id });
+
+    // El menú y los grupos de modificadores no traen nada del otro restaurante.
+    const m = (await api("GET", "/catalog/menu", mesero)).body;
+    expect(m.products.some((p: any) => p.id === foreign!.id)).toBe(false);
+    expect(m.products.flatMap((p: any) => p.modifierGroups).some((g: any) => g.id === grp!.id)).toBe(false);
+    const groups = (await api("GET", "/catalog/modifier-groups", owner)).body as any[];
+    expect(groups.flatMap((g) => g.modifiers).some((x: any) => x.id === mod!.id)).toBe(false);
+
+    // No se puede vender el producto ajeno ni colgarle un modificador ajeno (o de otro platillo) a uno propio.
+    const floor = (await api("GET", "/floor", mesero)).body;
+    const free = [...floor.tables].reverse().find((t: any) => t.status === "libre");
+    const c = (await api("POST", "/orders/checks", mesero, { kind: "mesa", tableId: free.id, guests: 1 })).body;
+    expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: foreign!.id, quantity: 1 }] })).status).toBe(404);
+    const own = m.products.find((p: any) => p.active && !p.soldOut && p.stationIds.length)!;
+    expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1, modifierIds: [mod!.id] }] })).status).toBe(400);
+    const otherMod = m.products.filter((p: any) => p.id !== own.id).flatMap((p: any) => p.modifierGroups).flatMap((g: any) => g.modifiers).find((x: any) => !own.modifierGroups.some((g: any) => g.modifiers.some((y: any) => y.id === x.id)));
+    if (otherMod) expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1, modifierIds: [otherMod.id] }] })).status).toBe(400);
+    expect((await api("POST", `/orders/checks/${c.id}/items`, mesero, { items: [{ productId: own.id, quantity: 1 }] })).status).toBe(201);
+
+    // Limpieza: sync.test.ts compara conteos de toda la base contra el nodo.
+    const { eq } = await import("@convivium/db");
+    await db.delete(schema.products).where(eq(schema.products.id, foreign!.id));
+    await db.delete(schema.modifierGroups).where(eq(schema.modifierGroups.id, grp!.id));
+    await db.delete(schema.categories).where(eq(schema.categories.id, cat!.id));
+    await db.delete(schema.tenants).where(eq(schema.tenants.id, t2!.id));
+  });
+});

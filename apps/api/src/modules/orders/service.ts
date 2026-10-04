@@ -215,12 +215,19 @@ export class OrdersService {
     if (check.status !== "abierta") throw conflict("check_closed", "La cuenta no está abierta");
     const productIds = [...new Set(body.items.map((i) => i.productId))];
     const [products, routes, avail] = await Promise.all([
-      this.db.select().from(schema.products).where(inArray(schema.products.id, productIds)),
+      this.db.select().from(schema.products).where(and(inArray(schema.products.id, productIds), eq(schema.products.tenantId, who.tenantId))),
       this.db.select().from(schema.productStations).where(inArray(schema.productStations.productId, productIds)),
       this.db.select().from(schema.productAvailability).where(and(inArray(schema.productAvailability.productId, productIds), eq(schema.productAvailability.branchId, who.branchId))),
     ]);
     const modIds = body.items.flatMap((i) => i.modifierIds);
-    const mods = modIds.length ? await this.db.select().from(schema.modifiers).where(inArray(schema.modifiers.id, modIds)) : [];
+    // Solo modificadores de un grupo ligado al producto (y por ende del mismo restaurante).
+    const mods = modIds.length
+      ? await this.db
+          .select({ id: schema.modifiers.id, name: schema.modifiers.name, priceDelta: schema.modifiers.priceDelta, productId: schema.productModifierGroups.productId })
+          .from(schema.modifiers)
+          .innerJoin(schema.productModifierGroups, eq(schema.productModifierGroups.groupId, schema.modifiers.groupId))
+          .where(and(inArray(schema.modifiers.id, modIds), inArray(schema.productModifierGroups.productId, productIds)))
+      : [];
 
     const now = new Date();
     const rows: (typeof schema.orderItems.$inferInsert)[] = [];
@@ -230,7 +237,8 @@ export class OrdersService {
       if (avail.find((a) => a.productId === product.id)?.soldOut) throw conflict("sold_out", `${product.name} está agotado`);
       const stationIds = routes.filter((r) => r.productId === product.id).map((r) => r.stationId);
       if (!stationIds.length) throw conflict("no_station", `${product.name} no tiene estación asignada`);
-      const itemMods = mods.filter((m) => input.modifierIds.includes(m.id)).map((m) => ({ id: m.id, name: m.name, priceDelta: m.priceDelta }));
+      const itemMods = mods.filter((m) => m.productId === product.id && input.modifierIds.includes(m.id)).map((m) => ({ id: m.id, name: m.name, priceDelta: m.priceDelta }));
+      if (itemMods.length !== new Set(input.modifierIds).size) throw new AppError(400, "bad_modifier", `Modificador no válido para ${product.name}`);
       // Un renglón por estación; el precio va solo en la estación principal.
       stationIds.forEach((stationId, idx) =>
         rows.push({

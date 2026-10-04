@@ -12,20 +12,40 @@ import { mediaDir } from "../../plugins/media.js";
 const plugin: ApiModule["plugin"] = async (app) => {
   const { db } = app;
 
+  // Tablas hijas sin tenant_id: se acotan por su padre para no leer datos de otros restaurantes.
+  const productStationsOf = (tenantId: string) =>
+    db.select({ productId: schema.productStations.productId, stationId: schema.productStations.stationId }).from(schema.productStations)
+      .innerJoin(schema.products, eq(schema.products.id, schema.productStations.productId)).where(eq(schema.products.tenantId, tenantId));
+  const modifiersOf = (tenantId: string) =>
+    db.select({ id: schema.modifiers.id, groupId: schema.modifiers.groupId, name: schema.modifiers.name, priceDelta: schema.modifiers.priceDelta }).from(schema.modifiers)
+      .innerJoin(schema.modifierGroups, eq(schema.modifierGroups.id, schema.modifiers.groupId)).where(eq(schema.modifierGroups.tenantId, tenantId));
+  const productGroupsOf = (tenantId: string) =>
+    db.select({ productId: schema.productModifierGroups.productId, groupId: schema.productModifierGroups.groupId }).from(schema.productModifierGroups)
+      .innerJoin(schema.products, eq(schema.products.id, schema.productModifierGroups.productId)).where(eq(schema.products.tenantId, tenantId));
+  const groupBy = <T, K>(xs: T[], key: (x: T) => K) => {
+    const m = new Map<K, T[]>();
+    for (const x of xs) { const a = m.get(key(x)); if (a) a.push(x); else m.set(key(x), [x]); }
+    return m;
+  };
+
   /** Menú completo de la sucursal (mesero y caja lo cachean offline). */
   app.get("/menu", { onRequest: [app.guard()], schema: { tags: ["catálogo"], response: { 200: catalog.Menu } } }, async (req) => {
     const { tenantId, branchId } = req.user;
     const [cats, prods, stations, groups, mods, pmg, avail] = await Promise.all([
       db.select().from(schema.categories).where(eq(schema.categories.tenantId, tenantId)),
       db.select().from(schema.products).where(eq(schema.products.tenantId, tenantId)),
-      db.select().from(schema.productStations),
+      productStationsOf(tenantId),
       db.select().from(schema.modifierGroups).where(eq(schema.modifierGroups.tenantId, tenantId)),
-      db.select().from(schema.modifiers),
-      db.select().from(schema.productModifierGroups),
+      modifiersOf(tenantId),
+      productGroupsOf(tenantId),
       db.select().from(schema.productAvailability).where(eq(schema.productAvailability.branchId, branchId)),
     ]);
     const [branch] = await db.select({ ivaPct: schema.branches.ivaPct }).from(schema.branches).where(eq(schema.branches.id, branchId));
-    const groupById = new Map(groups.map((g) => [g.id, { ...g, modifiers: mods.filter((m) => m.groupId === g.id) }]));
+    const modsByGroup = groupBy(mods, (m) => m.groupId);
+    const stationsByProduct = groupBy(stations, (x) => x.productId);
+    const groupsByProduct = groupBy(pmg, (x) => x.productId);
+    const soldOut = new Set(avail.filter((a) => a.soldOut).map((a) => a.productId));
+    const groupById = new Map(groups.map((g) => [g.id, { ...g, modifiers: modsByGroup.get(g.id) ?? [] }]));
     return {
       version: Date.now(),
       ivaPct: branch?.ivaPct ?? 16,
@@ -34,9 +54,9 @@ const plugin: ApiModule["plugin"] = async (app) => {
         ...p,
         iepsPct: Number(p.iepsPct),
         badges: p.badges.filter((b): b is "nuevo" | "picante" | "vegetariano" | "recomendado" => ["nuevo", "picante", "vegetariano", "recomendado"].includes(b)),
-        stationIds: stations.filter((s) => s.productId === p.id).map((s) => s.stationId),
-        modifierGroups: pmg.filter((x) => x.productId === p.id).map((x) => groupById.get(x.groupId)!).filter(Boolean),
-        soldOut: avail.find((a) => a.productId === p.id)?.soldOut ?? false,
+        stationIds: (stationsByProduct.get(p.id) ?? []).map((s) => s.stationId),
+        modifierGroups: (groupsByProduct.get(p.id) ?? []).map((x) => groupById.get(x.groupId)!).filter(Boolean),
+        soldOut: soldOut.has(p.id),
       })),
     };
   });
@@ -98,8 +118,8 @@ const plugin: ApiModule["plugin"] = async (app) => {
   app.get("/modifier-groups", { onRequest: [app.guard("menu.editar")], schema: { tags: ["catálogo"] } }, async (req) => {
     const [groups, mods, links] = await Promise.all([
       db.select().from(schema.modifierGroups).where(eq(schema.modifierGroups.tenantId, req.user.tenantId)),
-      db.select().from(schema.modifiers),
-      db.select().from(schema.productModifierGroups),
+      modifiersOf(req.user.tenantId),
+      productGroupsOf(req.user.tenantId),
     ]);
     return groups.map((g) => ({ ...g, modifiers: mods.filter((m) => m.groupId === g.id), productCount: links.filter((l) => l.groupId === g.id).length }));
   });
@@ -215,7 +235,7 @@ const plugin: ApiModule["plugin"] = async (app) => {
   app.get("/stations/overview", { onRequest: [app.guard("estaciones.editar")], schema: { tags: ["catálogo"] } }, async (req) => {
     const [stations, routes, products, cats] = await Promise.all([
       db.select().from(schema.stations).where(eq(schema.stations.branchId, req.user.branchId)),
-      db.select().from(schema.productStations),
+      productStationsOf(req.user.tenantId),
       db.select({ id: schema.products.id, categoryId: schema.products.categoryId }).from(schema.products).where(eq(schema.products.tenantId, req.user.tenantId)),
       db.select().from(schema.categories).where(eq(schema.categories.tenantId, req.user.tenantId)),
     ]);

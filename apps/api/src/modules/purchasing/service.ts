@@ -25,7 +25,7 @@ export class PurchasingService {
     const [rows, prices, payables] = await Promise.all([
       this.db.select().from(schema.suppliers).where(eq(schema.suppliers.tenantId, who.tenantId)),
       this.db.select({ supplierId: schema.supplierPrices.supplierId, ingredientId: schema.supplierPrices.ingredientId, unitPrice: schema.supplierPrices.unitPrice, name: schema.ingredients.name })
-        .from(schema.supplierPrices).innerJoin(schema.ingredients, eq(schema.ingredients.id, schema.supplierPrices.ingredientId)),
+        .from(schema.supplierPrices).innerJoin(schema.ingredients, eq(schema.ingredients.id, schema.supplierPrices.ingredientId)).where(eq(schema.ingredients.tenantId, who.tenantId)),
       this.db.select().from(schema.payables).where(eq(schema.payables.tenantId, who.tenantId)),
     ]);
     return rows.map((s) => ({
