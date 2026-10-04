@@ -1,6 +1,8 @@
 /* Diseño: design/stitch/admin-receta.html (Stitch). Marcado y clases originales; datos reales. E7-03, E7-04, E7-05, E7-11. */
 import { client } from "@convivium/app-shell";
-import { useCallback, useEffect, useState } from "react";
+import type { Menu } from "@convivium/api-client";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { InventoryApi, type Ingredient, type RecipeDetail, type RecipeSummary, type Warehouse } from "./api";
 
 /** Objetivo de % de costo por tipo de producto (barra / cocina). */
@@ -9,10 +11,19 @@ const money = (c: number) => new Intl.NumberFormat("es-MX", { style: "currency",
 const fmt = (n: number) => new Intl.NumberFormat("es-MX", { maximumFractionDigits: 1 }).format(n);
 
 type EditLine = { ingredientId: string | null; subRecipeId: string | null; quantity: string; wastePct: string };
+const blankLine = (): EditLine => ({ ingredientId: null, subRecipeId: null, quantity: "", wastePct: "0" });
+/** Receta aún no guardada (platillo sin receta o subreceta nueva). */
+const draftRecipe = (name: string, productId: string | null): RecipeDetail => ({ id: "", name, isSubRecipe: !productId, yieldQty: productId ? null : 1000, steps: [], productId, cost: 0, lines: [], product: null, modifierRecipes: [] });
 
 export function RecipesPage() {
+  const [params, setParams] = useSearchParams();
+  const sel = params.get("receta");
+  const forProduct = params.get("producto");
+  const newSub = params.get("nueva") === "subreceta";
   const [list, setList] = useState<RecipeSummary[]>([]);
-  const [sel, setSel] = useState<string | null>(null);
+  const [menu, setMenu] = useState<Menu | null>(null);
+  const [tab, setTab] = useState<"platillos" | "subrecetas">(params.get("tipo") === "subrecetas" ? "subrecetas" : "platillos");
+  const [q, setQ] = useState("");
   const [r, setR] = useState<RecipeDetail | null>(null);
   const [ings, setIngs] = useState<Ingredient[]>([]);
   const [whs, setWhs] = useState<Warehouse[]>([]);
@@ -21,32 +32,49 @@ export function RecipesPage() {
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    InventoryApi.recipes().then((l) => { setList(l); setSel((s) => s ?? l.find((x) => !x.isSubRecipe)?.id ?? null); });
+    InventoryApi.recipes().then(setList);
+    client.catalog.menu().then(setMenu);
     InventoryApi.ingredients().then(setIngs);
     InventoryApi.warehouses().then(setWhs);
   }, []);
   const load = useCallback(async () => {
-    if (!sel) return;
+    setMsg(null);
+    // Desde Menú llega ?producto=: abre su receta o una nueva ligada al platillo.
+    if (!sel && newSub) { setR(draftRecipe("Nueva subreceta", null)); setEdit({ lines: [blankLine()], steps: [] }); return; }
+    if (!sel && forProduct) {
+      if (!menu) return;
+      const existing = list.find((x) => x.productId === forProduct && !x.modifierId && !x.isSubRecipe);
+      if (existing) return setParams({ receta: existing.id }, { replace: true });
+      const p = menu.products.find((x) => x.id === forProduct);
+      if (!p) return setR(null);
+      setR(draftRecipe(p.name, p.id));
+      setEdit({ lines: [blankLine()], steps: [] });
+      return;
+    }
+    if (!sel) { setR(null); setEdit(null); return; }
     const d = await InventoryApi.recipe(sel);
     setR(d);
     setEdit(null);
     if (d.productId) {
-      const [menu, stations] = await Promise.all([client.catalog.menu(), client.catalog.stations()]);
-      const p = menu.products.find((x) => x.id === d.productId);
+      const [m, stations] = await Promise.all([menu ?? client.catalog.menu(), client.catalog.stations()]);
+      const p = m.products.find((x) => x.id === d.productId);
       setKind(stations.find((s) => s.id === p?.stationIds[0])?.kind === "barra" ? "barra" : "cocina");
     }
-  }, [sel]);
+  }, [sel, forProduct, newSub, menu, list, setParams]);
   useEffect(() => { load(); }, [load]);
 
   const save = async () => {
     if (!r || !edit) return;
-    await InventoryApi.saveRecipe({
-      name: r.name, productId: r.productId, isSubRecipe: r.isSubRecipe, yieldQty: r.yieldQty, steps: edit.steps.filter((s) => s.trim()),
+    const valid = edit.lines.filter((l) => (l.ingredientId || l.subRecipeId) && Number(l.quantity) > 0);
+    if (!r.name.trim()) return setMsg("Ponle nombre a la receta.");
+    if (!valid.length) return setMsg("Agrega al menos un insumo con cantidad para guardar la receta.");
+    const saved = await InventoryApi.saveRecipe({
+      name: r.product?.name ?? r.name, productId: r.productId, isSubRecipe: r.isSubRecipe, yieldQty: r.yieldQty, steps: edit.steps.filter((s) => s.trim()),
       lines: edit.lines.filter((l) => (l.ingredientId || l.subRecipeId) && Number(l.quantity) > 0).map((l) => ({ ingredientId: l.ingredientId, subRecipeId: l.subRecipeId, quantity: Number(l.quantity), wastePct: Number(l.wastePct) || 0 })),
-    }, r.id);
+    }, r.id || undefined);
+    setList(await InventoryApi.recipes());
+    if (!r.id) setParams({ receta: saved.id }); else load();
     setMsg("Receta guardada; costo teórico recalculado.");
-    load();
-    InventoryApi.recipes().then(setList);
   };
   const produce = async () => {
     if (!r) return;
@@ -64,27 +92,27 @@ export function RecipesPage() {
   const totalQty = r?.lines.reduce((s, l) => s + l.quantity, 0) ?? 0;
 
   return (
-    <main className="flex-1 pt-6 pb-16 px-8 max-w-7xl w-full mx-auto">
+    <div className="flex-1 flex min-h-screen min-w-0">
+    <RecipeList list={list} menu={menu} tab={tab} setTab={setTab} q={q} setQ={setQ} sel={sel} forProduct={forProduct}
+      onOpen={(id) => setParams({ receta: id })} onProduct={(pid) => setParams({ producto: pid })}
+      onNewSub={() => setParams({ nueva: "subreceta", tipo: "subrecetas" })} />
+    <main className="flex-1 pt-6 pb-16 px-8 max-w-6xl w-full mx-auto min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <nav className="flex items-center gap-2 text-xs text-neutral-500 font-medium">
           <span>Inventario</span>
           <span className="material-symbols-outlined text-[14px]">chevron_right</span>
           <span>Fichas Técnicas &amp; Recetas</span>
-          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-          <select value={sel ?? ""} onChange={(e) => setSel(e.target.value)} className="text-neutral-900 font-semibold bg-brand-arena/30 px-2 py-0.5 rounded border-0 text-xs focus:ring-brand-dorado">
-            <optgroup label="Productos">{list.filter((x) => !x.isSubRecipe && !x.modifierId).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup>
-            <optgroup label="Subrecetas">{list.filter((x) => x.isSubRecipe).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</optgroup>
-          </select>
+          {r && <><span className="material-symbols-outlined text-[14px]">chevron_right</span><span className="text-neutral-900 font-semibold">{r.product?.name ?? r.name}</span></>}
         </nav>
         <div className="flex items-center gap-2">
-          {r?.isSubRecipe && (
+          {r?.isSubRecipe && r.id && (
             <button onClick={produce} className="px-3 py-1.5 rounded-lg border border-brand-arena bg-white hover:bg-stone-50 text-neutral-700 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm">
               <span className="material-symbols-outlined text-base text-neutral-500">science</span>Registrar producción (1 lote)
             </button>
           )}
           {edit ? (
             <>
-              <button onClick={() => setEdit(null)} className="px-3 py-1.5 rounded-lg border border-brand-arena bg-white text-neutral-700 text-xs font-medium">Cancelar</button>
+              <button onClick={() => (r?.id ? setEdit(null) : setParams({}))} className="px-3 py-1.5 rounded-lg border border-brand-arena bg-white text-neutral-700 text-xs font-medium">Cancelar</button>
               <button onClick={save} className="px-3.5 py-1.5 rounded-lg bg-brand-olivo text-brand-dorado font-semibold text-xs flex items-center gap-1.5 shadow"><span className="material-symbols-outlined text-base">save</span>Guardar receta</button>
             </>
           ) : (
@@ -96,16 +124,22 @@ export function RecipesPage() {
         </div>
       </div>
       {msg && <div className="mb-4 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-brand-arena text-brand-olivo">{msg}</div>}
-      {!r ? null : (
+      {!r ? (
+        <div className="bg-white rounded-lg border border-brand-arena p-10 text-center text-sm text-neutral-500 shadow-sm">
+          <span className="material-symbols-outlined text-4xl text-brand-arena block mb-2">menu_book</span>
+          Elige un platillo o subreceta de la lista para ver su ficha técnica, o crea una nueva.
+        </div>
+      ) : (
         <>
           <section className="bg-white rounded-lg border border-brand-arena p-6 shadow-sm mb-6">
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4 border-b border-brand-arena/60">
               <div>
                 <div className="flex items-center gap-3 flex-wrap mb-1">
-                  <h1 className="font-serif-title text-3xl font-bold text-brand-carbon tracking-tight">{r.name}</h1>
+                  {edit && r.isSubRecipe ? <input value={r.name} onChange={(e) => setR({ ...r, name: e.target.value })} className="font-serif-title text-2xl font-bold text-brand-carbon border-brand-arena rounded px-2 py-1" /> : <h1 className="font-serif-title text-3xl font-bold text-brand-carbon tracking-tight">{r.product?.name ?? r.name}</h1>}
+                  {!r.id && <span className="bg-brand-dorado-light text-brand-olivo border border-brand-dorado/40 text-xs font-semibold px-2.5 py-0.5 rounded-full">Nueva · sin guardar</span>}
                   <span className="bg-stone-100 text-neutral-800 border border-stone-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">{r.isSubRecipe ? "Subreceta / Preparación" : kind === "barra" ? "Barra & Coctelería" : "Cocina"}</span>
                 </div>
-                <p className="text-xs text-neutral-500">Rendimiento: <span className="font-medium text-neutral-700">{r.isSubRecipe ? `${fmt(r.yieldQty ?? 1)} ml por lote` : "1 porción estándar"}</span></p>
+                <p className="text-xs text-neutral-500">Rendimiento: <span className="font-medium text-neutral-700">{r.isSubRecipe ? (edit ? <><input value={r.yieldQty ?? ""} inputMode="decimal" onChange={(e) => setR({ ...r, yieldQty: Number(e.target.value) || null })} className="w-20 text-xs rounded border-brand-arena px-1 py-0.5" /> ml por lote</> : `${fmt(r.yieldQty ?? 1)} ml por lote`) : "1 porción estándar"}</span></p>
               </div>
               {r.product && (
                 <div className="text-right">
@@ -117,7 +151,7 @@ export function RecipesPage() {
             </div>
           </section>
 
-          {r.product ? (
+          {!r.id ? null : r.product ? (
             <section className="mb-8">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className={`lg:col-span-2 rounded-lg p-5 shadow-sm relative overflow-hidden flex flex-col justify-between ${over ? "bg-brand-terracota-light border-2 border-brand-terracota" : "bg-emerald-50 border-2 border-emerald-300"}`}>
@@ -295,5 +329,55 @@ export function RecipesPage() {
         </>
       )}
     </main>
+    </div>
+  );
+}
+
+/** Lista lateral: todos los platillos (con o sin receta) y subrecetas. */
+function RecipeList({ list, menu, tab, setTab, q, setQ, sel, forProduct, onOpen, onProduct, onNewSub }: {
+  list: RecipeSummary[]; menu: Menu | null; tab: "platillos" | "subrecetas"; setTab: (t: "platillos" | "subrecetas") => void; q: string; setQ: (q: string) => void;
+  sel: string | null; forProduct: string | null; onOpen: (id: string) => void; onProduct: (productId: string) => void; onNewSub: () => void;
+}) {
+  const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const match = (name: string) => !q || norm(name).includes(norm(q));
+  const byProduct = useMemo(() => new Map(list.filter((x) => x.productId && !x.modifierId && !x.isSubRecipe).map((x) => [x.productId!, x])), [list]);
+  const products = (menu?.products ?? []).filter((p) => p.active && match(p.name));
+  const subs = list.filter((x) => x.isSubRecipe && match(x.name));
+  const missing = (menu?.products ?? []).filter((p) => p.active && !byProduct.has(p.id)).length;
+  return (
+    <aside className="w-72 shrink-0 border-r border-brand-arena bg-white flex flex-col h-screen sticky top-0">
+      <div className="p-4 border-b border-brand-arena/60 space-y-3">
+        <h2 className="font-serif-title text-lg font-bold text-brand-carbon">Recetas</h2>
+        <div className="relative"><span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base">search</span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar receta…" className="w-full pl-8 pr-2 py-1.5 text-xs rounded-lg border-brand-arena focus:ring-brand-dorado" /></div>
+        <div className="grid grid-cols-2 gap-1 bg-stone-100 rounded-lg p-1 text-xs font-medium">
+          {(["platillos", "subrecetas"] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={tab === t ? "py-1.5 rounded-md bg-white shadow-sm text-brand-olivo font-semibold" : "py-1.5 rounded-md text-neutral-500"}>{t === "platillos" ? "Platillos" : "Subrecetas"}</button>)}
+        </div>
+        {tab === "platillos" && missing > 0 && <p className="text-[11px] text-amber-700">{missing} {missing === 1 ? "platillo sin receta" : "platillos sin receta"}: no descuentan inventario.</p>}
+      </div>
+      <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {tab === "platillos" ? products.map((p) => {
+          const rec = byProduct.get(p.id);
+          const on = rec ? rec.id === sel : p.id === forProduct;
+          return (
+            <button key={p.id} onClick={() => (rec ? onOpen(rec.id) : onProduct(p.id))} className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between gap-2 text-xs ${on ? "bg-brand-olivo text-brand-dorado" : "hover:bg-stone-50 text-neutral-800"}`}>
+              <span className="truncate font-medium">{p.name}</span>
+              {rec ? <span className={`font-mono text-[11px] shrink-0 ${on ? "text-brand-dorado" : "text-neutral-500"}`}>{money(rec.cost)}</span> : <span className={`text-[10px] font-semibold shrink-0 px-1.5 rounded ${on ? "bg-brand-dorado text-brand-olivo" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>Sin receta</span>}
+            </button>
+          );
+        }) : subs.map((x) => (
+          <button key={x.id} onClick={() => onOpen(x.id)} className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between gap-2 text-xs ${x.id === sel ? "bg-brand-olivo text-brand-dorado" : "hover:bg-stone-50 text-neutral-800"}`}>
+            <span className="truncate font-medium">{x.name}</span><span className="font-mono text-[11px] shrink-0">{money(x.cost)}</span>
+          </button>
+        ))}
+        {tab === "platillos" && !products.length && <p className="text-xs text-neutral-500 p-3">{menu ? "Sin platillos que coincidan." : "Cargando…"}</p>}
+        {tab === "subrecetas" && !subs.length && <p className="text-xs text-neutral-500 p-3">Sin subrecetas{q ? " que coincidan" : ""}.</p>}
+      </div>
+      {tab === "subrecetas" && (
+        <div className="p-3 border-t border-brand-arena/60">
+          <button onClick={onNewSub} className="w-full py-2 rounded-lg bg-brand-olivo text-brand-dorado text-xs font-semibold flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-base">add</span>Nueva subreceta</button>
+        </div>
+      )}
+    </aside>
   );
 }

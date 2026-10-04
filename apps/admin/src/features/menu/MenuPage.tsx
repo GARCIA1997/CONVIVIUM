@@ -328,7 +328,7 @@ export function MenuPage() {
             <div ref={sections.cost} className="bg-white rounded-xl border border-arena-border p-6 shadow-xs scroll-mt-4">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-arena-light">
                 <div><h3 className="font-serif-brand text-base font-semibold text-stone-900 flex items-center gap-2"><span className="material-symbols-outlined text-dorado text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>Rentabilidad y Costeo Teórico (Food Cost)</h3><p className="text-xs text-stone-500 mt-0.5">Integrado con el costo promedio de los insumos en inventario.</p></div>
-                <button onClick={() => nav("/recetas")} className="text-xs text-olivo hover:underline font-semibold flex items-center gap-1">{cost === null ? "Capturar receta" : "Ver receta completa"}<span className="material-symbols-outlined text-sm">arrow_forward</span></button>
+                <button disabled={!draft.id} onClick={() => draft.id && nav(`/recetas?producto=${draft.id}`)} className="text-xs text-olivo hover:underline font-semibold flex items-center gap-1">{cost === null ? "Capturar receta" : "Ver receta completa"}<span className="material-symbols-outlined text-sm">arrow_forward</span></button>
               </div>
               {cost === null ? <p className="text-xs text-stone-500">{draft.id ? "Este platillo aún no tiene receta: sin ella no se descuenta inventario ni se conoce su margen." : "Guarda el producto y después captura su receta."}</p> : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

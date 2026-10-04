@@ -62,7 +62,7 @@ export function AdminLayout({ session, sections, onLogout, children }: { session
           </div>
         </div>
       </aside>
-      <div className="ml-64 flex-1 flex flex-col min-h-screen">{children}</div>
+      <div className="ml-64 flex-1 flex flex-col min-h-screen min-w-0">{children}</div>
     </div>
   );
 }
