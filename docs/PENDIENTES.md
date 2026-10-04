@@ -134,7 +134,7 @@ Referencia: `docs/03-historias-de-usuario-mvp.md`. M = must, S = should, C = cou
 - E6-03: dividir cuenta por producto y por comensal.
 - E6-07: conteo ciego.
 - E6-08: reabrir cuenta con autorización.
-- E8-04: XML CFDI con un archivo real de proveedor.
+- E8-04: XML CFDI con un archivo real de proveedor. **En pausa por decisión del cliente (aún no se manejarán facturas).**
 
 ---
 
